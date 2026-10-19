@@ -175,6 +175,7 @@ pass "site installs and serves pages"
 get() { docker exec "$SITE" curl -s -i --max-time 20 -H 'Host: test.example.org' "http://127.0.0.1:8080$1"; }
 code() { docker exec "$SITE" curl -s -o /dev/null -w '%{http_code}' --max-time 20 -H "Host: ${2:-test.example.org}" "http://127.0.0.1:8080$1"; }
 
+assert_contains "$(docker logs "$SITE" 2>&1)" "the database is empty, so nothing is dropped" "the install log explains Drush's 'DROP all tables' notice"
 assert_eq "200" "$(code /)" "front page returns 200 (so php-fpm passes the environment to settings.php)"
 assert_eq "200" "$(code /user/login)" "login page returns 200"
 assert_contains "$(get /)" "Test Site" "front page shows the configured site name"

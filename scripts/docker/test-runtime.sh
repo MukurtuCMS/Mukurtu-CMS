@@ -81,6 +81,17 @@ for tag in "$FULL" "$SLIM"; do
   assert_contains "$volumes" "/var/www/files/private" "$tag declares the private volume"
 done
 
+echo "runtime: mail without an SMTP server fails with a clear message"
+for tag in "$FULL"; do
+  out="$(docker run --rm --entrypoint sh "$tag" -c '
+    export MUKURTU_RUN_DIR=/tmp/r
+    /usr/local/lib/mukurtu/render-config.sh 2>/dev/null
+    PHPRC=/tmp/r/cli php -r "var_dump(mail(\"someone@example.org\", \"subject\", \"body\"));" 2>&1' 2>&1)"
+  assert_contains "$out" "bool(false)" "$tag: PHP mail() reports failure"
+  assert_contains "$out" "mail was not sent: MUKURTU_SMTP_HOST is not set" "$tag: the log says why"
+  assert_not_contains "$out" "127.0.0.1" "$tag: it does not try to reach a mail server on localhost"
+done
+
 echo "image sizes (informational)"
 docker image ls --format '  {{.Repository}}:{{.Tag}} {{.Size}}' mukurtu-test
 

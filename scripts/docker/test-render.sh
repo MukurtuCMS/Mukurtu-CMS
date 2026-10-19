@@ -149,7 +149,7 @@ out="$(render)"
 assert_eq "0" "$(rc "$out")" "no smtp: exits 0"
 assert_contains "$(section "$out" stderr)" "MUKURTU_SMTP_HOST" "no smtp: warns on stderr"
 assert_not_contains "$(section "$out" msmtprc)" "host " "no smtp: msmtprc has no host line"
-assert_not_contains "$(section "$out" php.ini)" "sendmail_path" "no smtp: no sendmail_path"
+assert_contains "$(section "$out" php.ini)" "sendmail_path = /usr/local/lib/mukurtu/no-mail" "no smtp: mail goes to the no-mail script, not to the base image's sendmail"
 
 echo "render: exec-allowed"
 out="$(render)"

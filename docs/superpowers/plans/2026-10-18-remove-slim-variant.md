@@ -66,6 +66,13 @@ guard stage keeps validating it. The runtime-contents tests keep checking the to
   (Commit "Give Drush the site address however it is started".)
 - nginx start-up alert (`could not open error log file ... Permission denied`) fixed
   with `nginx -e stderr`; new fast test `scripts/docker/test-supervise.sh`.
+- Mail with no SMTP server now fails with `[mukurtu] mail was not sent:
+  MUKURTU_SMTP_HOST is not set` (`docker/no-mail`) instead of busybox's
+  `sendmail: can't connect to remote host (127.0.0.1)`.
+- The install log explains Drush's "DROP all tables" notice (the database is empty).
+- New "Reading the start-up log" section in `docs/docker.md`.
+- **Not yet run:** the full install test (`test-entrypoint.sh`) with these changes. It
+  needs port-free, ~10 minutes. Run the whole suite before pushing rc2.
 - TODO: pin `runs-on` to `ubuntu-24.04` in `docker-publish.yml` (GitHub moves
   `ubuntu-latest` to Ubuntu 26 on 2026-10-19; the tests need Docker, jq, curl, python3).
 

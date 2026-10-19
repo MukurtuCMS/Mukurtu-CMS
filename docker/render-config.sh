@@ -103,7 +103,8 @@ mkdir -p "$MUKURTU_RUN_DIR/cli"
 if [ -z "$MUKURTU_SMTP_HOST" ]; then
   warn "MUKURTU_SMTP_HOST is not set: the site cannot send mail (password resets, notifications)."
   MUKURTU_MSMTP_SETTINGS="# MUKURTU_SMTP_HOST is not set: outbound mail is not configured."
-  MUKURTU_PHP_MAIL_SETTINGS=""
+  # Mail still fails, but with a message that names the cause.
+  MUKURTU_PHP_MAIL_SETTINGS="sendmail_path = /usr/local/lib/mukurtu/no-mail"
 else
   _validate MUKURTU_SMTP_HOST '^[A-Za-z0-9.-]+$' "a host name or IP address"
   [ -z "$MUKURTU_SMTP_USER" ] || validate_no_spaces MUKURTU_SMTP_USER

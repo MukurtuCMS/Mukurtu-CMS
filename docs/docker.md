@@ -17,6 +17,7 @@ is built and why*, see [docker-build.md](docker-build.md).
 - [Upgrades and backups](#upgrades-and-backups)
 - [Running commands](#running-commands)
 - [Hosting many sites](#hosting-many-sites)
+- [Reading the start-up log](#reading-the-start-up-log)
 - [Troubleshooting](#troubleshooting)
 - [Building the image yourself](#building-the-image-yourself)
 
@@ -421,6 +422,39 @@ another's data. See [Sizing memory](#sizing-memory) for fitting more sites on a
 host, and [docker-build.md](docker-build.md#hosting-examples) for why the examples
 are laid out this way.
 
+## Reading the start-up log
+
+`docker compose logs` mixes the output of every container, and the lines are not in
+time order across containers. A first start looks like this. Most of it is normal.
+
+| Line (shortened) | Meaning |
+| --- | --- |
+| `WARNING: MUKURTU_SMTP_HOST is not set` | Expected until you configure mail. See [Mail](#mail). |
+| `[mukurtu] generated a hash salt ...` | First start with no `MUKURTU_HASH_SALT`. Set one for production. |
+| `[mukurtu] waiting for the database` / `database is reachable` | The boot sequence. |
+| `[mukurtu] Installing Mukurtu ...` then `[notice] Performed install task: ...` | The install, about two minutes. |
+| `You are about to: * DROP all tables in your 'mukurtu' database` | Drush's standard notice before an install. The database is empty, so nothing is dropped; the container only gets here for an empty database. |
+| `[warning] The "block_content:00000000-0000-0000-0000-000000000000" block plugin was not found` | Printed by the Mukurtu profile's own install configuration (the landing page's layout refers to a block with a placeholder id). It is not caused by the container and does not stop the install. |
+| `[mukurtu] installation finished`, `[mukurtu] starting` | Done; nginx and PHP are starting. |
+| `NOTICE: fpm is running` / `ready to handle connections` | php-fpm is up. |
+| `GET ... 499` in the access log | The browser gave up on a request, usually on a reload while the very first page was still being built. |
+| `WARNING: [pool www] server reached max_children setting (4)` | All page workers were busy at once. On the **first** visit after a start this is normal: see below. If it keeps appearing under normal use, raise `MUKURTU_FPM_MAX_CHILDREN`. |
+| `sendmail ...` or `mail was not sent: MUKURTU_SMTP_HOST is not set` | Mukurtu tried to send mail and no mail server is configured. |
+
+Lines from the **database** container, such as `io_uring_queue_init() failed with EPERM
+... falling back to libaio` and `/sys/fs/cgroup/memory.pressure not writable`, come
+from MariaDB and your host's settings, not from Mukurtu. They are harmless.
+
+**The first page after a start is slow.** Nothing is cached yet: PHP has not compiled
+its code, Drupal has not built its caches, and the page's CSS and JavaScript bundles
+are created on first use. Measured on a fresh install: about 6.6 s for the first
+request, about 2.6 s after a restart, and under 0.01 s once cached. A browser asks
+for the page and its assets at once, so on that first visit all four page workers can
+be busy, which is what the `max_children` warning reports. The image does not warm
+the site up on its own: doing so for every site at once after a host reboot would
+create a burst of load, which is what the default settings avoid. If you want it
+warmed, request the home page once after starting.
+
 ## Troubleshooting
 
 | What you see | Meaning and fix |
@@ -434,6 +468,8 @@ are laid out this way.
 | `ERROR: <path> is not writable by uid 1000` | A volume or `MUKURTU_FILE_TEMP_PATH` cannot be written. See [Volumes and permissions](#volumes-and-permissions). |
 | `WARNING: ffmpeg is not installed in this image` | You are running the slim image. Use the full image if you need that feature. |
 | `WARNING: MUKURTU_SMTP_HOST is not set` | The site cannot send mail. See [Mail](#mail). |
+| The first page after a start takes several seconds and the log warns about `max_children` | Normal on a cold start; see [Reading the start-up log](#reading-the-start-up-log). |
+| `mail was not sent: MUKURTU_SMTP_HOST is not set` | Mukurtu tried to send mail. Set up [Mail](#mail). |
 | Pages answer `400 Bad Request` | The `Host` header is not in `MUKURTU_TRUSTED_HOSTS`. |
 | Uploads fail without a message | Check `MUKURTU_UPLOAD_MAX`, and the limits of the reverse proxy in front. |
 | A video upload kills the container | Out of memory: `ffmpeg` is outside PHP's limit. Raise the container's memory limit; see [Sizing memory](#sizing-memory). |

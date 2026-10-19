@@ -115,7 +115,7 @@ case "$state" in
     if [ "$MUKURTU_AUTO_INSTALL" = true ]; then
       require_env MUKURTU_ADMIN_PASSWORD
       require_env MUKURTU_ADMIN_EMAIL
-      log "Installing Mukurtu into the empty database (this takes a few minutes)"
+      log "Installing Mukurtu into the empty database (this takes a few minutes). Drush prints a notice below that it will DROP all tables; the database is empty, so nothing is dropped."
       drush site:install mukurtu --yes \
         --account-name="$MUKURTU_ADMIN_USER" \
         --account-pass="$MUKURTU_ADMIN_PASSWORD" \
