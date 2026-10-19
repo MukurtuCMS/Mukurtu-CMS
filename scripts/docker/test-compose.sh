@@ -152,9 +152,13 @@ if [[ -f "$MULTI" ]]; then
     else
       pass "an unknown host name is not served"
     fi
-    # `docker compose port` prints nothing, or ":0", for a port that is not published.
-    published="$(mc port site_a 8080 2>/dev/null | sed 's/^://')"
-    [[ -z "$published" || "$published" == 0 ]] && pass "site A's port is not published on the host" || fail "site A's port is not published on the host (got '$published')"
+    # Ask Docker for the container's port bindings. (Not `docker compose port`, whose
+    # output for an unpublished port differs between Compose versions: "", ":0",
+    # "invalid IP:0".) No bindings are reported as {} or null.
+    bindings="$(docker inspect -f '{{json .HostConfig.PortBindings}}' "$(mc ps -q site_a)" 2>/dev/null)"
+    [[ "$bindings" == "{}" || "$bindings" == "null" ]] && pass "site A publishes no port on the host" || fail "site A publishes no port on the host (got '$bindings')"
+    bindings="$(docker inspect -f '{{json .HostConfig.PortBindings}}' "$(mc ps -q caddy)" 2>/dev/null)"
+    assert_contains "$bindings" "8443" "the proxy does publish its HTTPS port"
     # The sites cannot reach each other's databases.
     assert_eq "denied" "$(mc exec -T db sh -c "mariadb -usite_a -paaa -e 'use site_b' 2>&1 | grep -q 'Access denied' && echo denied")" "site A's database user cannot open site B's database"
   else
