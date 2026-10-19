@@ -24,7 +24,13 @@
  */
 #}
 
-<div{{ attributes.addClass('category-teaser') }}>
+{%
+  set classes = [
+    'category-teaser',
+    view_mode == 'names_only' ? 'category-teaser--names-only',
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>
   {{ title_prefix }}
   {{ title_suffix }}
   <a href="{{ browse_url }}">

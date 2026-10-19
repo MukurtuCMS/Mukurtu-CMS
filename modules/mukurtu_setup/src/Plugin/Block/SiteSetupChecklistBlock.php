@@ -42,7 +42,7 @@ class SiteSetupChecklistBlock extends BlockBase implements ContainerFactoryPlugi
 
   public function build(): array {
     $cache = [
-      'tags' => ['config:system.site', 'community_list', 'protocol_list', 'taxonomy_term_list', 'block_content_list', 'mukurtu_setup:tasks'],
+      'tags' => SiteSetupTaskManager::CACHE_TAGS,
       'contexts' => ['user.roles'],
       // "Site operations" checks read untagged state/settings; refresh hourly.
       'max-age' => 3600,

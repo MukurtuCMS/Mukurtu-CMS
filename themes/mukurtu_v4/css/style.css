@@ -151,16 +151,8 @@ documentation on how to use @include media(). */
   --brand-secondary: #e6ab49;
   --brand-secondary-dark: #9d6915;
   --brand-secondary-accent: #f1b85a;
-  --mukurtu-navbar-collapse-link-hover-color: #e5ab48;
   --mukurtu-breadcrumb-gradient-color: #b7873a;
-  --mukurtu-panel-pane-text-color: var(--color-white);
   --mukurtu-panel-pane-content-background-color: #eeecec;
-  --mukurtu-mejs-background-color: var(--brand-light-accent);
-  --mukurtu-mejs-time-rail-loaded-color: #e5e1e1;
-  --mukurtu-mejs-time-rail-current-color: #d1cbcb;
-  --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
-  --mukurtu-collection-title-font-color: var(--color-white);
-  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
   --image-description-horizontal-text: var(--brand-primary-dark);
   --collection-title-link-text: var(--brand-primary);
   --horizontal-tab-link-text: var(--brand-primary-dark);
@@ -557,16 +549,8 @@ div.palette-demo--custom {
   --brand-secondary: #d9d4c2;
   --brand-secondary-dark: #7a734d;
   --brand-secondary-accent: #c9c2a8;
-  --mukurtu-navbar-collapse-link-hover-color: var(--brand-secondary);
   --mukurtu-breadcrumb-gradient-color: #99937f;
-  --mukurtu-panel-pane-text-color: var(--brand-primary);
   --mukurtu-panel-pane-content-background-color: #f1efe9;
-  --mukurtu-mejs-background-color: var(--mukurtu-navbar-collapse-bg);
-  --mukurtu-mejs-time-rail-loaded-color: #fff;
-  --mukurtu-mejs-time-rail-current-color: var(--brand-secondary-accent);
-  --mukurtu-dictionary-word-label-background-color: var(--brand-secondary);
-  --mukurtu-collection-title-font-color: var(--text-color);
-  --mukurtu-collection-pane-bg-color: var(--brand-light-accent);
 }
 
 :root {
@@ -7078,7 +7062,12 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   inline-size: 100%;
 }
 
-.category-teaser:not(:has(.media--image)) a::before {
+.category-teaser.category-teaser--names-only a h2 {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+
+.category-teaser:not(:has(.media--image), .category-teaser--names-only) a::before {
   content: "";
   display: block;
   inline-size: 100%;
@@ -8940,6 +8929,10 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   text-align: center;
   -webkit-margin-after: var(--v-space-2xs);
           margin-block-end: var(--v-space-2xs);
+}
+.layout--onecol .block-wrapper .category-grid:has(.category-teaser--names-only) {
+  -webkit-padding-after: var(--v-space-2xs);
+          padding-block-end: var(--v-space-2xs);
 }
 .layout--onecol .block-wrapper:has(.field--name-body) {
   padding-inline: var(--v-space-xs);
