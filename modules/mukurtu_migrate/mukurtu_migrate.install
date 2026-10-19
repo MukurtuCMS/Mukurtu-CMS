@@ -139,3 +139,49 @@ function mukurtu_migrate_update_40205(): ?string {
 
   return (string) t('Updated the mukurtu_cms_v3_users migration so a Mukurtu 3 user whose username is already taken by an account on this site is migrated under a numbered name instead of being dropped with a duplicate-username error.');
 }
+
+/**
+ * Repair migrated group memberships so their edit forms load.
+ */
+function mukurtu_migrate_update_40206(): ?string {
+  // The Mukurtu 3 membership migrations shipped with the group's bundle as
+  // the og_membership bundle. OG only provides the 'default' membership type,
+  // so OgMembershipForm fatals reading the missing type's label.
+  $migrations = [
+    'mukurtu_cms_v3_community_memberships' => 'community',
+    'mukurtu_cms_v3_language_community_community_memberships' => 'community',
+    'mukurtu_cms_v3_protocol_memberships' => 'protocol',
+    'mukurtu_cms_v3_language_community_protocol_memberships' => 'protocol',
+  ];
+  foreach ($migrations as $id => $shipped_bundle) {
+    // Leave a migration alone if a site has customized its bundle.
+    $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.' . $id);
+    if (!$config->isNew() && $config->get('destination.default_bundle') === $shipped_bundle) {
+      $config->set('destination.default_bundle', 'default')->save();
+    }
+  }
+
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$entity_type_manager->hasDefinition('og_membership') || !\Drupal::database()->schema()->tableExists('og_membership')) {
+    return NULL;
+  }
+
+  $types = array_keys($entity_type_manager->getStorage('og_membership_type')->loadMultiple());
+  if (!in_array('default', $types, TRUE)) {
+    return NULL;
+  }
+
+  $count = (int) \Drupal::database()->update('og_membership')
+    ->fields(['type' => 'default'])
+    ->condition('type', $types, 'NOT IN')
+    ->execute();
+  if ($count === 0) {
+    return NULL;
+  }
+
+  $entity_type_manager->getStorage('og_membership')->resetCache();
+
+  return (string) t('Fixed @count migrated group memberships that used a membership type that does not exist, which made their edit forms fail.', [
+    '@count' => $count,
+  ]);
+}
