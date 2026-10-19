@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
+use Drupal\Core\Serialization\Yaml;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
@@ -68,15 +69,24 @@ class EditorLanguageListTest extends KernelTestBase {
       'bundle' => 'language',
       'label' => 'Language code',
     ])->save();
+
+    // From the shipped config, so these fail if that config stops being
+    // valid, matching DictionaryWordLangAttributeTest.
+    $path = $this->container->get('extension.list.module')->getPath('mukurtu_core') . '/config/install/';
+    FieldStorageConfig::create(Yaml::decode(file_get_contents($path . 'field.storage.taxonomy_term.field_language_rtl.yml')))->save();
+    FieldConfig::create(Yaml::decode(file_get_contents($path . 'field.field.taxonomy_term.language.field_language_rtl.yml')))->save();
   }
 
   /**
    * Creates a language term.
    */
-  protected function language(string $name, ?string $code): void {
+  protected function language(string $name, ?string $code, ?string $direction = NULL): void {
     $values = ['vid' => 'language', 'name' => $name];
     if ($code !== NULL) {
       $values['field_language_code'] = $code;
+    }
+    if ($direction !== NULL) {
+      $values['field_language_rtl'] = ($direction === 'rtl');
     }
     Term::create($values)->save();
   }
@@ -139,6 +149,26 @@ class EditorLanguageListTest extends KernelTestBase {
       ['title' => 'Hawaiian', 'languageCode' => 'haw'],
       ['title' => 'Te Reo Māori', 'languageCode' => 'mi'],
     ], $list, "The site's languages are offered, sorted by name, under their own names.");
+  }
+
+  /**
+   * Tests that a right-to-left language says so.
+   *
+   * CKEditor only wants to hear about right to left; left to right is its
+   * default, so saying it would add nothing.
+   */
+  public function testRightToLeftLanguageCarriesTextDirection(): void {
+    $this->language('Arabic', 'ar', 'rtl');
+    $this->language('Hawaiian', 'haw', 'ltr');
+    $this->language('Unset direction', 'mi');
+
+    $list = $this->dropdown($this->alter($this->settingsWithDropdown()));
+
+    $this->assertSame([
+      ['title' => 'Arabic', 'languageCode' => 'ar', 'textDirection' => 'rtl'],
+      ['title' => 'Hawaiian', 'languageCode' => 'haw'],
+      ['title' => 'Unset direction', 'languageCode' => 'mi'],
+    ], $list);
   }
 
   /**
