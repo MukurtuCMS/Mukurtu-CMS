@@ -58,9 +58,9 @@ class VersionConsistencyTest extends TestCase {
       new \RecursiveCallbackFilterIterator(
         new \RecursiveDirectoryIterator($this->root(), \FilesystemIterator::SKIP_DOTS),
         // Test fixture modules carry their own unrelated versions, and the
-        // dependency directories are not part of the distribution.
+        // dependency and git directories are not part of the distribution.
         static fn (\SplFileInfo $file): bool => !$file->isDir()
-          || !in_array($file->getFilename(), ['tests', 'node_modules', 'vendor', 'web'], TRUE),
+          || !in_array($file->getFilename(), ['tests', 'node_modules', 'vendor', 'web', '.git'], TRUE),
       )
     );
     foreach ($iterator as $file) {

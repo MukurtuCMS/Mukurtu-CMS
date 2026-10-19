@@ -5,7 +5,8 @@
 # The version appears in VERSION.md (which the dashboard reads), in the
 # `version:` key of the profile, every custom module and the theme (which is
 # what /admin/modules and /admin/appearance display), and in the build tooling's
-# package.json files. Before this script existed these were edited by hand,
+# package.json and package-lock.json files. Before this script existed these
+# were edited by hand,
 # which is why every one of them still read "4.x-dev" at 4.0.0-rc.
 #
 # Usage: scripts/set-version.sh 4.0.1
