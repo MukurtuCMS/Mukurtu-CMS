@@ -87,15 +87,48 @@ class NotifyFrequencyTest extends KernelTestBase {
   }
 
   /**
-   * The pending-approval notice to managers is never opt-out-able, even for
-   * a user who chose 'none'.
+   * The 'none' frequency also suppresses the manager registration notice.
    */
-  public function testNoneDoesNotSuppressMandatoryRegistrationNotice(): void {
+  public function testNoneSuppressesRegistrationNotice(): void {
     $user = User::create(['name' => 'opted_out_manager', 'status' => 1]);
     $user->set('field_notify_frequency', 'none');
     $user->save();
 
-    $this->assertTrue(_mukurtu_notifications_user_wants_email((int) $user->id(), 'mukurtu_new_user_registration'));
+    $this->assertFalse(_mukurtu_notifications_user_wants_email((int) $user->id(), 'mukurtu_new_user_registration'));
+  }
+
+  /**
+   * A user created after the field exists defaults to 'none'.
+   */
+  public function testNewUserDefaultsToNone(): void {
+    $user = User::create(['name' => 'new_user', 'status' => 1]);
+    $user->save();
+
+    $user = User::load($user->id());
+    $this->assertSame('none', $user->get('field_notify_frequency')->value);
+    $this->assertFalse(_mukurtu_notifications_user_wants_email((int) $user->id(), 'mukurtu_new_user_account_created'));
+  }
+
+  /**
+   * Update 40058 changes the field default but not existing users' values.
+   */
+  public function testUpdate40058ChangesDefaultOnly(): void {
+    $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
+    $field->setDefaultValue([['value' => 'immediate']])->save();
+
+    $existing = User::create(['name' => 'existing_user', 'status' => 1]);
+    $existing->save();
+    $this->assertSame('immediate', User::load($existing->id())->get('field_notify_frequency')->value);
+
+    mukurtu_notifications_update_40058();
+
+    $field = FieldConfig::loadByName('user', 'user', 'field_notify_frequency');
+    $this->assertSame([['value' => 'none']], $field->getDefaultValueLiteral());
+    $this->assertSame('immediate', User::load($existing->id())->get('field_notify_frequency')->value);
+
+    $new = User::create(['name' => 'after_update', 'status' => 1]);
+    $new->save();
+    $this->assertSame('none', User::load($new->id())->get('field_notify_frequency')->value);
   }
 
   /**
@@ -118,7 +151,7 @@ class NotifyFrequencyTest extends KernelTestBase {
    * This is what actually protects uid 1 on a fresh install: it's commonly
    * created before mukurtu_notifications_install() runs, so its field
    * value would otherwise stay empty even though FieldConfig's
-   * default_value is 'immediate' -- that default only applies to entities
+   * default_value is 'none' -- that default only applies to entities
    * created after the field already exists.
    */
   public function testFieldCreationBackfillsExistingEmptyValues(): void {
@@ -130,6 +163,6 @@ class NotifyFrequencyTest extends KernelTestBase {
     mukurtu_notifications_create_field_notify_frequency();
 
     $existingAdmin = User::load($existingAdmin->id());
-    $this->assertSame('immediate', $existingAdmin->get('field_notify_frequency')->value);
+    $this->assertSame('none', $existingAdmin->get('field_notify_frequency')->value);
   }
 }
