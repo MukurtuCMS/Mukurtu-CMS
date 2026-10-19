@@ -149,4 +149,37 @@ test.describe('Media modal filters', () => {
       }).toPass({ timeout: SETTLE });
     });
   }
+
+  // 200% text on a 320px screen. Doubling the root font size stands in for
+  // the browser's text size setting, which the rem-based dialog follows.
+  for (const where of ['node form', 'Layout Builder'] as const) {
+    test(`the dialog reflows at 320px with 200% text (${where})`, async ({ page }) => {
+      test.slow(where === 'Layout Builder', 'Layout Builder opens the library in several steps');
+      await page.setViewportSize({ width: 320, height: 640 });
+      const { modal } = await openMediaLibrary(page, where);
+      await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+      // Core sizes the dialog's content on window resize.
+      await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+
+      await expect(async () => {
+        const content = await modal.locator('.ui-dialog-content').evaluate((el) => ({
+          scrollWidth: el.scrollWidth,
+          clientWidth: el.clientWidth,
+          clientHeight: el.clientHeight,
+        }));
+
+        // Without the fix, "Apply filters" ran 34px past the node form's
+        // dialog and gin_lb's Grid and Table links 61px past Layout
+        // Builder's.
+        expect(content.scrollWidth,
+          `the library is ${content.scrollWidth}px wide in a ${content.clientWidth}px dialog`)
+          .toBeLessThanOrEqual(content.clientWidth + TOLERANCE);
+        // Measured 185px in the node form with the fix and 0px without it:
+        // the title bar and buttons took the whole dialog.
+        expect(content.clientHeight,
+          `the library has ${content.clientHeight}px of a 640px window`)
+          .toBeGreaterThanOrEqual(640 / 6);
+      }).toPass({ timeout: SETTLE });
+    });
+  }
 });

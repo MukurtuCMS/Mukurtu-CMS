@@ -795,6 +795,55 @@ same !important that sets it. */
     .media-library-widget-modal .media-library-content {
         width: auto;
     }
+
+    /* At 320px with 200% text, the title bar and button pane took the
+    dialog's whole height and left the library 0px tall. Trim their padding,
+    which Gin sets with !important, and let the count and "Insert selected"
+    share a row when they fit instead of always stacking. Claro's side margins
+    on the count squeezed it to one word per line. gin_lb loads after this file
+    and sets the column with the same specificity, so this adds .ui-dialog. */
+    .media-library-widget-modal .ui-dialog-titlebar,
+    .media-library-widget-modal .ui-dialog-buttonpane {
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .ui-dialog.media-library-widget-modal .ui-dialog-buttonpane {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 1rem;
+    }
+
+    .media-library-widget-modal .ui-dialog-buttonpane .media-library-selected-count {
+        margin: 0;
+    }
+}
+
+/* WCAG 1.4.10 Reflow: keep the dialog's text and buttons inside it on narrow
+screens and with large text.
+
+gin_lb cuts the title off with an ellipsis ("Add or select ...") at 320px.
+Its Grid and Table links sit on one unbreakable line, which ran 45px past the
+dialog at 200% text. "Apply filters" and "Insert selected" don't wrap their
+text, so at 200% text they ran past the dialog too. The header selector
+matches gin_lb's, which loads after this file, plus one class. */
+.media-library-widget-modal .ui-dialog-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.media-library-widget-modal .glb-media-library-view .glb-view-header {
+    display: inline-flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.media-library-widget-modal .ui-dialog-buttonpane .button,
+.media-library-widget-modal .views-exposed-form input[type="submit"],
+.media-library-widget-modal .glb-views-exposed-form input[type="submit"] {
+    max-width: 100%;
+    white-space: normal;
 }
 
 /* WCAG 1.4.10 Reflow: let the media table scroll inside its own wrapper.
