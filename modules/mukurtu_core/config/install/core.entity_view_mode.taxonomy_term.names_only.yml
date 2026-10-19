@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - taxonomy
+id: taxonomy_term.names_only
+label: 'Names only'
+description: ''
+targetEntityType: taxonomy_term
+cache: true

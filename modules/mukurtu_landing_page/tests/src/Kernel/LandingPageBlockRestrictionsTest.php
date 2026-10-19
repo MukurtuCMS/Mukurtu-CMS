@@ -178,12 +178,16 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
         'category' => 'Lists (Views)',
         'provider' => 'views',
       ],
+      'views_block:mukurtu_categories-browse_by_category_names_block' => [
+        'category' => 'Lists (Views)',
+        'provider' => 'views',
+      ],
       'views_block:content_recent-block_1' => ['category' => 'Lists (Views)', 'provider' => 'views'],
     ];
 
     $allowed = $this->filterDefinitions($definitions);
 
-    $this->assertCount(2, $allowed);
+    $this->assertCount(3, $allowed);
     $this->assertNotContains('views_block:content_recent-block_1', $allowed);
   }
 

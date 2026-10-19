@@ -61,7 +61,13 @@ class ShippedViewsLanguageFallbackTest extends UnitTestCase {
         'file' => 'modules/mukurtu_core/config/install/views.view.mukurtu_categories.yml',
         'language_with_fallback' => [],
         'default_langcode' => ['default'],
-        'rendering_language' => ['default', 'browse_by_category_block', 'categories_page'],
+        'rendering_language' => [
+          'default',
+          'browse_by_category_block',
+          'browse_by_category_names_block',
+          'categories_page',
+          'categories_names_page',
+        ],
       ],
       'mukurtu_browse' => [
         'file' => 'modules/mukurtu_browse/config/install/views.view.mukurtu_browse.yml',

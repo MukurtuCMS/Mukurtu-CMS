@@ -53,6 +53,13 @@
       margin-block-end: var(--v-space-2xs);
     }
 
+    // Names-only category cards zero their heading margin so the focus ring
+    // fits the card. Put the space below the cards on the grid instead; a
+    // margin on the card would only stretch it to fill the grid row.
+    .category-grid:has(.category-teaser--names-only) {
+      padding-block-end: var(--v-space-2xs);
+    }
+
     // Text block: add breathing room around the body content.
     &:has(.field--name-body) {
       padding-inline: var(--v-space-xs);
