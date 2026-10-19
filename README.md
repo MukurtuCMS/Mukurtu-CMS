@@ -1,4 +1,4 @@
-[![Mukurtu CI Tests](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/workflows/build-and-test.yml)
+[![Mukurtu CI Tests](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/MukurtuCMS/Mukurtu-CMS/actions/workflows/build-and-test.yml) [![Latest release](https://img.shields.io/packagist/v/mukurtu/mukurtu?label=latest%20release)](https://packagist.org/packages/mukurtu/mukurtu)
 
 <img alt="Mukurtu Logo" src="https://mukurtu.org/wp-content/uploads/2017/02/cropped-Mukurtu-dc8633.png" height="75px">
 
@@ -8,7 +8,7 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 ## Requirements
 
 * The necessary database server, web server, and PHP installed that meet [modern Drupal requirements](https://www.drupal.org/docs/system-requirements)
-  * PHP 8.4 is supported.
+  * PHP 8.4 or later is required.
   * We recommend setting the PHP memory Limit (memory_limit) to 512MB (or higher, if needed).
   * Currently MariaDB or MySQL is supported. PostGRES is not.
   * The Mukurtu Team does our internal work with nginx. Apache SHOULD work fine, but we have not tested it extensively.
