@@ -20,6 +20,7 @@ import { gotoReady } from '~helpers/preview';
  *   at Tagify's hidden input (WCAG 3.3.1).
  * - Enter or Tab before the suggestions load leaves the typed text in the
  *   textbox. It used to become a red invalid tag that was dropped on submit.
+ *   The same goes for Enter after Escape has closed the list.
  *
  * Nothing is merged: the test stops at the first step of the form.
  */
@@ -102,6 +103,36 @@ test.describe('Term merge Tagify picker', () => {
     await page.keyboard.press('Tab');
 
     await expect(textbox).toHaveText('Unmatched term');
+    await expect(page.locator('tags.tagify')).not.toHaveAttribute('data-tag-seen', 'true');
+  });
+
+  test('Enter after Escape does not reuse the closed list\'s highlight', async ({ page }) => {
+    // Answer with one made-up suggestion, so this needs no real terms.
+    await page.route(/\/tagify_autocomplete\//, (route) => route.fulfill({
+      json: [{ entity_id: '999999', label: 'Example term', attributes: {} }],
+    }));
+    await gotoReady(page, MERGE_URL);
+    await page.evaluate(() => {
+      const tags = document.querySelector('tags.tagify')!;
+      new MutationObserver(() => {
+        if (tags.querySelector('tag')) {
+          tags.dataset.tagSeen = 'true';
+        }
+      }).observe(tags, { childList: true });
+    });
+
+    const textbox = page.locator('tags.tagify .tagify__input');
+    await textbox.click();
+    await page.keyboard.type('Exam');
+    await expect(page.locator('.tagify__dropdown .tagify__dropdown__item--active')).toHaveText('Example term', SLOW);
+    // A closed list keeps its highlighted item. Enter must not act on it.
+    await page.keyboard.press('Escape');
+    // Tagify finishes closing the list a moment after Escape.
+    await page.waitForTimeout(300);
+    await page.keyboard.type('x');
+    await page.keyboard.press('Enter');
+
+    await expect(textbox).toHaveText('Examx');
     await expect(page.locator('tags.tagify')).not.toHaveAttribute('data-tag-seen', 'true');
   });
 });

@@ -18,13 +18,19 @@
     instance.settings.delimiters = null;
     if (instance.settings.enforceWhitelist) {
       instance.settings.addTagOnBlur = false;
-      // Capture on window so this runs before Tagify's own Enter handlers.
-      window.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter' || event.target !== instance.DOM.input
+      // Capture on the wrapper so this runs before Tagify's own Enter
+      // handlers on the input.
+      instance.DOM.scope.addEventListener('keydown', (event) => {
+        // Let Enter through when it confirms an IME composition.
+        if (event.key !== 'Enter' || event.isComposing
+          || event.target !== instance.DOM.input
           || !instance.settings.enforceWhitelist) {
           return;
         }
-        const active = instance.DOM.dropdown.querySelector('.tagify__dropdown__item--active');
+        // A closed list keeps its last highlight, so only trust an open one.
+        const { dropdown } = instance.DOM;
+        const active = dropdown.isConnected
+          && dropdown.querySelector('.tagify__dropdown__item--active');
         if (!active || active.getAttribute('value') === 'noMatch') {
           event.preventDefault();
           event.stopImmediatePropagation();
