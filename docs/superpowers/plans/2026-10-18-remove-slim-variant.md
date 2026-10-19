@@ -64,6 +64,8 @@ guard stage keeps validating it. The runtime-contents tests keep checking the to
 - `drush` is now a wrapper that reads the site address written at start-up, so
   `docker exec <c> drush user:login` prints your real address, not `http://default`.
   (Commit "Give Drush the site address however it is started".)
+- nginx start-up alert (`could not open error log file ... Permission denied`) fixed
+  with `nginx -e stderr`; new fast test `scripts/docker/test-supervise.sh`.
 - TODO: pin `runs-on` to `ubuntu-24.04` in `docker-publish.yml` (GitHub moves
   `ubuntu-latest` to Ubuntu 26 on 2026-10-19; the tests need Docker, jq, curl, python3).
 

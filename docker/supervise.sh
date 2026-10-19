@@ -30,7 +30,10 @@ stop_all() {
 trap stop_all TERM INT
 
 start quit php-fpm -y "$RUN/php-fpm.conf" -c "$RUN/php.ini"
-start quit nginx -c "$RUN/nginx.conf" -g 'daemon off;'
+# -e stderr: before it reads the configuration, nginx opens a compiled-in default
+# error log (/var/lib/nginx/logs/error.log) that the unprivileged user cannot write,
+# and prints an alert. This sends that early log to stderr, as the configuration does.
+start quit nginx -e stderr -c "$RUN/nginx.conf" -g 'daemon off;'
 if [ "${MUKURTU_CRON:-true}" = true ]; then
   start term "$LIB/cron.sh"
 fi

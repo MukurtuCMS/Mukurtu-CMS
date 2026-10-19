@@ -472,6 +472,10 @@ setting or path at fault if any step fails:
 `true`, the cron loop. If any of them stops unexpectedly, it stops the others
 and exits non-zero, so the container restarts (or stops, visibly) rather than
 serving errors. On `SIGTERM` it shuts everything down gracefully and exits `0`.
+nginx is started with `-e stderr`: before it reads its configuration, nginx opens a
+compiled-in default error log that the unprivileged user cannot write, and would
+print a `could not open error log file` alert on every start. A test fails on any
+nginx alert in the start-up log.
 A plain shell script does this instead of a supervisor package such as s6 or
 supervisord: it needs nothing installed, runs as the unprivileged user, and has
 no configuration to go wrong.
