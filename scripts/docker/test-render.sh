@@ -25,7 +25,7 @@ render() {
   docker run --rm --entrypoint sh -e MUKURTU_RUN_DIR="$OUT" "${env_args[@]}" "$IMAGE" -c "
     $LIB/render-config.sh 2>/tmp/stderr; echo RC=\$?
     echo '=== stderr'; cat /tmp/stderr
-    for f in php.ini cli/php.ini php-fpm.conf nginx.conf msmtprc smtp-password; do
+    for f in php.ini cli/php.ini php-fpm.conf nginx.conf msmtprc smtp-password drush-uri; do
       echo \"=== \$f\"; cat $OUT/\$f 2>/dev/null; echo
     done
     echo '=== mode msmtprc'; stat -c %a $OUT/msmtprc 2>/dev/null
@@ -110,6 +110,21 @@ out="$(render MUKURTU_SMTP_HOST=smtp.example.org "MUKURTU_SMTP_FROM=a@example.or
 assert_eq "1" "$(rc "$out")" "newline in the SMTP sender: exits 1"
 out="$(render "MUKURTU_PHP_TIMEZONE=UTC${nl}evil = 1")"
 assert_eq "1" "$(rc "$out")" "newline in the time zone: exits 1"
+
+echo "render: drush-uri (the address command-line tools use in links)"
+out="$(render MUKURTU_TRUSTED_HOSTS=example.org,www.example.org)"
+assert_eq "https://example.org" "$(section "$out" drush-uri)" "defaults to https:// plus the first trusted host"
+out="$(render MUKURTU_TRUSTED_HOSTS=example.org MUKURTU_BASE_URL=http://localhost:8080)"
+assert_eq "http://localhost:8080" "$(section "$out" drush-uri)" "MUKURTU_BASE_URL wins"
+out="$(render 'MUKURTU_TRUSTED_HOSTS=*.example.org,example.org')"
+assert_eq "" "$(section "$out" drush-uri)" "a wildcard first host gives no default"
+out="$(render)"
+assert_eq "" "$(section "$out" drush-uri)" "no trusted hosts, no address"
+out="$(render MUKURTU_BASE_URL=localhost)"
+assert_eq "1" "$(rc "$out")" "a base URL without a scheme: exits 1"
+assert_contains "$(section "$out" stderr)" "MUKURTU_BASE_URL" "a base URL without a scheme: names the variable"
+out="$(render "MUKURTU_BASE_URL=http://a.example${nl}evil")"
+assert_eq "1" "$(rc "$out")" "a base URL with a line break: exits 1"
 
 echo "render: file-secret"
 out="$(docker run --rm --entrypoint sh -e MUKURTU_RUN_DIR="$OUT" \

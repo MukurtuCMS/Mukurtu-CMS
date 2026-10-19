@@ -40,6 +40,7 @@ LIB_DIR=$(dirname "$0")
 : "${MUKURTU_SMTP_USER:=}"
 : "${MUKURTU_SMTP_TLS:=starttls}"
 : "${MUKURTU_SMTP_FROM:=}"
+: "${MUKURTU_BASE_URL:=}"
 
 # --- validation -----------------------------------------------------------
 validate_abs_path MUKURTU_RUN_DIR
@@ -67,6 +68,7 @@ validate_bool MUKURTU_NGINX_ACCESS_LOG
 validate_bool MUKURTU_REVERSE_PROXY
 validate_positive_int MUKURTU_SMTP_PORT
 validate_choice MUKURTU_SMTP_TLS starttls tls off
+[ -z "$MUKURTU_BASE_URL" ] || validate_url MUKURTU_BASE_URL
 
 if [ "$MUKURTU_REVERSE_PROXY" = true ] && [ -z "$MUKURTU_REVERSE_PROXY_ADDRESSES" ]; then
   die "MUKURTU_REVERSE_PROXY_ADDRESSES is required when MUKURTU_REVERSE_PROXY=true (a comma-separated list of the proxy's IP addresses or CIDR ranges)"
@@ -146,6 +148,22 @@ export MUKURTU_RUN_DIR MUKURTU_PHP_MEMORY_LIMIT MUKURTU_PHP_MAX_EXECUTION_TIME \
   MUKURTU_FPM_FILES_MAX_CHILDREN MUKURTU_FPM_PM_SETTINGS MUKURTU_NGINX_WORKER_PROCESSES \
   MUKURTU_NGINX_WORKER_CONNECTIONS MUKURTU_NGINX_ACCESS_LOG_DIRECTIVE \
   MUKURTU_MSMTP_SETTINGS MUKURTU_PHP_MAIL_SETTINGS
+
+# --- the address command-line tools write into links -----------------------
+# Cron mail and `drush user:login` need the site's public address. It is MUKURTU_BASE_URL,
+# or https:// plus the first trusted host. It is written to a file that the `drush`
+# wrapper reads, so it applies however Drush is started (including `docker exec`,
+# which does not run the entrypoint).
+mkdir -p "$MUKURTU_RUN_DIR"
+rm -f "$MUKURTU_RUN_DIR/drush-uri"
+_drush_uri=$MUKURTU_BASE_URL
+if [ -z "$_drush_uri" ]; then
+  _first_host=$(printf '%s' "${MUKURTU_TRUSTED_HOSTS:-}" | cut -d, -f1 | tr -d ' ')
+  if printf '%s' "$_first_host" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9.-]*$'; then
+    _drush_uri="https://$_first_host"
+  fi
+fi
+[ -z "$_drush_uri" ] || printf '%s\n' "$_drush_uri" > "$MUKURTU_RUN_DIR/drush-uri"
 
 # --- render ---------------------------------------------------------------
 TEMPLATES="$LIB_DIR/templates"

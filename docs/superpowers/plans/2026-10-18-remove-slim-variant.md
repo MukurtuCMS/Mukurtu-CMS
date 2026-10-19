@@ -59,6 +59,14 @@ guard stage keeps validating it. The runtime-contents tests keep checking the to
 - [ ] **Friend bundle** (`../mukurtu-compose-bundle`): no slim references; only the
   image tag needs updating to `4.0.5-rc2`.
 
+## Also in `4.0.5-rc2` (already committed on the branch, found while testing rc1)
+
+- `drush` is now a wrapper that reads the site address written at start-up, so
+  `docker exec <c> drush user:login` prints your real address, not `http://default`.
+  (Commit "Give Drush the site address however it is started".)
+- TODO: pin `runs-on` to `ubuntu-24.04` in `docker-publish.yml` (GitHub moves
+  `ubuntu-latest` to Ubuntu 26 on 2026-10-19; the tests need Docker, jq, curl, python3).
+
 ## Verification
 
 Run the whole suite (`for t in scripts/docker/test-*.sh; do $t || break; done`).

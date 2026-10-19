@@ -185,6 +185,8 @@ for _ in $(seq 1 60); do
   sleep 2
 done
 assert_eq "healthy" "$(docker inspect -f '{{.State.Health.Status}}' "$SITE")" "container reports healthy"
+# `docker exec` does not run the entrypoint; the drush wrapper must still know the address.
+assert_contains "$(docker exec "$SITE" drush user:login 2>/dev/null)" "https://test.example.org/user/reset" "drush links use the site address, also through docker exec"
 assert_eq "1G" "$(docker exec "$SITE" drush php:eval 'echo ini_get("memory_limit");' 2>/dev/null)" "Drush runs with MUKURTU_PHP_CLI_MEMORY_LIMIT"
 assert_eq "512M" "$(docker exec "$SITE" php -d opcache.enable_cli=0 -r 'echo "512M";')" "php binary runs"
 

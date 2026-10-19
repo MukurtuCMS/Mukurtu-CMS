@@ -37,21 +37,6 @@ load_secret MUKURTU_HASH_SALT
 PHPRC="$MUKURTU_RUN_DIR/cli"
 export PHPRC
 
-# Absolute links in command-line output (cron mail, `drush uli`) need a base
-# URL, which Drush reads from this variable.
-if [ -z "${DRUSH_OPTIONS_URI:-}" ]; then
-  if [ -n "${MUKURTU_BASE_URL:-}" ]; then
-    DRUSH_OPTIONS_URI=$MUKURTU_BASE_URL
-  else
-    _first_host=$(printf '%s' "${MUKURTU_TRUSTED_HOSTS:-}" | cut -d, -f1 | tr -d ' ')
-    case "$_first_host" in
-      ''|\**) ;;
-      *) DRUSH_OPTIONS_URI="https://$_first_host" ;;
-    esac
-  fi
-  export DRUSH_OPTIONS_URI
-fi
-
 if [ "$mode" != supervise ]; then
   exec "$@"
 fi

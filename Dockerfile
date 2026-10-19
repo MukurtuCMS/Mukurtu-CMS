@@ -212,13 +212,13 @@ RUN set -eux; \
     mkdir -p /var/www/files/public /var/www/files/private; \
     chown mukurtu:mukurtu /var/www/files/public /var/www/files/private; \
     rm -rf /var/www/html/web/sites/default/files; \
-    ln -s /var/www/files/public /var/www/html/web/sites/default/files; \
-    ln -s /var/www/html/vendor/bin/drush /usr/local/bin/drush
+    ln -s /var/www/files/public /var/www/html/web/sites/default/files
 
 # Entrypoint, config templates, and settings.php. Last so that editing them
 # does not rebuild the layers above.
 COPY docker/ /usr/local/lib/mukurtu/
-RUN cp /usr/local/lib/mukurtu/settings.php /var/www/html/web/sites/default/settings.php
+RUN cp /usr/local/lib/mukurtu/settings.php /var/www/html/web/sites/default/settings.php; \
+    ln -s /usr/local/lib/mukurtu/drush /usr/local/bin/drush
 
 VOLUME ["/var/www/files/public", "/var/www/files/private"]
 

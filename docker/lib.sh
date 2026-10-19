@@ -61,6 +61,7 @@ validate_positive_int() { _validate "$1" '^[1-9][0-9]*$' "a whole number greater
 validate_bool() { _validate "$1" '^(true|false)$' "true or false"; }
 validate_duration() { _validate "$1" '^[0-9]+[smhd]?$' "a duration such as 10s or 5m"; }
 validate_abs_path() { _validate "$1" '^/[A-Za-z0-9_./-]*$' "an absolute path"; }
+validate_url() { _validate "$1" '^https?://[^[:space:]]+$' "an address starting with http:// or https://"; }
 validate_no_spaces() { _validate "$1" '^[^[:space:]]+$' "a single word without spaces"; }
 validate_timezone() { _validate "$1" '^[A-Za-z0-9_+/-]+$' "a time zone name such as UTC or Pacific/Auckland"; }
 
