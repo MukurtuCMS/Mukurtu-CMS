@@ -1,93 +1,145 @@
 #!/usr/bin/env bash
-# The Compose examples must be valid, hardened, and actually bring up working sites:
-# the single-site file, and the hosting file (several sites behind a Caddy proxy).
-# See docs/docker-build.md, "Hosting examples".
+# The Compose examples under examples/docker/ must be complete (a .env.example that covers
+# every required variable, a generator that makes real secrets), hardened, and actually
+# bring up working sites: the minimal and single-site examples, and the multi-tenant
+# one (several sites behind a Caddy proxy). See docs/docker-build.md, "Hosting examples".
 set -u
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 command -v jq >/dev/null || { echo "jq is required"; exit 1; }
 
-SINGLE="$REPO_ROOT/docker-compose.example.yml"
-MULTI="$REPO_ROOT/docker-compose.multi-tenant.example.yml"
+EX="$REPO_ROOT/examples/docker"
 WORK="$(mktemp -d -t mukurtu-compose.XXXXXX)"
 PROJECT="mukurtu-ctest-$$"
 IMAGE_TAG=mukurtu-test:image
 cleanup() {
-  (cd "$WORK" && MUKURTU_IMAGE=$IMAGE_TAG docker compose --env-file .env -p "$PROJECT-one" -f "$WORK/$(basename "$SINGLE")" down -v >/dev/null 2>&1)
-  (cd "$WORK" && MUKURTU_IMAGE=$IMAGE_TAG docker compose --env-file .env -p "$PROJECT-many" -f "$WORK/$(basename "$MULTI")" down -v >/dev/null 2>&1)
+  for name in minimal single-site multi-tenant; do
+    [[ -f "$WORK/$name/docker-compose.yml" ]] && (cd "$WORK/$name" && docker compose -p "$PROJECT-$name" down -v >/dev/null 2>&1)
+  done
   rm -rf "$WORK" "$BUILD_LOG"
 }
 trap cleanup EXIT
 
-# Environment and secret files the examples ask for. The hosting example is tried on
-# *.localhost names, which Caddy serves with its own local certificate authority, and
-# on high ports so no privileges are needed.
-mkdir -p "$WORK/secrets"
-for name in db_password db_root_password admin_password hash_salt; do
-  printf 'test-%s-value' "$name" >"$WORK/secrets/$name.txt"
-done
-chmod -R a+rX "$WORK"
-cat >"$WORK/.env" <<ENV
-MUKURTU_HOST=localhost
-MUKURTU_ADMIN_EMAIL=admin@example.org
-ACME_EMAIL=ops@example.org
-HTTP_PORT=8088
-HTTPS_PORT=8443
-SITE_A_HOST=a.localhost
-SITE_B_HOST=b.localhost
-SITE_A_DB_PASSWORD=aaa
-SITE_B_DB_PASSWORD=bbb
-DB_ROOT_PASSWORD=root
-SITE_A_ADMIN_PASSWORD=Adm1n-a
-SITE_B_ADMIN_PASSWORD=Adm1n-b
-SITE_A_ADMIN_EMAIL=a@example.org
-SITE_B_ADMIN_EMAIL=b@example.org
-ENV
-cp "$SINGLE" "$MULTI" "$WORK/" 2>/dev/null
-
-compose_json() { (cd "$WORK" && docker compose --env-file .env -f "$1" config --format json 2>&1); }
-
-echo "compose: both files are valid"
-for file in "$SINGLE" "$MULTI"; do
-  if [[ ! -f "$file" ]]; then fail "$(basename "$file") exists"; continue; fi
-  if json="$(compose_json "$file")" && jq -e . >/dev/null <<<"$json"; then
-    pass "$(basename "$file") is valid Compose"
+# prep <name>: copy an example to a scratch directory and prepare it the way its README
+# says a user does: run the generator, then point the image at the one under test.
+prep() {
+  local name="$1" dir="$WORK/$1"
+  cp -r "$EX/$name" "$dir"
+  if [[ -x "$dir/generate-secrets.sh" ]]; then
+    (cd "$dir" && ./generate-secrets.sh >/dev/null 2>&1)
+  fi
+  if [[ -f "$dir/.env" ]]; then
+    sed -i "s#^MUKURTU_IMAGE=.*#MUKURTU_IMAGE=$IMAGE_TAG#" "$dir/.env"
   else
-    fail "$(basename "$file") is valid Compose"; echo "$json" | head -5
+    # The minimal example has no .env: its compose file names the image directly.
+    sed -i "s#^\( *image: \)ghcr.io/[^ ]*mukurtu:[^ ]*#\1$IMAGE_TAG#" "$dir/docker-compose.yml"
+  fi
+}
+# dc <name> <docker compose args...>
+dc() { local name="$1"; shift; (cd "$WORK/$name" && docker compose -p "$PROJECT-$name" "$@"); }
+compose_json() { (cd "$WORK/$1" && docker compose config --format json 2>&1); }
+
+echo "examples: the layout"
+for name in minimal single-site multi-tenant; do
+  [[ -f "$EX/$name/docker-compose.yml" ]] && pass "$name/docker-compose.yml exists" || fail "$name/docker-compose.yml exists"
+  [[ -f "$EX/$name/README.md" ]] && pass "$name/README.md exists" || fail "$name/README.md exists"
+done
+[[ -f "$EX/README.md" ]] && pass "examples/docker/README.md exists" || fail "examples/docker/README.md exists"
+for name in single-site multi-tenant; do
+  for f in .env.example generate-secrets.sh .gitignore; do
+    [[ -e "$EX/$name/$f" ]] && pass "$name/$f exists" || fail "$name/$f exists"
+  done
+  [[ -x "$EX/$name/generate-secrets.sh" ]] && pass "$name/generate-secrets.sh is executable" || fail "$name/generate-secrets.sh is executable"
+  ignore="$(cat "$EX/$name/.gitignore" 2>/dev/null)"
+  assert_contains "$ignore" ".env" "$name/.gitignore keeps the generated .env out of git"
+  assert_contains "$ignore" "secrets" "$name/.gitignore keeps the generated secrets out of git"
+  # Real or sample secret values must never be committed.
+  committed="$(git -C "$REPO_ROOT" ls-files "examples/docker/$name" | grep -E '(^|/)(\.env|secrets/)' | grep -v '\.env\.example$' || true)"
+  assert_eq "" "$committed" "$name: no .env or secret file is committed"
+done
+
+for name in minimal single-site multi-tenant; do
+  [[ -d "$EX/$name" ]] && prep "$name"
+done
+
+echo "examples: every example is valid Compose"
+for name in minimal single-site multi-tenant; do
+  [[ -f "$WORK/$name/docker-compose.yml" ]] || continue
+  if json="$(compose_json "$name")" && jq -e . >/dev/null <<<"$json"; then
+    pass "$name is valid Compose"
+  else
+    fail "$name is valid Compose"; echo "$json" | head -5
   fi
 done
 
-echo "compose: every Mukurtu service is hardened and bounded"
-check_services() { # check_services <file> <service names...>
-  local file="$1" json svc
-  shift
-  json="$(compose_json "$file")" || return
-  for svc in "$@"; do
-    assert_eq "true" "$(jq -r ".services[\"$svc\"].read_only" <<<"$json")" "$(basename "$file"): $svc is read_only"
-    assert_eq '["ALL"]' "$(jq -c ".services[\"$svc\"].cap_drop" <<<"$json")" "$(basename "$file"): $svc drops all capabilities"
-    assert_contains "$(jq -c ".services[\"$svc\"].security_opt" <<<"$json")" "no-new-privileges:true" "$(basename "$file"): $svc sets no-new-privileges"
-    local mem
-    mem="$(jq -r ".services[\"$svc\"].mem_limit // \"\"" <<<"$json")"
-    [[ -n "$mem" && "$mem" != null ]] && pass "$(basename "$file"): $svc has mem_limit ($mem)" || fail "$(basename "$file"): $svc has mem_limit"
-    assert_contains "$(jq -c ".services[\"$svc\"].tmpfs" <<<"$json")" "/tmp" "$(basename "$file"): $svc has a /tmp tmpfs with a cap"
+echo "examples: .env.example covers every required variable"
+for name in single-site multi-tenant; do
+  [[ -f "$EX/$name/docker-compose.yml" ]] || continue
+  required="$(grep -oE '\$\{[A-Z0-9_]+:\?' "$EX/$name/docker-compose.yml" | sed -E 's/\$\{([A-Z0-9_]+):\?/\1/' | sort -u)"
+  missing=""
+  for var in $required; do
+    grep -qE "^$var=" "$EX/$name/.env.example" 2>/dev/null || missing="$missing $var"
   done
-}
-[[ -f "$SINGLE" ]] && check_services "$SINGLE" mukurtu
-[[ -f "$MULTI" ]] && check_services "$MULTI" site_a site_b
-
-echo "compose: MariaDB is configured the way Drupal asks"
-for file in "$SINGLE" "$MULTI"; do
-  [[ -f "$file" ]] || continue
-  cmd="$(compose_json "$file" | jq -c '.services.db.command')"
-  assert_contains "$cmd" "--transaction-isolation=READ-COMMITTED" "$(basename "$file"): READ-COMMITTED"
-  assert_contains "$cmd" "--binlog-format=ROW" "$(basename "$file"): binlog_format ROW"
-  assert_contains "$cmd" "--max-allowed-packet=64M" "$(basename "$file"): max_allowed_packet"
-  assert_contains "$cmd" "--character-set-server=utf8mb4" "$(basename "$file"): utf8mb4"
+  [[ -z "$missing" ]] && pass "$name: .env.example has every required variable ($(wc -w <<<"$required") of them)" || fail "$name: .env.example is missing:$missing"
 done
 
-echo "compose: the hosting file routes two domains through Caddy and trusts only the proxy"
-if [[ -f "$MULTI" ]]; then
-  json="$(compose_json "$MULTI")"
+echo "examples: the generators make real, private, distinct secrets and never overwrite"
+if [[ -d "$WORK/single-site" ]]; then
+  d="$WORK/single-site"
+  for f in db_password db_root_password hash_salt admin_password; do
+    [[ -s "$d/secrets/$f.txt" ]] && pass "single-site: secrets/$f.txt is created and not empty" || fail "single-site: secrets/$f.txt is created and not empty"
+  done
+  assert_eq "644" "$(stat -c %a "$d/secrets/db_password.txt")" "single-site: secrets are readable by the container's user (mode 644)"
+  [[ "$(<"$d/secrets/db_password.txt")" != "$(<"$d/secrets/db_root_password.txt")" ]] && pass "single-site: the database and root passwords differ" || fail "single-site: the database and root passwords differ"
+  before="$(cat "$d"/secrets/*.txt | sha256sum)"
+  (cd "$d" && ./generate-secrets.sh >/dev/null 2>&1)
+  assert_eq "$before" "$(cat "$d"/secrets/*.txt | sha256sum)" "single-site: running the generator again keeps the existing secrets"
+fi
+if [[ -d "$WORK/multi-tenant" ]]; then
+  d="$WORK/multi-tenant"
+  for var in DB_ROOT_PASSWORD SITE_A_DB_PASSWORD SITE_B_DB_PASSWORD SITE_A_ADMIN_PASSWORD SITE_B_ADMIN_PASSWORD; do
+    value="$(grep -E "^$var=" "$d/.env" | cut -d= -f2-)"
+    [[ ${#value} -ge 16 ]] && pass "multi-tenant: $var is generated (${#value} characters)" || fail "multi-tenant: $var is generated"
+  done
+  before="$(grep -E 'PASSWORD=' "$d/.env" | sha256sum)"
+  (cd "$d" && ./generate-secrets.sh >/dev/null 2>&1)
+  assert_eq "$before" "$(grep -E 'PASSWORD=' "$d/.env" | sha256sum)" "multi-tenant: running the generator again keeps the existing passwords"
+fi
+
+echo "examples: every Mukurtu service is hardened and bounded"
+check_services() { # check_services <name> <service names...>
+  local name="$1" json svc
+  shift
+  json="$(compose_json "$name")" || return
+  for svc in "$@"; do
+    assert_eq "true" "$(jq -r ".services[\"$svc\"].read_only" <<<"$json")" "$name: $svc is read_only"
+    assert_eq '["ALL"]' "$(jq -c ".services[\"$svc\"].cap_drop" <<<"$json")" "$name: $svc drops all capabilities"
+    assert_contains "$(jq -c ".services[\"$svc\"].security_opt" <<<"$json")" "no-new-privileges:true" "$name: $svc sets no-new-privileges"
+    local mem
+    mem="$(jq -r ".services[\"$svc\"].mem_limit // \"\"" <<<"$json")"
+    [[ -n "$mem" && "$mem" != null ]] && pass "$name: $svc has mem_limit ($mem)" || fail "$name: $svc has mem_limit"
+    assert_contains "$(jq -c ".services[\"$svc\"].tmpfs" <<<"$json")" "/tmp" "$name: $svc has a /tmp tmpfs with a cap"
+  done
+}
+[[ -d "$WORK/single-site" ]] && check_services single-site mukurtu
+[[ -d "$WORK/multi-tenant" ]] && check_services multi-tenant site_a site_b
+
+echo "examples: MariaDB is configured the way Drupal asks"
+for name in minimal single-site multi-tenant; do
+  [[ -d "$WORK/$name" ]] || continue
+  cmd="$(compose_json "$name" | jq -c '.services.db.command')"
+  assert_contains "$cmd" "--transaction-isolation=READ-COMMITTED" "$name: READ-COMMITTED"
+  assert_contains "$cmd" "--binlog-format=ROW" "$name: binlog_format ROW"
+  assert_contains "$cmd" "--character-set-server=utf8mb4" "$name: utf8mb4"
+done
+for name in single-site multi-tenant; do
+  [[ -d "$WORK/$name" ]] || continue
+  assert_contains "$(compose_json "$name" | jq -c '.services.db.command')" "--max-allowed-packet=64M" "$name: max_allowed_packet"
+done
+
+echo "examples: the multi-tenant example routes two domains through Caddy and trusts only the proxy"
+if [[ -d "$WORK/multi-tenant" ]]; then
+  json="$(compose_json multi-tenant)"
   caddyfile="$(jq -r '.configs.caddyfile.content // ""' <<<"$json")"
   assert_contains "$caddyfile" "a.localhost" "the Caddyfile names site A's host"
   assert_contains "$caddyfile" "reverse_proxy site_a:8080" "site A's host goes to site_a"
@@ -111,31 +163,31 @@ if ! build_image runtime "$IMAGE_TAG" "${DEFAULT_BUILD_ARGS[@]}"; then
   fail "image builds"; tail -20 "$BUILD_LOG"; finish; exit 1
 fi
 
-echo "compose: the single-site example brings up a working site"
-if [[ -f "$SINGLE" ]]; then
-  # Run the copy next to the secrets and .env, as a user would.
-  dc() { (cd "$WORK" && MUKURTU_IMAGE=$IMAGE_TAG docker compose --env-file .env -p "$PROJECT-one" -f "$WORK/$(basename "$SINGLE")" "$@"); }
-  dc up -d >/dev/null 2>&1
-  port="$(dc port mukurtu 8080 2>/dev/null | sed 's/.*://')"
-  ok=false
+# live_single <name>: bring up an example on port 8080 and wait for the login page.
+live_single() {
+  local name="$1" ok=false
+  dc "$name" up -d >/dev/null 2>&1
   for _ in $(seq 1 300); do
-    if curl -sf -o /dev/null -H 'Host: localhost' "http://127.0.0.1:${port:-0}/user/login"; then ok=true; break; fi
+    if curl -sf -o /dev/null -H 'Host: localhost' "http://127.0.0.1:8080/user/login"; then ok=true; break; fi
     sleep 2
   done
-  if $ok; then pass "the site installs and serves pages from the example (read-only root, tmpfs, secrets)"; else
-    fail "the site installs and serves pages from the example"
-    dc logs --tail 40 mukurtu 2>&1
+  if $ok; then pass "$name installs and serves pages"; else
+    fail "$name installs and serves pages"
+    dc "$name" logs --tail 40 mukurtu 2>&1
   fi
-  dc down -v >/dev/null 2>&1
-fi
+  dc "$name" down -v >/dev/null 2>&1
+}
+echo "examples: the minimal example brings up a working site"
+[[ -d "$WORK/minimal" ]] && live_single minimal
+echo "examples: the single-site example brings up a working site (read-only root, tmpfs, secrets)"
+[[ -d "$WORK/single-site" ]] && live_single single-site
 
-echo "compose: the hosting example brings up two sites behind Caddy"
-if [[ -f "$MULTI" ]]; then
-  mc() { (cd "$WORK" && MUKURTU_IMAGE=$IMAGE_TAG docker compose --env-file .env -p "$PROJECT-many" -f "$WORK/$(basename "$MULTI")" "$@"); }
-  # get <host> <path>: through Caddy's TLS port, as a browser would reach that name.
+echo "examples: the multi-tenant example brings up two sites behind Caddy"
+if [[ -d "$WORK/multi-tenant" ]]; then
+  # (the .env.example defaults are the local-try values: *.localhost names, ports 8088 and 8443)
   via_caddy() { curl -sk --max-time 20 --resolve "$1:8443:127.0.0.1" "https://$1:8443$2"; }
   code_via_caddy() { curl -sk --max-time 20 -o /dev/null -w '%{http_code}' --resolve "$1:8443:127.0.0.1" "https://$1:8443$2"; }
-  mc up -d >/dev/null 2>&1
+  dc multi-tenant up -d >/dev/null 2>&1
   ok=false
   for _ in $(seq 1 300); do
     if [[ "$(code_via_caddy a.localhost /user/login)" == 200 && "$(code_via_caddy b.localhost /user/login)" == 200 ]]; then ok=true; break; fi
@@ -153,17 +205,16 @@ if [[ -f "$MULTI" ]]; then
       pass "an unknown host name is not served"
     fi
     # Ask Docker for the container's port bindings. (Not `docker compose port`, whose
-    # output for an unpublished port differs between Compose versions: "", ":0",
-    # "invalid IP:0".) No bindings are reported as {} or null.
-    bindings="$(docker inspect -f '{{json .HostConfig.PortBindings}}' "$(mc ps -q site_a)" 2>/dev/null)"
+    # output for an unpublished port differs between Compose versions.)
+    bindings="$(docker inspect -f '{{json .HostConfig.PortBindings}}' "$(dc multi-tenant ps -q site_a)" 2>/dev/null)"
     [[ "$bindings" == "{}" || "$bindings" == "null" ]] && pass "site A publishes no port on the host" || fail "site A publishes no port on the host (got '$bindings')"
-    bindings="$(docker inspect -f '{{json .HostConfig.PortBindings}}' "$(mc ps -q caddy)" 2>/dev/null)"
+    bindings="$(docker inspect -f '{{json .HostConfig.PortBindings}}' "$(dc multi-tenant ps -q caddy)" 2>/dev/null)"
     assert_contains "$bindings" "8443" "the proxy does publish its HTTPS port"
-    # The sites cannot reach each other's databases.
-    assert_eq "denied" "$(mc exec -T db sh -c "mariadb -usite_a -paaa -e 'use site_b' 2>&1 | grep -q 'Access denied' && echo denied")" "site A's database user cannot open site B's database"
+    password_a="$(grep -E '^SITE_A_DB_PASSWORD=' "$WORK/multi-tenant/.env" | cut -d= -f2-)"
+    assert_eq "denied" "$(dc multi-tenant exec -T db sh -c "mariadb -usite_a -p'$password_a' -e 'use site_b' 2>&1 | grep -q 'Access denied' && echo denied")" "site A's database user cannot open site B's database"
   else
     fail "both sites install and answer through Caddy"
-    mc logs --tail 30 caddy site_a site_b 2>&1
+    dc multi-tenant logs --tail 30 caddy site_a site_b 2>&1
   fi
 fi
 

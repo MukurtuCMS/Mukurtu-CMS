@@ -522,15 +522,26 @@ remove. They are documented so operators can size and monitor for them.
 
 ## Hosting examples
 
-Two Compose files show how the image is meant to be run. Both are tested: the
-test suite checks that they are valid, that every Mukurtu service has the
-hardening below, that the single-site file starts a working site, and that the
-hosting file starts two sites behind Caddy, each answering only on its own name.
+Three examples under [`examples/docker/`](../examples/docker) show how the image is meant
+to be run, each in its own self-contained folder (a Compose file, and where needed a
+`.env.example`, a secrets generator, a `.gitignore` and a README). All three are tested:
+the test suite checks that each is valid, that its `.env.example` covers every variable the
+Compose file requires, that the generators make random, private, distinct secrets and never
+overwrite them, that every Mukurtu service has the hardening below, and that each example
+**starts a working site** (the multi-tenant one starts two, behind Caddy, each answering
+only on its own name).
 
-**Single site** (`docker-compose.example.yml`): the image, MariaDB, two named
-volumes for files, and Docker secrets for every password.
+**Minimal** (`minimal/`): the image and MariaDB with throwaway passwords written in the
+file, and nothing to prepare. For trying Mukurtu, not for keeping.
 
-**Several sites on one host** (`docker-compose.multi-tenant.example.yml`): one
+**Single site** (`single-site/`): the image, MariaDB, two named volumes for files, and Docker
+secrets for every password. `generate-secrets.sh` creates `.env` and the secret files with
+random values; sample secret files are deliberately **not** committed, because anyone who
+copied them would run a site with a publicly known password, and `.gitignore` keeps the
+generated ones out of git. `MUKURTU_IMAGE` is required, with no default, so a version is
+always chosen deliberately.
+
+**Several sites on one host** (`multi-tenant/`): one
 container per site, all from the same image, behind a Caddy reverse proxy that
 routes by host name and obtains TLS certificates. The proxy is Caddy and not a
 label-driven proxy such as Traefik because Caddy reads a plain configuration file:

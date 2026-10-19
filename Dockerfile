@@ -87,8 +87,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
 # them out keeps the Composer layers cached when only those files change.
 # Composer copies the result into web/profiles/mukurtu (symlink=false) rather
 # than linking it.
-COPY --exclude=Dockerfile --exclude=.dockerignore --exclude=docker --exclude=docker-compose*.yml \
-     --exclude=scripts/docker . /src/mukurtu
+COPY --exclude=Dockerfile --exclude=.dockerignore --exclude=docker --exclude=scripts/docker \
+     . /src/mukurtu
 
 WORKDIR /app
 

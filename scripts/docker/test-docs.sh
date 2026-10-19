@@ -54,7 +54,7 @@ fi
 # ending in _ is a prefix mentioned in a comment, not a variable.
 names() { grep -rhoE 'MUKURTU_[A-Z0-9_]*[A-Z0-9]\b' "$@" 2>/dev/null | sort -u; }
 code_names="$(names "$REPO_ROOT/Dockerfile" "$REPO_ROOT"/docker/*.sh "$REPO_ROOT"/docker/*.php \
-  "$REPO_ROOT"/docker/templates "$REPO_ROOT"/docker-compose*.yml "$REPO_ROOT/.github/workflows/docker-publish.yml")"
+  "$REPO_ROOT"/docker/templates "$REPO_ROOT"/examples/docker/*/docker-compose.yml "$REPO_ROOT"/examples/docker/*/.env.example "$REPO_ROOT"/examples/docker/*/generate-secrets.sh "$REPO_ROOT/.github/workflows/docker-publish.yml")"
 doc_names="$(names "$REFERENCE")"
 
 # Variables that exist only inside the image (template placeholders, pool tags):

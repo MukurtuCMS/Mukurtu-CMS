@@ -22,40 +22,46 @@ is built and why*, see [docker-build.md](docker-build.md).
 
 ## Quick start
 
-You need Docker with the Compose plugin, a host name for the site, and a
-reverse proxy that provides HTTPS (the container speaks plain HTTP on port
-8080).
+You need Docker with the Compose plugin. The ready-to-run examples are in
+[`examples/docker/`](../examples/docker): get them with
 
 ```
-mkdir mukurtu && cd mukurtu
-curl -O https://raw.githubusercontent.com/OWNER/Mukurtu-CMS/main/docker-compose.example.yml
-mv docker-compose.example.yml docker-compose.yml
+git clone --depth 1 --filter=blob:none --sparse https://github.com/OWNER/Mukurtu-CMS.git mukurtu-docker
+cd mukurtu-docker && git sparse-checkout set examples/docker
+```
 
-mkdir secrets
-openssl rand -base64 24 > secrets/db_password.txt
-openssl rand -base64 24 > secrets/db_root_password.txt
-openssl rand -base64 48 > secrets/hash_salt.txt
-printf '%s' 'choose-a-strong-admin-password' > secrets/admin_password.txt
-chmod 644 secrets/*.txt
+(or download the repository as a ZIP from GitHub). Replace `OWNER` with the GitHub account
+that publishes the image and the repository.
 
-cat > .env <<'ENV'
-MUKURTU_HOST=mukurtu.example.org
-MUKURTU_ADMIN_EMAIL=you@example.org
-MUKURTU_IMAGE=ghcr.io/OWNER/mukurtu:4.0.5
-ENV
+**Try it (two minutes).** The `minimal` example needs nothing prepared:
 
+```
+cd examples/docker/minimal
 docker compose up -d
 docker compose logs -f mukurtu
 ```
 
-Replace `OWNER` with the GitHub account that publishes the image. The first start
-installs Mukurtu into the empty database, which takes a few minutes; the log ends
-with `[mukurtu] starting`. Then browse to the site through your reverse proxy and
-sign in as `admin` with the password from `secrets/admin_password.txt`.
+The first start installs Mukurtu into the empty database, which takes a few minutes; the
+log ends with `[mukurtu] starting`. Then open `http://localhost:8080` and sign in as
+`admin` with the password `Mukurtu-Test-1`. Use that exact address: `http://127.0.0.1:8080`
+answers `400 Bad Request`, because the address is not in `MUKURTU_TRUSTED_HOSTS`. Its
+passwords are throwaway.
 
-To try it on your own machine without a proxy, use `MUKURTU_HOST=localhost` and open
-`http://localhost:8080`. Use that exact name: `http://127.0.0.1:8080` answers `400
-Bad Request`, because the address is not in `MUKURTU_TRUSTED_HOSTS`.
+**Run a site properly.** The `single-site` example keeps the passwords in secret files and
+hardens the container:
+
+```
+cd examples/docker/single-site
+./generate-secrets.sh        # creates .env and secrets/ with random passwords
+# edit .env: the image version, the host name, the admin email
+docker compose up -d
+```
+
+It prints the admin password. For a real site, put a reverse proxy that provides HTTPS in
+front of port 8080 and set `MUKURTU_HOST` to the site's domain; see [Behind a reverse
+proxy](#behind-a-reverse-proxy). To host several sites on one machine, use `multi-tenant`
+([Hosting many sites](#hosting-many-sites)). The three examples are described in
+[`examples/docker/README.md`](../examples/docker/README.md).
 
 ## Images and tags
 
@@ -252,14 +258,14 @@ These are read by the example Compose files, not by the container.
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `MUKURTU_IMAGE` | the `latest` tag of the published image | Which image to run. Pin a version. |
+| `MUKURTU_IMAGE` | none: required | Which image to run, in `single-site` and `multi-tenant` (set in `.env`). Pin an exact version. The `minimal` example names its image in the file. |
 | `MUKURTU_HOST` | | The site's host name, passed to `MUKURTU_TRUSTED_HOSTS`. |
 
-The hosting example (`docker-compose.multi-tenant.example.yml`) also reads `ACME_EMAIL`
+The `multi-tenant` example also reads `ACME_EMAIL`
 (the address Let's Encrypt can reach), `HTTP_PORT` and `HTTPS_PORT` (the host ports
-Caddy listens on; default 80 and 443), `DB_ROOT_PASSWORD`, and for each site
+Caddy listens on; the example's defaults are 8088 and 8443, use 80 and 443 in production), `DB_ROOT_PASSWORD`, and for each site
 `SITE_x_HOST`, `SITE_x_DB_PASSWORD`, `SITE_x_ADMIN_PASSWORD` and `SITE_x_ADMIN_EMAIL`.
-The file's header comment lists them.
+`multi-tenant/.env.example` lists them, and `generate-secrets.sh` fills in the passwords.
 
 ## Secrets
 
@@ -413,7 +419,7 @@ database, and volumes, behind one reverse proxy that routes by host name. (This 
 not Drupal's "multisite" feature, which this image does not use: here every site is a
 separate, standalone container.)
 
-[`docker-compose.multi-tenant.example.yml`](../docker-compose.multi-tenant.example.yml)
+[`examples/docker/multi-tenant`](../examples/docker/multi-tenant)
 shows two sites behind a **Caddy** proxy that routes each domain to its site and
 obtains and renews the HTTPS certificates. The sites publish no ports on the host;
 only Caddy listens on 80 and 443. Each site can be upgraded, restarted, and limited

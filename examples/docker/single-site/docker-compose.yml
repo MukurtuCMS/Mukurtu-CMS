@@ -1,16 +1,15 @@
-# Mukurtu CMS: one site, with its database.
+# Mukurtu CMS: one site, with its database. Production-shaped: passwords in secret files,
+# a read-only container, and memory limits.
 #
-#   1. Create the secret files (see "Secrets" below).
-#   2. Create a .env file next to this one:
-#        MUKURTU_HOST=mukurtu.example.org        # the name the site is served on
-#        MUKURTU_ADMIN_EMAIL=you@example.org
-#   3. docker compose up -d
+#   ./generate-secrets.sh      creates .env (from .env.example) and the secrets/ folder
+#   (edit .env: the image, the host name, the admin email)
+#   docker compose up -d
 #
 # The first start installs Mukurtu into the empty database; allow a few minutes.
-# To try it locally, set MUKURTU_HOST=localhost and open http://localhost:8080
-# (not 127.0.0.1: that name is not in MUKURTU_TRUSTED_HOSTS and answers 400).
-# Put a TLS-terminating reverse proxy in front of port 8080 (see
-# docker-compose.multi-tenant.example.yml for one that does it with Caddy).
+# To try it locally, keep MUKURTU_HOST=localhost and open http://localhost:8080 (not
+# 127.0.0.1: that name is not in MUKURTU_TRUSTED_HOSTS and answers 400).
+# For a real site, put a TLS-terminating reverse proxy in front of port 8080; see
+# ../multi-tenant for one that does it with Caddy.
 #
 # Every setting is documented in docs/docker.md.
 
@@ -49,10 +48,8 @@ services:
     networks: [backend]
 
   mukurtu:
-    # Replace OWNER with the GitHub account or organisation that publishes the
-    # image. Pin a version in production (for example :4.0.5) rather than using
-    # latest, and upgrade on purpose.
-    image: ${MUKURTU_IMAGE:-ghcr.io/OWNER/mukurtu:latest}
+    # Required, with no default: pin an exact version and upgrade on purpose.
+    image: ${MUKURTU_IMAGE:?set MUKURTU_IMAGE in .env}
     restart: unless-stopped
     depends_on:
       db:
@@ -97,14 +94,8 @@ services:
     networks: [backend]
 
 secrets:
-  # Create these before the first start, readable by uid 1000 (chmod 644, or
-  # chown 1000). Example:
-  #   mkdir secrets
-  #   openssl rand -base64 24 > secrets/db_password.txt
-  #   openssl rand -base64 24 > secrets/db_root_password.txt
-  #   openssl rand -base64 48 > secrets/hash_salt.txt
-  #   printf '%s' 'a-strong-password' > secrets/admin_password.txt
-  #   chmod 644 secrets/*.txt
+  # Created by ./generate-secrets.sh: random values, readable by the container's user
+  # (uid 1000), never overwritten, and kept out of git by .gitignore.
   db_password:
     file: ./secrets/db_password.txt
   db_root_password:
