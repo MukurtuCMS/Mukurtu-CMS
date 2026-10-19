@@ -23,8 +23,9 @@ To learn more about Mukurtu CMS and the larger Mukurtu community, visit [mukurtu
 A ready-to-run container image is published to the GitHub Container Registry when
 a release is published. It installs itself into an empty database on first start
 and is configured entirely through environment variables. See
-[docs/docker.md](docs/docker.md) to run it (including every setting, with
-Compose examples for one site or many), and [docs/docker-build.md](docs/docker-build.md)
+[docs/docker.md](docs/docker.md) to run it (including every setting) and
+[examples/docker](examples/docker) for ready-to-run Compose examples (try it in two
+minutes, one site, or several sites on one host), and [docs/docker-build.md](docs/docker-build.md)
 for how the image is built, hardened, and tested.
 
 ## Installing Mukurtu CMS with Composer
