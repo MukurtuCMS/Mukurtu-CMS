@@ -70,6 +70,12 @@ guard stage keeps validating it. The runtime-contents tests keep checking the to
   MUKURTU_SMTP_HOST is not set` (`docker/no-mail`) instead of busybox's
   `sendmail: can't connect to remote host (127.0.0.1)`.
 - The install log explains Drush's "DROP all tables" notice (the database is empty).
+- `docker-compose.multisite.example.yml` renamed to `docker-compose.multi-tenant.example.yml`
+  (it is not Drupal's multisite feature) and switched from Traefik to Caddy (no Docker
+  socket mount). It is now verified live by `test-compose.sh`: two sites install behind
+  Caddy, each answers on its own name, an unlisted name is refused, the database users
+  are isolated. Caddy cannot be `read_only` because Compose cannot place an inline
+  config in a read-only service.
 - New "Reading the start-up log" section in `docs/docker.md`.
 - **Not yet run:** the full install test (`test-entrypoint.sh`) with these changes. It
   needs port-free, ~10 minutes. Run the whole suite before pushing rc2.

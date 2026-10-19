@@ -337,8 +337,9 @@ routes by domain and terminates TLS.
 - Estimated cost (not measured): about 150–250 MB per warm idle tenant, plus
   roughly 60–120 MB per concurrent PHP request. Measure with `docker stats` once
   the image exists and replace these figures in the docs.
-- `docker-compose.multisite.example.yml` uses Traefik, per-service `mem_limit`,
-  and two tenants at different domains.
+- `docker-compose.multi-tenant.example.yml` uses a Caddy proxy (no Docker socket
+  needed), per-service `mem_limit`, and two tenants at different domains. (Renamed
+  from `multisite`, which is a different Drupal feature this image does not use.)
 
 ## Files to add
 
@@ -348,7 +349,7 @@ routes by domain and terminates TLS.
   template, entrypoint and helper scripts, healthcheck; the nginx template
   includes the Drupal rules above)
 - `docker-compose.example.yml` (one site plus MariaDB)
-- `docker-compose.multisite.example.yml`
+- `docker-compose.multi-tenant.example.yml`
 - `.github/workflows/docker-publish.yml`
 - `docs/docker-build.md`: how the image is built and why (inputs, source of the code, runtime, configuration, startup, security hardening, performance tuning, known hazards, publishing and supply chain, measured footprint). Written for people evaluating the image; grows with every implementation task
 - `docs/docker.md` (usage, the full variable reference above, tags, upgrade

@@ -543,14 +543,18 @@ remove. They are documented so operators can size and monitor for them.
 
 Two Compose files show how the image is meant to be run. Both are tested: the
 test suite checks that they are valid, that every Mukurtu service has the
-hardening below, and that the single-site file starts a working site.
+hardening below, that the single-site file starts a working site, and that the
+hosting file starts two sites behind Caddy, each answering only on its own name.
 
 **Single site** (`docker-compose.example.yml`): the image, MariaDB, two named
 volumes for files, and Docker secrets for every password.
 
-**Several sites on one host** (`docker-compose.multisite.example.yml`): one
-container per site, all from the same image, behind a Traefik reverse proxy that
-routes by host name and obtains TLS certificates. Each site has its own
+**Several sites on one host** (`docker-compose.multi-tenant.example.yml`): one
+container per site, all from the same image, behind a Caddy reverse proxy that
+routes by host name and obtains TLS certificates. The proxy is Caddy and not a
+label-driven proxy such as Traefik because Caddy reads a plain configuration file:
+Traefik discovers containers through the Docker socket, and a service with access to
+that socket controls the host. Adding a site costs three lines of Caddyfile instead. Each site has its own
 environment, database, user, and file volumes, so sites can be upgraded,
 restarted, and resource-limited independently, and a problem in one cannot
 reach another's data or files. This matters for Mukurtu in particular: sites
@@ -571,8 +575,10 @@ pool. It is not supported by this image.
 | `tmpfs: /tmp` with a `size` | Where uploads land first (`MUKURTU_FILE_TEMP_PATH`). A tmpfs is fast but counts against the container's memory; for large video uploads, mount a size-capped volume there instead. The size cap bounds the worst case. |
 | `tmpfs: /run` | Where the rendered configuration is written (`MUKURTU_RUN_DIR`), so nothing else in the container needs to be writable. |
 | `*_FILE` secrets | Passwords are mounted as files and read from there. They never appear in `docker inspect`. |
+| Hosting file: sites publish no port | Only Caddy is reachable from outside; each site speaks plain HTTP to it on an internal network. |
+| Hosting file: unlisted domains are not served | Caddy only obtains certificates for, and answers, the names in its Caddyfile. |
 | Published on `127.0.0.1` only | The reverse proxy connects to the site; the site is not reachable from outside the host except through the proxy. |
-| `MUKURTU_REVERSE_PROXY_ADDRESSES` | Only the proxy network may set `X-Forwarded-*` headers. The multi-site file gives the proxy network a fixed address range so this can be exact. |
+| `MUKURTU_REVERSE_PROXY_ADDRESSES` | Only the proxy network may set `X-Forwarded-*` headers. The hosting file gives the proxy network a fixed address range so this can be exact. |
 | Database on an `internal` network | The database is reachable from the sites and nothing else. |
 
 ### MariaDB settings

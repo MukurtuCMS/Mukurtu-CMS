@@ -257,6 +257,12 @@ These are read by the example Compose files, not by the container.
 | `MUKURTU_IMAGE` | the `latest` tag of the published image | Which image to run. Pin a version. |
 | `MUKURTU_HOST` | | The site's host name, passed to `MUKURTU_TRUSTED_HOSTS`. |
 
+The hosting example (`docker-compose.multi-tenant.example.yml`) also reads `ACME_EMAIL`
+(the address Let's Encrypt can reach), `HTTP_PORT` and `HTTPS_PORT` (the host ports
+Caddy listens on; default 80 and 443), `DB_ROOT_PASSWORD`, and for each site
+`SITE_x_HOST`, `SITE_x_DB_PASSWORD`, `SITE_x_ADMIN_PASSWORD` and `SITE_x_ADMIN_EMAIL`.
+The file's header comment lists them.
+
 ## Secrets
 
 Four settings can be given as a file instead of a value, by adding `_FILE` to the
@@ -414,13 +420,29 @@ docker compose run --rm mukurtu drush status
 ## Hosting many sites
 
 Run one container per site, from the same image, each with its own environment,
-database, and volumes, behind one reverse proxy that routes by host name.
-[`docker-compose.multisite.example.yml`](../docker-compose.multisite.example.yml)
-shows two sites with Traefik and automatic HTTPS certificates. Each site can be
-upgraded, restarted, and limited separately, and one site's failure cannot reach
-another's data. See [Sizing memory](#sizing-memory) for fitting more sites on a
-host, and [docker-build.md](docker-build.md#hosting-examples) for why the examples
-are laid out this way.
+database, and volumes, behind one reverse proxy that routes by host name. (This is
+not Drupal's "multisite" feature, which this image does not use: here every site is a
+separate, standalone container.)
+
+[`docker-compose.multi-tenant.example.yml`](../docker-compose.multi-tenant.example.yml)
+shows two sites behind a **Caddy** proxy that routes each domain to its site and
+obtains and renews the HTTPS certificates. The sites publish no ports on the host;
+only Caddy listens on 80 and 443. Each site can be upgraded, restarted, and limited
+separately, and one site's failure cannot reach another's data.
+
+Adding a site means copying a `site_*` block, adding its database to the `db_init`
+config, and adding its domain to the `caddyfile` config (three lines), then `docker
+compose up -d`. Caddy reads a plain configuration file and does not need access to
+the Docker socket, which is why the example uses it: a proxy that discovers
+containers by label (such as Traefik) must mount the socket, and anything with
+access to the socket controls the host.
+
+To try the hosting example on your own machine, use names under `.localhost`
+(`a.localhost`, `b.localhost`), `HTTP_PORT=8088`, and `HTTPS_PORT=8443`, and browse to
+`https://a.localhost:8443`; Caddy signs those names with its own certificate
+authority, so your browser will warn. See [Sizing memory](#sizing-memory) for fitting
+more sites on a host, and [docker-build.md](docker-build.md#hosting-examples) for why
+the examples are laid out this way.
 
 ## Reading the start-up log
 

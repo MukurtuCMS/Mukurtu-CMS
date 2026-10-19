@@ -1,20 +1,34 @@
 # Mukurtu CMS: several independent sites on one host, each at its own domain.
 #
-# Every site is its own container (same image, own configuration, own database,
-# own file volumes), so sites are upgraded, restarted, and limited separately. A
-# Traefik reverse proxy routes by host name and obtains TLS certificates.
+# This is NOT Drupal's "multisite" feature. Every site is its own container (same
+# image, own configuration, own database, own file volumes), so sites are upgraded,
+# restarted, and limited separately, and one site cannot reach another's data.
 #
-# To add a site: copy the site_b block and its two volumes, give it a new host
-# name, database name and credentials, and add the database in the db_init
-# config. Documentation: docs/docker.md ("Hosting many sites").
+# A Caddy proxy owns ports 80 and 443. It routes each domain to its site by the Host
+# header and obtains and renews the HTTPS certificates itself. The sites speak plain
+# HTTP on port 8080 inside the Docker network and publish nothing on the host.
+#
+# To add a site:
+#   1. Copy the site_b block and its two volumes; give it a new name and settings.
+#   2. Add its database and user in the db_init config below (that script only runs on
+#      the database's first start; for an existing database, create them by hand).
+#   3. Add two lines for its domain to the caddyfile config below.
+#   4. docker compose up -d
+# Documentation: docs/docker.md ("Hosting many sites").
 #
 # Create a .env file next to this one:
-#   ACME_EMAIL=ops@example.org
+#   ACME_EMAIL=ops@example.org           # where Let's Encrypt can reach you
 #   DB_ROOT_PASSWORD=...                 # long and random
 #   SITE_A_HOST=a.example.org            SITE_B_HOST=b.example.org
 #   SITE_A_DB_PASSWORD=...               SITE_B_DB_PASSWORD=...
 #   SITE_A_ADMIN_PASSWORD=...            SITE_B_ADMIN_PASSWORD=...
 #   SITE_A_ADMIN_EMAIL=a@example.org     SITE_B_ADMIN_EMAIL=b@example.org
+# The DNS names must point at this host, with ports 80 and 443 reachable from the
+# internet, for Let's Encrypt to issue certificates. To try it on your own machine,
+# use names under .localhost (a.localhost, b.localhost): Caddy then signs with its own
+# local certificate authority. Set HTTP_PORT=8088 and HTTPS_PORT=8443 to avoid
+# privileged ports, and browse to https://a.localhost:8443 (accept the certificate
+# warning).
 #
 # Plain environment variables are used here to keep the example short. For
 # production, prefer the *_FILE secret form shown in docker-compose.example.yml:
@@ -47,30 +61,28 @@ x-mukurtu-env: &mukurtu-env
   MUKURTU_FPM_MAX_CHILDREN: "3"
 
 services:
-  traefik:
-    image: traefik:v3.2
+  caddy:
+    image: caddy:2
     restart: unless-stopped
-    command:
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=mukurtu-hosting_proxy
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.le.acme.email=${ACME_EMAIL:?set ACME_EMAIL in .env}
-      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
-      - --certificatesresolvers.le.acme.tlschallenge=true
     ports:
-      - "80:80"
-      - "443:443"
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
     volumes:
-      # Traefik reads container labels through the Docker socket. Anything with
-      # access to the socket controls the host: consider a socket proxy.
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - letsencrypt:/letsencrypt
+      # Certificates and Caddy's account with Let's Encrypt. Keep this volume, or
+      # certificates are re-issued (and rate limits apply).
+      - caddy_data:/data
+      - caddy_config:/config
+    # Not read_only, unlike the Mukurtu sites: Compose cannot place an inline config
+    # (the Caddyfile below) in a read-only service. Caddy still has no extra
+    # capabilities, only the right to bind ports 80 and 443.
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
     security_opt:
       - no-new-privileges:true
+    mem_limit: 128m
     networks: [proxy]
 
   db:
@@ -116,12 +128,6 @@ services:
     tmpfs:
       - /tmp:size=256m,mode=1777
       - /run:size=16m,mode=1777
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.site_a.rule: Host(`${SITE_A_HOST}`)
-      traefik.http.routers.site_a.entrypoints: websecure
-      traefik.http.routers.site_a.tls.certresolver: le
-      traefik.http.services.site_a.loadbalancer.server.port: "8080"
 
   site_b:
     <<: *mukurtu
@@ -140,14 +146,25 @@ services:
     tmpfs:
       - /tmp:size=256m,mode=1777
       - /run:size=16m,mode=1777
-    labels:
-      traefik.enable: "true"
-      traefik.http.routers.site_b.rule: Host(`${SITE_B_HOST}`)
-      traefik.http.routers.site_b.entrypoints: websecure
-      traefik.http.routers.site_b.tls.certresolver: le
-      traefik.http.services.site_b.loadbalancer.server.port: "8080"
 
 configs:
+  # Which domain goes to which site. Caddy sets X-Forwarded-For, -Proto and -Host on
+  # the requests it passes on, which is what MUKURTU_REVERSE_PROXY relies on. Domains
+  # that are not listed here get no certificate and are not served.
+  caddyfile:
+    content: |
+      {
+        email ${ACME_EMAIL:?set ACME_EMAIL in .env}
+      }
+
+      ${SITE_A_HOST} {
+        reverse_proxy site_a:8080
+      }
+
+      ${SITE_B_HOST} {
+        reverse_proxy site_b:8080
+      }
+
   db_init:
     content: |
       CREATE DATABASE site_a CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -158,7 +175,8 @@ configs:
       GRANT ALL PRIVILEGES ON site_b.* TO 'site_b'@'%';
 
 volumes:
-  letsencrypt:
+  caddy_data:
+  caddy_config:
   db:
   site_a_public:
   site_a_private:

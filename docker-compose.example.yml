@@ -10,7 +10,7 @@
 # To try it locally, set MUKURTU_HOST=localhost and open http://localhost:8080
 # (not 127.0.0.1: that name is not in MUKURTU_TRUSTED_HOSTS and answers 400).
 # Put a TLS-terminating reverse proxy in front of port 8080 (see
-# docker-compose.multisite.example.yml for one that does it with Traefik).
+# docker-compose.multi-tenant.example.yml for one that does it with Caddy).
 #
 # Every setting is documented in docs/docker.md.
 
