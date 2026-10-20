@@ -223,4 +223,30 @@ class PageBackgroundTest extends KernelTestBase {
     $this->assertContains('url.path.is_front', $metadata->getCacheContexts());
   }
 
+  /**
+   * The tint is on unless it has been explicitly turned off.
+   *
+   * A missing key is a site that set its background before the setting
+   * existed, and it keeps the scrim it always had.
+   */
+  public function testTintIsOnUnlessTurnedOff(): void {
+    $this->setBackgroundImage();
+    $this->setHeaderImage();
+    $config = $this->config('mukurtu_design.settings');
+
+    $this->assertTrue($this->pageBackground()->resolve()['tint'], 'Shipped default.');
+    $this->assertTrue($this->pageBackground(FALSE)->resolveHeader()['tint'], 'Shipped header default.');
+
+    $config->clear('background.tint')->clear('header.tint')->save();
+    $this->assertTrue($this->pageBackground()->resolve()['tint'], 'Missing key.');
+    $this->assertTrue($this->pageBackground(FALSE)->resolveHeader()['tint'], 'Missing header key.');
+
+    $config->set('background.tint', FALSE)->save();
+    $this->assertFalse($this->pageBackground()->resolve()['tint'], 'Turned off.');
+    $this->assertTrue($this->pageBackground(FALSE)->resolveHeader()['tint'], 'The header setting is separate.');
+
+    $config->set('header.tint', FALSE)->save();
+    $this->assertFalse($this->pageBackground(FALSE)->resolveHeader()['tint'], 'Header turned off.');
+  }
+
 }

@@ -408,6 +408,33 @@
     }
   }
 
+  /* Plain over a page background image: "None" paints no ground, so the text
+   * sits on the page's scrim and takes the page's text treatment, whose
+   * pairing is already measured in _layout.scss (5.74:1 light, 7.37:1 dark).
+   * Without this the plain-page colours above win and render a brand heading
+   * and dark body copy on the darkened image. :where() keeps the specificity
+   * level with the rules above, so source order decides and the .contextual
+   * revert below still wins. */
+  :where(.page--has-background) &.hero-ground-none {
+    *,
+    h1,
+    h2 {
+      color: inherit;
+    }
+
+    a {
+      text-decoration-color: currentColor;
+    }
+
+    svg.ext {
+      fill: currentColor;
+
+      path {
+        stroke: currentColor;
+      }
+    }
+  }
+
   /* The presets' `* { color }` outrank the with-image hero's .contextual
    * revert, so Drupal's contextual links would take the preset colours.
    * Same revert, restated after the presets so it wins the tie. */

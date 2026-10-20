@@ -237,6 +237,13 @@
   color: var(--color-black);
 }
 
+/* An admin can turn the scrim off. The text keeps its treatment colour, but its
+ * contrast now depends on the photograph, which the settings form warns about.
+ * Two classes so it beats the treatment's own scrim at any source order. */
+.page--has-background.page--no-tint {
+  --mukurtu-page-scrim: transparent;
+}
+
 /* Let text take the treatment colour.
  *
  * Headings and body copy set their colour explicitly for a white ground, so
