@@ -9,3 +9,8 @@ services:
   mukurtu_design.palette_contrast_analyzer:
     class: Drupal\mukurtu_design\PaletteContrastAnalyzer
     arguments: ['@extension.list.theme']
+  mukurtu_design.design_settings_config_subscriber:
+    class: Drupal\mukurtu_design\EventSubscriber\DesignSettingsConfigSubscriber
+    arguments: ['@class_resolver']
+    tags:
+      - { name: event_subscriber }
