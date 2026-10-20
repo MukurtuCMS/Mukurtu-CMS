@@ -149,3 +149,12 @@ entity_reference_role_tagify:
     - core/drupal.autocomplete
     - core/once
     - core/sortable
+
+visitors-country-map:
+  version: 1.x
+  js:
+    js/visitors-country-map.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - leaflet/leaflet-drupal

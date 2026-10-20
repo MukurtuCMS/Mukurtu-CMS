@@ -32,6 +32,8 @@ class VisitorsLocationRouteAlterTest extends UnitTestCase {
       'visitors.location' => '/visitors/location',
       'visitors.software' => '/visitors/software',
       'visitors.location.continent' => '/visitors/location/continent/{continent}',
+      'visitors.location.country' => '/visitors/location/country/{country}',
+      'visitors.location.region' => '/visitors/location/region/{country}/{region}',
     ] as $name => $path) {
       $route = new Route($path);
       $route->setDefault('_controller', self::CONTRIB . '::location');
@@ -59,6 +61,23 @@ class VisitorsLocationRouteAlterTest extends UnitTestCase {
     $this->assertSame(
       VisitorsLocationReportController::class . '::location',
       $collection->get('visitors.location')->getDefault('_controller'),
+    );
+  }
+
+  /**
+   * The country and region drill-downs get the scoped map too.
+   */
+  public function testDrillDownRoutesUseTheMukurtuController(): void {
+    $collection = $this->visitorsRouteCollection();
+    $this->alter($collection);
+
+    $this->assertSame(
+      VisitorsLocationReportController::class . '::country',
+      $collection->get('visitors.location.country')->getDefault('_controller'),
+    );
+    $this->assertSame(
+      VisitorsLocationReportController::class . '::region',
+      $collection->get('visitors.location.region')->getDefault('_controller'),
     );
   }
 

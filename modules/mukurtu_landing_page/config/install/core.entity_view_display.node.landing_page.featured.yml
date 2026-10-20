@@ -47,7 +47,7 @@ third_party_settings:
         - 'Chaos Tools'
         - 'Config Pages'
         - 'Content fields'
-        - Custom
+        - 'Custom blocks'
         - Devel
         - Facets
         - Forms

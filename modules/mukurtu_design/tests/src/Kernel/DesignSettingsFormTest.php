@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_design\Kernel;
 
+use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_design\Form\MukurtuDesignSettingsForm;
 use PHPUnit\Framework\Attributes\Group;
@@ -95,6 +96,61 @@ class DesignSettingsFormTest extends KernelTestBase {
     $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
 
     $this->assertSame('dark', $build['background']['text_treatment']['#default_value']);
+  }
+
+  /**
+   * Both tint checkboxes are on for a fresh install.
+   */
+  public function testTintDefaultsToOn(): void {
+    $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
+
+    $this->assertSame('checkbox', $build['background']['tint']['#type']);
+    $this->assertTrue($build['background']['tint']['#default_value']);
+    $this->assertSame('checkbox', $build['header']['tint']['#type']);
+    $this->assertTrue($build['header']['tint']['#default_value']);
+  }
+
+  /**
+   * A site upgraded from before the setting existed shows the tint as on.
+   *
+   * There is no update hook for the key, so a missing value has to read as the
+   * scrim the site already had.
+   */
+  public function testMissingTintReadsAsOn(): void {
+    $config = $this->config('mukurtu_design.settings');
+    $config->set('background', ['image' => NULL, 'text_treatment' => 'light'])
+      ->set('header', ['image' => NULL, 'text_treatment' => 'light'])
+      ->save();
+
+    $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
+
+    $this->assertTrue($build['background']['tint']['#default_value']);
+    $this->assertTrue($build['header']['tint']['#default_value']);
+  }
+
+  /**
+   * Saving the form stores each tint setting on its own.
+   *
+   * An unchecked box is NULL input. A checkbox reads any other submitted value,
+   * 0 included, as checked.
+   */
+  public function testSubmitStoresTint(): void {
+    $form_state = (new FormState())->setValues([
+      'palette' => 'red-bone',
+      'background' => ['text_treatment' => 'light', 'tint' => NULL],
+      'header' => ['text_treatment' => 'dark', 'tint' => 1],
+      'op' => 'Save configuration',
+    ]);
+
+    \Drupal::formBuilder()->submitForm(MukurtuDesignSettingsForm::class, $form_state);
+
+    $this->assertSame([], $form_state->getErrors());
+    $config = $this->config('mukurtu_design.settings');
+    $this->assertFalse($config->get('background.tint'));
+    $this->assertTrue($config->get('header.tint'));
+
+    $build = \Drupal::formBuilder()->getForm(MukurtuDesignSettingsForm::class);
+    $this->assertFalse($build['background']['tint']['#default_value']);
   }
 
 }
