@@ -211,6 +211,7 @@ assert_contains "$(docker exec "$SITE" sh -c 'ps -o pid,args | sed -n 2p')" "tin
 echo "entrypoint: restart-idempotent"
 salt_before="$(docker exec "$SITE" cat /var/www/files/private/.hash_salt 2>/dev/null || echo none)"
 users_before="$(sql 'select count(*) from users_field_data')"
+restart_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 docker restart "$SITE" >/dev/null
 for _ in $(seq 1 120); do
   docker exec "$SITE" curl -sf -H 'Host: test.example.org' -o /dev/null http://127.0.0.1:8080/user/login 2>/dev/null && break
@@ -219,7 +220,7 @@ done
 assert_eq "200" "$(code /user/login)" "site is back after a restart"
 assert_eq "$users_before" "$(sql 'select count(*) from users_field_data')" "restart did not reinstall (user count unchanged)"
 assert_eq "$salt_before" "$(docker exec "$SITE" cat /var/www/files/private/.hash_salt 2>/dev/null || echo none)" "restart did not change the salt file"
-restart_log="$(docker logs --since 60s "$SITE" 2>&1)"
+restart_log="$(docker logs --since "$restart_at" "$SITE" 2>&1)"
 assert_not_contains "$restart_log" "Installing Mukurtu" "restart log shows no installation"
 assert_contains "$restart_log" "existing installation" "restart log says an installation exists"
 assert_contains "$restart_log" "pending database updates:" "restart log lists the pending updates before they run"

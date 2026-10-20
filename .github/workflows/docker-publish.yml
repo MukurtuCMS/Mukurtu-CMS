@@ -107,7 +107,7 @@ jobs:
       id-token: write
       attestations: write
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - arch: amd64
