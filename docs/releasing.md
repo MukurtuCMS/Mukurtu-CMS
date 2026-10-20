@@ -90,6 +90,34 @@ image revision](#releasing-an-image-revision). To try the image before a release
 (from `main` or a pull request's branch), run the workflow by hand with `dev` ticked;
 see [Development images](docker-build.md#development-images).
 
+## Before a release: the manual checks for the container image
+
+The automated tests (`scripts/docker/test-*.sh`) run in the pipeline for every image.
+These checks need a real host or a human, so they are done by hand before a release
+that changes the image, and before the first release of a new line.
+
+1. **Upgrade drill.** Installs a site with the previous release's code, then starts the
+   current image on the same data:
+   `scripts/docker/drill-upgrade.sh 4.0.5` (the previous release tag; fetch the tags
+   first). It takes about ten minutes and checks that the site still serves pages, that
+   users and files survive, and that no update is left pending and the Status report
+   has no errors. It is not in the default suite because it builds a second image.
+2. **A real domain with HTTPS.** Run the `multi-tenant` example on a host with a real
+   domain, using Let's Encrypt's *staging* environment first (add
+   `acme_ca https://acme-staging-v02.api.letsencrypt.org/directory` next to `email`
+   in the Caddyfile's global options, so a mistake does not use up the rate limit). Check that the certificate is issued, that `http://` redirects to
+   `https://`, that the login link emailed to a user opens on `https://`, and that
+   `docker compose logs caddy` shows no errors.
+3. **Uploads and media, by hand.** On the running example, as an administrator: upload
+   a 100 MB video and see that its thumbnail appears; upload a PDF and see its
+   thumbnail and that its text is searchable; download a file from the private
+   file system as a user who may, and see it refused for one who may not.
+   (The Playwright suite in `tests/playwright` covers pages and accessibility, not
+   uploads, and it needs seeded content, so it is not part of the image tests.)
+4. **Read the log.** `docker compose logs mukurtu` from a fresh start through a
+   restart: no PHP warnings, no `pending database updates` that the release notes did
+   not mention.
+
 ## Releasing an image revision
 
 The image has dependencies Mukurtu does not: the Alpine, PHP and nginx packages,

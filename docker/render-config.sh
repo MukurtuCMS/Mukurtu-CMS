@@ -135,11 +135,15 @@ auth on
 user $MUKURTU_SMTP_USER
 passwordeval cat $MUKURTU_RUN_DIR/smtp-password"
   fi
+  # msmtp takes the sender either from the message (--read-envelope-from) or from
+  # the config (`from`), and refuses both together.
+  _envelope=--read-envelope-from
   if [ -n "$MUKURTU_SMTP_FROM" ]; then
     MUKURTU_MSMTP_SETTINGS="$MUKURTU_MSMTP_SETTINGS
 from $MUKURTU_SMTP_FROM"
+    _envelope=
   fi
-  MUKURTU_PHP_MAIL_SETTINGS="sendmail_path = /usr/bin/msmtp --read-envelope-from -t -C $MUKURTU_RUN_DIR/msmtprc"
+  MUKURTU_PHP_MAIL_SETTINGS="sendmail_path = /usr/bin/msmtp ${_envelope:+$_envelope }-t -C $MUKURTU_RUN_DIR/msmtprc"
 fi
 
 export MUKURTU_RUN_DIR MUKURTU_PHP_MEMORY_LIMIT MUKURTU_PHP_MAX_EXECUTION_TIME \

@@ -91,7 +91,12 @@ to on purpose. `4.0` follows new patch releases and revisions, `4` also follows
 new minor releases, and `latest` follows everything newer; each moves only forward,
 so a backport never moves it back. Pre-releases (such as `4.0.0-rc`) have only
 their exact tag and never become any of those. **Pin an exact tag in production**
-and upgrade on purpose. The full tagging and publishing rules are in
+and upgrade on purpose.
+
+**Development images.** A maintainer can publish an image of any commit by hand
+(`4.x-dev-<commit>`, never rebuilt, and `edge`, which moves to the newest). They are
+for trying unreleased code, are not releases, and never become `latest`; do not run
+them in production. The full tagging and publishing rules are in
 [docker-build.md](docker-build.md#publishing-and-supply-chain).
 
 ## What the container does

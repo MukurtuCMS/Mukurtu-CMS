@@ -36,7 +36,7 @@ docker network create "$NET" >/dev/null
 db_up() { # db_up <container> : start MariaDB on the test network, wait until it answers
   docker run -d --name "$1" --network "$NET" --network-alias "$1" \
     -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=mukurtu -e MARIADB_USER=mukurtu -e MARIADB_PASSWORD=mukurtu \
-    mariadb:11 --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci \
+    mariadb:11.8 --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci \
     --transaction-isolation=READ-COMMITTED --binlog-format=ROW >/dev/null
   CLEANUP_CONTAINERS+=("$1")
   for _ in $(seq 1 60); do
@@ -251,6 +251,9 @@ NEW_SITE="mukurtu-test-newsite-$RUN_ID"
 CLEANUP_VOLUMES+=("$NEW_PRIV" "$NEW_PUB")
 CLEANUP_CONTAINERS+=("$NEW_SITE")
 db_up "$DB2" || fail "the new database starts"
+MAIL="mukurtu-test-mailpit-$RUN_ID"
+CLEANUP_CONTAINERS+=("$MAIL")
+docker run -d --name "$MAIL" --network "$NET" --network-alias "$MAIL" axllent/mailpit:v1.31.6 >/dev/null
 docker exec -i "$DB2" mariadb -uroot -proot mukurtu < "$BK/mukurtu.sql"
 docker run --rm -v "$NEW_PUB:/data" -v "$BK:/backup:ro" alpine sh -c 'tar xzf /backup/public.tgz -C /data && chown -R 1000:1000 /data'
 docker run --rm -v "$NEW_PRIV:/data" -v "$BK:/backup:ro" alpine sh -c 'tar xzf /backup/private.tgz -C /data && chown -R 1000:1000 /data'
@@ -258,6 +261,7 @@ docker run -d --name "$NEW_SITE" --network "$NET" \
   -e MUKURTU_DB_HOST="$DB2" -e MUKURTU_DB_NAME=mukurtu -e MUKURTU_DB_USER=mukurtu -e MUKURTU_DB_PASSWORD=mukurtu \
   -e MUKURTU_TRUSTED_HOSTS=test.example.org -e MUKURTU_HASH_SALT=test-salt \
   -e MUKURTU_ADMIN_PASSWORD='Adm1n-p@ss!' -e MUKURTU_ADMIN_EMAIL=admin@example.org \
+  -e MUKURTU_SMTP_HOST="$MAIL" -e MUKURTU_SMTP_PORT=1025 -e MUKURTU_SMTP_TLS=off -e MUKURTU_SMTP_FROM=sender@example.org \
   -v "$NEW_PRIV:/var/www/files/private" -v "$NEW_PUB:/var/www/files/public" "$FULL" >/dev/null
 ready=false
 for _ in $(seq 1 120); do
@@ -273,6 +277,46 @@ assert_eq "$users_before" "$(docker exec "$DB2" mariadb -uroot -proot -N -B muku
 assert_eq "public-probe" "$(docker exec "$NEW_SITE" curl -s -H 'Host: test.example.org' http://127.0.0.1:8080/sites/default/files/restore-probe.txt)" "a restored public file is served"
 assert_eq "private-probe" "$(docker exec "$NEW_SITE" cat /var/www/files/private/restore-probe.txt)" "a restored private file is in place"
 assert_contains "$(docker exec "$NEW_SITE" drush user:login 2>/dev/null)" "/user/reset" "the restored site can issue a login link (the salt works)"
-docker rm -f "$NEW_SITE" "$DB2" >/dev/null 2>&1
+
+echo "entrypoint: mail leaves through the configured SMTP server"
+# Drupal's password-reset mail to the administrator, captured by Mailpit.
+mail_send="$(docker exec "$NEW_SITE" drush php:eval '$u = \Drupal\user\Entity\User::load(1); var_dump(_user_mail_notify("password_reset", $u));' 2>&1)"
+mail_json=""
+for _ in $(seq 1 20); do
+  mail_json="$(docker exec "$NEW_SITE" curl -s "http://$MAIL:8025/api/v1/messages" 2>/dev/null)"
+  [[ "$mail_json" == *'"messages_count":0'* || -z "$mail_json" ]] || break
+  sleep 1
+done
+assert_contains "$mail_json" "admin@example.org" "the password-reset mail reached the SMTP server, addressed to the administrator"
+# Mailpit records the envelope sender (MAIL FROM) as a Return-Path header on the raw
+# message, unless the message already has one (Drupal adds its own). So the sender is
+# checked with a plain probe message through PHP's mail(), which uses the same sendmail_path.
+docker exec "$NEW_SITE" php -r 'mail("b@example.org", "sender probe", "body", "From: a@example.org");' >/dev/null 2>&1
+sleep 2
+mail_latest="$(docker exec "$NEW_SITE" curl -s "http://$MAIL:8025/api/v1/message/latest/raw" 2>/dev/null)"
+assert_contains "$mail_latest" "Return-Path: <sender@example.org>" "MUKURTU_SMTP_FROM sets the envelope sender"
+if [[ "$mail_json" != *"admin@example.org"* || "$mail_latest" != *"Return-Path: <sender@example.org>"* ]]; then
+  echo "--- drush: $mail_send"; echo "--- mailpit: $mail_latest"; docker logs "$NEW_SITE" 2>&1 | tail -15
+fi
+docker rm -f "$NEW_SITE" "$DB2" "$MAIL" >/dev/null 2>&1
+
+echo "entrypoint: install in another language"
+LOCALE_DB="mukurtu-test-localedb-$RUN_ID"
+LOCALE_SITE="mukurtu-test-localesite-$RUN_ID"
+CLEANUP_CONTAINERS+=("$LOCALE_SITE")
+db_up "$LOCALE_DB" || fail "the locale database starts"
+docker run -d --name "$LOCALE_SITE" --network "$NET" \
+  -e MUKURTU_DB_HOST="$LOCALE_DB" -e MUKURTU_DB_NAME=mukurtu -e MUKURTU_DB_USER=mukurtu -e MUKURTU_DB_PASSWORD=mukurtu \
+  -e MUKURTU_TRUSTED_HOSTS=test.example.org -e MUKURTU_HASH_SALT=test-salt \
+  -e MUKURTU_ADMIN_PASSWORD='Adm1n-p@ss!' -e MUKURTU_ADMIN_EMAIL=admin@example.org -e MUKURTU_LOCALE=es "$FULL" >/dev/null
+ready=false
+for _ in $(seq 1 300); do
+  [[ "$(docker inspect -f '{{.State.Running}}' "$LOCALE_SITE")" == true ]] || break
+  docker exec "$LOCALE_SITE" curl -sf -H 'Host: test.example.org' -o /dev/null http://127.0.0.1:8080/user/login 2>/dev/null && { ready=true; break; }
+  sleep 2
+done
+$ready && pass "a site installs with MUKURTU_LOCALE=es" || { fail "a site installs with MUKURTU_LOCALE=es"; docker logs "$LOCALE_SITE" 2>&1 | tail -20; }
+assert_contains "$(docker exec "$LOCALE_SITE" curl -s -H 'Host: test.example.org' http://127.0.0.1:8080/user/login)" 'lang="es"' "the installed site's language is Spanish"
+docker rm -f "$LOCALE_SITE" "$LOCALE_DB" >/dev/null 2>&1
 
 finish
