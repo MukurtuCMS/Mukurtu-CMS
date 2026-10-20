@@ -1028,6 +1028,34 @@ short fields themselves. Shrink it in these dialogs specifically. */
   --gin-bg-header: #273c3d !important;
 }
 
+/* Fix #1826: give checked toggle switches their color back in Gin's dark
+   mode. Not a WCAG failure on its own (the knob's position still shows the
+   state, at 3.49:1 against the gray track), but the color is the cue most
+   people read first, and light mode has it.
+
+   Gin's dark mode declares --gin-switch: var(--gin-color-primary) on
+   .gin--dark-mode, a class init.js puts on <html>. But --gin-color-primary
+   is only defined under [data-gin-accent] (accent.css), and that attribute
+   is printed on <body>, not <html> (html.html.twig's `attributes`, in both
+   Gin and mukurtu_v4). A var() is resolved on the element that declares the
+   property, so on <html> it is invalid, --gin-switch computes to nothing,
+   and every descendant inherits the empty value. gin_lb's checked toggle
+   fill (.glb-checkbox-toggle__inner, used in Layout Builder's off-canvas
+   forms such as "Display title") is then transparent, so on and off look
+   the same gray. Gin's own admin toggles are not affected: in dark mode
+   they use --gin-color-primary-light-active instead. Light mode is
+   unaffected too: there --gin-switch is a literal #26a769.
+
+   Redeclaring it on the element that carries the attribute resolves it
+   against the real accent color. Any accent preset, not only "custom", so
+   no attribute value. No other dark-mode token in Gin 5.0.16 depends on an
+   accent-only variable this way (checked by computed value on <html> and
+   <body>). */
+.gin--dark-mode[data-gin-accent],
+.gin--dark-mode [data-gin-accent] {
+  --gin-switch: var(--gin-color-primary);
+}
+
 /* Fix #2003 (WCAG 4.1.2 Name, Role, Value / 2.4.4 Link Purpose): give the
    collapsed admin toolbar's links and buttons back their accessible names.
 
