@@ -44,6 +44,8 @@ composer create-project mukurtu/mukurtu-template:^4.0 .
 * Set your web server to serve the "web" folder (e.g. `mukurtu4/web`)
 * Install Drupal as normal by opening the site in your web browser, the Mukurtu profile distribution will automatically be used.
 
+**Expected warning during install:** When you install with Drush, the output shows `The "block_content:00000000-0000-0000-0000-000000000000" block plugin was not found` up to four times. This is expected and you can ignore it. The landing page's welcome block is created at the end of the install, and the warning stops once it exists.
+
 ## Post-installation Steps
 
 ### Set up private files

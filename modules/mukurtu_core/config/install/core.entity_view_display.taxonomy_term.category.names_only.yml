@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.taxonomy_term.names_only
+    - field.field.taxonomy_term.category.field_thumbnail_image
+    - taxonomy.vocabulary.category
+id: taxonomy_term.category.names_only
+targetEntityType: taxonomy_term
+bundle: category
+mode: names_only
+content: {  }
+hidden:
+  description: true
+  field_thumbnail_image: true
+  flag_email_term: true
+  flag_mukurtu_email_term: true
+  flag_subscribe_term: true
+  langcode: true
+  search_api_excerpt: true

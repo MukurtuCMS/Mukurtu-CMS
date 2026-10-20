@@ -168,6 +168,33 @@ class VisitorsLocationReportControllerTest extends UnitTestCase {
   }
 
   /**
+   * On a drill-down report the map goes above the single table.
+   */
+  public function testMapRowCanGoFirst(): void {
+    $build = $this->contribBuild();
+    unset($build['main']['2'], $build['main']['3']);
+
+    $build = VisitorsLocationReportController::addMapRow($build, self::MAP, 0);
+
+    $this->assertSame(
+      ['country_map', '1'],
+      array_map('strval', Element::children($build['main'], TRUE)),
+    );
+  }
+
+  /**
+   * A position past the last row puts the map at the end, not nowhere.
+   */
+  public function testMapRowPositionPastTheEndAppends(): void {
+    $build = VisitorsLocationReportController::addMapRow($this->contribBuild(), self::MAP, 10);
+
+    $this->assertSame(
+      ['1', '2', '3', 'country_map'],
+      array_map('strval', Element::children($build['main'], TRUE)),
+    );
+  }
+
+  /**
    * Contrib's own rows are untouched apart from the added weight.
    */
   public function testContribRowsAreOtherwiseUnchanged(): void {

@@ -57,7 +57,7 @@ process:
   language: language
 destination:
   plugin: 'entity:og_membership'
-  default_bundle: protocol
+  default_bundle: default
 migration_dependencies:
   required:
     - mukurtu_cms_v3_communities

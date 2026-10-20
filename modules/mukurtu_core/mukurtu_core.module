@@ -990,6 +990,8 @@ function mukurtu_core_preprocess_leaflet_map(array &$variables) {
     $variables['attributes'] = [];
   }
   $variables['attributes']['aria-label'] = t('Visitor locations');
+  // aria-label is not allowed on an element with no role.
+  $variables['attributes']['role'] = 'group';
 }
 
 /**
@@ -1226,7 +1228,7 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
     'url' => 'internal:' . $homepagePath . '/layout',
     'menu_name' => 'dashboard-look-feel',
     'parent' => 'mukurtu_dashboard',
-    'weight' => 5,
+    'weight' => 7,
   ];
 
   // Add the Mukurtu Version link in the dashboard. Cannot be defined in a
