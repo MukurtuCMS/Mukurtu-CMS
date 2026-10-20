@@ -1,7 +1,7 @@
 title: Mukurtu CMS Accessibility Conformance Report
 product:
   name: Mukurtu CMS
-  version: "4"
+  version: "4.0.6"
   description: >-
     Mukurtu CMS is a free, mobile, and open source platform built with
     Indigenous communities to manage and share digital cultural heritage.
@@ -13,9 +13,9 @@ author:
   email: "support@mukurtu.org"
   phone: ""
   website: "https://mukurtu.org"
-report_date: "2026-07-10"
-last_modified_date: "2026-10-09"
-version: 3
+report_date: "2026-10-20"
+last_modified_date: "2026-10-20"
+version: 4
 notes: >-
   This is a living document maintained as part of the Mukurtu CMS
   accessibility program (see docs/accessibility/README.md in the Mukurtu CMS
@@ -38,10 +38,17 @@ evaluation_methods_used: >-
   Manual keyboard-only testing and screen reader testing (NVDA, VoiceOver or
   Orca) following the program's manual testing checklist are planned but have
   not yet been carried out. Criteria that depend on them remain
-  not-evaluated. Where an evaluated criterion still has manual
-  verification outstanding, its own note says so: 4.1.2 is the one such
-  case, where keyboard and screen reader verification of the custom
-  widgets is still to come.
+  not-evaluated, and each of those rows says what is untested, why an
+  automated check cannot settle it, and where the work is tracked. The
+  Authoring Tool component was evaluated by desk review against the shipped
+  product rather than by scanning, because it asks what the tool does for an
+  author rather than how a page renders. Each criterion was considered for
+  whether an author has any means to affect the outcome. Most do not,
+  because the theme and the code decide it whatever is entered, and those
+  rows are marked not applicable with the reason given. Where an author does
+  have a part, the assessment rests on the fields, widgets and editor
+  configuration the tool actually ships, and each supporting row states what
+  the tool does not verify.
 legal_disclaimer: >-
   The information herein is provided in good faith based on the analysis of
   the product at the time of the review and does not represent a
