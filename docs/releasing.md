@@ -8,7 +8,7 @@ From the repository root:
 scripts/set-version.sh 4.0.1
 ```
 
-That is the whole version bump. It writes **30 files**:
+That is the whole version bump. It writes **31 files**:
 
 | File(s) | Where the value shows up |
 | --- | --- |
@@ -17,11 +17,15 @@ That is the whole version bump. It writes **30 files**:
 | 26 module `.info.yml` files | Per-module version at `/admin/modules` |
 | `themes/mukurtu_v4/mukurtu_v4.info.yml` | `/admin/appearance` |
 | `package.json`, `themes/mukurtu_v4/package.json` | Build tooling, kept in step |
+| `themes/mukurtu_v4/package-lock.json` | The root package's version, which npm copies in |
+
+`tests/src/Unit/VersionConsistencyTest.php` fails if any of these disagree with
+`VERSION.md`, so a hand edit to one of them is caught in CI.
 
 Then review and commit:
 
 ```bash
-git diff --stat          # sanity check: 30 files
+git diff --stat          # sanity check: 31 files
 git commit -am "Update version from 4.0.0 to 4.0.1"
 ```
 
@@ -29,7 +33,17 @@ git commit -am "Update version from 4.0.0 to 4.0.1"
 
 `4.0.1`, `4.0.1-beta1`, `4.x-dev`. Anything else is refused, nothing is written,
 and the script exits `1` — so `4.0.1beta` fails loudly instead of writing a
-malformed version into 30 files. Safe to call from another script.
+malformed version into 31 files. Safe to call from another script.
+
+### Between releases, `main` reads `4.x-dev`
+
+Only a tagged commit carries a release number. Everything after it on `main` is
+unreleased code, often with new update hooks, so it must not call itself the
+release it came after. Otherwise every Tugboat preview, test image and dev site
+built from `main` shows the last release on the Dashboard while running code
+that release does not contain, and a bug report quoting that version points at
+the wrong code. Step 9 of the checklist below sets `main` back to `4.x-dev` as
+soon as the tag exists.
 
 ### What it deliberately skips
 
@@ -64,6 +78,10 @@ them from drifting apart again.
 8. **Check whether `mukurtu-template` needs a release.** See [Releasing
    alongside mukurtu-template](#releasing-alongside-mukurtu-template). If it
    does, release it *after* this tag is published, never before.
+9. **Set `main` back to `4.x-dev`.** Once the tag is pushed, run
+   `scripts/set-version.sh 4.x-dev` on a branch from `main`, and merge it as
+   the first change after the release. See [Between releases, `main` reads
+   `4.x-dev`](#between-releases-main-reads-4x-dev).
 
 ## Releasing alongside mukurtu-template
 
