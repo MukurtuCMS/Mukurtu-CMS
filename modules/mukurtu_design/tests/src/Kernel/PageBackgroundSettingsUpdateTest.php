@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_design\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\mukurtu_design\PageBackground;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -106,14 +107,22 @@ class PageBackgroundSettingsUpdateTest extends KernelTestBase {
 
   /**
    * A fresh install must match what the update hook produces.
+   *
+   * The one exception is tint, added later with no update hook of its own. A
+   * fresh install stores it as on, and an upgraded site has no value, which
+   * PageBackground::tintEnabled() also reads as on.
    */
   public function testFreshInstallMatchesTheHook(): void {
     $fresh = $this->background();
+    $this->assertTrue($fresh['tint']);
+    unset($fresh['tint']);
 
     $this->writePreUpdateState();
     mukurtu_design_update_40005();
 
-    $this->assertSame($fresh, $this->background());
+    $upgraded = $this->background();
+    $this->assertSame($fresh, $upgraded);
+    $this->assertTrue(PageBackground::tintEnabled($upgraded['tint'] ?? NULL));
   }
 
 }

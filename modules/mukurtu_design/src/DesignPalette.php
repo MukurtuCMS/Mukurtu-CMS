@@ -43,6 +43,19 @@ final class DesignPalette implements ContainerInjectionInterface {
   ];
 
   /**
+   * Theme properties the custom palette sets without a colour picker.
+   *
+   * The shipped palettes define these too. Without them a custom palette
+   * falls back to the values of whichever palette style.css compiles in.
+   */
+  const CUSTOM_DERIVED_VARS = [
+    '--mukurtu-breadcrumb-gradient-color' => 'var(--brand-secondary-dark)',
+    // Neutral rather than brand-tinted, so the fixed text colour on the facet
+    // panels keeps its contrast whatever brand colours are chosen.
+    '--mukurtu-panel-pane-content-background-color' => '#eeecec',
+  ];
+
+  /**
    * The config factory service.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
@@ -187,13 +200,11 @@ final class DesignPalette implements ContainerInjectionInterface {
     }
 
     $css_content = ":root {\n";
-    if (!empty($css_vars)) {
-      foreach ($css_vars as $var_name => $color) {
-        $css_content .= "  $var_name: $color;\n";
-      }
-    }
-    else {
+    if (empty($css_vars)) {
       $css_content .= "  /* No custom colors defined */\n";
+    }
+    foreach ($css_vars + self::CUSTOM_DERIVED_VARS as $var_name => $value) {
+      $css_content .= "  $var_name: $value;\n";
     }
     $css_content .= "}\n";
 

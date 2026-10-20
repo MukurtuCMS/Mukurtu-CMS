@@ -38,6 +38,9 @@ mukurtu_design.settings:
         text_treatment:
           type: string
           label: 'Page text treatment'
+        tint:
+          type: boolean
+          label: 'Tint the background image'
     header:
       type: mapping
       label: 'Header background'
@@ -49,3 +52,6 @@ mukurtu_design.settings:
         text_treatment:
           type: string
           label: 'Header text treatment'
+        tint:
+          type: boolean
+          label: 'Tint the header image'

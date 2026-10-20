@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for the Mukurtu Design module.
  */
 
+use Drupal\mukurtu_design\DesignPalette;
+
 /**
  * Implements hook_update_last_removed().
  *
@@ -26,7 +28,7 @@ function mukurtu_design_update_last_removed(): int {
  */
 function mukurtu_design_update_40005(): string {
   $config = \Drupal::configFactory()
-    ->getEditable(\Drupal\mukurtu_design\DesignPalette::SETTINGS);
+    ->getEditable(DesignPalette::SETTINGS);
 
   $background = (array) $config->get('background');
   $header = (array) $config->get('header');
@@ -60,4 +62,21 @@ function mukurtu_design_update_40005(): string {
   $config->set('background', $background)->set('header', $header)->save();
 
   return (string) t('Added the page and header background settings. No images are set, so the site is unchanged until one is uploaded.');
+}
+
+/**
+ * Regenerate the custom palette stylesheet with the breadcrumb and panel colours.
+ */
+function mukurtu_design_update_40006(): string {
+  // The stylesheet is only written when the form is saved or the file is
+  // missing, so an existing one never picks up CUSTOM_DERIVED_VARS on its own.
+  $config = \Drupal::config(DesignPalette::SETTINGS);
+  if ($config->get('palette') !== 'custom') {
+    return (string) t('This site does not use the custom palette, so there was nothing to regenerate.');
+  }
+
+  \Drupal::classResolver(DesignPalette::class)
+    ->generateCustomCss($config->get('colors') ?? []);
+
+  return (string) t('Regenerated the custom palette stylesheet.');
 }

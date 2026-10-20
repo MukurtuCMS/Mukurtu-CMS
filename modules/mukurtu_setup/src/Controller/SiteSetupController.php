@@ -58,14 +58,7 @@ class SiteSetupController extends ControllerBase {
       '#dismissed' => $dismissed,
       '#all_complete' => $counts['total'] > 0 && $counts['complete'] === $counts['total'],
       '#cache' => [
-        'tags' => [
-          'config:system.site',
-          'community_list',
-          'protocol_list',
-          'taxonomy_term_list',
-          'block_content_list',
-          'mukurtu_setup:tasks',
-        ],
+        'tags' => SiteSetupTaskManager::CACHE_TAGS,
         'contexts' => ['user.roles'],
         // The "Site operations" checks read state (cron_last) and settings.php,
         // which have no cache tags; bound staleness to an hour.
