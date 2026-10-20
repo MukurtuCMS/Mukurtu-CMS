@@ -4,6 +4,10 @@
 #   build_image <target> <tag> [docker build args...]
 #     Builds a Dockerfile target from the repository root. Output goes to
 #     $BUILD_LOG; the return code is docker's.
+#   runtime_image <tag>
+#     Makes the runtime image available as <tag>: the image named by
+#     MUKURTU_TEST_IMAGE if that is set (the pipeline tests the image it will publish),
+#     otherwise a fresh build of the runtime stage.
 #   assert_eq <expected> <actual> <message>
 #   assert_contains <haystack> <needle> <message>
 #   assert_not_contains <haystack> <needle> <message>
@@ -28,6 +32,14 @@ build_image() {
   shift 2
   docker build --progress=plain --target "$target" --tag "$tag" \
     --file "$REPO_ROOT/Dockerfile" "$@" "$REPO_ROOT" >"$BUILD_LOG" 2>&1
+}
+
+runtime_image() {
+  if [[ -n "${MUKURTU_TEST_IMAGE:-}" ]]; then
+    docker tag "$MUKURTU_TEST_IMAGE" "$1" >"$BUILD_LOG" 2>&1
+  else
+    build_image runtime "$1" "${DEFAULT_BUILD_ARGS[@]}"
+  fi
 }
 
 assert_eq() {

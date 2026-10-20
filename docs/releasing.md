@@ -63,17 +63,32 @@ them from drifting apart again.
    procedure, and any release that must be passed through rather than skipped.
 8. **Check whether `mukurtu-template` needs a release.** See [Releasing
    alongside mukurtu-template](#releasing-alongside-mukurtu-template). If it
-   does, release it *after* this tag is published, never before.
+   does, release it *after* the profile tag is published, never before.
 9. **The container image publishes itself.** Publishing the release starts
-   `.github/workflows/docker-publish.yml`, which tests and scans the image and
-   pushes it to `ghcr.io/<owner>/mukurtu`. Check that the run succeeded. If the
-   release was created by a workflow using `GITHUB_TOKEN`, the event does not
-   fire; run the workflow by hand with the tag. After a new
-   `mukurtu-template` release, update the `ARG MUKURTU_TEMPLATE_VERSION` default in
-   the `Dockerfile`. See [docker-build.md](docker-build.md), "Publishing and supply
-   chain".
-   To ship a fix to the platform without a new Mukurtu release, see
-   [Releasing an image revision](#releasing-an-image-revision).
+   `.github/workflows/docker-publish.yml`, which builds the image on both
+   architectures, runs the test suite against it, scans it, and pushes it to
+   `ghcr.io/<owner>/mukurtu`. Check that the run succeeded. If the release was
+   created by a workflow using `GITHUB_TOKEN`, the event does not fire; run the
+   workflow by hand with the tag in `ref` (leave `dev` unticked). After a new
+   `mukurtu-template` release, update the `ARG MUKURTU_TEMPLATE_VERSION` default
+   in the `Dockerfile` (in the next release, or as an [image
+   revision](#releasing-an-image-revision)). See [docker-build.md](docker-build.md),
+   "Publishing and supply chain".
+
+   The image is built from the **tag**, not from `main`, so what `main` holds at
+   that moment does not matter to it.
+
+**Order.** These steps depend on each other by name, not by number, so other steps
+can be added around them. The order is: *Tag*, then *Check whether
+`mukurtu-template` needs a release*, then the image publishes (starting from the
+published release), and only then any step that moves `main` on (for example setting
+it back to `4.x-dev`). The image workflow checks out the tag it was given, so it
+does not depend on that last step.
+
+To ship a fix to the platform without a new Mukurtu release, see [Releasing an
+image revision](#releasing-an-image-revision). To try the image before a release
+(from `main` or a pull request's branch), run the workflow by hand with `dev` ticked;
+see [Development images](docker-build.md#development-images).
 
 ## Releasing an image revision
 

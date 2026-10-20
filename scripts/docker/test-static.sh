@@ -44,6 +44,13 @@ assert_eq "revision" "$(kind 4.0.5-r12)" "kind: revision with two digits"
 assert_eq "prerelease" "$(kind 4.0.0-rc)" "kind: release candidate"
 assert_eq "prerelease" "$(kind 4.0.0-rc1)" "kind: rc1 is a pre-release, not revision 'c1'"
 assert_eq "prerelease" "$(kind 4.0.0-beta37)" "kind: beta"
+# A development build is named after the commit it was built from, and moves only `edge`.
+dev() { "$TAGS" --dev "$1" 2>&1 | paste -sd' ' -; }
+assert_eq "4.x-dev-0123abc edge" "$(dev 0123abcdef0123abcdef0123abcdef0123abcdef)" "dev build: commit tag and edge, never latest"
+assert_eq "4.x-dev-abcdef1 edge" "$(dev ABCDEF1234)" "dev build: the commit is lower-cased and shortened to 7"
+for bad in "" "main" "0123" "xyz1234" "0123abc; rm"; do
+  if "$TAGS" --dev "$bad" >/dev/null 2>&1; then fail "dev build rejects: '$bad'"; else pass "dev build rejects: '$bad'"; fi
+done
 # There is one image: no variant argument, no suffixes.
 for bad in "4.x-dev" "v4.0.5" "4.0" "4.0.5-r0" "4.0.5-r01" "4.0.5 full" "4.0.5 slim" ""; do
   # shellcheck disable=SC2086
@@ -56,11 +63,11 @@ if [[ ! -f "$WORKFLOW" ]]; then
 fi
 pass "docker-publish.yml exists"
 
-# actionlint does not know the newest GitHub-hosted runner label yet (ubuntu-26.04 is
-# in GitHub's own list of hosted images). Ignore that one message, and nothing else;
-# remove the -ignore when a newer actionlint lists the label.
+# actionlint does not know the newest GitHub-hosted runner labels yet (ubuntu-26.04 and
+# its arm64 twin are in GitHub's own list of hosted images). Ignore those messages, and
+# nothing else; remove the -ignore when a newer actionlint lists the labels.
 if docker run --rm -v "$REPO_ROOT:/repo:ro" -w /repo rhysd/actionlint:1.7.12 \
-    -ignore 'label "ubuntu-26.04" is unknown' .github/workflows/docker-publish.yml >/tmp/actionlint.out 2>&1; then
+    -ignore 'label "ubuntu-26.04(-arm)?" is unknown' .github/workflows/docker-publish.yml >/tmp/actionlint.out 2>&1; then
   pass "actionlint finds nothing"
 else
   fail "actionlint finds nothing"; cat /tmp/actionlint.out
@@ -78,6 +85,8 @@ on = wf.get(True) or wf.get("on")  # YAML 1.1 reads a bare `on` as True
 for trigger in ("release", "workflow_dispatch"):
     if trigger not in on:
         errors.append(f"missing trigger: {trigger}")
+if set(on) != {"release", "workflow_dispatch"}:
+    errors.append(f"only release and workflow_dispatch may trigger a publish (got {sorted(on)})")
 # A published tag is a fixed artifact. Nothing rebuilds and re-pushes existing
 # tags on a timer; fixes arrive as new releases.
 if "schedule" in on:
@@ -115,49 +124,82 @@ if "compute-tags.sh --kind" not in text:
 if "compute-tags.sh --existing -" not in text:
     errors.append("publish must pass the existing tags to compute-tags.sh --existing -")
 
-# There is one image: no matrix, no variants, no build arguments for the tools.
+# One image, built natively on each architecture: the `build` job runs once per
+# architecture, on a runner of that architecture, and `publish` joins the two.
+build = jobs["build"]
 publish = jobs["publish"]
-if "strategy" in publish:
-    errors.append("publish must not have a matrix: there is a single image")
 for needle in ("WITH_FFMPEG", "WITH_POPPLER", "slim", "-slim"):
     if needle in text:
         errors.append(f"the workflow must not mention {needle}")
+include = build.get("strategy", {}).get("matrix", {}).get("include", [])
+if sorted(m.get("arch") for m in include) != ["amd64", "arm64"]:
+    errors.append("build must have a matrix with exactly amd64 and arm64")
+runners = {m.get("arch"): m.get("runner") for m in include}
+if runners.get("amd64") != "ubuntu-26.04" or runners.get("arm64") != "ubuntu-26.04-arm":
+    errors.append(f"build must run natively: ubuntu-26.04 for amd64 and ubuntu-26.04-arm for arm64 (got {runners})")
+if build.get("runs-on") != "${{ matrix.runner }}":
+    errors.append("build must take runs-on from the matrix")
+if "qemu" in text.lower():
+    errors.append("no QEMU: each architecture builds natively")
 
-# Runners are pinned to a named image, not `ubuntu-latest`, which GitHub moves to a
-# new Ubuntu release on its own schedule and so can change what the tests run on.
-for jname, job in jobs.items():
-    if job.get("runs-on") != "ubuntu-26.04":
-        errors.append(f"{jname}: runs-on must be ubuntu-26.04 (got {job.get('runs-on')})")
-
-# Nothing is pushed unless the tests and the vulnerability scan passed.
-needs = publish.get("needs")
-needs = [needs] if isinstance(needs, str) else needs
-if "test" not in needs:
-    errors.append("publish must need the test job")
-test_text = yaml.dump(jobs["test"])
-if "trivy" not in test_text.lower():
-    errors.append("the test job must run Trivy")
+# What is published is the image that was tested. The steps that test and scan come
+# before the step that pushes, in the same job, and the image is pushed with docker
+# push, not rebuilt.
+steps = build["steps"]
+def index(pred):
+    for i, st in enumerate(steps):
+        if pred(st):
+            return i
+    return None
+i_build = index(lambda st: "build-push-action" in st.get("uses", ""))
+i_test = index(lambda st: "scripts/docker/test-" in st.get("run", ""))
+i_scan = index(lambda st: "trivy" in st.get("uses", "").lower() and st.get("with", {}).get("exit-code") == "1")
+i_push = index(lambda st: "docker push" in st.get("run", ""))
+if None in (i_build, i_test, i_scan, i_push):
+    errors.append(f"build needs a build, test, scan and push step (got {i_build} {i_test} {i_scan} {i_push})")
+else:
+    if not (i_build < i_test < i_push and i_build < i_scan < i_push):
+        errors.append("build must build, then test and scan, then push")
+    b = steps[i_build]["with"]
+    if b.get("push") not in (False, "false", None) or str(b.get("load")).lower() != "true":
+        errors.append("the build step must load the image locally (load: true), not push it")
+    if "cache-from" in b or "cache-to" in b:
+        errors.append("no build cache: the image is built from scratch each time")
+    if "MUKURTU_TEST_IMAGE" not in steps[i_test].get("env", {}):
+        errors.append("the test step must run against the image just built (MUKURTU_TEST_IMAGE)")
 for flag in ("HIGH,CRITICAL", "ignore-unfixed", "exit-code"):
-    if flag not in test_text:
+    if flag not in yaml.dump(steps[i_scan]):
         errors.append(f"trivy step lacks {flag}")
-if "scripts/docker/test-" not in test_text:
-    errors.append("the test job must run scripts/docker/test-*.sh")
 
-# Permissions: least privilege, write only where it is needed.
-if jobs["test"].get("permissions", {}).get("packages") == "write":
-    errors.append("the test job must not have packages: write")
-if publish.get("permissions", {}).get("packages") != "write":
-    errors.append("publish needs packages: write")
+# Permissions: read-only by default, write only where it is needed.
+if wf.get("permissions") != {"contents": "read"}:
+    errors.append("the workflow default must be permissions: contents: read")
+for jname in ("build", "publish"):
+    if jobs[jname].get("permissions", {}).get("packages") != "write":
+        errors.append(f"{jname} needs packages: write")
+if jobs["resolve"].get("permissions", {}).get("packages"):
+    errors.append("resolve must not have packages permission")
 
-# Multi-arch, provenance, SBOM, cache.
+# The multi-arch tag is made by joining the two pushed images, and attested.
 pub_text = yaml.dump(publish)
-for needle in ("linux/amd64,linux/arm64", "provenance", "sbom", "cache-from", "cache-to"):
+for needle in ("imagetools create", "attest-build-provenance"):
     if needle not in pub_text:
         errors.append(f"publish lacks {needle}")
+if "attest-sbom" not in yaml.dump(build):
+    errors.append("build must attest an SBOM for each architecture's image")
+if "needs" not in publish or "build" not in (publish["needs"] if isinstance(publish["needs"], list) else [publish["needs"]]):
+    errors.append("publish must need the build job")
+
+# A development build is manual only, takes a commit, and never moves `latest`.
+inputs = on["workflow_dispatch"].get("inputs", {})
+if "ref" not in inputs or "dev" not in inputs:
+    errors.append("workflow_dispatch needs the inputs ref and dev")
+if "compute-tags.sh --dev" not in text:
+    errors.append("a development build must take its tags from compute-tags.sh --dev")
 
 # Dependabot watches the Dockerfile and the actions.
 ecosystems = {u["package-ecosystem"] for u in dep["updates"]}
-for eco in ("docker", "github-actions"):
+for eco in ("docker", "docker-compose", "github-actions"):
     if eco not in ecosystems:
         errors.append(f"dependabot.yml lacks {eco}")
 
@@ -187,6 +229,12 @@ if [[ ! -f "$DOC" ]]; then
   fail "docs/docker-build.md exists"; finish; exit 1
 fi
 
+echo "examples: the database image is pinned"
+for f in "$REPO_ROOT"/examples/docker/*/docker-compose.yml; do
+  image="$(sed -n 's/^ *image: *\(mariadb:[^ ]*\).*/\1/p' "$f" | head -1)"
+  [[ "$image" =~ ^mariadb:[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] && pass "$(basename "$(dirname "$f")"): MariaDB is pinned to a series ($image), not a moving major tag" || fail "$(basename "$(dirname "$f")"): MariaDB is pinned to a series (got '$image')"
+done
+
 echo "docs: docs/docker-build.md has a section for every part of the image"
 for heading in "${REQUIRED_SECTIONS[@]}"; do
   if grep -qxF "## $heading" "$DOC"; then
@@ -209,7 +257,7 @@ fi
 # ending in _ is a prefix mentioned in a comment, not a variable.
 names() { grep -rhoE 'MUKURTU_[A-Z0-9_]*[A-Z0-9]\b' "$@" 2>/dev/null | sort -u; }
 code_names="$(names "$REPO_ROOT/Dockerfile" "$REPO_ROOT"/docker/*.sh "$REPO_ROOT"/docker/*.php \
-  "$REPO_ROOT"/docker/templates "$REPO_ROOT"/examples/docker/*/docker-compose.yml "$REPO_ROOT"/examples/docker/*/.env.example "$REPO_ROOT"/examples/docker/*/generate-secrets.sh "$REPO_ROOT/.github/workflows/docker-publish.yml")"
+  "$REPO_ROOT"/docker/templates "$REPO_ROOT"/examples/docker/*/docker-compose.yml "$REPO_ROOT"/examples/docker/*/.env.example "$REPO_ROOT"/examples/docker/*/generate-secrets.sh)"
 doc_names="$(names "$REFERENCE")"
 
 # Variables that exist only inside the image (template placeholders, pool tags):

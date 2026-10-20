@@ -9,7 +9,7 @@ IMAGE=mukurtu-test:image
 LIB=/usr/local/lib/mukurtu
 OUT=/tmp/mukurtu-run
 
-if ! build_image runtime "$IMAGE" "${DEFAULT_BUILD_ARGS[@]}"; then
+if ! runtime_image "$IMAGE"; then
   fail "runtime image builds"
   tail -30 "$BUILD_LOG"
   finish

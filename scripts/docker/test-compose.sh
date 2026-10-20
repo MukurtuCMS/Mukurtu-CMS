@@ -159,7 +159,7 @@ if [[ -d "$WORK/multi-tenant" ]]; then
   assert_contains "$(jq -c '.services.caddy.security_opt' <<<"$json")" "no-new-privileges:true" "caddy sets no-new-privileges"
 fi
 
-if ! build_image runtime "$IMAGE_TAG" "${DEFAULT_BUILD_ARGS[@]}"; then
+if ! runtime_image "$IMAGE_TAG"; then
   fail "image builds"; tail -20 "$BUILD_LOG"; finish; exit 1
 fi
 

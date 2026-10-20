@@ -250,6 +250,7 @@ Mukurtu sends mail for password resets, notifications, and digests. Set
 
 | Variable | Default | Description |
 | --- | --- | --- |
+| `MUKURTU_SETTINGS_FILE` | | Absolute path of a PHP file with your own Drupal settings (a Redis cache, `$config` overrides). Mount it **read-only**; see [Your own settings](#your-own-settings). If the path is not a readable file, or the PHP user can write to the file, the container stops with an error. |
 | `MUKURTU_RUN_DIR` | `/run/mukurtu` | Where the rendered configuration is written. Change it only if `/run` is not usable; it should be on a tmpfs or other writable location. |
 
 ### Used by the Compose examples only
@@ -358,6 +359,52 @@ rarely needs more than 2 or 3) and keep `MUKURTU_FPM_PM=ondemand`. To make a bus
 site faster, raise `MUKURTU_FPM_MAX_CHILDREN` and the container's memory limit
 together.
 
+## Thumbnails, fonts, and image formats
+
+Mukurtu makes thumbnails of PDFs with `pdftoppm` (poppler) and of videos with
+`ffmpeg`. Both are always in the image. So that PDF thumbnails look right, the image
+also carries:
+
+- **poppler-data**: the character-encoding maps that poppler needs to draw PDFs
+  that use CJK or other non-Latin text without embedding the font.
+- **Liberation fonts** (with `fontconfig`): metric-compatible stand-ins for
+  Helvetica, Times, and Courier. Many PDFs name those fonts without embedding them;
+  without a stand-in, their text is blank in the thumbnail.
+
+Image processing supports JPEG, PNG, WebP, and **AVIF**. The image also includes
+the `maxminddb` PHP extension, which Mukurtu's optional GeoIP features use.
+
+## Your own settings
+
+Most sites need nothing beyond the environment variables. For anything else, such
+as a Redis cache backend or extra `$config` overrides, write a PHP file and set
+`MUKURTU_SETTINGS_FILE` to its path. It is included **last**, so it can override
+anything the image sets:
+
+```yaml
+    environment:
+      MUKURTU_SETTINGS_FILE: /etc/mukurtu/settings.php
+    volumes:
+      - ./settings.php:/etc/mukurtu/settings.php:ro
+```
+
+```php
+<?php
+// settings.php
+$settings['cache']['default'] = 'cache.backend.redis';
+```
+
+This file runs in every request, so whoever can write it can run code in the site.
+The container therefore refuses to start if the PHP user can write to it: mount it
+read-only (`:ro`) and do not make it owned by uid 1000.
+
+The image already sets these Drupal settings, which you can override the same way:
+
+- `enable_html5_validation` is `FALSE`, so forms are validated by Drupal on the
+  server and the Status report does not warn about Drupal 12's change of default.
+- `deployment_identifier` is derived from the image's `composer.lock`, so caches
+  of asset URLs are invalidated when you upgrade.
+
 ## Mail
 
 The container includes a small mail relay (`msmtp`). Set `MUKURTU_SMTP_HOST`
@@ -371,6 +418,10 @@ not arrive.
 
 ## Upgrades and backups
 
+**Back up first.** An upgrade changes the database in place, and databases are not
+downgraded. If the upgrade fails, or you want to go back, the backup is the only
+way. The steps for a backup are below.
+
 **Upgrade** by changing the image tag and recreating the container:
 
 ```
@@ -380,8 +431,9 @@ docker compose up -d mukurtu
 ```
 
 At start-up the container applies database updates and rebuilds caches
-(`MUKURTU_RUN_UPDATES=true`), then serves requests. **Back up before upgrading**,
-and read the release notes: some releases must be passed through rather than
+(`MUKURTU_RUN_UPDATES=true`), then serves requests. The pending updates are
+listed in the log (`pending database updates:`) just before they run. Read the
+release notes: some releases must be passed through rather than
 skipped. To go back, restore the backup and run the previous tag; databases are
 not downgraded.
 

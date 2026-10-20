@@ -84,10 +84,11 @@ processes, and Alpine's base is a few megabytes. The Mukurtu team works with ngi
 larger and less tested. The trade-off is PHP on Alpine's musl C library, whose difference is
 small for a Drupal workload dominated by the database and opcache.
 
-**PHP extensions:** everything Drupal core requires, plus `gd` (JPEG, WebP, FreeType: image
+**PHP extensions:** everything Drupal core requires, plus `gd` (JPEG, WebP, **AVIF**, FreeType: image
 styles and thumbnails), `intl`, `zip`, `pdo_mysql` (MariaDB or MySQL; Mukurtu does not support
-PostgreSQL), `bcmath`, opcache and `apcu` (Drupal's fast cache backend). The build checks that
-every extension is loaded and that `gd` has JPEG, WebP and FreeType support.
+PostgreSQL), `bcmath`, opcache, `apcu` (Drupal's fast cache backend) and `maxminddb` (the fast
+reader for GeoIP databases, which Mukurtu's optional GeoIP features use). The build checks that
+every extension is loaded and that `gd` has JPEG, WebP, AVIF and FreeType support.
 
 **Media tools.** Mukurtu runs these as external programs (see
 `modules/mukurtu_core/src/Hook/MediaToolRequirements.php`, which also reports a missing tool on
@@ -100,6 +101,19 @@ the status page):
 | `ffmpeg` | `ffmpeg` | Extract the first frame of a video as its thumbnail. |
 
 The build runs each with the same probe Mukurtu uses.
+
+**Fonts and encodings for PDF thumbnails.** Two further packages exist only so that
+`pdftoppm` draws the page the way a reader would:
+
+| Package | Size | Why |
+| --- | --- | --- |
+| `poppler-data` | 12 MB | The character-encoding maps poppler needs for PDFs with CJK or other non-Latin text that does not embed its font. Without it that text is blank in the thumbnail. |
+| `font-liberation` (and `fontconfig`) | 4.8 MB | Metric-compatible stand-ins for Helvetica, Times and Courier. Many PDFs name those fonts without embedding them; with no font to substitute, their text is blank. |
+
+The test suite renders a PDF that uses un-embedded Helvetica and checks the thumbnail has ink
+on it and that poppler reports no font error. Fonts for other scripts (CJK fonts such as
+`font-noto-cjk`, 88 MB) are left out to keep the image small; a site that needs them can add
+the fonts to its own image built `FROM` this one.
 
 **`exec()` stays enabled.** Hardening guides often disable PHP's process functions, but
 Mukurtu launches the tools above with `exec()`; the build fails if `exec` is in
@@ -365,12 +379,38 @@ values); and `innodb_buffer_pool_size` at roughly half the database container's 
 the repository's owner (lower-cased); no owner is written into any file, so it runs unchanged in a
 fork and upstream.
 
-**When it runs.** On a published release, or by hand (*Run workflow*) with a tag, for a release
-created by another workflow with `GITHUB_TOKEN`, which does not fire `release: published`. The
-tag is checked out, so the image is built from that tag's `Dockerfile` and code; a tag that
+**When it runs.** On a published release, or by hand (*Run workflow*) with a tag in `ref`, for a
+release created by another workflow with `GITHUB_TOKEN`, which does not fire `release: published`.
+The tag is checked out, so the image is built from that tag's `Dockerfile` and code; a tag that
 predates the `Dockerfile` cannot be built. The workflow refuses a tag that is not a release tag
 (`v4.0.5`, `4.x-dev`, `4.0.5-r0`) and a release that GitHub marks as a pre-release but whose tag
 has no pre-release suffix (tags are derived from the version alone, so it would take `latest`).
+Nothing else starts it: no push, pull request or timer.
+
+**How an image is built, tested and pushed.** Each architecture builds on a runner of that
+architecture (`amd64` and `arm64`; no emulation), in one job:
+
+1. Build the image and keep it in the runner's local Docker daemon. Nothing is cached between runs.
+2. Run every `scripts/docker/test-*.sh` against **that image** (`MUKURTU_TEST_IMAGE`), so the tests
+   do not build a second copy.
+3. Scan it with Trivy, and write an SBOM.
+4. Push **that same image**, under a temporary name `build-<version>-<arch>`, and attest its SBOM.
+
+A last job reads the two digests and creates the release tags as one multi-architecture
+manifest with `docker buildx imagetools create`, then attests the build provenance of the
+result. The consequence: the image a user pulls is the image whose tests passed, not a second
+build of the same source. This matters because the Composer build resolves Drupal and its
+modules at build time (the template ships no lock file), so two builds of one tag could contain
+different module versions. The temporary `build-*` tags stay in the registry; they are not
+release tags and need no attention.
+
+### Development images
+
+To try the image before a release, run the workflow by hand with `dev` ticked and `ref` set to a
+branch, tag or commit. It builds and tests exactly as above and publishes
+`4.x-dev-<first 7 characters of the commit>` (never rebuilt) and `edge` (moved to the latest
+development build). It never touches `4.0`, `4`, or `latest`. Nothing builds a development image
+by itself.
 
 ### Tags
 
@@ -396,12 +436,14 @@ and `latest` follows everything. The rules are in `scripts/docker/compute-tags.s
 
 ### What must pass before anything is pushed
 
-The `publish` job needs the `test` job, which:
+The push step of each architecture's job comes after these two steps in the same job, so a failure
+in either stops that architecture, and the `publish` job does not run unless both pushed:
 
-1. Runs every `scripts/docker/test-*.sh`: the image's contents, the web stack, configuration
-   rendering, `settings.php`, a real install against MariaDB with restart, health and shutdown
-   checks, the Compose examples, and static checks of the workflow and documentation.
-2. Scans the image with Trivy for **fixable HIGH or CRITICAL** vulnerabilities (operating system
+1. Every `scripts/docker/test-*.sh` runs against the built image: the image's contents, the web
+   stack, configuration rendering, `settings.php`, a real install against MariaDB with restart,
+   health and shutdown checks, the Compose examples, and static checks of the workflow and
+   documentation.
+2. Trivy scans the image with Trivy for **fixable HIGH or CRITICAL** vulnerabilities (operating system
    packages and Composer dependencies, including Drupal core). A finding fails the run; findings
    with no fix yet are ignored. To accept a specific one, add its ID, a reason and a review date to
    a `.trivyignore` file in the repository root, which Trivy reads automatically.
@@ -413,11 +455,11 @@ advisory before the image is assembled.
 
 - **Pinned bases and actions.** Base images are pinned by version and digest; GitHub Actions by
   major version, following the repository's other workflows. Dependabot proposes updates to both.
-- **Provenance and SBOM.** Each push carries a BuildKit provenance attestation (`mode=max`), an
-  SBOM, and a build-provenance attestation from `actions/attest-build-provenance`. Verify with
-  `gh attestation verify oci://ghcr.io/<owner>/mukurtu:<tag> --owner <owner>`.
-- **Least privilege.** Default permission is read-only; only `publish` can write packages and
-  create attestations. Event data (tag names, inputs) reaches scripts through environment
+- **Provenance and SBOM.** Each architecture's image has an SBOM attestation (SPDX, made by Trivy),
+  and the published tag has a build-provenance attestation from `actions/attest-build-provenance`.
+  Verify with `gh attestation verify oci://ghcr.io/<owner>/mukurtu:<tag> --owner <owner>`.
+- **Least privilege.** Default permission is read-only; only `build` and `publish` can write
+  packages and create attestations, and `build` pushes only after its tests and scan passed. Event data (tag names, inputs) reaches scripts through environment
   variables, never interpolated into script text, which would allow script injection.
 - **Fixes arrive as releases.** Because published tags never change, a fix to a base image, nginx
   or Drupal reaches users only when released: a new Mukurtu release if the fix is in Mukurtu or

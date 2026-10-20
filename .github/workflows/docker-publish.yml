@@ -4,90 +4,151 @@ name: Publish Docker image
 # it to the GitHub Container Registry as ghcr.io/<owner>/mukurtu. How the image is
 # built, and why, is documented in docs/docker-build.md.
 #
-#  - release published: build that release.
-#  - workflow_dispatch: build a named tag by hand. Use this if the release was
-#    created by another workflow with GITHUB_TOKEN, which does not trigger
-#    `release: published`.
+# Each architecture is built natively, on a runner of that architecture. The image
+# that is pushed is the image that was tested and scanned: the job builds it, runs the
+# whole test suite against it, scans it, and only then pushes that same image. A last
+# job joins the two images into one multi-architecture tag.
 #
-# A published tag is a fixed artifact: nothing rebuilds and re-pushes existing
-# tags on a timer. Fixes to the base images or to Drupal reach users in a new
-# release.
+#  - release published: build that release.
+#  - workflow_dispatch: build a named release tag by hand (use this if the release was
+#    created by another workflow with GITHUB_TOKEN, which does not trigger
+#    `release: published`), or, with `dev` ticked, build any branch or commit as a
+#    development image (4.x-dev-<commit> and `edge`; never `latest`).
+#
+# A published release tag is a fixed artifact: nothing rebuilds and re-pushes existing
+# tags on a timer. Fixes to the base images or to Drupal reach users in a new release.
 
 on:
   release:
     types: [published]
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Release tag to build and publish, for example 4.0.5. The tag must contain the Dockerfile."
+      ref:
+        description: "Release tag to build and publish, for example 4.0.5 (it must contain the Dockerfile). With 'dev' ticked: any branch, tag or commit."
         required: true
         type: string
+      dev:
+        description: "Publish a development image (4.x-dev-<commit> and edge) instead of a release."
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: docker-publish-${{ github.event.release.tag_name || inputs.tag }}
+  group: docker-publish-${{ github.event.release.tag_name || inputs.ref }}
   cancel-in-progress: false
 
 jobs:
   resolve:
-    name: Resolve the tag to build
+    name: Resolve what to build
     runs-on: ubuntu-26.04
     outputs:
-      tag: ${{ steps.tag.outputs.tag }}
+      sha: ${{ steps.what.outputs.sha }}
+      version: ${{ steps.what.outputs.version }}
+      kind: ${{ steps.what.outputs.kind }}
     steps:
-      - name: Checkout the tag
+      - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.release.tag_name || inputs.tag }}
+          ref: ${{ github.event.release.tag_name || inputs.ref }}
 
-      - name: Check the tag
-        id: tag
+      - name: Check what was asked for
+        id: what
         # Event data reaches the script through env:, never by interpolation
         # into the script text.
         env:
           EVENT: ${{ github.event_name }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
           RELEASE_IS_PRERELEASE: ${{ github.event.release.prerelease }}
-          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_REF: ${{ inputs.ref }}
+          INPUT_DEV: ${{ inputs.dev }}
         run: |
           set -euo pipefail
-          if [[ "$EVENT" == release ]]; then
-            tag="$RELEASE_TAG"
+          test -f Dockerfile || { echo "::error::This ref does not contain a Dockerfile, so there is nothing to build."; exit 1; }
+          sha="$(git rev-parse HEAD)"
+          if [[ "$EVENT" == workflow_dispatch && "$INPUT_DEV" == true ]]; then
+            # A development image is named after the commit. Nothing about the
+            # branch or tag it was found through matters.
+            kind=dev
+            version="$(scripts/docker/compute-tags.sh --dev "$sha" | head -1)"
           else
-            tag="$INPUT_TAG"
+            if [[ "$EVENT" == release ]]; then
+              version="$RELEASE_TAG"
+            else
+              version="$INPUT_REF"
+            fi
+            # The tag is a Mukurtu release (4.0.5), an image revision of one
+            # (4.0.5-r1), or a pre-release (4.0.0-rc). Anything else is refused.
+            kind="$(scripts/docker/compute-tags.sh --kind "$version")"
+            # The tags are derived from the version alone, so GitHub's flag must
+            # agree with it. Otherwise a release published as a pre-release would
+            # take `latest`.
+            if [[ "$RELEASE_IS_PRERELEASE" == true && "$kind" != prerelease ]]; then
+              echo "::error::Release $version is marked as a pre-release on GitHub, but its tag has no pre-release suffix such as -rc1. Re-tag it (for example ${version}-rc1) so it cannot become 'latest'."
+              exit 1
+            fi
           fi
-          test -f Dockerfile || { echo "::error::Tag $tag does not contain a Dockerfile, so there is nothing to build."; exit 1; }
-          # The tag is a Mukurtu release (4.0.5), an image revision of one
-          # (4.0.5-r1), or a pre-release (4.0.0-rc). Anything else is refused.
-          kind="$(scripts/docker/compute-tags.sh --kind "$tag")"
-          # The tags are derived from the version alone, so GitHub's flag must
-          # agree with it. Otherwise a release published as a pre-release would
-          # take `latest`.
-          if [[ "$RELEASE_IS_PRERELEASE" == true && "$kind" != prerelease ]]; then
-            echo "::error::Release $tag is marked as a pre-release on GitHub, but its tag has no pre-release suffix such as -rc1. Re-tag it (for example ${tag}-rc1) so it cannot become 'latest'."
-            exit 1
-          fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          {
+            echo "sha=$sha"
+            echo "version=$version"
+            echo "kind=$kind"
+          } >> "$GITHUB_OUTPUT"
 
-  test:
-    name: Test and scan
+  build:
+    name: Build, test and push (${{ matrix.arch }})
     needs: resolve
-    runs-on: ubuntu-26.04
-    timeout-minutes: 90
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
     permissions:
       contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-26.04
+          - arch: arm64
+            runner: ubuntu-26.04-arm
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/mukurtu
+      VERSION: ${{ needs.resolve.outputs.version }}
+      ARCH: ${{ matrix.arch }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ needs.resolve.outputs.tag }}
+          ref: ${{ needs.resolve.outputs.sha }}
 
-      # Every scripts/docker/test-*.sh builds the image it needs and runs it,
-      # including a real install against MariaDB. A failure here stops the
-      # release from being published.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # The image is built once and kept in the local Docker daemon. Everything
+      # below runs against it, and the push step publishes it.
+      - name: Build the image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          push: false
+          tags: mukurtu-ci:image
+          labels: |
+            org.opencontainers.image.title=Mukurtu CMS
+            org.opencontainers.image.description=Mukurtu CMS
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ needs.resolve.outputs.version }}
+            org.opencontainers.image.revision=${{ needs.resolve.outputs.sha }}
+            org.opencontainers.image.licenses=GPL-3.0-or-later
+
+      # Every scripts/docker/test-*.sh runs against that image, including a real
+      # install against MariaDB. A failure here stops the image from being pushed.
       - name: Run the image tests
+        env:
+          MUKURTU_TEST_IMAGE: mukurtu-ci:image
         run: |
           failed=0
           for test in scripts/docker/test-*.sh; do
@@ -97,21 +158,77 @@ jobs:
           done
           exit "$failed"
 
-      # The tests leave the image in the local Docker daemon, built from the same
-      # Dockerfile and arguments as the published one.
       - name: Scan the image for fixable HIGH and CRITICAL vulnerabilities
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: mukurtu-test:image
+          image-ref: mukurtu-ci:image
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
 
+      - name: List the image's contents (SBOM)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: mukurtu-ci:image
+          format: spdx-json
+          output: sbom.spdx.json
+          scan-type: image
+          skip-setup-trivy: true
+
+      # The template ships no lock file, so this records exactly which Drupal and
+      # contributed-module versions the image contains.
+      - name: Extract the resolved composer.lock
+        run: |
+          docker create --name lock mukurtu-ci:image >/dev/null
+          docker cp lock:/var/www/html/composer.lock composer.lock
+          docker rm lock >/dev/null
+
+      - name: Log in to the GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pushed under a temporary name that only the publish job uses; the release
+      # tags are made from the two digests there.
+      - name: Push the tested image
+        id: push
+        run: |
+          set -euo pipefail
+          IMAGE="${IMAGE,,}"
+          docker tag mukurtu-ci:image "$IMAGE:build-$VERSION-$ARCH"
+          docker push "$IMAGE:build-$VERSION-$ARCH"
+          digest="$(docker buildx imagetools inspect "$IMAGE:build-$VERSION-$ARCH" --format '{{json .Manifest}}' | jq -r .digest)"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          mkdir digests
+          echo "$digest" > "digests/$ARCH"
+
+      - name: Attest the SBOM
+        uses: actions/attest-sbom@v4
+        with:
+          subject-name: ghcr.io/${{ github.repository_owner }}/mukurtu
+          subject-digest: ${{ steps.push.outputs.digest }}
+          sbom-path: sbom.spdx.json
+          push-to-registry: true
+
+      - name: Keep the digest for the publish job
+        uses: actions/upload-artifact@v7
+        with:
+          name: digest-${{ matrix.arch }}
+          path: digests/${{ matrix.arch }}
+
+      - name: Keep composer.lock with the run
+        uses: actions/upload-artifact@v7
+        with:
+          name: composer-lock-${{ matrix.arch }}
+          path: composer.lock
+
   publish:
-    name: Publish
-    needs: [resolve, test]
+    name: Publish the multi-architecture tags
+    needs: [resolve, build]
     runs-on: ubuntu-26.04
-    timeout-minutes: 90
+    timeout-minutes: 15
     permissions:
       contents: read
       packages: write
@@ -121,35 +238,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ needs.resolve.outputs.tag }}
+          ref: ${{ needs.resolve.outputs.sha }}
 
-      - name: Work out the tags
-        id: meta
-        env:
-          TAG: ${{ needs.resolve.outputs.tag }}
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          image="ghcr.io/${OWNER,,}/mukurtu"
-          # The moving tags (4.0, 4, latest) only advance: the script publishes
-          # one only if this release is the newest of its scope among the tags
-          # that already exist, so a backport cannot pull `latest` backwards.
-          tag_list="$(gh api --paginate "repos/$REPO/tags" --jq '.[].name')"
-          {
-            echo "image=$image"
-            echo "revision=$(git rev-parse HEAD)"
-            echo "tags<<TAGS"
-            printf '%s\n' "$tag_list" | scripts/docker/compute-tags.sh --existing - "$TAG" | sed "s|^|$image:|"
-            echo "TAGS"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Set up QEMU (for the arm64 build)
-        uses: docker/setup-qemu-action@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+      - name: Download the digests
+        uses: actions/download-artifact@v8
+        with:
+          pattern: digest-*
+          path: digests
+          merge-multiple: true
 
       - name: Log in to the GitHub Container Registry
         uses: docker/login-action@v4
@@ -158,46 +254,53 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
-        id: push
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: |
-            org.opencontainers.image.title=Mukurtu CMS
-            org.opencontainers.image.description=Mukurtu CMS
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.version=${{ needs.resolve.outputs.tag }}
-            org.opencontainers.image.revision=${{ steps.meta.outputs.revision }}
-            org.opencontainers.image.licenses=GPL-3.0-or-later
-          provenance: mode=max
-          sbom: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Work out the tags
+        id: meta
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          KIND: ${{ needs.resolve.outputs.kind }}
+          SHA: ${{ needs.resolve.outputs.sha }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${OWNER,,}/mukurtu"
+          if [[ "$KIND" == dev ]]; then
+            tags="$(scripts/docker/compute-tags.sh --dev "$SHA")"
+          else
+            # The moving tags (4.0, 4, latest) only advance: the script publishes
+            # one only if this release is the newest of its scope among the tags
+            # that already exist, so a backport cannot pull `latest` backwards.
+            tag_list="$(gh api --paginate "repos/$REPO/tags" --jq '.[].name')"
+            tags="$(printf '%s\n' "$tag_list" | scripts/docker/compute-tags.sh --existing - "$VERSION")"
+          fi
+          {
+            echo "image=$image"
+            echo "tags<<TAGS"
+            printf '%s\n' "$tags" | sed "s|^|$image:|"
+            echo "TAGS"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Join the two images under the release tags
+        id: join
+        env:
+          IMAGE: ${{ steps.meta.outputs.image }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          set -euo pipefail
+          args=()
+          while read -r tag; do
+            [[ -n "$tag" ]] && args+=(--tag "$tag")
+          done <<< "$TAGS"
+          docker buildx imagetools create "${args[@]}" \
+            "$IMAGE@$(<digests/amd64)" "$IMAGE@$(<digests/arm64)"
+          first="$(head -1 <<< "$TAGS")"
+          echo "digest=$(docker buildx imagetools inspect "$first" --format '{{json .Manifest}}' | jq -r .digest)" >> "$GITHUB_OUTPUT"
 
       - name: Attest the build provenance
         uses: actions/attest-build-provenance@v4
         with:
           subject-name: ${{ steps.meta.outputs.image }}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.join.outputs.digest }}
           push-to-registry: true
-
-      # The template ships no lock file, so this records exactly which Drupal and
-      # contributed-module versions the image contains.
-      - name: Extract the resolved composer.lock
-        env:
-          IMAGE: ${{ steps.meta.outputs.image }}
-          DIGEST: ${{ steps.push.outputs.digest }}
-        run: |
-          docker create --name lock "$IMAGE@$DIGEST" >/dev/null
-          docker cp lock:/var/www/html/composer.lock composer.lock
-          docker rm lock >/dev/null
-
-      - name: Keep composer.lock with the run
-        uses: actions/upload-artifact@v7
-        with:
-          name: composer-lock
-          path: composer.lock

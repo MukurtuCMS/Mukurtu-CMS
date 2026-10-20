@@ -3,6 +3,7 @@
 #
 #   compute-tags.sh [--existing FILE|-] <tag>   print the tags to publish
 #   compute-tags.sh --kind <tag>                            print stable, revision or prerelease
+#   compute-tags.sh --dev <commit>                          print the tags of a development build
 #
 # Three kinds of release tag exist:
 #
@@ -19,6 +20,11 @@
 # backport (4.0.4-r1, published after 4.0.5) from dragging `latest` backwards.
 # "Newest" is judged against the other tags passed with --existing, one per line;
 # tags that are not stable or revision tags are ignored.
+#
+# A development build (started by hand, never by a release) is named after the commit
+# it was built from, 4.x-dev-<first 7 characters>, and also moves `edge` to itself. It
+# never touches 4.0, 4 or latest. Dev tags are not release tags, so --existing ignores
+# them.
 #
 # A published tag is never re-pushed by this workflow, so the plain tag 4.0.5 stays
 # the image it was; a pinned deployment moves to 4.0.5-r1 on purpose.
@@ -44,6 +50,17 @@ parse() {
 
 # key <major> <minor> <patch> <rev>: a string that sorts in release order.
 key() { printf '%09d%09d%09d%09d' "$1" "$2" "$3" "$4"; }
+
+if [[ "${1:-}" == "--dev" ]]; then
+  if [[ $# -ne 2 ]] || [[ ! "$2" =~ ^[0-9A-Fa-f]{7,64}$ ]]; then
+    echo "ERROR: --dev needs a commit hash of at least 7 hexadecimal characters: '${2:-}'" >&2
+    exit 1
+  fi
+  short="${2:0:7}"
+  echo "4.x-dev-${short,,}"
+  echo "edge"
+  exit 0
+fi
 
 if [[ "${1:-}" == "--kind" ]]; then
   if [[ $# -ne 2 ]] || ! parse "$2"; then
