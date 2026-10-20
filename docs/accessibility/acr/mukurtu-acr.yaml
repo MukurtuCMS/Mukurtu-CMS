@@ -174,7 +174,11 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. Whether the reading sequence preserves
+                meaning is a judgement made by listening to each page, not
+                something a scan decides. Needs the screen reader pass,
+                tracked in issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -248,7 +252,14 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. Deciding this needs a person to operate
+                every interactive component from the keyboard alone. Automated
+                scans cover three narrow cases across the audited inventory
+                and report no failures: focusable content inside frames,
+                scrollable regions that cannot be reached by keyboard, and
+                server-side image maps. The full pass is the keyboard bucket
+                in the manual audit runbook, tracked in issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -258,7 +269,13 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. A custom check tabs through every page in
+                the audited inventory and reports no trap, but it can only
+                find a trap it is able to escape by tabbing, so a component
+                that captures the keyboard in a way the check cannot reproduce
+                would go unseen. Confirming it needs a person. Tracked in
+                issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -381,7 +398,11 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. Whether the focus order preserves meaning
+                and operability is a judgement about sequence that no
+                automated check makes. Needs the keyboard pass, tracked in
+                issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -391,7 +412,14 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. Automated checks cover the mechanical part
+                across the audited inventory and report no failures: every
+                link and image map area has an accessible name, and a custom
+                check flags link text that cannot stand on its own, such as
+                "read more" or a bare URL. Whether a link's purpose is clear
+                from its context remains a judgement, so the determination
+                waits on the screen reader pass, tracked in issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -500,7 +528,10 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. Finding a change of context on focus means
+                moving focus through every component and watching for one.
+                Tracked in issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -510,7 +541,11 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. As for 3.2.1, but for changing a setting
+                rather than focusing it: someone has to operate each control
+                and watch for an unexpected change of context. Tracked in
+                issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -520,7 +555,10 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. Deciding this means submitting each form
+                with input it should reject and reading what comes back.
+                Tracked in issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -638,14 +676,19 @@ chapters:
             adherence:
               level: does-not-support
               notes: >-
-                No synchronised audio description capability
-                for locally hosted video: the video media type
-                has no described-track field and the player
-                renders no track element (issue #2355). A
-                transcript does not satisfy 1.2.5, which
-                requires description synchronised with the
-                video. The remote_video type depends on the
-                provider. Evidence is recorded in
+                No synchronised audio description capability for
+                locally hosted video: the video media type has no
+                described-track field and the player renders no track
+                element (issue #2355). A transcript does not satisfy
+                1.2.5, which requires description synchronised with the
+                video. The remote_video type depends on the provider.
+                Captions and subtitles are supported and cover 1.2.2.
+                Building the capability is a decision taken and
+                deferred, not an oversight: even with the field and a
+                player control in place, whether any given item has a
+                described version is editorial work in each community,
+                so the level could reach partially-supports but never
+                supports. Evidence is recorded in
                 docs/accessibility/findings/2026-10-06-desk-review.md.
 
           - name: authoring-tool
@@ -885,7 +928,10 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. Tooltips and similar content have to be
+                checked for being dismissable, hoverable and persistent, which
+                means driving each one by hand. Tracked in issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -916,7 +962,11 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. An automated check can tell that a heading
+                or label exists; it cannot tell whether it describes its topic
+                or purpose, which is what this criterion asks. Tracked in
+                issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
@@ -1108,7 +1158,10 @@ chapters:
           - name: web
             adherence:
               level: not-evaluated
-              notes: ""
+              notes: >-
+                Not yet evaluated. A status message has to reach assistive
+                technology without taking focus, which means listening for it
+                with a screen reader. Tracked in issue #2242.
           - name: authoring-tool
             adherence:
               level: not-evaluated
