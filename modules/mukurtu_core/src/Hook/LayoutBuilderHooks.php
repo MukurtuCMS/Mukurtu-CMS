@@ -15,11 +15,11 @@ class LayoutBuilderHooks {
   /**
    * Implements hook_plugin_filter_block__layout_builder_alter().
    *
-   * For basic pages only, administrators see every block except the footer and
-   * the "Custom" plugin blocks, and every other role is restricted to the
-   * curated set of inline block types. Other content types
-   * (landing pages etc.) manage their own restrictions via layout_builder_restrictions
-   * config and are not altered here.
+   * For basic pages only, administrators see every block except reusable
+   * content blocks, the footer, and the "Custom" plugin blocks, and every other
+   * role is restricted to the curated set of inline block types. Other content
+   * types (landing pages etc.) manage their own restrictions via
+   * layout_builder_restrictions config and are not altered here.
    */
   #[Hook('plugin_filter_block__layout_builder_alter')]
   public function restrictBlocksForRole(array &$definitions, array $extra): void {
@@ -35,38 +35,16 @@ class LayoutBuilderHooks {
       return;
     }
 
-    // These block_content bundles are only meant to be placed via "Create
-    // custom block" (a fresh, non-reusable entity per placement). Strip any
-    // already-saved reusable instance of them from the "Content block"
-    // library so editors -- including administrators -- can't accidentally
-    // place the same entity in more than one spot. The footer entity belongs
-    // in the footer region only, where the mukurtu_footer plugin renders it.
-    $no_reuse_bundles = [
-      'media_carousel_block',
-      'featured_content',
-      'local_contexts_block',
-      'horizontal_divider',
-      'call_to_action',
-      'mukurtu_footer',
-    ];
-    $block_content_storage = \Drupal::entityTypeManager()->getStorage('block_content');
+    // Hide these from every role:
+    // - Reusable content blocks. Content blocks come from "Add a block" (a
+    //   fresh entity per placement), so the same block types do not appear in
+    //   two lists, and one entity is never shared across pages by accident.
+    // - The "Custom" category, which holds site-wide plugin blocks (the footer
+    //   and the consent popup) that live in theme regions, not page bodies.
+    // - The footer and single-media inline types, which landing pages do not
+    //   offer either.
     foreach ($definitions as $plugin_id => $definition) {
-      if (str_starts_with($plugin_id, 'block_content:')) {
-        $block_uuid = substr($plugin_id, strlen('block_content:'));
-        $block_content = $block_content_storage->loadByProperties(['uuid' => $block_uuid]);
-        $block_content = $block_content ? reset($block_content) : NULL;
-        if ($block_content && in_array($block_content->bundle(), $no_reuse_bundles, TRUE)) {
-          unset($definitions[$plugin_id]);
-        }
-      }
-    }
-
-    // Hide these from every role. The "Custom" category holds site-wide
-    // plugin blocks (the footer and the consent popup) that live in theme
-    // regions, not page bodies. The footer and single-media inline types are
-    // not offered on landing pages either.
-    foreach ($definitions as $plugin_id => $definition) {
-      if ($this->untranslatedCategory($definition) === 'Custom') {
+      if (str_starts_with($plugin_id, 'block_content:') || $this->untranslatedCategory($definition) === 'Custom') {
         unset($definitions[$plugin_id]);
       }
     }

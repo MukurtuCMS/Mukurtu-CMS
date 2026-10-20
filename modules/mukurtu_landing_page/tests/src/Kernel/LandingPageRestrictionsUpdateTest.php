@@ -113,7 +113,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
     $config = \Drupal::configFactory()->getEditable(self::DISPLAY);
     $key = 'third_party_settings.layout_builder_restrictions.entity_view_mode_restriction';
     $settings = $config->get($key);
-    $settings['restricted_categories'] = array_values(array_diff($settings['restricted_categories'], ['Custom blocks']));
+    $settings['restricted_categories'] = array_values(array_diff($settings['restricted_categories'], ['Custom blocks', 'Custom block types']));
     $settings['restricted_categories'][] = 'Custom';
     $settings['denylisted_blocks'] = [];
     $config->set($key, $settings)->save();
@@ -291,32 +291,33 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   }
 
   /**
-   * Update 40205 hides the Custom category and the footer content block.
+   * Update 40205 hides the Custom category and reusable content blocks.
    */
-  public function testHidesCustomCategoryAndFooter(): void {
+  public function testHidesCustomCategoryAndReusableBlocks(): void {
     $this->writeDisplay();
     $this->rollBackCustomRestrictions();
     $this->assertContains('Custom', $this->restrictions()['restricted_categories']);
 
     $message = mukurtu_landing_page_update_40205();
 
-    $after = $this->restrictions();
-    $this->assertNotContains('Custom', $after['restricted_categories']);
-    $this->assertContains('Custom blocks', $after['restricted_categories']);
-    $this->assertSame(['mukurtu_footer'], $after['denylisted_blocks']['Custom block types']);
+    $after = $this->restrictions()['restricted_categories'];
+    $this->assertNotContains('Custom', $after);
+    $this->assertContains('Custom blocks', $after);
+    $this->assertContains('Custom block types', $after);
     $this->assertStringContainsString('Custom block category', $message);
-    $this->assertStringContainsString('Mukurtu Footer', $message);
+    $this->assertStringContainsString('reusable content blocks', $message);
 
     // Running it again changes nothing.
+    $before_rerun = $this->restrictions();
     $message = mukurtu_landing_page_update_40205();
-    $this->assertSame($after, $this->restrictions());
+    $this->assertSame($before_rerun, $this->restrictions());
     $this->assertStringContainsString('already up to date', $message);
   }
 
   /**
-   * Update 40205 keeps block types a site builder already denylisted.
+   * Update 40205 keeps a site builder's own per-type content block rules.
    */
-  public function testFooterDenylistKeepsExistingEntries(): void {
+  public function testRespectsContentBlockTypeRules(): void {
     $this->writeDisplay();
     $this->rollBackCustomRestrictions();
     $config = \Drupal::configFactory()->getEditable(self::DISPLAY);
@@ -326,7 +327,10 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
 
     mukurtu_landing_page_update_40205();
 
-    $this->assertSame(['call_to_action', 'mukurtu_footer'], $this->restrictions()['denylisted_blocks']['Custom block types']);
+    $after = $this->restrictions();
+    $this->assertNotContains('Custom block types', $after['restricted_categories']);
+    $this->assertContains('Custom blocks', $after['restricted_categories']);
+    $this->assertSame(['call_to_action'], $after['denylisted_blocks']['Custom block types']);
   }
 
   /**
@@ -349,6 +353,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
     $after = $this->restrictions()['restricted_categories'];
     $this->assertContains('Custom', $after);
     $this->assertNotContains('Custom blocks', $after);
+    $this->assertNotContains('Custom block types', $after);
   }
 
   /**

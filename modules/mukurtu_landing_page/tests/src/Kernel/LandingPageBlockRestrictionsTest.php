@@ -190,33 +190,28 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
   }
 
   /**
-   * The footer content block is hidden, other reusable blocks are not.
+   * Reusable content blocks are not offered on landing pages.
    *
-   * The footer is placed in the footer region by the mukurtu_footer plugin.
-   * Offering the entity in the "Content block" category put a second
-   * "Mukurtu Footer" next to the homepage hero blocks.
+   * Content blocks come from "Add a block" instead. Offering reusable ones as
+   * well put the same block types in two lists, and placing one shares a
+   * single entity across pages.
    */
-  public function testFooterContentBlockIsUnavailable(): void {
+  public function testReusableContentBlocksAreUnavailable(): void {
     $this->enableModules(['block_content', 'text', 'filter']);
     $this->installEntitySchema('block_content');
 
-    $blocks = [];
+    $definitions = [];
     foreach (['mukurtu_footer', 'image_with_description'] as $bundle) {
       BlockContentType::create(['id' => $bundle, 'label' => $bundle])->save();
       $block = BlockContent::create(['type' => $bundle, 'info' => $bundle]);
       $block->save();
-      $blocks[$bundle] = 'block_content:' . $block->uuid();
+      $definitions['block_content:' . $block->uuid()] = [
+        'category' => new TranslatableMarkup('Content block'),
+        'provider' => 'block_content',
+      ];
     }
 
-    $definitions = [];
-    foreach ($blocks as $plugin_id) {
-      $definitions[$plugin_id] = ['category' => new TranslatableMarkup('Content block'), 'provider' => 'block_content'];
-    }
-
-    $allowed = $this->filterDefinitions($definitions);
-
-    $this->assertNotContains($blocks['mukurtu_footer'], $allowed);
-    $this->assertContains($blocks['image_with_description'], $allowed);
+    $this->assertSame([], $this->filterDefinitions($definitions));
   }
 
   /**

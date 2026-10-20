@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
-use Drupal\block_content\Entity\BlockContent;
-use Drupal\block_content\Entity\BlockContentType;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\KernelTests\KernelTestBase;
@@ -40,7 +38,6 @@ class LayoutBuilderHooksTest extends KernelTestBase {
     'leaflet',
     'node',
     'block',
-    'block_content',
     'layout_discovery',
     'layout_builder',
     'mukurtu_core',
@@ -52,7 +49,6 @@ class LayoutBuilderHooksTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('user');
-    $this->installEntitySchema('block_content');
     Role::create(['id' => 'administrator', 'label' => 'Administrator'])->save();
   }
 
@@ -92,33 +88,21 @@ class LayoutBuilderHooksTest extends KernelTestBase {
   }
 
   /**
-   * Creates a reusable content block and returns its plugin ID.
-   */
-  protected function createReusableBlock(string $bundle): string {
-    if (!BlockContentType::load($bundle)) {
-      BlockContentType::create(['id' => $bundle, 'label' => $bundle])->save();
-    }
-    $block = BlockContent::create(['type' => $bundle, 'info' => $bundle, 'reusable' => TRUE]);
-    $block->save();
-    return 'block_content:' . $block->uuid();
-  }
-
-  /**
-   * Site-wide blocks are hidden from every role.
+   * Reusable and site-wide blocks are hidden from every role.
    *
-   * The "Custom" plugin blocks and the footer content block belong in theme
-   * regions. The footer and single-media inline types are not offered on
-   * landing pages, so basic pages match.
+   * Content blocks come from "Add a block", so reusable ones are not offered.
+   * The "Custom" plugin blocks belong in theme regions. The footer and
+   * single-media inline types are not offered on landing pages, so basic
+   * pages match.
    */
   #[DataProvider('roleProvider')]
   public function testSiteWideBlocksAreHidden(bool $administrator): void {
     $this->logIn($administrator);
-    $footer = $this->createReusableBlock('mukurtu_footer');
 
     $definitions = [
       'consent_popup' => ['category' => new TranslatableMarkup('Custom')],
       'mukurtu_footer' => ['category' => new TranslatableMarkup('Custom')],
-      $footer => ['category' => new TranslatableMarkup('Content block')],
+      'block_content:5c3a1f2e-0000-4000-8000-000000000001' => ['category' => new TranslatableMarkup('Content block')],
       'inline_block:mukurtu_footer' => ['category' => new TranslatableMarkup('Inline blocks')],
       'inline_block:media_block' => ['category' => new TranslatableMarkup('Inline blocks')],
       'inline_block:basic' => ['category' => new TranslatableMarkup('Inline blocks')],
@@ -140,14 +124,12 @@ class LayoutBuilderHooksTest extends KernelTestBase {
   }
 
   /**
-   * Administrators keep everything else, including reusable hero blocks.
+   * Administrators keep everything else.
    */
   public function testAdministratorKeepsOtherBlocks(): void {
     $this->logIn(TRUE);
-    $hero = $this->createReusableBlock('image_with_description');
 
     $definitions = [
-      $hero => ['category' => new TranslatableMarkup('Content block')],
       'views_block:mukurtu_browse_by_map-map_block' => ['category' => new TranslatableMarkup('Lists (Views)')],
       'inline_block:image_with_description' => ['category' => new TranslatableMarkup('Inline blocks')],
     ];

@@ -207,7 +207,7 @@ function mukurtu_landing_page_update_40204(): string {
 }
 
 /**
- * Hides the Custom block category and the Mukurtu Footer block from the landing page block chooser.
+ * Hides the Custom block category and reusable content blocks from the landing page block chooser.
  */
 function mukurtu_landing_page_update_40205(): string {
   $config = \Drupal::configFactory()
@@ -215,48 +215,51 @@ function mukurtu_landing_page_update_40205(): string {
   $settings = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction');
 
   // With no settings at all, Layout Builder Restrictions bails out and every
-  // block is offered. Restricting two of them here would be the first
+  // block is offered. Restricting some of them here would be the first
   // restriction this site has, so leave that decision to the site builder.
   if (empty($settings)) {
     return (string) t('Landing page block restrictions are not configured on this site; nothing to change.');
   }
 
+  // With per-block "Custom blocks" rules, the module files every reusable
+  // content block under "Custom blocks" instead of "Custom block types".
+  // Restricting "Custom blocks" would then hide content blocks the site
+  // builder chose to allow, and restricting "Custom block types" would do
+  // nothing, so leave such a site alone.
+  if (isset($settings['allowlisted_blocks']['Custom blocks']) || isset($settings['denylisted_blocks']['Custom blocks'])) {
+    return (string) t('Landing page block restrictions were already up to date.');
+  }
+
   $changes = [];
+  $restricted = $settings['restricted_categories'] ?? [];
 
   // Layout Builder Restrictions renames the "Custom" category to "Custom
   // blocks" before comparing it against restricted_categories, so a
   // restriction stored as "Custom" never matched. That let the Consent Popup
   // and Mukurtu Footer plugin blocks through to the landing page chooser.
-  //
-  // Skip sites with per-block "Custom blocks" rules: the module then files
-  // every reusable content block under "Custom blocks" too, and restricting
-  // that category would hide all of them.
-  $restricted = $settings['restricted_categories'] ?? [];
-  $per_block_rules = isset($settings['allowlisted_blocks']['Custom blocks']) || isset($settings['denylisted_blocks']['Custom blocks']);
-  if (in_array('Custom', $restricted, TRUE) && !$per_block_rules) {
-    $restricted = array_values(array_diff($restricted, ['Custom']));
-    if (!in_array('Custom blocks', $restricted, TRUE)) {
-      $restricted[] = 'Custom blocks';
-    }
-    $settings['restricted_categories'] = $restricted;
+  if (in_array('Custom', $restricted, TRUE)) {
+    $restricted = array_diff($restricted, ['Custom']);
+    $restricted[] = 'Custom blocks';
     $changes[] = (string) t('Hid the Custom block category from landing pages.');
   }
 
-  // The footer is a reusable content block, so it was offered in the "Content
-  // block" category alongside the homepage hero blocks. It belongs in the
-  // footer region only, which the mukurtu_footer plugin block already handles.
-  // Reusable content blocks are checked by bundle under "Custom block types".
-  $denied = $settings['denylisted_blocks']['Custom block types'] ?? [];
-  if (!in_array('mukurtu_footer', $denied, TRUE)) {
-    $denied[] = 'mukurtu_footer';
-    $settings['denylisted_blocks']['Custom block types'] = $denied;
-    $changes[] = (string) t('Hid the Mukurtu Footer content block from landing pages.');
+  // Reusable content blocks are checked under "Custom block types". Offering
+  // them next to the "Add a block" button put the same block types in two
+  // lists, and placing a reusable block shares one entity across pages.
+  // Respect a site builder's own per-type allowlist or denylist.
+  $type_rules = isset($settings['allowlisted_blocks']['Custom block types']) || isset($settings['denylisted_blocks']['Custom block types']);
+  if (!$type_rules && !in_array('Custom block types', $restricted, TRUE)) {
+    $restricted[] = 'Custom block types';
+    $changes[] = (string) t('Hid reusable content blocks from landing pages. Editors add content blocks with Add a block.');
   }
 
   if (!$changes) {
     return (string) t('Landing page block restrictions were already up to date.');
   }
 
+  $restricted = array_values(array_unique($restricted));
+  sort($restricted);
+  $settings['restricted_categories'] = $restricted;
   $config
     ->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction', $settings)
     ->save();
