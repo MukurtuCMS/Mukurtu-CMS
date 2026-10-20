@@ -1,7 +1,7 @@
 # Visitor geolocation
 
 The `/visitors/*` analytics reports (Times, Locations, Software, Performance) work
-out of the box. The **Locations** report's country map and its Region/City
+out of the box. The **Locations** report's visitor map and its Region/City
 breakdowns now also work out of the box: mukurtu_core automatically downloads and
 uses a free, redistributable geolocation database (DB-IP's "City Lite"), so no
 account, license key, or setup step is required. A site that wants better
@@ -63,6 +63,52 @@ country/region level, weaker on exact city/lat-long precision, particularly for
 mobile carriers, VPNs, and CGNAT'd ranges. It is what makes the map and
 Region/City tables show real (if approximate) data instead of nothing, for every
 Mukurtu site, with no setup step.
+
+## Past visits
+
+Visits saved before a site had a geolocation database have only a country guessed
+from the browser language, and no region, city or coordinates. So do the visits
+that were saved while DB-IP's missing region codes were making every geolocated
+visit fail (see Limitations). `Drupal\mukurtu_core\Service\VisitorsLocationBackfill`
+re-resolves them from their stored IP addresses automatically, through
+visitors_geoip's own `RebuildLocationService`:
+
+- It starts once, on the first cron run that finds a geolocation database
+  installed, and covers every visit up to the highest `visitors_id` at that
+  moment.
+- Each cron run does about 20 seconds of work. Progress is kept in the
+  `mukurtu_core.visitors_location_backfill` state key, and the status report shows
+  how many addresses are left.
+- It walks the table by id rather than repeatedly asking for "rows still missing
+  coordinates", so addresses no database can place (private ranges, for example)
+  are looked at once and do not stall it.
+
+To run it again (after adding a MaxMind key, say), first clear the coordinates of
+the rows to re-resolve, then delete the state key; the next cron run starts over:
+
+```
+drush state:delete mukurtu_core.visitors_location_backfill
+```
+
+## The visitor map
+
+The Locations report shows a map below its Continent and Country tables, and its
+country and region drill-downs show one above their table
+(`Drupal\mukurtu_core\Service\VisitorsCountryMap`). It has
+one circle per city, sized by unique visitors, at the average position of that
+city's visits, for the report's selected dates.
+
+By default every city gets its own circle. A site that does not want small
+numbers of visitors to be locatable can raise the threshold on the GeoIP settings
+form (`/admin/config/system/visitors/geoip`; stored in
+`mukurtu_core.visitors_map:city_threshold`, default 1). A city with fewer unique
+visitors than the threshold is then not plotted on its own: it is combined with
+the rest of its region, and a region still under the threshold with the rest of
+its country. Anything still under it at country level is left off the map (the
+tables still count it).
+
+When the DB-IP database is installed, the map shows the "IP Geolocation by DB-IP"
+credit its CC BY 4.0 licence requires.
 
 ## Configuring MaxMind for better precision (optional)
 
