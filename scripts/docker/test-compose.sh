@@ -187,7 +187,13 @@ if [[ -d "$WORK/multi-tenant" ]]; then
   # (the .env.example defaults are the local-try values: *.localhost names, ports 8088 and 8443)
   via_caddy() { curl -sk --max-time 20 --resolve "$1:8443:127.0.0.1" "https://$1:8443$2"; }
   code_via_caddy() { curl -sk --max-time 20 -o /dev/null -w '%{http_code}' --resolve "$1:8443:127.0.0.1" "https://$1:8443$2"; }
-  dc multi-tenant up -d >/dev/null 2>&1
+  # Starting can fail for reasons outside the example (a registry that refuses a pull),
+  # so try a few times, and keep the output to show if it never works.
+  up_out=""
+  for attempt in 1 2 3; do
+    up_out="$(dc multi-tenant up -d 2>&1)" && break
+    sleep 15
+  done
   ok=false
   for _ in $(seq 1 300); do
     if [[ "$(code_via_caddy a.localhost /user/login)" == 200 && "$(code_via_caddy b.localhost /user/login)" == 200 ]]; then ok=true; break; fi
@@ -214,6 +220,8 @@ if [[ -d "$WORK/multi-tenant" ]]; then
     assert_eq "denied" "$(dc multi-tenant exec -T db sh -c "mariadb -usite_a -p'$password_a' -e 'use site_b' 2>&1 | grep -q 'Access denied' && echo denied")" "site A's database user cannot open site B's database"
   else
     fail "both sites install and answer through Caddy"
+    echo "--- compose up:"; echo "$up_out" | tail -20
+    echo "--- compose ps:"; dc multi-tenant ps -a 2>&1
     dc multi-tenant logs --tail 30 caddy site_a site_b 2>&1
   fi
 fi
