@@ -6,9 +6,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 IMAGE=mukurtu-test:image
 HARNESS="$(mktemp -t mukurtu-harness.XXXXXX)"
-trap 'rm -f "$HARNESS" "$BUILD_LOG"' EXIT
+trap 'rm -f "$HARNESS" "$BUILD_LOG" "${EXTRA_FILE:-}"' EXIT
 
-if ! build_image runtime "$IMAGE" "${DEFAULT_BUILD_ARGS[@]}"; then
+if ! runtime_image "$IMAGE"; then
   fail "runtime image builds"; tail -30 "$BUILD_LOG"; finish; exit 1
 fi
 
@@ -30,6 +30,7 @@ catch (Throwable $e) {
 PHP
 chmod a+r "$HARNESS"
 
+DOCKER_EXTRA=()   # extra `docker run` arguments for settings(), such as -v
 BASE_ENV=(
   MUKURTU_DB_HOST=db MUKURTU_DB_NAME=mukurtu MUKURTU_DB_USER=mukurtu MUKURTU_DB_PASSWORD=secret
   MUKURTU_TRUSTED_HOSTS=example.com MUKURTU_HASH_SALT=salt
@@ -42,7 +43,7 @@ settings() {
   if [[ "${1:-}" == "-s" ]]; then pre="$2"; shift 2; fi
   local env_args=() kv
   for kv in "${BASE_ENV[@]}" "$@"; do env_args+=(-e "$kv"); done
-  docker run --rm --entrypoint sh -v "$HARNESS:/harness.php:ro" "${env_args[@]}" "$IMAGE" -c "$pre php /harness.php"
+  docker run --rm --entrypoint sh -v "$HARNESS:/harness.php:ro" "${DOCKER_EXTRA[@]}" "${env_args[@]}" "$IMAGE" -c "$pre php /harness.php"
 }
 
 # without <VAR>: BASE_ENV minus one variable
@@ -138,5 +139,39 @@ assert_eq "hide" "$(jget "$out" 'd["config"]["system.logging"]["error_level"]')"
 out="$(settings MUKURTU_FILE_TEMP_PATH=/var/www/files/tmp MUKURTU_CONFIG_SYNC_DIR=/data/sync)"
 assert_eq "/var/www/files/tmp" "$(jget "$out" 'd["settings"]["file_temp_path"]')" "temp path override"
 assert_eq "/data/sync" "$(jget "$out" 'd["settings"]["config_sync_directory"]')" "config sync directory override"
+
+echo "settings: Drupal behaviours the image fixes for every site"
+out="$(settings)"
+assert_eq "False" "$(jget "$out" 'd["settings"]["enable_html5_validation"]')" "HTML5 validation is off (Drupal 12's default; clears the Status report warning)"
+lock_hash="$(docker run --rm --entrypoint sh "$IMAGE" -c 'sha256sum /var/www/html/composer.lock | cut -c1-16')"
+assert_eq "$lock_hash" "$(jget "$out" 'd["settings"]["deployment_identifier"]')" "deployment_identifier follows the code and dependencies (hash of composer.lock)"
+
+echo "settings: the site's own settings file (MUKURTU_SETTINGS_FILE)"
+EXTRA_FILE="$(mktemp -t mukurtu-extra.XXXXXX)"
+cat >"$EXTRA_FILE" <<'PHP'
+<?php
+$settings['extra_setting'] = 'from-include';
+$config['system.site']['name'] = 'Overridden';
+$settings['file_temp_path'] = '/overridden';
+PHP
+chmod 444 "$EXTRA_FILE"
+DOCKER_EXTRA=(-v "$EXTRA_FILE:/etc/mukurtu/settings.php:ro")
+out="$(settings MUKURTU_SETTINGS_FILE=/etc/mukurtu/settings.php)"
+assert_eq "from-include" "$(jget "$out" 'd["settings"]["extra_setting"]')" "the file can add settings"
+assert_eq "Overridden" "$(jget "$out" 'd["config"]["system.site"]["name"]')" "the file can add config overrides"
+assert_eq "/overridden" "$(jget "$out" 'd["settings"]["file_temp_path"]')" "the file runs last, so it can override the image's own settings"
+out="$(settings)"
+assert_eq "None" "$(jget "$out" 'd["settings"].get("extra_setting")')" "without the variable nothing is included"
+out="$(settings MUKURTU_SETTINGS_FILE=/etc/mukurtu/missing.php)"
+assert_contains "$(jget "$out" 'd.get("exception","")')" "MUKURTU_SETTINGS_FILE" "a missing file is reported by name"
+out="$(settings MUKURTU_SETTINGS_FILE=relative.php)"
+assert_contains "$(jget "$out" 'd.get("exception","")')" "MUKURTU_SETTINGS_FILE" "a relative path is refused, naming the variable"
+# A file the PHP process could write is refused: whoever can write it can run code in every request.
+chmod 666 "$EXTRA_FILE"
+DOCKER_EXTRA=(-v "$EXTRA_FILE:/etc/mukurtu/settings.php")
+out="$(settings MUKURTU_SETTINGS_FILE=/etc/mukurtu/settings.php)"
+assert_contains "$(jget "$out" 'd.get("exception","")')" "writable" "a file the PHP process can write is refused"
+DOCKER_EXTRA=()
+rm -f "$EXTRA_FILE"
 
 finish

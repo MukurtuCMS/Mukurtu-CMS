@@ -2,7 +2,7 @@
 # How to run it: README.md. For anything real use ../single-site.
 services:
   db:
-    image: mariadb:11
+    image: mariadb:11.8
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_general_ci

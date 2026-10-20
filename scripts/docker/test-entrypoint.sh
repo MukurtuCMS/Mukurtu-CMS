@@ -25,7 +25,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if ! build_image runtime "$FULL" "${DEFAULT_BUILD_ARGS[@]}"; then
+if ! runtime_image "$FULL"; then
   fail "runtime image builds"; tail -30 "$BUILD_LOG"; finish; exit 1
 fi
 
@@ -220,6 +220,7 @@ assert_eq "$salt_before" "$(docker exec "$SITE" cat /var/www/files/private/.hash
 restart_log="$(docker logs --since 60s "$SITE" 2>&1)"
 assert_not_contains "$restart_log" "Installing Mukurtu" "restart log shows no installation"
 assert_contains "$restart_log" "existing installation" "restart log says an installation exists"
+assert_contains "$restart_log" "No database updates required" "restart log lists the pending updates before they run (here: none)"
 
 echo "entrypoint: sigterm"
 start=$SECONDS

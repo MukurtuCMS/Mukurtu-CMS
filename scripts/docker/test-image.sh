@@ -67,7 +67,7 @@ assert_contains "$patched" "drupal/paragraphs" "profile patches are applied: dru
 
 
 echo "runtime stage: build"
-if build_image runtime "$IMAGE" "${DEFAULT_BUILD_ARGS[@]}"; then
+if runtime_image "$IMAGE"; then
   pass "runtime builds"
 else
   fail "runtime builds"; tail -30 "$BUILD_LOG"; finish; exit 1
@@ -88,13 +88,14 @@ check "$IMAGE" "has pdftoppm" 'pdftoppm --help'
 echo "runtime: contents and users"
 for tag in "$IMAGE"; do
   modules="$(run_in "$tag" 'php -m')"
-  for ext in gd intl zip "Zend OPcache" pdo_mysql mbstring apcu curl dom fileinfo xml SimpleXML; do
+  for ext in gd intl zip "Zend OPcache" pdo_mysql mbstring apcu maxminddb curl dom fileinfo xml SimpleXML; do
     assert_contains "$modules" "$ext" "$tag has extension: $ext"
   done
   gd="$(run_in "$tag" "php -r 'foreach (gd_info() as \$k => \$v) { echo \$k, \"=\", var_export(\$v, true), \"\\n\"; }'")"
   assert_contains "$gd" "JPEG Support=true" "$tag gd: JPEG"
   assert_contains "$gd" "WebP Support=true" "$tag gd: WebP"
   assert_contains "$gd" "FreeType Support=true" "$tag gd: FreeType"
+  assert_contains "$gd" "AVIF Support=true" "$tag gd: AVIF (the Status report flags its absence)"
   check "$tag" "does not disable exec()" 'php -r "exit(in_array(\"exec\", array_map(\"trim\", explode(\",\", ini_get(\"disable_functions\")))) ? 1 : 0);"'
   check "$tag" "has no composer binary" '! command -v composer'
   check "$tag" "has tini" 'command -v tini'
@@ -112,6 +113,26 @@ for tag in "$IMAGE"; do
   assert_contains "$volumes" "/var/www/files/public" "$tag declares the public volume"
   assert_contains "$volumes" "/var/www/files/private" "$tag declares the private volume"
 done
+
+echo "runtime: PDFs whose fonts are not embedded still produce a thumbnail"
+# A one-page PDF that names the standard Helvetica font without embedding it, as many
+# PDFs do. Without fonts in the image, pdftoppm logs "Couldn't find a font" and draws a
+# blank page, while pdftotext still works, so the loss is easy to miss.
+pdf_out="$(docker run --rm --entrypoint sh "$IMAGE" -c '
+  cd /tmp
+  content="BT /F1 48 Tf 20 30 Td (Mukurtu) Tj ET"
+  printf "%%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 100]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n4 0 obj<</Length %d>>stream\n%s\nendstream endobj\n5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\ntrailer<</Root 1 0 R/Size 6>>\n%%%%EOF\n" "${#content}" "$content" > nofonts.pdf
+  pdftoppm -png -singlefile -r 72 nofonts.pdf thumb 2>/tmp/pdftoppm.err
+  echo "TEXT=$(pdftotext nofonts.pdf - 2>/dev/null | tr -d "\n\f")"
+  echo "FONTERR=$(grep -c "find a font" /tmp/pdftoppm.err)"
+  php -r "\$i = imagecreatefrompng(\"thumb.png\"); \$n = 0; for (\$y = 0; \$y < imagesy(\$i); \$y++) { for (\$x = 0; \$x < imagesx(\$i); \$x++) { if ((imagecolorat(\$i, \$x, \$y) & 0xFFFFFF) !== 0xFFFFFF) { \$n++; } } } echo \"INKED=\$n\n\";"
+' 2>&1)"
+assert_contains "$pdf_out" "TEXT=Mukurtu" "text extraction works on the font-less PDF"
+assert_contains "$pdf_out" "FONTERR=0" "pdftoppm finds a font for Helvetica"
+inked="$(sed -n 's/^INKED=//p' <<<"$pdf_out")"
+[[ "${inked:-0}" -gt 200 ]] && pass "the thumbnail is not blank ($inked inked pixels)" || fail "the thumbnail is not blank (inked pixels: '${inked:-none}')"
+check "$IMAGE" "has the CMap and encoding data for non-Latin PDFs (poppler-data)" 'test -d /usr/share/poppler'
+check "$IMAGE" "has fontconfig" 'command -v fc-match'
 
 echo "runtime: mail without an SMTP server fails with a clear message"
 for tag in "$IMAGE"; do

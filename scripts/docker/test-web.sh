@@ -13,7 +13,7 @@ NAME="mukurtu-web-test-$$"
 STUB="$(mktemp -d -t mukurtu-stub.XXXXXX)"
 trap 'docker rm -f "$NAME" >/dev/null 2>&1; rm -rf "$STUB" "$BUILD_LOG"' EXIT
 
-if ! build_image runtime "$IMAGE" "${DEFAULT_BUILD_ARGS[@]}"; then
+if ! runtime_image "$IMAGE"; then
   fail "runtime image builds"; tail -30 "$BUILD_LOG"; finish; exit 1
 fi
 
@@ -23,6 +23,8 @@ mkdir -p "$STUB/sites/default/files/css" "$STUB/sites/default/files/styles/thumb
 cat >"$STUB/index.php" <<'PHP'
 <?php
 header('X-Pool: ' . getenv('MUKURTU_POOL'));
+header('X-Content-Type-Options: nosniff');   // Drupal sets this itself
+if (str_contains($_SERVER['REQUEST_URI'] ?? '', 'bigpage')) { echo str_repeat('x', 6000000); }
 if (str_contains($_SERVER['REQUEST_URI'] ?? '', 'slow')) { sleep(8); }
 echo 'index ' . ($_SERVER['REQUEST_URI'] ?? '') . ' script=' . ($_SERVER['SCRIPT_FILENAME'] ?? '');
 PHP
@@ -110,6 +112,25 @@ docker exec "$NAME" sh -c 'head -c 20000000 /dev/zero > /tmp/upload.bin'
 upload="$(docker exec "$NAME" curl -s -o /dev/null -w '%{http_code}' --max-time 20 --data-binary @/tmp/upload.bin http://127.0.0.1:8080/index.php)"
 assert_eq "200" "$upload" "a 20 MB upload succeeds although the run directory holds only 4 MB"
 
+echo "headers are not sent twice, large pages stay in memory, and login tokens are not logged"
+count_header() { grep -ci "^$2:" <<<"$1" || true; }
+assert_eq "1" "$(count_header "$(get /node/1)" X-Content-Type-Options)" "a PHP response carries X-Content-Type-Options once (Drupal sets it, nginx does not repeat it)"
+assert_eq "1" "$(count_header "$(get /sites/default/files/css/x.css)" X-Content-Type-Options)" "a static file carries it once (nginx sets it)"
+assert_eq "1" "$(count_header "$(get /node/1)" Referrer-Policy)" "a PHP response carries Referrer-Policy once"
+# nginx spills a response to a temporary file when the client reads more slowly than PHP
+# writes and the page is bigger than the socket buffers (about 6 MB here). That is good (it
+# frees the PHP worker) but nginx logs it at "warn" level together with the request URL,
+# which for a login link includes the token. Read a big page slowly, as a real browser
+# might (about 4 seconds for 6 MB).
+assert_eq "200" "$(docker exec "$NAME" curl -s -o /dev/null -w '%{http_code}' --max-time 30 --limit-rate 1500k http://127.0.0.1:8080/bigpage)" "a 6 MB page is served to a slow client"
+assert_not_contains "$(docker logs "$NAME" 2>&1)" "an upstream response is buffered to a temporary file" "the spill to a temporary file is not logged (the log line would carry the URL)"
+docker exec "$NAME" curl -s -o /dev/null --max-time 10 -H 'Referer: http://localhost:8080/user/reset/1/1700000000/REFERERSECRET/login' http://127.0.0.1:8080/user/reset/1/1700000000/URLSECRET/login
+sleep 1
+access_log="$(docker logs "$NAME" 2>&1)"
+assert_not_contains "$access_log" "URLSECRET" "a one-time login token in the URL is not written to the log"
+assert_not_contains "$access_log" "REFERERSECRET" "nor one in the Referer header"
+assert_contains "$access_log" "/user/reset/[redacted]" "the request is still logged, with the token replaced"
+
 echo "private downloads cannot starve page requests"
 # Three slow downloads: two hold the files pool's workers, one waits.
 for i in 1 2 3; do
@@ -120,6 +141,25 @@ started=$SECONDS
 page="$(docker exec "$NAME" curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:8080/node/1)"
 assert_eq "200" "$page" "a page request is answered while private downloads are running"
 [[ $((SECONDS - started)) -lt 4 ]] && pass "and it is answered promptly" || fail "and it is answered promptly"
+
+echo "cron: the first run comes soon after start, then every interval"
+# Run cron.sh with stand-ins for sleep and drush that record what they were asked, so the
+# timing can be checked without waiting for it.
+cron_run() { # cron_run <interval>: prints the sleep lengths in order, one per line
+  docker run --rm --entrypoint sh -e MUKURTU_CRON_INTERVAL="$1" "$IMAGE" -c '
+    mkdir -p /tmp/bin
+    printf "#!/bin/sh\necho \"\$1\" >> /tmp/sleeps\nexec /bin/busybox sleep 0.05\n" > /tmp/bin/sleep
+    printf "#!/bin/sh\necho run >> /tmp/runs\n" > /tmp/bin/drush
+    chmod +x /tmp/bin/*
+    PATH=/tmp/bin:$PATH timeout 2 /usr/local/lib/mukurtu/cron.sh >/dev/null 2>&1
+    cat /tmp/sleeps' 2>&1
+}
+sleeps="$(cron_run 3600)"
+first="$(sed -n 1p <<<"$sleeps")"
+[[ "$first" =~ ^[0-9]+$ && "$first" -ge 60 && "$first" -le 90 ]] && pass "with a 3600 s interval the first run waits about a minute ($first s), not an hour" || fail "with a 3600 s interval the first run waits about a minute (got '$first')"
+assert_eq "3600" "$(sed -n 2p <<<"$sleeps")" "and the runs after that wait the full interval"
+sleeps="$(cron_run 5)"
+assert_eq "5" "$(sed -n 1p <<<"$sleeps")" "an interval shorter than a minute is used from the start"
 
 echo "shutdown"
 start=$SECONDS

@@ -27,7 +27,9 @@ RUN set -eux; \
     apk add --no-cache \
       freetype \
       icu-libs \
+      libavif \
       libjpeg-turbo \
+      libmaxminddb \
       libpng \
       libwebp \
       libzip; \
@@ -35,14 +37,16 @@ RUN set -eux; \
       $PHPIZE_DEPS \
       freetype-dev \
       icu-dev \
+      libavif-dev \
       libjpeg-turbo-dev \
+      libmaxminddb-dev \
       libpng-dev \
       libwebp-dev \
       libzip-dev; \
-    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp; \
+    docker-php-ext-configure gd --with-avif --with-freetype --with-jpeg --with-webp; \
     docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip bcmath; \
-    pecl install apcu; \
-    docker-php-ext-enable apcu; \
+    pecl install apcu maxminddb; \
+    docker-php-ext-enable apcu maxminddb; \
     apk del --no-network .build-deps; \
     rm -rf /tmp/pear /var/cache/apk/*
 
@@ -119,6 +123,11 @@ RUN set -eux; \
 # ---------------------------------------------------------------------------
 FROM php-base AS runtime
 
+# fontconfig and font-liberation: many PDFs name a standard font (Helvetica, Times, Courier)
+# without embedding it. With no fonts installed pdftoppm draws nothing for them, so the
+# thumbnail is blank while text extraction still works. Liberation is metric-compatible
+# with those fonts. poppler-data holds the character maps poppler needs for CJK and other
+# non-Latin PDFs. (PDFs in other scripts must embed their fonts, so need nothing more.)
 RUN set -eux; \
     apk add --no-cache \
       mariadb-client \
@@ -126,7 +135,10 @@ RUN set -eux; \
       nginx \
       tini \
       ffmpeg \
-      poppler-utils
+      poppler-utils \
+      poppler-data \
+      fontconfig \
+      font-liberation
 
 # Fail the build if a media tool does not run. Mukurtu skips thumbnails and PDF text
 # silently when a tool is missing, so the image must never lack one. The probes are
@@ -141,11 +153,11 @@ RUN set -eu; \
 RUN set -eu; \
     php -r ' \
       $missing = []; \
-      foreach (["ctype","curl","dom","fileinfo","filter","gd","hash","iconv","intl","json","libxml","mbstring","openssl","pcre","PDO","pdo_mysql","session","SimpleXML","SPL","tokenizer","xml","xmlwriter","zip","zlib","Zend OPcache","apcu"] as $e) { \
+      foreach (["ctype","curl","dom","fileinfo","filter","gd","hash","iconv","intl","json","libxml","mbstring","openssl","pcre","PDO","pdo_mysql","session","SimpleXML","SPL","tokenizer","xml","xmlwriter","zip","zlib","Zend OPcache","apcu","maxminddb"] as $e) { \
         if (!extension_loaded($e)) { $missing[] = $e; } \
       } \
       $gd = gd_info(); \
-      foreach (["JPEG Support","WebP Support","FreeType Support"] as $f) { \
+      foreach (["JPEG Support","WebP Support","FreeType Support","AVIF Support"] as $f) { \
         if (empty($gd[$f])) { $missing[] = "gd: " . $f; } \
       } \
       if (in_array("exec", array_map("trim", explode(",", (string) ini_get("disable_functions"))), true)) { \

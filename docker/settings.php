@@ -139,3 +139,31 @@ $settings['class_loader_auto_detect'] = FALSE;
 // Never show errors on screen. They go to the container log and the database
 // log, where an administrator can read them.
 $config['system.logging']['error_level'] = 'hide';
+
+// Drupal 12 turns browser-side HTML5 validation off on every form, and the Status
+// report warns until a site sets this. Turning it off here means forms are validated
+// by Drupal on the server, which shows its own error messages.
+// See https://www.drupal.org/node/3537128
+$settings['enable_html5_validation'] = FALSE;
+
+// Changes whenever the code or its dependencies change, so Drupal can invalidate
+// caches (asset URLs, for example) on an upgrade. The lock file records exactly what
+// the image contains.
+if (is_readable('/var/www/html/composer.lock')) {
+  $settings['deployment_identifier'] = substr(hash_file('sha256', '/var/www/html/composer.lock'), 0, 16);
+}
+
+// The site's own settings (a Redis cache, extra $config overrides, ...): a PHP file
+// that the operator mounts and names here. It runs last, so it can override anything
+// above. It must not be writable by the PHP process: whoever can write it can run
+// code in every request, so a writable file is refused. Mount it read-only.
+$extra = mukurtu_env('MUKURTU_SETTINGS_FILE');
+if ($extra !== NULL) {
+  if (!str_starts_with($extra, '/') || !is_file($extra) || !is_readable($extra)) {
+    throw new RuntimeException("MUKURTU_SETTINGS_FILE is '{$extra}', which is not a readable file (give an absolute path)");
+  }
+  if (is_writable($extra)) {
+    throw new RuntimeException("MUKURTU_SETTINGS_FILE ({$extra}) is writable by the PHP process; mount it read-only");
+  }
+  include $extra;
+}

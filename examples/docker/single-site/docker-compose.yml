@@ -5,7 +5,7 @@ name: mukurtu
 
 services:
   db:
-    image: mariadb:11
+    image: mariadb:11.8
     restart: unless-stopped
     # The settings Drupal asks of MariaDB/MySQL:
     #   utf8mb4          - emoji and non-Latin scripts are stored correctly

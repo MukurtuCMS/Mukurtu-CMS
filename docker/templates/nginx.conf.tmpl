@@ -7,7 +7,11 @@
 
 worker_processes @@MUKURTU_NGINX_WORKER_PROCESSES@@;
 pid @@MUKURTU_RUN_DIR@@/nginx.pid;
-error_log stderr warn;
+# Errors and above only. At "warn" nginx logs every response it has to spill to a temporary
+# file (a big page to a slow client; that is fine, it frees the PHP worker) together
+# with the request URL, and for a one-time login link the URL contains the token. The
+# access log redacts those; an error log line cannot be.
+error_log stderr error;
 
 events {
   worker_connections @@MUKURTU_NGINX_WORKER_CONNECTIONS@@;
@@ -46,6 +50,19 @@ http {
   open_file_cache_valid 60s;
   open_file_cache_min_uses 2;
   open_file_cache_errors on;
+
+  # One-time login links (/user/reset/<uid>/<time>/<token>) are credentials until used.
+  # The URL and a Referer that contains one are logged with the token replaced.
+  map $request_uri $mukurtu_log_uri {
+    ~^/user/reset/ "/user/reset/[redacted]";
+    default $request_uri;
+  }
+  map $http_referer $mukurtu_log_referer {
+    ~^(?<before>.*/user/reset/) "${before}[redacted]";
+    default $http_referer;
+  }
+  log_format mukurtu '$remote_addr - $remote_user [$time_local] "$request_method $mukurtu_log_uri $server_protocol" '
+                     '$status $body_bytes_sent "$mukurtu_log_referer" "$http_user_agent"';
 
   @@MUKURTU_NGINX_ACCESS_LOG_DIRECTIVE@@
 
@@ -101,6 +118,8 @@ http {
       fastcgi_param SCRIPT_NAME /index.php;
       fastcgi_param HTTP_PROXY "";
       fastcgi_read_timeout @@MUKURTU_PHP_MAX_EXECUTION_TIME@@s;
+      # Drupal sends X-Content-Type-Options itself; nginx's add_header would repeat it.
+      fastcgi_hide_header X-Content-Type-Options;
       fastcgi_pass php_www;
     }
 
@@ -119,6 +138,7 @@ http {
       fastcgi_param HTTP_PROXY "";
       fastcgi_buffering off;
       fastcgi_read_timeout 3600s;
+      fastcgi_hide_header X-Content-Type-Options;
       fastcgi_pass php_files;
     }
 

@@ -67,7 +67,7 @@ services:
     networks: [proxy]
 
   db:
-    image: mariadb:11
+    image: mariadb:11.8
     restart: unless-stopped
     command:
       - --character-set-server=utf8mb4

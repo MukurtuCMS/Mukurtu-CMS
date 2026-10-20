@@ -91,7 +91,7 @@ esac
 
 # --- nginx access log -----------------------------------------------------
 if [ "$MUKURTU_NGINX_ACCESS_LOG" = true ]; then
-  MUKURTU_NGINX_ACCESS_LOG_DIRECTIVE="access_log /dev/stdout;"
+  MUKURTU_NGINX_ACCESS_LOG_DIRECTIVE="access_log /dev/stdout mukurtu;"
 else
   MUKURTU_NGINX_ACCESS_LOG_DIRECTIVE="access_log off;"
 fi

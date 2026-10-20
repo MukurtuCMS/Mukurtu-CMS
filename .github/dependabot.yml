@@ -45,3 +45,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+
+  # The database image used by the example Compose files, pinned to a series there.
+  - package-ecosystem: docker-compose
+    directories:
+      - "/examples/docker/*"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
