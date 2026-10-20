@@ -52,8 +52,9 @@ class LbPendingMessagesControllerTest extends KernelTestBase {
   }
 
   /**
-   * Tests that the route itself requires the "configure any layout"
-   * permission, not just an authenticated session.
+   * Tests that the route requires the "configure any layout" permission.
+   *
+   * An authenticated session alone is not enough.
    */
   public function testRouteRequiresLayoutBuilderPermission(): void {
     $access_manager = \Drupal::service('access_manager');

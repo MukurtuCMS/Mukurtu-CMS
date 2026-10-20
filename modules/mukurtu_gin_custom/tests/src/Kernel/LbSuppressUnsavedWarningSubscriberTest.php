@@ -58,9 +58,10 @@ class LbSuppressUnsavedWarningSubscriberTest extends KernelTestBase {
   }
 
   /**
-   * Tests the real fix end-to-end: core's own listener queues the warning,
-   * dispatched through the actual event dispatcher (not called directly), and
-   * this subscriber's lower-priority registration removes it in the same
+   * Tests the real fix end-to-end.
+   *
+   * Core's own listener queues the warning, dispatched through the actual
+   * event dispatcher (not called directly), and this subscriber's lower-priority registration removes it in the same
    * dispatch. Unlike the tests above, this never hardcodes core's warning
    * text -- it only asserts on the outcome of the real PREPARE_LAYOUT
    * dispatch, so it fails loudly (instead of silently no-op'ing) if core ever
