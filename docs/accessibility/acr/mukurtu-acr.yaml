@@ -78,8 +78,16 @@ chapters:
                 reviewed in the manual audit cycle.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Authors are prompted for alt text wherever they add an image.
+                Alt is required on seven of the eight image fields across
+                media bundles, including field_media_image on the Image
+                bundle, which is the path authors use, and on the article
+                image and footer logo fields. Two exceptions remain: the
+                document thumbnail and the user picture. The tool cannot judge
+                whether the text entered is a useful description, which no
+                authoring tool can.
       - num: 1.2.1
         components:
           - name: web
@@ -123,8 +131,14 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The video media type carries caption and subtitle tracks
+                (issues #2329 and #2358), and the track widget requires a
+                language to be chosen for each track, so one cannot be added
+                without saying what language it is in. Whether an author
+                supplies a track for a given video is editorial work the tool
+                cannot do for them.
       - num: 1.2.3
         components:
           - name: web
@@ -167,8 +181,15 @@ chapters:
                 docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The rich text editor gives authors headings, ordered and
+                unordered lists and blockquotes, with tables in the full HTML
+                format, so structure is expressed as markup rather than as
+                visual formatting. The text formats restrict saved output to
+                those elements, so an author cannot store structure the theme
+                has no semantics for. The tool does not check that an author
+                chose the right heading level.
       - num: 1.3.2
         components:
           - name: web
@@ -630,26 +651,15 @@ chapters:
             adherence:
               level: partially-supports
               notes: >-
-                July 2026 scans of pages rendered with the administration
-                toolbar found 15 toolbar buttons and links with no accessible
-                name, and an invalid ARIA attribute on three toolbar menus.
-                Both originate upstream in the Gin admin theme and affect
-                authenticated administrators and authors only. Both are now
-                resolved (September 2026, issue #2003, PR #2225): the
-                collapsed toolbar hid its labels with display:none, removing
-                them from the accessibility tree, and now uses a
-                visually-hidden technique instead; the invalid attribute is
-                corrected by carrying Gin's own reviewed fix as a composer
-                patch until it is released upstream. A re-scan of
-                /admin/content with the toolbar collapsed reports no
-                remaining violations of these rules. Evidence for the
-                September 2026 changes is recorded by criterion in
-                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
-                The full authoring interface has still not been evaluated,
-                so this remains a partial claim pending a Phase 2 audit of
-                the authoring surface. Issue #1975 scoped and closed out
-                that phase's inventory and its form-by-form code read; the
-                evaluation itself does not yet have its own tracking issue.
+                Authors do not write ARIA. The text formats restrict saved
+                markup to a known set of elements and attributes, so content
+                created through the editor cannot introduce an incorrect name,
+                role or value. The source editing button, available in the
+                full HTML format, does allow raw markup and nothing checks
+                what is pasted there. The accessible-name defects previously
+                reported in this row were in the authoring interface itself;
+                under this report's scoping those belong to the Web component
+                and are recorded there.
   success_criteria_level_aa:
     notes: ""
     criteria:
@@ -693,8 +703,15 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: does-not-support
+              notes: >-
+                The tool gives authors no way to attach an audio-described
+                version of a video. Building the capability is a decision
+                taken and deferred, not an oversight (issue #2355). Captions
+                and subtitles are supported and cover 1.2.2. Even with the
+                capability in place this could reach partially-supports but
+                never supports, because whether an item has a described
+                version is editorial work in each community.
       - num: 1.3.4
         components:
           - name: web
@@ -774,8 +791,18 @@ chapters:
                 docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Where an author chooses colours, the tool checks them. The
+                custom palette lets a site set six colours written straight
+                into the stylesheet. PaletteContrastAnalyzer compares them
+                against the theme's real colour pairings, derived from the
+                compiled stylesheet rather than a hand-maintained list, and
+                warns on each pairing below the WCAG AA ratio, naming the
+                ratio, the requirement and an affected component. It warns
+                rather than blocks, so a site can still ship a failing palette
+                deliberately. Added for issue #1054, which the code records as
+                an ATAG 2.0 B.2.2 gap.
       - num: 1.4.4
         components:
           - name: web
@@ -1063,8 +1090,16 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Authors can mark a run of text with its language in the rich
+                text editor. The Language button is fed from the site's own
+                language vocabulary rather than a fixed list, so a community's
+                languages are selectable under their own names (PR #2440), and
+                a language marked as read right to left also carries dir (PR
+                #2441). The gap is plain text: titles, names and taxonomy term
+                names cannot hold inline markup, so text in those fields
+                cannot be marked at all. Recorded when issue #2354 closed.
       - num: 3.2.3
         components:
           - name: web
