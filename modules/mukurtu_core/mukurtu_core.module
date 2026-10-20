@@ -990,6 +990,8 @@ function mukurtu_core_preprocess_leaflet_map(array &$variables) {
     $variables['attributes'] = [];
   }
   $variables['attributes']['aria-label'] = t('Visitor locations');
+  // aria-label is not allowed on an element with no role.
+  $variables['attributes']['role'] = 'group';
 }
 
 /**
