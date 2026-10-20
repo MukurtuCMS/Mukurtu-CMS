@@ -60,9 +60,13 @@ chapters:
       the product's whole browser interface, the visitor and member
       experience and the administrative one alike, and the page inventory
       behind these assessments includes all three. The "Authoring Tool"
-      component covers conformance with ATAG 2.0, which asks additionally
-      that an authoring tool help its authors produce accessible content; it
-      will be evaluated in a later phase.
+      component covers ATAG 2.0's additional ask, that an authoring tool
+      help its authors produce accessible content. It reports on what the
+      tool does for an author, not on whether the authoring interface is
+      itself accessible, which the Web component already covers. Its
+      evaluation is under way and tracked in issue #2457: the criteria an
+      author can affect are assessed first, and the rest remain
+      not-evaluated.
     criteria:
       - num: 1.1.1
         components:
