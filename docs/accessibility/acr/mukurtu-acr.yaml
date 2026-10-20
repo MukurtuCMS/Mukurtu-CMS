@@ -109,8 +109,14 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Digital heritage carries field_transcription, described to
+                authors as a basic text transcription of an audio or video
+                recording, which is the alternative this criterion asks for.
+                The gap is that the field sits on the digital heritage item
+                rather than on the audio or video media entity, so a recording
+                used outside that context has nowhere to carry one.
       - num: 1.2.2
         components:
           - name: web
@@ -160,8 +166,12 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                The same transcription field described under 1.2.1 satisfies
+                the media alternative half of this criterion. The audio
+                description half has nothing, for the reasons given under
+                1.2.5.
       - num: 1.3.1
         components:
           - name: web
@@ -206,8 +216,12 @@ chapters:
                 tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The reading sequence is built by the theme
+                from the content model. An author supplies text and media;
+                they do not control the order in which regions and fields are
+                emitted.
       - num: 1.3.3
         components:
           - name: web
@@ -224,8 +238,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether instructions rely on shape, colour or
+                position is a property of an author's own wording, and no
+                feature of the tool generates, transforms or inspects it.
       - num: 1.4.1
         components:
           - name: web
@@ -251,8 +268,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The editor offers no colour control, so an
+                author cannot convey information by colour alone inside their
+                content.
       - num: 1.4.2
         components:
           - name: web
@@ -270,8 +290,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether audio plays automatically is decided
+                by the player the theme configures. The dictionary audio
+                display and the lightbox both set autoplay off.
       - num: 2.1.1
         components:
           - name: web
@@ -287,8 +310,11 @@ chapters:
                 in the manual audit runbook, tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Keyboard operability is a property of the
+                interface the theme renders, not of the content an author
+                enters into it.
       - num: 2.1.2
         components:
           - name: web
@@ -303,8 +329,10 @@ chapters:
                 issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether focus can be moved away from a
+                component is a property of the theme and its JavaScript.
       - num: 2.1.4
         components:
           - name: web
@@ -326,8 +354,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The tool defines no single-character shortcuts
+                for authored content, and an author cannot add one.
       - num: 2.2.1
         components:
           - name: web
@@ -344,8 +374,9 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. No authored content imposes a time limit.
       - num: 2.2.2
         components:
           - name: web
@@ -367,8 +398,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Moving content comes from components the theme
+                provides, such as the carousel. An author chooses whether to
+                use one, not how it behaves.
       - num: 2.3.1
         components:
           - name: web
@@ -383,8 +417,12 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Mukurtu stores and plays media that
+                communities supply. It neither generates nor re-encodes moving
+                images, so no feature of the tool bears on whether footage
+                flashes.
       - num: 2.4.1
         components:
           - name: web
@@ -403,8 +441,10 @@ chapters:
                 cycle.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The skip link and the landmark structure are
+                the theme's.
       - num: 2.4.2
         components:
           - name: web
@@ -416,8 +456,11 @@ chapters:
                 headings and labels (2.4.6) in the manual audit cycle.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Every content type requires a title before an item can be
+                saved, so nothing reaches the site untitled. Whether the title
+                describes the item is the author's judgement.
       - num: 2.4.3
         components:
           - name: web
@@ -430,8 +473,10 @@ chapters:
                 issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Focus order follows the markup the theme
+                emits.
       - num: 2.4.4
         components:
           - name: web
@@ -447,8 +492,12 @@ chapters:
                 waits on the screen reader pass, tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The editor's link tool prompts for the text as well as the
+                destination, so a link is never created without words
+                attached. It does not judge whether those words make the
+                destination clear.
       - num: 2.5.1
         components:
           - name: web
@@ -468,8 +517,9 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. No authored content defines a pointer gesture.
       - num: 2.5.2
         components:
           - name: web
@@ -486,8 +536,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Pointer behaviour comes from the theme and
+                from Drupal.
       - num: 2.5.3
         components:
           - name: web
@@ -515,8 +567,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The visible label and the accessible name of a
+                control are set in code, not by an author.
       - num: 2.5.4
         components:
           - name: web
@@ -532,8 +586,9 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Nothing in the tool responds to device motion.
       - num: 3.1.1
         components:
           - name: web
@@ -546,8 +601,11 @@ chapters:
                 separate criterion and remains under evaluation.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The page language comes from the site's
+                language configuration rather than from an author's entry.
+                Marking a language within content is 3.1.2.
       - num: 3.2.1
         components:
           - name: web
@@ -559,8 +617,10 @@ chapters:
                 Tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether focusing a control changes the context
+                is decided by the code behind that control.
       - num: 3.2.2
         components:
           - name: web
@@ -573,8 +633,10 @@ chapters:
                 issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether changing a setting changes the context
+                is decided by the code behind that control.
       - num: 3.3.1
         components:
           - name: web
@@ -586,8 +648,10 @@ chapters:
                 Tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Validation messages are produced by Drupal and
+                by the distribution's own forms.
       - num: 3.3.2
         components:
           - name: web
@@ -612,8 +676,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Field labels and help text belong to the
+                content model, set in code and configuration rather than
+                written by an author creating an item.
       - num: 4.1.1
         components:
           - name: web
@@ -627,8 +694,12 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The delivered markup is assembled by the
+                theme. The text formats do constrain what an author can save,
+                which keeps authored fragments well formed, but this criterion
+                is about the page as delivered.
       - num: 4.1.2
         components:
           - name: web
@@ -682,8 +753,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Nothing in the tool handles live media, so
+                there is no live content for an author to caption.
       - num: 1.2.5
         components:
           - name: web
@@ -730,8 +803,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Orientation is handled by the theme's layout.
+                No authoring choice locks a page to one orientation.
       - num: 1.3.5
         components:
           - name: web
@@ -766,8 +841,10 @@ chapters:
                 docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The autocomplete attributes on user-facing
+                form fields are set in code, not by an author.
       - num: 1.4.3
         components:
           - name: web
@@ -834,8 +911,10 @@ chapters:
                 covered by this check.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Text resizing depends on the theme's units and
+                layout, not on anything an author enters.
       - num: 1.4.5
         components:
           - name: web
@@ -852,8 +931,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The editor gives authors real text with real structure, so an
+                image of text is never the only way to say something. The tool
+                does not detect when an author uploads one anyway.
       - num: 1.4.10
         components:
           - name: web
@@ -899,8 +981,12 @@ chapters:
                 docs/accessibility/findings/2026-10-06-automated-evidence-prefill.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Reflow is a property of the theme's layout. An
+                author can paste a wide table, which the theme then has to
+                accommodate, and that responsibility is reported under the Web
+                component.
       - num: 1.4.11
         components:
           - name: web
@@ -925,8 +1011,11 @@ chapters:
                 docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The contrast of controls and graphical objects
+                is set by the theme. The palette check described under 1.4.3
+                compares text against its background, not non-text pairings.
       - num: 1.4.12
         components:
           - name: web
@@ -952,8 +1041,9 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Text spacing is set by the theme's stylesheet.
       - num: 1.4.13
         components:
           - name: web
@@ -965,8 +1055,11 @@ chapters:
                 means driving each one by hand. Tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Tooltips and similar hover or focus behaviour
+                come from the theme and from Drupal, not from authored
+                content.
       - num: 2.4.5
         components:
           - name: web
@@ -986,8 +1079,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Navigation, search and browse are features of
+                the distribution rather than things an author assembles for
+                each page.
       - num: 2.4.6
         components:
           - name: web
@@ -1000,8 +1096,11 @@ chapters:
                 issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The editor offers real headings and the text formats keep them
+                as markup rather than as styling. It does not check that a
+                heading describes what follows.
       - num: 2.4.7
         components:
           - name: web
@@ -1045,8 +1144,9 @@ chapters:
                 docs/accessibility/findings/2026-10-15-focus-visible-clean-run.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Focus styling is set by the theme.
       - num: 3.1.2
         components:
           - name: web
@@ -1121,8 +1221,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Where navigation appears is set by the theme
+                and is repeated across pages by it.
       - num: 3.2.4
         components:
           - name: web
@@ -1138,8 +1240,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Components are identified consistently by the
+                theme, not per page by an author.
       - num: 3.3.3
         components:
           - name: web
@@ -1158,8 +1262,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Correction suggestions, where offered, come
+                from the form code rather than from authored content.
       - num: 3.3.4
         components:
           - name: web
@@ -1190,8 +1296,10 @@ chapters:
                 docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Confirmation steps before a consequential
+                action are built into the forms.
       - num: 4.1.3
         components:
           - name: web
@@ -1203,5 +1311,7 @@ chapters:
                 with a screen reader. Tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Status messages are emitted by Drupal and by
+                the distribution's code.
