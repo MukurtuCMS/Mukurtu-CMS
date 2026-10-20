@@ -51,6 +51,7 @@ final class PageBackground {
    *   Either an empty array when no background applies, or:
    *   - url: the image URL, ready for a CSS url() value.
    *   - treatment: one of the TREATMENTS keys.
+   *   - tint: whether to lay the scrim over the image.
    */
   public function resolve(): array {
     $config = $this->configFactory->get(DesignPalette::SETTINGS);
@@ -78,6 +79,7 @@ final class PageBackground {
     return [
       'url' => $this->fileUrlGenerator->generateString($file->getFileUri()),
       'treatment' => isset(self::TREATMENTS[$treatment]) ? $treatment : 'light',
+      'tint' => self::tintEnabled($config->get('background.tint')),
     ];
   }
 
@@ -89,7 +91,7 @@ final class PageBackground {
    * covers the header and a second one would sit on top of it.
    *
    * @return array
-   *   Either an empty array, or url and treatment as resolve() returns.
+   *   Either an empty array, or url, treatment and tint as resolve() returns.
    */
   public function resolveHeader(): array {
     $config = $this->configFactory->get(DesignPalette::SETTINGS);
@@ -114,7 +116,18 @@ final class PageBackground {
     return [
       'url' => $this->fileUrlGenerator->generateString($file->getFileUri()),
       'treatment' => isset(self::TREATMENTS[$treatment]) ? $treatment : 'light',
+      'tint' => self::tintEnabled($config->get('header.tint')),
     ];
+  }
+
+  /**
+   * Whether a stored tint setting means the scrim is on.
+   *
+   * Only an explicit FALSE turns it off. A site that set its background before
+   * the setting existed has no value stored, and keeps the scrim it always had.
+   */
+  public static function tintEnabled(mixed $value): bool {
+    return $value !== FALSE;
   }
 
   /**
