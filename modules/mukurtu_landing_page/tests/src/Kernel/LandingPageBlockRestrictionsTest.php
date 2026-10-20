@@ -192,8 +192,8 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
   /**
    * Reusable content blocks are not offered on landing pages.
    *
-   * Content blocks come from "Add a block" instead. Offering reusable ones as
-   * well put the same block types in two lists, and placing one shares a
+   * Editors create new content blocks instead. Offering reusable ones as well
+   * put the same block types in the chooser twice, and placing one shares a
    * single entity across pages.
    */
   public function testReusableContentBlocksAreUnavailable(): void {

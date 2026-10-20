@@ -250,7 +250,7 @@ class DefaultLandingPageTest extends KernelTestBase {
 
     // The vertical and full-background hero variants used to be created as
     // well, but nothing placed them, so they sat in the content block library
-    // looking orphaned. Editors build those from "Add a block" instead.
+    // looking orphaned. Editors create those as new content blocks instead.
     $bundles = array_map(static fn($block) => $block->bundle(), $first_block_storage->loadMultiple());
     $this->assertNotContains('vertical_image_with_description', $bundles);
     $this->assertNotContains('full_image_with_description', $bundles);

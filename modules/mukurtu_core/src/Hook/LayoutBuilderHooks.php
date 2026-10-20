@@ -17,8 +17,8 @@ class LayoutBuilderHooks {
    * Matches the landing page allowlists in
    * core.entity_view_display.node.landing_page.default, so editors get the
    * same blocks on both content types. Reusable content blocks are left out:
-   * content blocks come from "Add a block" (a fresh entity per placement), so
-   * the same block types do not appear in two lists and one entity is never
+   * editors create a new content block per placement instead, so the same
+   * block types do not appear in the chooser twice and one entity is never
    * shared across pages by accident.
    */
   public const ALLOWED_BLOCKS = [

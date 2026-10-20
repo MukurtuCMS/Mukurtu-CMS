@@ -244,13 +244,14 @@ function mukurtu_landing_page_update_40205(): string {
   }
 
   // Reusable content blocks are checked under "Custom block types". Offering
-  // them next to the "Add a block" button put the same block types in two
-  // lists, and placing a reusable block shares one entity across pages.
+  // them alongside new content blocks put the same block types in the
+  // chooser twice, and placing a reusable block shares one entity across
+  // pages.
   // Respect a site builder's own per-type allowlist or denylist.
   $type_rules = isset($settings['allowlisted_blocks']['Custom block types']) || isset($settings['denylisted_blocks']['Custom block types']);
   if (!$type_rules && !in_array('Custom block types', $restricted, TRUE)) {
     $restricted[] = 'Custom block types';
-    $changes[] = (string) t('Hid reusable content blocks from landing pages. Editors add content blocks with Add a block.');
+    $changes[] = (string) t('Hid reusable content blocks from landing pages.');
   }
 
   if (!$changes) {
