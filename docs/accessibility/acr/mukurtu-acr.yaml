@@ -1,7 +1,7 @@
 title: Mukurtu CMS Accessibility Conformance Report
 product:
   name: Mukurtu CMS
-  version: "4"
+  version: "4.0.6"
   description: >-
     Mukurtu CMS is a free, mobile, and open source platform built with
     Indigenous communities to manage and share digital cultural heritage.
@@ -13,9 +13,9 @@ author:
   email: "support@mukurtu.org"
   phone: ""
   website: "https://mukurtu.org"
-report_date: "2026-07-10"
-last_modified_date: "2026-10-09"
-version: 3
+report_date: "2026-10-20"
+last_modified_date: "2026-10-20"
+version: 4
 notes: >-
   This is a living document maintained as part of the Mukurtu CMS
   accessibility program (see docs/accessibility/README.md in the Mukurtu CMS
@@ -38,10 +38,17 @@ evaluation_methods_used: >-
   Manual keyboard-only testing and screen reader testing (NVDA, VoiceOver or
   Orca) following the program's manual testing checklist are planned but have
   not yet been carried out. Criteria that depend on them remain
-  not-evaluated. Where an evaluated criterion still has manual
-  verification outstanding, its own note says so: 4.1.2 is the one such
-  case, where keyboard and screen reader verification of the custom
-  widgets is still to come.
+  not-evaluated, and each of those rows says what is untested, why an
+  automated check cannot settle it, and where the work is tracked. The
+  Authoring Tool component was evaluated by desk review against the shipped
+  product rather than by scanning, because it asks what the tool does for an
+  author rather than how a page renders. Each criterion was considered for
+  whether an author has any means to affect the outcome. Most do not,
+  because the theme and the code decide it whatever is entered, and those
+  rows are marked not applicable with the reason given. Where an author does
+  have a part, the assessment rests on the fields, widgets and editor
+  configuration the tool actually ships, and each supporting row states what
+  the tool does not verify.
 legal_disclaimer: >-
   The information herein is provided in good faith based on the analysis of
   the product at the time of the review and does not represent a
@@ -60,9 +67,15 @@ chapters:
       the product's whole browser interface, the visitor and member
       experience and the administrative one alike, and the page inventory
       behind these assessments includes all three. The "Authoring Tool"
-      component covers conformance with ATAG 2.0, which asks additionally
-      that an authoring tool help its authors produce accessible content; it
-      will be evaluated in a later phase.
+      component covers ATAG 2.0's additional ask, that an authoring tool
+      help its authors produce accessible content. It reports on what the
+      tool does for an author, not on whether the authoring interface is
+      itself accessible, which the Web component already covers. Its
+      evaluation is complete and was tracked in issue #2457. Most criteria
+      are not applicable to it, because the theme and the code determine
+      the outcome whatever an author enters; those rows say which. The
+      criteria an author can affect are assessed, and each supporting row
+      states what the tool does not verify.
     criteria:
       - num: 1.1.1
         components:
@@ -78,8 +91,16 @@ chapters:
                 reviewed in the manual audit cycle.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Authors are prompted for alt text wherever they add an image.
+                Alt is required on seven of the eight image fields across
+                media bundles, including field_media_image on the Image
+                bundle, which is the path authors use, and on the article
+                image and footer logo fields. Two exceptions remain: the
+                document thumbnail and the user picture. The tool cannot judge
+                whether the text entered is a useful description, which no
+                authoring tool can.
       - num: 1.2.1
         components:
           - name: web
@@ -97,34 +118,39 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Digital heritage carries field_transcription, described to
+                authors as a basic text transcription of an audio or video
+                recording, which is the alternative this criterion asks for.
+                The gap is that the field sits on the digital heritage item
+                rather than on the audio or video media entity, so a recording
+                used outside that context has nowhere to carry one.
       - num: 1.2.2
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                Locally hosted video cannot carry captions.
-                The video media type offers an author no
-                caption or subtitle track field, and the
-                file_video formatter renders no track element,
-                so a site that uploads its own video has no
-                way to provide synchronised captions (issue
-                #2329). The remote_video type is unaffected,
-                because the provider carries its own captions.
-                A transcript is not a substitute: it satisfies
-                1.2.3, which accepts a media alternative, but
-                not 1.2.2, which requires synchronisation. The
-                same evidence bears on the authoring-tool
-                component, which is evaluated separately.
-                Evidence is recorded in
-                docs/accessibility/findings/2026-10-06-desk-review.md.
-
+                Locally hosted video carries caption and subtitle tracks. The
+                video media type has a track field, the widget requires a
+                language for each track, and mukurtu-file-video.html.twig
+                renders a track element for each one (issues #2329 and #2358).
+                The remote_video type is unaffected, because the provider
+                carries its own captions. A transcript remains an alternative
+                under 1.2.3 rather than a substitute for synchronised
+                captions. Whether a given video has a track supplied is
+                editorial work, reported under the authoring-tool component.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The video media type carries caption and subtitle tracks
+                (issues #2329 and #2358), and the track widget requires a
+                language to be chosen for each track, so one cannot be added
+                without saying what language it is in. Whether an author
+                supplies a track for a given video is editorial work the tool
+                cannot do for them.
       - num: 1.2.3
         components:
           - name: web
@@ -142,8 +168,12 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                The same transcription field described under 1.2.1 satisfies
+                the media alternative half of this criterion. The audio
+                description half has nothing, for the reasons given under
+                1.2.5.
       - num: 1.3.1
         components:
           - name: web
@@ -167,8 +197,15 @@ chapters:
                 docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The rich text editor gives authors headings, ordered and
+                unordered lists and blockquotes, with tables in the full HTML
+                format, so structure is expressed as markup rather than as
+                visual formatting. The text formats restrict saved output to
+                those elements, so an author cannot store structure the theme
+                has no semantics for. The tool does not check that an author
+                chose the right heading level.
       - num: 1.3.2
         components:
           - name: web
@@ -181,8 +218,12 @@ chapters:
                 tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The reading sequence is built by the theme
+                from the content model. An author supplies text and media;
+                they do not control the order in which regions and fields are
+                emitted.
       - num: 1.3.3
         components:
           - name: web
@@ -199,35 +240,33 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether instructions rely on shape, colour or
+                position is a property of an author's own wording, and no
+                feature of the tool generates, transforms or inspects it.
       - num: 1.4.1
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                Required fields are marked with an asterisk
-                glyph rather than colour, and form errors name
-                the field in text, so those do not rely on
-                colour. System messages do. Error, warning and
-                status blocks are distinguished from one
-                another only by background colour: there is no
-                icon, the left border is identical and
-                transparent on all three, padding is
-                identical, and the only text cue is a
-                visually-hidden heading that a sighted reader
-                never sees. The wording of a message often
-                makes its nature clear on its own, which
-                limits the practical impact, but severity
-                itself is carried visually by colour alone.
-                Evidence is recorded in
+                Required fields are marked with an asterisk glyph rather than
+                colour, and form errors name the field in text. System
+                messages previously carried severity by background colour
+                alone, with no icon and an identical border and padding on all
+                three types; each now has an icon in currentColor beside a
+                visible heading, so error, warning and status are told apart
+                without perceiving colour (issue #2421, PR #2423). Evidence
+                for the original finding is recorded in
                 docs/accessibility/findings/2026-10-09-visual-pass.md.
-
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The editor offers no colour control, so an
+                author cannot convey information by colour alone inside their
+                content.
       - num: 1.4.2
         components:
           - name: web
@@ -245,8 +284,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether audio plays automatically is decided
+                by the player the theme configures. The dictionary audio
+                display and the lightbox both set autoplay off.
       - num: 2.1.1
         components:
           - name: web
@@ -262,8 +304,11 @@ chapters:
                 in the manual audit runbook, tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Keyboard operability is a property of the
+                interface the theme renders, not of the content an author
+                enters into it.
       - num: 2.1.2
         components:
           - name: web
@@ -278,8 +323,10 @@ chapters:
                 issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether focus can be moved away from a
+                component is a property of the theme and its JavaScript.
       - num: 2.1.4
         components:
           - name: web
@@ -301,8 +348,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The tool defines no single-character shortcuts
+                for authored content, and an author cannot add one.
       - num: 2.2.1
         components:
           - name: web
@@ -319,8 +368,9 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. No authored content imposes a time limit.
       - num: 2.2.2
         components:
           - name: web
@@ -342,8 +392,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Moving content comes from components the theme
+                provides, such as the carousel. An author chooses whether to
+                use one, not how it behaves.
       - num: 2.3.1
         components:
           - name: web
@@ -358,8 +411,12 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Mukurtu stores and plays media that
+                communities supply. It neither generates nor re-encodes moving
+                images, so no feature of the tool bears on whether footage
+                flashes.
       - num: 2.4.1
         components:
           - name: web
@@ -378,8 +435,10 @@ chapters:
                 cycle.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The skip link and the landmark structure are
+                the theme's.
       - num: 2.4.2
         components:
           - name: web
@@ -391,8 +450,11 @@ chapters:
                 headings and labels (2.4.6) in the manual audit cycle.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Every content type requires a title before an item can be
+                saved, so nothing reaches the site untitled. Whether the title
+                describes the item is the author's judgement.
       - num: 2.4.3
         components:
           - name: web
@@ -405,8 +467,10 @@ chapters:
                 issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Focus order follows the markup the theme
+                emits.
       - num: 2.4.4
         components:
           - name: web
@@ -422,8 +486,12 @@ chapters:
                 waits on the screen reader pass, tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The editor's link tool prompts for the text as well as the
+                destination, so a link is never created without words
+                attached. It does not judge whether those words make the
+                destination clear.
       - num: 2.5.1
         components:
           - name: web
@@ -443,8 +511,9 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. No authored content defines a pointer gesture.
       - num: 2.5.2
         components:
           - name: web
@@ -461,8 +530,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Pointer behaviour comes from the theme and
+                from Drupal.
       - num: 2.5.3
         components:
           - name: web
@@ -490,8 +561,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The visible label and the accessible name of a
+                control are set in code, not by an author.
       - num: 2.5.4
         components:
           - name: web
@@ -507,8 +580,9 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Nothing in the tool responds to device motion.
       - num: 3.1.1
         components:
           - name: web
@@ -521,8 +595,11 @@ chapters:
                 separate criterion and remains under evaluation.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The page language comes from the site's
+                language configuration rather than from an author's entry.
+                Marking a language within content is 3.1.2.
       - num: 3.2.1
         components:
           - name: web
@@ -534,8 +611,10 @@ chapters:
                 Tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether focusing a control changes the context
+                is decided by the code behind that control.
       - num: 3.2.2
         components:
           - name: web
@@ -548,8 +627,10 @@ chapters:
                 issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Whether changing a setting changes the context
+                is decided by the code behind that control.
       - num: 3.3.1
         components:
           - name: web
@@ -561,8 +642,10 @@ chapters:
                 Tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Validation messages are produced by Drupal and
+                by the distribution's own forms.
       - num: 3.3.2
         components:
           - name: web
@@ -587,8 +670,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Field labels and help text belong to the
+                content model, set in code and configuration rather than
+                written by an author creating an item.
       - num: 4.1.1
         components:
           - name: web
@@ -602,8 +688,12 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The delivered markup is assembled by the
+                theme. The text formats do constrain what an author can save,
+                which keeps authored fragments well formed, but this criterion
+                is about the page as delivered.
       - num: 4.1.2
         components:
           - name: web
@@ -630,26 +720,15 @@ chapters:
             adherence:
               level: partially-supports
               notes: >-
-                July 2026 scans of pages rendered with the administration
-                toolbar found 15 toolbar buttons and links with no accessible
-                name, and an invalid ARIA attribute on three toolbar menus.
-                Both originate upstream in the Gin admin theme and affect
-                authenticated administrators and authors only. Both are now
-                resolved (September 2026, issue #2003, PR #2225): the
-                collapsed toolbar hid its labels with display:none, removing
-                them from the accessibility tree, and now uses a
-                visually-hidden technique instead; the invalid attribute is
-                corrected by carrying Gin's own reviewed fix as a composer
-                patch until it is released upstream. A re-scan of
-                /admin/content with the toolbar collapsed reports no
-                remaining violations of these rules. Evidence for the
-                September 2026 changes is recorded by criterion in
-                docs/accessibility/findings/2026-09-17-remediation-cycle.md.
-                The full authoring interface has still not been evaluated,
-                so this remains a partial claim pending a Phase 2 audit of
-                the authoring surface. Issue #1975 scoped and closed out
-                that phase's inventory and its form-by-form code read; the
-                evaluation itself does not yet have its own tracking issue.
+                Authors do not write ARIA. The text formats restrict saved
+                markup to a known set of elements and attributes, so content
+                created through the editor cannot introduce an incorrect name,
+                role or value. The source editing button, available in the
+                full HTML format, does allow raw markup and nothing checks
+                what is pasted there. The accessible-name defects previously
+                reported in this row were in the authoring interface itself;
+                under this report's scoping those belong to the Web component
+                and are recorded there.
   success_criteria_level_aa:
     notes: ""
     criteria:
@@ -668,8 +747,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Nothing in the tool handles live media, so
+                there is no live content for an author to caption.
       - num: 1.2.5
         components:
           - name: web
@@ -693,8 +774,15 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: does-not-support
+              notes: >-
+                The tool gives authors no way to attach an audio-described
+                version of a video. Building the capability is a decision
+                taken and deferred, not an oversight (issue #2355). Captions
+                and subtitles are supported and cover 1.2.2. Even with the
+                capability in place this could reach partially-supports but
+                never supports, because whether an item has a described
+                version is editorial work in each community.
       - num: 1.3.4
         components:
           - name: web
@@ -709,8 +797,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Orientation is handled by the theme's layout.
+                No authoring choice locks a page to one orientation.
       - num: 1.3.5
         components:
           - name: web
@@ -745,8 +835,10 @@ chapters:
                 docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The autocomplete attributes on user-facing
+                form fields are set in code, not by an author.
       - num: 1.4.3
         components:
           - name: web
@@ -774,37 +866,42 @@ chapters:
                 docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                Where an author chooses colours, the tool checks them. The
+                custom palette lets a site set six colours written straight
+                into the stylesheet. PaletteContrastAnalyzer compares them
+                against the theme's real colour pairings, derived from the
+                compiled stylesheet rather than a hand-maintained list, and
+                warns on each pairing below the WCAG AA ratio, naming the
+                ratio, the requirement and an affected component. It warns
+                rather than blocks, so a site can still ship a failing palette
+                deliberately. Added for issue #1054, which the code records as
+                an ATAG 2.0 B.2.2 gap.
       - num: 1.4.4
         components:
           - name: web
             adherence:
-              level: partially-supports
+              level: supports
               notes: >-
-                Evaluated with checkTextZoom, which doubles the
-                browser's own default font size through the Chrome
-                DevTools Protocol and reloads the page with it
-                already set, so that rem media queries re-evaluate
-                the way they do for a reader who has chosen a larger
-                text size.
-
-                Forty-three of the 45 pages in the inventory need no
-                horizontal scrolling at 200%. Two do: the Local
-                Contexts supported projects pages, for a community
-                and for a protocol, each reporting 1485px of content
-                in a 1280px viewport. The same two pages at the same
-                width failed on two separate main runs (38003543030
-                and 38064032171), so this is stable rather than
-                intermittent, and every other automated check on
-                those two pages is clean (issue #2392).
-
-                Page zoom, as distinct from text size, is not
-                covered by this check.
+                Evaluated with checkTextZoom, which doubles the browser's own
+                default font size through the Chrome DevTools Protocol and
+                reloads the page with it already set, so that rem media
+                queries re-evaluate the way they do for a reader who has
+                chosen a larger text size. No page in the inventory needs
+                horizontal scrolling at 200%. The two Local Contexts supported
+                projects pages that previously reported 1485px of content in a
+                1280px viewport were fixed by capping the width those forms'
+                API key fields ask for (issue #2392, PR #2431). On a main run
+                the only remaining finding is the deliberately wide fixture
+                that proves the check still fires. Page zoom, as distinct from
+                text size, is not covered by this check.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Text resizing depends on the theme's units and
+                layout, not on anything an author enters.
       - num: 1.4.5
         components:
           - name: web
@@ -821,8 +918,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The editor gives authors real text with real structure, so an
+                image of text is never the only way to say something. The tool
+                does not detect when an author uploads one anyway.
       - num: 1.4.10
         components:
           - name: web
@@ -868,8 +968,12 @@ chapters:
                 docs/accessibility/findings/2026-10-06-automated-evidence-prefill.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Reflow is a property of the theme's layout. An
+                author can paste a wide table, which the theme then has to
+                accommodate, and that responsibility is reported under the Web
+                component.
       - num: 1.4.11
         components:
           - name: web
@@ -894,8 +998,11 @@ chapters:
                 docs/accessibility/findings/2026-09-17-remediation-cycle.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. The contrast of controls and graphical objects
+                is set by the theme. The palette check described under 1.4.3
+                compares text against its background, not non-text pairings.
       - num: 1.4.12
         components:
           - name: web
@@ -921,8 +1028,9 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Text spacing is set by the theme's stylesheet.
       - num: 1.4.13
         components:
           - name: web
@@ -934,8 +1042,11 @@ chapters:
                 means driving each one by hand. Tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Tooltips and similar hover or focus behaviour
+                come from the theme and from Drupal, not from authored
+                content.
       - num: 2.4.5
         components:
           - name: web
@@ -955,8 +1066,11 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Navigation, search and browse are features of
+                the distribution rather than things an author assembles for
+                each page.
       - num: 2.4.6
         components:
           - name: web
@@ -969,8 +1083,11 @@ chapters:
                 issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: supports
+              notes: >-
+                The editor offers real headings and the text formats keep them
+                as markup rather than as styling. It does not check that a
+                heading describes what follows.
       - num: 2.4.7
         components:
           - name: web
@@ -1014,8 +1131,9 @@ chapters:
                 docs/accessibility/findings/2026-10-15-focus-visible-clean-run.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Focus styling is set by the theme.
       - num: 3.1.2
         components:
           - name: web
@@ -1063,8 +1181,16 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: partially-supports
+              notes: >-
+                Authors can mark a run of text with its language in the rich
+                text editor. The Language button is fed from the site's own
+                language vocabulary rather than a fixed list, so a community's
+                languages are selectable under their own names (PR #2440), and
+                a language marked as read right to left also carries dir (PR
+                #2441). The gap is plain text: titles, names and taxonomy term
+                names cannot hold inline markup, so text in those fields
+                cannot be marked at all. Recorded when issue #2354 closed.
       - num: 3.2.3
         components:
           - name: web
@@ -1082,8 +1208,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Where navigation appears is set by the theme
+                and is repeated across pages by it.
       - num: 3.2.4
         components:
           - name: web
@@ -1099,8 +1227,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Components are identified consistently by the
+                theme, not per page by an author.
       - num: 3.3.3
         components:
           - name: web
@@ -1119,8 +1249,10 @@ chapters:
 
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Correction suggestions, where offered, come
+                from the form code rather than from authored content.
       - num: 3.3.4
         components:
           - name: web
@@ -1151,8 +1283,10 @@ chapters:
                 docs/accessibility/findings/2026-10-06-desk-review.md.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Confirmation steps before a consequential
+                action are built into the forms.
       - num: 4.1.3
         components:
           - name: web
@@ -1164,5 +1298,7 @@ chapters:
                 with a screen reader. Tracked in issue #2242.
           - name: authoring-tool
             adherence:
-              level: not-evaluated
-              notes: ""
+              level: not-applicable
+              notes: >-
+                Not applicable. Status messages are emitted by Drupal and by
+                the distribution's code.
