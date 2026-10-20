@@ -15,6 +15,7 @@ SITE_PRIV="mukurtu-test-priv-$RUN_ID"
 SITE_PUB="mukurtu-test-pub-$RUN_ID"
 CLEANUP_CONTAINERS=("$SITE" "$DB")
 CLEANUP_VOLUMES=("$SITE_PRIV" "$SITE_PUB")
+CLEANUP_DIRS=()
 
 cleanup() {
   local c v
@@ -22,6 +23,7 @@ cleanup() {
   for v in "${CLEANUP_VOLUMES[@]}"; do docker volume rm -f "$v" >/dev/null 2>&1; done
   docker network rm "$NET" >/dev/null 2>&1
   rm -f "$BUILD_LOG"
+  for d in "${CLEANUP_DIRS[@]}"; do rm -rf "$d"; done
 }
 trap cleanup EXIT
 
@@ -220,7 +222,8 @@ assert_eq "$salt_before" "$(docker exec "$SITE" cat /var/www/files/private/.hash
 restart_log="$(docker logs --since 60s "$SITE" 2>&1)"
 assert_not_contains "$restart_log" "Installing Mukurtu" "restart log shows no installation"
 assert_contains "$restart_log" "existing installation" "restart log says an installation exists"
-assert_contains "$restart_log" "No database updates required" "restart log lists the pending updates before they run (here: none)"
+assert_contains "$restart_log" "pending database updates:" "restart log lists the pending updates before they run"
+[[ "$restart_log" == *"pending database updates:"*"running database updates"* ]] && pass "the list comes before the updates run" || fail "the list comes before the updates run"
 
 echo "entrypoint: sigterm"
 start=$SECONDS
@@ -228,5 +231,48 @@ docker stop -t 10 "$SITE" >/dev/null
 code_exit="$(docker inspect -f '{{.State.ExitCode}}' "$SITE")"
 [[ $((SECONDS - start)) -lt 10 ]] && pass "container stops within 10 seconds" || fail "container stops within 10 seconds"
 [[ "$code_exit" == 0 || "$code_exit" == 143 ]] && pass "stop exit code is 0 or 143 ($code_exit)" || fail "stop exit code is 0 or 143 ($code_exit)"
+
+echo "entrypoint: restore a backup onto a new host"
+# The commands are the ones docs/docker.md gives under "Upgrades and backups" and
+# "Moving a site to another host". The site is stopped, so the three parts are consistent.
+BK="$(mktemp -d)"
+CLEANUP_DIRS+=("$BK")
+docker run --rm --user 1000 --entrypoint sh -v "$SITE_PUB:/d" "$FULL" -c 'echo public-probe > /d/restore-probe.txt'
+docker run --rm --user 1000 --entrypoint sh -v "$SITE_PRIV:/d" "$FULL" -c 'echo private-probe > /d/restore-probe.txt'
+docker exec "$DB" mariadb-dump --single-transaction -uroot -proot mukurtu > "$BK/mukurtu.sql"
+docker run --rm -v "$SITE_PUB:/data:ro" -v "$BK:/backup" alpine tar czf /backup/public.tgz -C /data .
+docker run --rm -v "$SITE_PRIV:/data:ro" -v "$BK:/backup" alpine tar czf /backup/private.tgz -C /data .
+[[ -s "$BK/mukurtu.sql" && -s "$BK/public.tgz" && -s "$BK/private.tgz" ]] && pass "the backup commands produce a dump and two archives" || fail "the backup commands produce a dump and two archives"
+
+DB2="mukurtu-test-db2-$RUN_ID"
+NEW_PRIV="mukurtu-test-newpriv-$RUN_ID"
+NEW_PUB="mukurtu-test-newpub-$RUN_ID"
+NEW_SITE="mukurtu-test-newsite-$RUN_ID"
+CLEANUP_VOLUMES+=("$NEW_PRIV" "$NEW_PUB")
+CLEANUP_CONTAINERS+=("$NEW_SITE")
+db_up "$DB2" || fail "the new database starts"
+docker exec -i "$DB2" mariadb -uroot -proot mukurtu < "$BK/mukurtu.sql"
+docker run --rm -v "$NEW_PUB:/data" -v "$BK:/backup:ro" alpine sh -c 'tar xzf /backup/public.tgz -C /data && chown -R 1000:1000 /data'
+docker run --rm -v "$NEW_PRIV:/data" -v "$BK:/backup:ro" alpine sh -c 'tar xzf /backup/private.tgz -C /data && chown -R 1000:1000 /data'
+docker run -d --name "$NEW_SITE" --network "$NET" \
+  -e MUKURTU_DB_HOST="$DB2" -e MUKURTU_DB_NAME=mukurtu -e MUKURTU_DB_USER=mukurtu -e MUKURTU_DB_PASSWORD=mukurtu \
+  -e MUKURTU_TRUSTED_HOSTS=test.example.org -e MUKURTU_HASH_SALT=test-salt \
+  -e MUKURTU_ADMIN_PASSWORD='Adm1n-p@ss!' -e MUKURTU_ADMIN_EMAIL=admin@example.org \
+  -v "$NEW_PRIV:/var/www/files/private" -v "$NEW_PUB:/var/www/files/public" "$FULL" >/dev/null
+ready=false
+for _ in $(seq 1 120); do
+  [[ "$(docker inspect -f '{{.State.Running}}' "$NEW_SITE")" == true ]] || break
+  docker exec "$NEW_SITE" curl -sf -H 'Host: test.example.org' -o /dev/null http://127.0.0.1:8080/user/login 2>/dev/null && { ready=true; break; }
+  sleep 2
+done
+$ready && pass "the restored site serves pages" || { fail "the restored site serves pages"; docker logs "$NEW_SITE" 2>&1 | tail -20; }
+restored_log="$(docker logs "$NEW_SITE" 2>&1)"
+assert_contains "$restored_log" "existing installation" "the container recognises the restored database and does not install over it"
+assert_not_contains "$restored_log" "Installing Mukurtu" "no installation ran on the restored site"
+assert_eq "$users_before" "$(docker exec "$DB2" mariadb -uroot -proot -N -B mukurtu -e 'select count(*) from users_field_data' 2>/dev/null)" "the restored database has the same users"
+assert_eq "public-probe" "$(docker exec "$NEW_SITE" curl -s -H 'Host: test.example.org' http://127.0.0.1:8080/sites/default/files/restore-probe.txt)" "a restored public file is served"
+assert_eq "private-probe" "$(docker exec "$NEW_SITE" cat /var/www/files/private/restore-probe.txt)" "a restored private file is in place"
+assert_contains "$(docker exec "$NEW_SITE" drush user:login 2>/dev/null)" "/user/reset" "the restored site can issue a login link (the salt works)"
+docker rm -f "$NEW_SITE" "$DB2" >/dev/null 2>&1
 
 finish

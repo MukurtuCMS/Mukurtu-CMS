@@ -437,7 +437,8 @@ release notes: some releases must be passed through rather than
 skipped. To go back, restore the backup and run the previous tag; databases are
 not downgraded.
 
-**Back up** three things together, taken at the same moment if you can:
+**Back up** three things together, taken at the same moment if you can (stop the
+site first for a consistent copy: `docker compose stop mukurtu`):
 
 1. The database: `docker compose exec db mariadb-dump --single-transaction -u root -p mukurtu > mukurtu.sql`
    (or `docker compose exec mukurtu drush sql:dump > mukurtu.sql`).
@@ -445,6 +446,48 @@ not downgraded.
 3. The `private` volume.
 
 Keep `MUKURTU_HASH_SALT` with the backup if you set it explicitly.
+
+Copy a volume into an archive with a throwaway container. Compose names a volume
+`<project>_<name>`; `docker volume ls` shows the exact names:
+
+```
+docker run --rm -v myproject_public:/data:ro -v "$PWD":/backup alpine tar czf /backup/public.tgz -C /data .
+docker run --rm -v myproject_private:/data:ro -v "$PWD":/backup alpine tar czf /backup/private.tgz -C /data .
+```
+
+## Moving a site to another host
+
+A backup restores onto a new host, or into a new project, the same way. The test
+suite runs these steps against a real site.
+
+1. Start only the database on the new host (`docker compose up -d db`), and wait for
+   it to be healthy.
+2. Load the dump: `docker compose exec -T db mariadb -u root -p mukurtu < mukurtu.sql`.
+3. Unpack each archive into its (new, empty) volume, and give the files to uid 1000:
+
+   ```
+   docker run --rm -v myproject_public:/data -v "$PWD":/backup:ro alpine \
+     sh -c 'tar xzf /backup/public.tgz -C /data && chown -R 1000:1000 /data'
+   docker run --rm -v myproject_private:/data -v "$PWD":/backup:ro alpine \
+     sh -c 'tar xzf /backup/private.tgz -C /data && chown -R 1000:1000 /data'
+   ```
+
+4. Use the **same** `MUKURTU_HASH_SALT` as the old site (or restore the private
+   volume, which holds a generated salt). A different salt invalidates one-time login
+   links and image-style URLs that were already issued.
+5. Start the site: `docker compose up -d mukurtu`. The container finds the existing
+   installation, does not install over it, and applies any pending database updates.
+
+The database name, user, and password in the new `.env` need not match the old
+ones; the dump carries no credentials. `MUKURTU_TRUSTED_HOSTS` must name the new
+address.
+
+A Mukurtu site that was **not** installed from this image (on a regular server) can
+move in the same way, but the test suite does not cover that case, so try it on a
+copy first: dump its database, archive its `sites/default/files`
+into `public.tgz` and its private files directory into `private.tgz`, and restore as
+above. Set the new site's `MUKURTU_HASH_SALT` to the old `hash_salt` from
+`settings.php`.
 
 ## Running commands
 
