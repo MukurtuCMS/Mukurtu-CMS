@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  *
  * Block restrictions can leave a role with only inline blocks. Basic pages
  * did this for non-administrators until they were given the landing page
- * blocks (see LayoutBuilderHooks::NON_ADMIN_BLOCKS), and a site builder can
+ * blocks (see LayoutBuilderHooks::ALLOWED_BLOCKS), and a site builder can
  * still configure it through Layout Builder Restrictions. Separately, Drupal
  * core's ChooseBlockController::build() (route layout_builder.choose_block)
  * always excludes inline_block plugins from its own "block_categories"

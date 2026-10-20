@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\Core\Config\FileStorage;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\layout_builder\OverridesSectionStorageInterface;
 use Drupal\mukurtu_core\Hook\LayoutBuilderHooks;
@@ -19,7 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests which blocks basic pages offer in Layout Builder.
  *
- * @see \Drupal\mukurtu_core\Hook\LayoutBuilderHooks::restrictBlocksForRole()
+ * @see \Drupal\mukurtu_core\Hook\LayoutBuilderHooks::restrictBasicPageBlocks()
  */
 #[Group('mukurtu_core')]
 class LayoutBuilderHooksTest extends KernelTestBase {
@@ -54,7 +52,7 @@ class LayoutBuilderHooksTest extends KernelTestBase {
   }
 
   /**
-   * Runs block definitions through the hook for a basic page.
+   * Runs block definitions through the hook.
    *
    * @param array $definitions
    *   Block definitions keyed by plugin ID.
@@ -70,7 +68,7 @@ class LayoutBuilderHooksTest extends KernelTestBase {
     $section_storage = $this->createMock(OverridesSectionStorageInterface::class);
     $section_storage->method('getContextValue')->with('entity')->willReturn($node);
 
-    (new LayoutBuilderHooks())->restrictBlocksForRole($definitions, ['section_storage' => $section_storage]);
+    (new LayoutBuilderHooks())->restrictBasicPageBlocks($definitions, ['section_storage' => $section_storage]);
     return array_keys($definitions);
   }
 
@@ -89,29 +87,29 @@ class LayoutBuilderHooksTest extends KernelTestBase {
   }
 
   /**
-   * Reusable and site-wide blocks are hidden from every role.
+   * Every role gets the allowed blocks and nothing else.
    *
-   * Content blocks come from "Add a block", so reusable ones are not offered.
-   * The "Custom" plugin blocks belong in theme regions. The footer and
-   * single-media inline types are not offered on landing pages, so basic
-   * pages match.
+   * The extras cover what used to leak through: reusable content blocks, the
+   * "Custom" plugin blocks, the footer and single-media inline types, and the
+   * wider set administrators used to see.
    */
   #[DataProvider('roleProvider')]
-  public function testSiteWideBlocksAreHidden(bool $administrator): void {
+  public function testOnlyAllowedBlocksAreOffered(bool $administrator): void {
     $this->logIn($administrator);
 
-    $definitions = [
-      'consent_popup' => ['category' => new TranslatableMarkup('Custom')],
-      'mukurtu_footer' => ['category' => new TranslatableMarkup('Custom')],
-      'block_content:5c3a1f2e-0000-4000-8000-000000000001' => ['category' => new TranslatableMarkup('Content block')],
-      'inline_block:mukurtu_footer' => ['category' => new TranslatableMarkup('Inline blocks')],
-      'inline_block:media_block' => ['category' => new TranslatableMarkup('Inline blocks')],
-      'inline_block:basic' => ['category' => new TranslatableMarkup('Inline blocks')],
-    ];
+    $definitions = array_fill_keys(LayoutBuilderHooks::ALLOWED_BLOCKS, []);
+    $definitions += array_fill_keys([
+      'block_content:5c3a1f2e-0000-4000-8000-000000000001',
+      'consent_popup',
+      'mukurtu_footer',
+      'inline_block:mukurtu_footer',
+      'inline_block:media_block',
+      'system_menu_block:main',
+      'views_block:content_recent-block_1',
+      'mukurtu_community_protocol_list',
+    ], []);
 
-    $allowed = $this->filterDefinitions($definitions);
-
-    $this->assertSame(['inline_block:basic'], array_values(array_intersect(array_keys($definitions), $allowed)));
+    $this->assertSame(LayoutBuilderHooks::ALLOWED_BLOCKS, $this->filterDefinitions($definitions));
   }
 
   /**
@@ -125,36 +123,22 @@ class LayoutBuilderHooksTest extends KernelTestBase {
   }
 
   /**
-   * Administrators keep everything else.
-   */
-  public function testAdministratorKeepsOtherBlocks(): void {
-    $this->logIn(TRUE);
-
-    $definitions = [
-      'views_block:mukurtu_browse_by_map-map_block' => ['category' => new TranslatableMarkup('Lists (Views)')],
-      'inline_block:image_with_description' => ['category' => new TranslatableMarkup('Inline blocks')],
-    ];
-
-    $this->assertSame(array_keys($definitions), $this->filterDefinitions($definitions));
-  }
-
-  /**
-   * Category matching must not depend on the interface language.
+   * The basic page set must match what landing pages offer.
    *
-   * Casting a category to a string translates it. The hook compares English
-   * names, so it has to read the untranslated string.
+   * The two lists live in different modules, so they can drift. Compare the
+   * hook's list with the allowlists in the shipped landing page display.
    */
-  public function testCategoryMatchingIgnoresTranslation(): void {
-    $this->logIn(FALSE);
-    $translation = $this->createMock(TranslationInterface::class);
-    $translation->method('translateString')->willReturn('Translated');
+  public function testAllowedBlocksMatchLandingPages(): void {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_landing_page');
+    $display = (new FileStorage($module_path . '/config/install'))->read('core.entity_view_display.node.landing_page.default');
+    $allowlists = $display['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction']['allowlisted_blocks'];
 
-    $definitions = [
-      'consent_popup' => ['category' => new TranslatableMarkup('Custom', [], [], $translation)],
-      'inline_block:basic' => ['category' => new TranslatableMarkup('Inline blocks', [], [], $translation)],
-    ];
+    $landing_page_blocks = array_merge(...array_values($allowlists));
+    $basic_page_blocks = LayoutBuilderHooks::ALLOWED_BLOCKS;
+    sort($landing_page_blocks);
+    sort($basic_page_blocks);
 
-    $this->assertSame(['inline_block:basic'], $this->filterDefinitions($definitions));
+    $this->assertSame($landing_page_blocks, $basic_page_blocks);
   }
 
   /**
@@ -162,46 +146,8 @@ class LayoutBuilderHooksTest extends KernelTestBase {
    */
   public function testOtherBundlesAreNotAltered(): void {
     $this->logIn(FALSE);
-    $definitions = [
-      'consent_popup' => ['category' => new TranslatableMarkup('Custom')],
-    ];
 
-    $this->assertSame(['consent_popup'], $this->filterDefinitions($definitions, 'landing_page'));
-  }
-
-  /**
-   * Non-administrators get the landing page blocks and nothing else.
-   */
-  public function testNonAdministratorGetsLandingPageBlocks(): void {
-    $this->logIn(FALSE);
-
-    $definitions = array_fill_keys(LayoutBuilderHooks::NON_ADMIN_BLOCKS, ['category' => new TranslatableMarkup('Lists (Views)')]);
-    $definitions += [
-      'system_menu_block:main' => ['category' => new TranslatableMarkup('Menus')],
-      'views_block:content_recent-block_1' => ['category' => new TranslatableMarkup('Lists (Views)')],
-      'mukurtu_community_protocol_list' => ['category' => new TranslatableMarkup('Mukurtu')],
-    ];
-
-    $this->assertSame(LayoutBuilderHooks::NON_ADMIN_BLOCKS, $this->filterDefinitions($definitions));
-  }
-
-  /**
-   * The basic page set must match what landing pages offer.
-   *
-   * The two lists live in different modules, so they can drift. Compare the
-   * hook's list with the allowlists in the shipped landing page display.
-   */
-  public function testNonAdministratorBlocksMatchLandingPages(): void {
-    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_landing_page');
-    $display = (new FileStorage($module_path . '/config/install'))->read('core.entity_view_display.node.landing_page.default');
-    $allowlists = $display['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction']['allowlisted_blocks'];
-
-    $landing_page_blocks = array_merge(...array_values($allowlists));
-    $basic_page_blocks = LayoutBuilderHooks::NON_ADMIN_BLOCKS;
-    sort($landing_page_blocks);
-    sort($basic_page_blocks);
-
-    $this->assertSame($landing_page_blocks, $basic_page_blocks);
+    $this->assertSame(['consent_popup'], $this->filterDefinitions(['consent_popup' => []], 'landing_page'));
   }
 
 }
