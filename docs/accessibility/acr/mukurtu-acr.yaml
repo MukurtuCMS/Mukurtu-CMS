@@ -64,9 +64,11 @@ chapters:
       help its authors produce accessible content. It reports on what the
       tool does for an author, not on whether the authoring interface is
       itself accessible, which the Web component already covers. Its
-      evaluation is under way and tracked in issue #2457: the criteria an
-      author can affect are assessed first, and the rest remain
-      not-evaluated.
+      evaluation is complete and was tracked in issue #2457. Most criteria
+      are not applicable to it, because the theme and the code determine
+      the outcome whatever an author enters; those rows say which. The
+      criteria an author can affect are assessed, and each supporting row
+      states what the tool does not verify.
     criteria:
       - num: 1.1.1
         components:
