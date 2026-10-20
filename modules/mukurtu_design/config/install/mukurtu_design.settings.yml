@@ -9,6 +9,8 @@ colors:
 background:
   image: null
   text_treatment: light
+  tint: true
 header:
   image: null
   text_treatment: light
+  tint: true
