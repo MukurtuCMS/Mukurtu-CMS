@@ -42,6 +42,9 @@
               Drupal.announce(message);
               showToast(message, layoutBuilder);
             });
+          })
+          .catch(function () {
+            // A failed check only means no toast; the save itself succeeded.
           });
       });
     },

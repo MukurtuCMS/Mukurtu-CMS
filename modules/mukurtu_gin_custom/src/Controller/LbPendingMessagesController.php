@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_gin_custom\Controller;
 
+use Drupal\Component\Render\MarkupInterface;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,7 +34,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class LbPendingMessagesController extends ControllerBase {
 
   /**
-   * Returns any queued status messages as plain text, draining them.
+   * Returns any queued status messages as HTML strings, draining them.
+   *
+   * The toast inserts these as markup, so plain-string messages are escaped
+   * the same way core's status_messages template would escape them. Only
+   * MarkupInterface messages, already sanitized, pass through unchanged.
    */
   public function build(): JsonResponse {
     $messenger = $this->messenger();
@@ -43,7 +49,10 @@ class LbPendingMessagesController extends ControllerBase {
     }
 
     return new JsonResponse([
-      'statuses' => array_map('strval', $statuses),
+      'statuses' => array_map(
+        fn ($message) => $message instanceof MarkupInterface ? (string) $message : Html::escape((string) $message),
+        $statuses,
+      ),
     ]);
   }
 

@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_gin_custom\Kernel;
 
 use Drupal\Core\Access\CsrfRequestHeaderAccessCheck;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_gin_custom\Controller\LbPendingMessagesController;
@@ -43,6 +44,23 @@ class LbPendingMessagesControllerTest extends KernelTestBase {
 
     $this->assertSame(['The layout override has been saved.'], $data['statuses']);
     $this->assertSame([], $messenger->messagesByType(MessengerInterface::TYPE_STATUS));
+  }
+
+  /**
+   * Tests that plain-string messages are escaped and markup is kept.
+   */
+  public function testBuildEscapesPlainStrings(): void {
+    $messenger = \Drupal::messenger();
+    $messenger->addStatus('Saved <img src=x onerror=alert(1)>');
+    $messenger->addStatus(Markup::create('Saved <em>Home</em>'));
+
+    $response = LbPendingMessagesController::create(\Drupal::getContainer())->build();
+    $data = json_decode((string) $response->getContent(), TRUE);
+
+    $this->assertSame([
+      'Saved &lt;img src=x onerror=alert(1)&gt;',
+      'Saved <em>Home</em>',
+    ], $data['statuses']);
   }
 
   /**
