@@ -22,6 +22,15 @@ interface CheckFinding {
   criterion: string;
   summary: string;
   detail: string;
+  // Optional diagnostics a check may attach so a reader of the report can
+  // act on a finding without reproducing it first. checkTextZoom uses
+  // these; see the comment where it fills them in (#2392).
+  offenders?: { tag: string; id: string; cls: string; right: number; width: number; depth: number }[];
+  // Boxes that reached past the viewport but were clipped by an ancestor, so
+  // they could not have caused the scroll (#2436).
+  clippedOffenders?: number;
+  readyState?: string;
+  msSinceLoad?: number | null;
 }
 
 function writeReport(slug: string, testInfo: TestInfo, findings: CheckFinding[]): void {
@@ -134,13 +143,92 @@ export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string
   // A failed reload leaves a navigation in flight, and evaluating against a
   // destroyed execution context throws. This check is report-only, so it
   // records that it could not measure rather than failing the test around it.
-  let overflow: { scrollWidth: number; clientWidth: number } | null = null;
+  type Offender = { tag: string; id: string; cls: string; right: number; width: number; depth: number };
+  type Measurement = {
+    scrollWidth: number;
+    clientWidth: number;
+    readyState: string;
+    // How long after the page finished loading the measurement was taken.
+    // A wide reading at a few hundred milliseconds, on a page that is
+    // narrow once settled, points at layout that JavaScript has not
+    // finished adjusting rather than at a real failure.
+    msSinceLoad: number | null;
+    offenders: Offender[];
+    clippedOffenders: number;
+  };
+
+  let overflow: Measurement | null = null;
   try {
     await page.waitForLoadState('domcontentloaded', { timeout: 5_000 }).catch(() => {});
-    overflow = await page.evaluate(() => ({
-      scrollWidth: document.documentElement.scrollWidth,
-      clientWidth: document.documentElement.clientWidth,
-    }));
+    overflow = await page.evaluate(() => {
+      const de = document.documentElement;
+      const scrollWidth = de.scrollWidth;
+      const clientWidth = de.clientWidth;
+
+      // Only worth walking the DOM when something is actually wide.
+      const offenders: Offender[] = [];
+      let clipped = 0;
+      if (scrollWidth > clientWidth + 1) {
+        // An element whose overflow is clipped by an ancestor cannot widen
+        // the page, however far past the viewport its own box reaches. On
+        // the Local Contexts pages this list used to name the group name
+        // inside h1.page-title, which Gin styles overflow: hidden with an
+        // ellipsis: clipped by its own parent, incapable of causing a
+        // scrollbar, and convincing enough that it nearly got its own CSS
+        // fix (#2436).
+        //
+        // The nearest horizontally clipping ancestor decides. If that
+        // ancestor sits inside the viewport, everything it clips is
+        // contained; if it overflows too, it is reported on its own merits
+        // by this same loop, so nothing real is lost either way.
+        const isContained = (el: HTMLElement): boolean => {
+          let n: HTMLElement | null = el.parentElement;
+          while (n && n !== document.documentElement) {
+            if (getComputedStyle(n).overflowX !== 'visible') {
+              return n.getBoundingClientRect().right <= clientWidth + 1;
+            }
+            n = n.parentElement;
+          }
+          return false;
+        };
+
+        for (const el of Array.from(document.querySelectorAll('body *')) as HTMLElement[]) {
+          const b = el.getBoundingClientRect();
+          if (b.width === 0 || b.height === 0) continue;
+          if (b.right <= clientWidth + 1) continue;
+          if (isContained(el)) { clipped += 1; continue; }
+          let depth = 0;
+          let n: HTMLElement | null = el;
+          while ((n = n.parentElement)) depth += 1;
+          offenders.push({
+            tag: el.tagName.toLowerCase(),
+            id: el.id,
+            cls: String(el.className).slice(0, 60),
+            right: Math.round(b.right),
+            width: Math.round(b.width),
+            depth,
+          });
+        }
+        // Shallowest first: the outermost wide box is usually the cause and
+        // the rest are its children inheriting the width.
+        offenders.sort((a, b) => a.depth - b.depth);
+      }
+
+      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+      const loaded = nav && nav.loadEventEnd > 0 ? nav.loadEventEnd : null;
+
+      return {
+        scrollWidth,
+        clientWidth,
+        readyState: document.readyState,
+        msSinceLoad: loaded === null ? null : Math.round(performance.now() - loaded),
+        offenders: offenders.slice(0, 8),
+        // How many boxes reached past the viewport but were clipped by an
+        // ancestor, so a reader can tell this list was filtered rather than
+        // empty by luck.
+        clippedOffenders: clipped,
+      };
+    });
   } catch {
     overflow = null;
   }
@@ -158,6 +246,14 @@ export async function checkTextZoom(page: Page, testInfo: TestInfo, slug: string
       check: 'text-zoom-200',
       criterion: '1.4.4 Resize Text',
       summary: `Horizontal scroll required at 200% text size (content ${overflow.scrollWidth}px vs viewport ${overflow.clientWidth}px)`,
+      // What overflowed, and whether the page had settled when it was
+      // measured. Without these a finding says only that something is
+      // wide, which cost two rounds of manual reproduction on the Local
+      // Contexts pages and still did not identify the element (#2392).
+      offenders: overflow.offenders,
+      clippedOffenders: overflow.clippedOffenders,
+      readyState: overflow.readyState,
+      msSinceLoad: overflow.msSinceLoad,
       detail: {
         'before-load': "Measured with the browser's own default font size doubled and applied before load, which is what a reader who sets a larger text size actually gets.",
         'after-restyle': "Measured with the browser's own default font size doubled, but the page could not be reloaded with it already set, so rem media queries may not have re-evaluated. Treat as indicative and re-check.",

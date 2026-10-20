@@ -811,6 +811,14 @@ short fields themselves. Shrink it in these dialogs specifically. */
   display: none !important;
 }
 
+/* #2397: Escape closes an open secondary toolbar tray (WCAG 1.4.13).
+   gin-secondary-tray-escape.js adds this class to the tab; it is cleared once
+   the pointer and focus have left. !important beats Gin's :hover and
+   :focus-within rules, which open the tray with CSS alone. */
+.gin-secondary-toolbar .toolbar-secondary .toolbar-bar .toolbar-tab.mukurtu-tray-dismissed .toolbar-tray {
+  display: none !important;
+}
+
 /* Layout Builder's off-canvas/dialog forms (add/configure/move block) don't
    render a [data-drupal-messages] placeholder in the DOM until a message is
    actually needed. Drupal core's Drupal.Message.defaultWrapper() (message.js)
@@ -1261,6 +1269,69 @@ body.path-visitors .layout-row.layout-row {
   border-radius: var(--gin-border-m);
 }
 
+.visitors-country-map__heading {
+  margin-block: 0 var(--gin-spacing-xs);
+}
+
+.visitors-country-map__description,
+.visitors-country-map__attribution {
+  margin-block: 0 var(--gin-spacing-s);
+  color: var(--gin-color-text-light);
+}
+
+.visitors-country-map__attribution {
+  margin-block: var(--gin-spacing-xs) 0;
+  font-size: var(--gin-font-size-s);
+}
+
+/* One circle per city, sized in PHP by unique visitors. The marker element is
+   Leaflet's own (a focusable button); the dot inside it is the visible
+   circle. A dark ring inside a light one keeps the edge at 3:1 or better
+   against both light and dark map tiles (WCAG 1.4.11), and the translucent
+   fill lets overlapping circles and the streets beneath them show through. */
+.visitors-country-map__marker {
+  border-radius: 50%;
+}
+
+.visitors-country-map__dot {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  background: rgb(0 85 164 / 45%);
+  border: 2px solid #003e78;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.visitors-country-map__marker:hover .visitors-country-map__dot {
+  background: rgb(0 85 164 / 70%);
+}
+
+/* Gin's own focus ring (a translucent blue box-shadow) otherwise wins here,
+   and over blue water tiles it nearly disappears. A black outline on a white
+   halo stays visible on any tile. Scoped to the map container so it outranks
+   Gin's rule without !important. */
+.visitors-main .visitors-country-map .leaflet-container .visitors-country-map__marker:focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #fff;
+}
+
+/* Forced colours drop the fill and shadow, so give the circle a system-colour
+   edge it keeps. */
+@media (forced-colors: active) {
+  .visitors-country-map__dot {
+    border-color: CanvasText;
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+
+  .visitors-main .visitors-country-map .leaflet-container .visitors-country-map__marker:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
 /* Visitors report, Gin dark mode: keep the chart on a light plate.
 
    charts_chartjs paints its title and legend onto the <canvas>, and neither
@@ -1548,4 +1619,34 @@ Nothing else sets visibility on this element, so no !important is needed;
 the only requirement is that the selector matches, which it does. */
 .gin-sticky-form-actions--preprocessed ~ .layout-container form.gin--has-sticky-form-actions .gin-sticky-form-actions {
   visibility: hidden;
+}
+
+/*
+ * Gin's meta sidebar trigger is the only way to open or close the sidebar
+ * panel that holds Revision information, Menu settings, URL alias and the
+ * rest. Gin gives it `width: 32px`, but it sits in `.gin-sticky-form-actions`,
+ * which is `display: flex`, and it inherits `flex-shrink: 1`. On Mukurtu's
+ * node forms that bar also carries the "Save as" state select alongside Save
+ * and Preview, so there is not enough room and the trigger is the item that
+ * gives way: measured at 13px wide with the panel closed and 0px with it open,
+ * on a 1920px viewport.
+ *
+ * At those sizes it cannot be operated. It is also well under the 24 by 24
+ * minimum in WCAG 2.2 2.5.8 Target Size, and at 0px it is not a target at all,
+ * which leaves a keyboard or pointer user no way to reach the fields inside
+ * the panel.
+ *
+ * flex-shrink: 0 keeps it at the 32px Gin asks for. The buttons beside it have
+ * their own shrink behaviour and wrap as before, so nothing else in the bar
+ * changes.
+ */
+.meta-sidebar__trigger {
+  flex-shrink: 0;
+}
+
+/* Tooltips on the visitor map stay open while hovered (see
+   mukurtu_core/js/visitors-country-map.js), which needs them to receive the
+   pointer; Leaflet turns that off by default. */
+#visitors-country-map .leaflet-tooltip {
+  pointer-events: auto;
 }

@@ -370,10 +370,12 @@ class DashboardLinkCleanupTest extends KernelTestBase {
         'All notifications',
       ],
       'dashboard-multilingual' => [
+        'Enable multilingual',
         'Manage site languages',
         'Configure content translation',
         'Translate configuration',
         'Translate interface',
+        'Translation status',
       ],
       'dashboard-roundtrip' => [
         'Export Lists',
@@ -391,6 +393,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
         'Configure consent popup',
         'Main navigation menu',
         'Edit footer',
+        'Add a basic page',
       ],
       'dashboard-site-settings' => [
         'Site Setup',
@@ -411,14 +414,32 @@ class DashboardLinkCleanupTest extends KernelTestBase {
   }
 
   /**
-   * "Add a basic page" and "Site configuration" are dropped from the dashboard,
-   * and "Access Denied Page" moves to the Look and feel section (#1787).
+   * "Site configuration" is dropped from the dashboard, and "Access Denied
+   * Page" moves to the Look and feel section (#1787).
    */
   public function testLinksDroppedAndMoved(): void {
     $links = $this->menuLinks('mukurtu_core');
-    $this->assertArrayNotHasKey('mukurtu_core.create_basic_page_dashboard', $links);
     $this->assertArrayNotHasKey('mukurtu_core.site_configuration', $links);
     $this->assertSame('dashboard-look-feel', $links['mukurtu_core.access_denied_settings']['menu_name']);
+  }
+
+  /**
+   * Tests that the "Add a basic page" link is restored (#2391).
+   *
+   * It points at the basic page add form in Look and feel, and the dynamic
+   * Landing Page link still sorts after it.
+   */
+  public function testBasicPageLinkRestored(): void {
+    $links = $this->menuLinks('mukurtu_core');
+    $this->assertArrayHasKey('mukurtu_core.create_basic_page_dashboard', $links);
+    $link = $links['mukurtu_core.create_basic_page_dashboard'];
+    $this->assertSame('dashboard-look-feel', $link['menu_name']);
+    $this->assertSame('mukurtu_core.add', $link['route_name']);
+    $this->assertSame(['node_type' => 'page'], $link['route_parameters']);
+
+    require_once dirname(__DIR__, 3) . '/mukurtu_core.module';
+    mukurtu_core_menu_links_discovered_alter($links);
+    $this->assertGreaterThan($link['weight'], $links['mukurtu_core.landing_page_dashboard']['weight']);
   }
 
   /**

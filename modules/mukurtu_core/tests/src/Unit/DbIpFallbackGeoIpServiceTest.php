@@ -8,6 +8,8 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\mukurtu_core\Service\DbIpDatabaseLocator;
 use Drupal\mukurtu_core\Service\DbIpFallbackGeoIpService;
 use Drupal\visitors_geoip\VisitorsGeoIpInterface;
+use GeoIp2\Exception\AddressNotFoundException;
+use GeoIp2\Model\City;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -67,6 +69,100 @@ class DbIpFallbackGeoIpServiceTest extends UnitTestCase {
     $inner->method('city')->willReturn(NULL);
 
     $this->assertNull($this->fallbackService($inner)->city('203.0.113.1'));
+  }
+
+  /**
+   * A DB-IP City Lite record's region name stands in for its missing code.
+   *
+   * This raw shape is exactly what DB-IP City Lite returns (checked against
+   * the 2026-09 database for 8.8.8.8): subdivision names, no iso_code.
+   */
+  public function testDbIpRecordGetsItsRegionNameAsTheRegionCode(): void {
+    $record = DbIpFallbackGeoIpService::normalize(new City([
+      'continent' => ['code' => 'NA'],
+      'country' => ['iso_code' => 'US'],
+      'subdivisions' => [['names' => ['en' => 'California']]],
+      'city' => ['names' => ['en' => 'Mountain View']],
+      'location' => ['latitude' => 37.422, 'longitude' => -122.085],
+    ]));
+
+    $this->assertSame('California', $record->subdivisions[0]->isoCode);
+    $this->assertSame('Mountain View', $record->city->names['en']);
+    $this->assertSame('NA', $record->continent->code);
+    $this->assertSame('US', $record->country->isoCode);
+    $this->assertSame(37.422, $record->location->latitude);
+    $this->assertSame(-122.085, $record->location->longitude);
+  }
+
+  /**
+   * A record that already has every field (MaxMind's usual case) is kept.
+   */
+  public function testCompleteRecordIsUnchanged(): void {
+    $record = DbIpFallbackGeoIpService::normalize(new City([
+      'continent' => ['code' => 'NA'],
+      'country' => ['iso_code' => 'US'],
+      'subdivisions' => [['iso_code' => 'CA', 'names' => ['en' => 'California']]],
+      'city' => ['names' => ['en' => 'Mountain View', 'de' => 'Mountain View']],
+    ]));
+
+    $this->assertSame('CA', $record->subdivisions[0]->isoCode);
+    $this->assertSame('Mountain View', $record->city->names['en']);
+  }
+
+  /**
+   * A country-only record gets empty strings, never NULL, for the rest.
+   *
+   * Both MaxMind and DB-IP return records like this for some addresses
+   * (country-level allocations, many anycast and mobile ranges).
+   */
+  public function testMissingFieldsBecomeEmptyStrings(): void {
+    $record = DbIpFallbackGeoIpService::normalize(new City([
+      'registered_country' => ['iso_code' => 'SG'],
+    ]));
+
+    $this->assertSame('', $record->continent->code);
+    $this->assertSame('SG', $record->country->isoCode, 'A missing country should fall back to the registered country.');
+    $this->assertSame('', $record->subdivisions[0]->isoCode);
+    $this->assertSame('', $record->city->names['en']);
+  }
+
+  /**
+   * A city with no English name uses its name in another language.
+   */
+  public function testCityWithoutEnglishNameUsesAnotherName(): void {
+    $record = DbIpFallbackGeoIpService::normalize(new City([
+      'subdivisions' => [['names' => ['ja' => '東京都']]],
+      'city' => ['names' => ['ja' => '東京']],
+    ]));
+
+    $this->assertSame('東京都', $record->subdivisions[0]->isoCode);
+    $this->assertSame('東京', $record->city->names['en']);
+  }
+
+  /**
+   * The inner (MaxMind) service's records are normalized too.
+   */
+  public function testInnerRecordIsNormalized(): void {
+    $inner = $this->createMock(VisitorsGeoIpInterface::class);
+    $inner->method('city')->willReturn(new City(['country' => ['iso_code' => 'FR']]));
+
+    $record = $this->fallbackService($inner)->city('8.8.8.8');
+
+    $this->assertSame('FR', $record->country->isoCode);
+    $this->assertSame('', $record->subdivisions[0]->isoCode);
+  }
+
+  /**
+   * An inner lookup that throws is treated as "no result", not a crash.
+   *
+   * The GeoIpService in visitors_geoip throws AddressNotFoundException for
+   * private and unknown addresses (https://www.drupal.org/i/3618588).
+   */
+  public function testInnerLookupExceptionIsTreatedAsNoResult(): void {
+    $inner = $this->createMock(VisitorsGeoIpInterface::class);
+    $inner->method('city')->willThrowException(new AddressNotFoundException('The address 10.0.0.1 is not in the database.'));
+
+    $this->assertNull($this->fallbackService($inner)->city('10.0.0.1'));
   }
 
   /**

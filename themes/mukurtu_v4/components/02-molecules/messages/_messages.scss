@@ -18,6 +18,36 @@
   }
 }
 
+// The severity row: icon plus the heading that names the type. Both exist so
+// severity does not depend on telling the three box colours apart (WCAG
+// 1.4.1, issue #2421). The heading was .visually-hidden until then.
+.messages__header {
+  display: flex;
+  align-items: center;
+  gap: var(--v-space-5xs);
+}
+
+.messages__icon {
+  display: flex;
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+// Sized down from a default h2: this names the message's type, it is not a
+// section heading competing with the page's own. Colour is inherited from
+// the message box so the icon, heading and text all carry the type's colour
+// and its contrast.
+.messages__title {
+  margin: 0;
+  font-size: var(--font-size-s);
+  font-weight: 700;
+  line-height: 1.2;
+  color: inherit;
+}
+
 // Icon button that inherits the message type's text color, so it keeps that
 // color's contrast and follows forced-colors mode.
 .messages__close {

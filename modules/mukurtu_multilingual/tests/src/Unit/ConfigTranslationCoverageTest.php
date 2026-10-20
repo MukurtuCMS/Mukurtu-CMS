@@ -16,7 +16,7 @@ use PHPUnit\Framework\Attributes\Group;
  * support on a multilingual site and nobody noticed until it was reported.
  * This test globs every bundle-defining config file in the profile and
  * asserts a matching language.content_settings.* exists in
- * mukurtu_multilingual/config/install/, so a new bundle added without
+ * mukurtu_multilingual/config/optional/, so a new bundle added without
  * translation support fails CI instead of shipping silently.
  *
  * A pure filesystem check - no Drupal bootstrap needed.
@@ -59,7 +59,7 @@ class ConfigTranslationCoverageTest extends UnitTestCase {
     $profileRoot = dirname(__DIR__, 5);
     $this->assertDirectoryExists($profileRoot . '/modules', 'Sanity check: resolved profile root is wrong.');
 
-    $contentSettingsDir = $profileRoot . '/modules/mukurtu_multilingual/config/install';
+    $contentSettingsDir = $profileRoot . '/modules/mukurtu_multilingual/config/optional';
     $existing = [];
     foreach (glob($contentSettingsDir . '/language.content_settings.*.yml') as $file) {
       $existing[] = basename($file, '.yml');
@@ -90,7 +90,7 @@ class ConfigTranslationCoverageTest extends UnitTestCase {
 
     $message = "The following bundles have no language.content_settings.* file "
       . "(so translation is silently unavailable on a multilingual site). "
-      . "Either ship modules/mukurtu_multilingual/config/install/language.content_settings.<type>.<bundle>.yml "
+      . "Either ship modules/mukurtu_multilingual/config/optional/language.content_settings.<type>.<bundle>.yml "
       . "(plus an update hook for existing sites), or add a documented exemption:\n"
       . implode("\n", array_map(fn ($key, $path) => "  $key ($path)", array_keys($gaps), $gaps));
 

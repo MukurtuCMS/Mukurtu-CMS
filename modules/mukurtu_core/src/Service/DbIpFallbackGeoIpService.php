@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_core\Service;
 use Drupal\visitors_geoip\VisitorsGeoIpInterface;
 use GeoIp2\Database\Reader;
 use GeoIp2\Exception\GeoIp2Exception;
+use GeoIp2\Model\City;
 
 /**
  * Falls back to a bundled, license-free DB-IP database when MaxMind has none.
@@ -66,9 +67,23 @@ final class DbIpFallbackGeoIpService implements VisitorsGeoIpInterface {
    * {@inheritdoc}
    */
   public function city($ip_address) {
-    $record = $this->inner->city($ip_address);
+    // GeoIp2\Database\Reader::city() throws AddressNotFoundException for any
+    // address the database has no record for -- private/loopback ranges
+    // (routine on any dev site, and not unheard of in production behind some
+    // proxy setups) included -- and \InvalidArgumentException for a
+    // malformed address string. Neither visitors_geoip's own GeoIpService
+    // nor its caller, Visitors::doLocation(), catches either one
+    // (https://www.drupal.org/i/3618588), so an uncaught one fails the whole
+    // tracking request and the hit is never recorded. Caught for both the
+    // inner (MaxMind) lookup and the DB-IP one.
+    try {
+      $record = $this->inner->city($ip_address);
+    }
+    catch (GeoIp2Exception | \InvalidArgumentException $e) {
+      $record = NULL;
+    }
     if ($record) {
-      return $record;
+      return static::normalize($record);
     }
 
     $reader = $this->dbIpReader();
@@ -77,22 +92,67 @@ final class DbIpFallbackGeoIpService implements VisitorsGeoIpInterface {
     }
 
     try {
-      return $reader->city($ip_address);
+      return static::normalize($reader->city($ip_address));
     }
     catch (GeoIp2Exception | \InvalidArgumentException $e) {
-      // GeoIp2\Database\Reader::city() throws AddressNotFoundException for
-      // any address the database has no record for -- private/loopback
-      // ranges (routine on any dev site, and not unheard of in production
-      // behind some proxy setups) included -- and \InvalidArgumentException
-      // for a malformed address string. Neither visitors_geoip's own
-      // GeoIpService nor its caller, Visitors::doLocation(), catches either
-      // one, so a site with MaxMind configured already relies on this
-      // exception simply never being hit in practice, which real per-visit
-      // traffic does not guarantee. Not this class's bug to fix, but
-      // swallowing it here at least keeps the DB-IP fallback from crashing a
-      // hit that the MaxMind path would have crashed on too.
       return NULL;
     }
+  }
+
+  /**
+   * Fills in the record fields visitors_geoip writes to NOT NULL columns.
+   *
+   * Visitors::doLocation() and RebuildLocationService::rebuild() copy
+   * continent->code, country->isoCode, subdivisions[0]->isoCode and
+   * city->names['en'] straight into the visitors table, whose columns for
+   * them are all NOT NULL. Any of the four can be missing from a record, and
+   * one always is with DB-IP: its City Lite database has subdivision names
+   * but no subdivision ISO codes at all, so every address it resolves would
+   * insert a NULL location_region. Under MySQL's strict mode that is an
+   * integrity constraint violation, which fails the tracking request and
+   * loses the visit entirely -- the more precisely DB-IP can place a
+   * visitor, the more certain the visit is to be dropped.
+   *
+   * A missing subdivision code falls back to the subdivision's English
+   * name, which the Region report then shows as-is ("California" rather
+   * than "CA"); anything else missing becomes an empty string, which the
+   * reports already show as "Unknown".
+   *
+   * @param mixed $record
+   *   A lookup result; anything other than a City model is returned as-is.
+   *
+   * @return mixed
+   *   The normalized record.
+   */
+  public static function normalize(mixed $record): mixed {
+    if (!$record instanceof City) {
+      return $record;
+    }
+
+    $raw = $record->jsonSerialize();
+
+    $raw['continent']['code'] ??= '';
+    $raw['country']['iso_code'] ??= $raw['registered_country']['iso_code'] ?? '';
+
+    $subdivision = $raw['subdivisions'][0] ?? [];
+    $subdivision['iso_code'] ??= static::englishName($subdivision);
+    $raw['subdivisions'][0] = $subdivision;
+
+    $raw['city']['names']['en'] ??= static::englishName($raw['city'] ?? []);
+
+    return new City($raw, ['en']);
+  }
+
+  /**
+   * A record's English name, else its first name in any language, else ''.
+   *
+   * Truncated to the 128 characters visitors_geoip's region and city
+   * columns hold.
+   */
+  private static function englishName(array $record): string {
+    $names = $record['names'] ?? [];
+    $name = (string) ($names['en'] ?? reset($names) ?: '');
+    return mb_substr($name, 0, 128);
   }
 
   /**

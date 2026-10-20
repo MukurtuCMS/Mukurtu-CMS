@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_setup;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
@@ -41,10 +42,28 @@ class SiteSetupTaskManager {
    */
   const CRON_MAX_AGE = 86400;
 
+  /**
+   * Cache tags for anything rendered from the task list or its counts.
+   *
+   * config:core.extension covers tasks that depend on an optional module
+   * (cookie_consent needs Klaro). Uninstalling a module flushes every cache,
+   * but installing one only invalidates this tag.
+   */
+  const CACHE_TAGS = [
+    'config:system.site',
+    'config:core.extension',
+    'community_list',
+    'protocol_list',
+    'taxonomy_term_list',
+    'block_content_list',
+    'mukurtu_setup:tasks',
+  ];
+
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected ConfigFactoryInterface $configFactory,
     protected StateInterface $state,
+    protected ModuleHandlerInterface $moduleHandler,
     protected AccountInterface $currentUser,
   ) {}
 
@@ -67,7 +86,7 @@ class SiteSetupTaskManager {
    * @return SiteSetupTask[]
    */
   protected function getAllTasks(): array {
-    return [
+    $tasks = [
       new SiteSetupTask(
         self::TASK_MIGRATE,
         (string) $this->t('Migrate from Mukurtu CMS 3'),
@@ -225,6 +244,14 @@ class SiteSetupTaskManager {
         (string) $this->t('Open bot protection settings'),
       ),
     ];
+
+    // Klaro is installed by default but sites may uninstall it, and the
+    // cookie consent task links to its settings page.
+    if (!$this->moduleHandler->moduleExists('klaro')) {
+      $tasks = array_values(array_filter($tasks, fn (SiteSetupTask $task) => $task->getId() !== 'cookie_consent'));
+    }
+
+    return $tasks;
   }
 
   /**

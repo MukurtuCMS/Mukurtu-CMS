@@ -394,6 +394,11 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   color: var(--color-black);
 }
 
+/* Same opt-out as the page background, see _layout.scss. */
+.site-header--has-background.site-header--no-tint {
+  --mukurtu-header-scrim: transparent;
+}
+
 /* The nav sits on the image at desktop.
  *
  * .header-nav is the same element in two guises: a static bar at >=lg, and the

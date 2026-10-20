@@ -151,16 +151,8 @@ documentation on how to use @include media(). */
   --brand-secondary: #e6ab49;
   --brand-secondary-dark: #9d6915;
   --brand-secondary-accent: #f1b85a;
-  --mukurtu-navbar-collapse-link-hover-color: #e5ab48;
   --mukurtu-breadcrumb-gradient-color: #b7873a;
-  --mukurtu-panel-pane-text-color: var(--color-white);
   --mukurtu-panel-pane-content-background-color: #eeecec;
-  --mukurtu-mejs-background-color: var(--brand-light-accent);
-  --mukurtu-mejs-time-rail-loaded-color: #e5e1e1;
-  --mukurtu-mejs-time-rail-current-color: #d1cbcb;
-  --mukurtu-dictionary-word-label-background-color: var(--mukurtu-view-row-divider-color);
-  --mukurtu-collection-title-font-color: var(--color-white);
-  --mukurtu-collection-pane-bg-color: var(--mukurtu-navbar-collapse-bg);
   --image-description-horizontal-text: var(--brand-primary-dark);
   --collection-title-link-text: var(--brand-primary);
   --horizontal-tab-link-text: var(--brand-primary-dark);
@@ -402,6 +394,13 @@ Those files are injected by Drupal so they shouldn't be bundled to style.css. */
   color: var(--color-black);
 }
 
+/* An admin can turn the scrim off. The text keeps its treatment colour, but its
+ * contrast now depends on the photograph, which the settings form warns about.
+ * Two classes so it beats the treatment's own scrim at any source order. */
+.page--has-background.page--no-tint {
+  --mukurtu-page-scrim: transparent;
+}
+
 /* Let text take the treatment colour.
  *
  * Headings and body copy set their colour explicitly for a white ground, so
@@ -550,16 +549,8 @@ div.palette-demo--custom {
   --brand-secondary: #d9d4c2;
   --brand-secondary-dark: #7a734d;
   --brand-secondary-accent: #c9c2a8;
-  --mukurtu-navbar-collapse-link-hover-color: var(--brand-secondary);
   --mukurtu-breadcrumb-gradient-color: #99937f;
-  --mukurtu-panel-pane-text-color: var(--brand-primary);
   --mukurtu-panel-pane-content-background-color: #f1efe9;
-  --mukurtu-mejs-background-color: var(--mukurtu-navbar-collapse-bg);
-  --mukurtu-mejs-time-rail-loaded-color: #fff;
-  --mukurtu-mejs-time-rail-current-color: var(--brand-secondary-accent);
-  --mukurtu-dictionary-word-label-background-color: var(--brand-secondary);
-  --mukurtu-collection-title-font-color: var(--text-color);
-  --mukurtu-collection-pane-bg-color: var(--brand-light-accent);
 }
 
 :root {
@@ -1089,29 +1080,38 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 
 .translation-status-badge {
-  display: inline-block;
-  font-size: var(--font-size-s);
-  font-weight: var(--text-bold);
-  letter-spacing: var(--letter-spacing-label);
-  text-transform: uppercase;
-  padding-block: var(--v-space-6xs);
-  padding-inline: var(--v-space-4xs);
-  border-radius: var(--v-space-6xs);
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-6xs);
+  max-inline-size: 100%;
+  margin-block: var(--v-space-6xs);
+  padding-block: 0.125rem;
+  padding-inline: var(--v-space-5xs);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--text-regular);
+  line-height: 1.3;
   overflow-wrap: anywhere;
+}
+.translation-status-badge__icon {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  inline-size: 1em;
+  block-size: 1em;
 }
 .translation-status-badge--not-translated {
   background-color: var(--color-warning-light);
   color: var(--color-warning-dark);
 }
-
-.translation-status-badge-note {
-  display: block;
-  font-size: var(--font-size-2xs);
-  font-weight: var(--text-regular);
-  text-transform: none;
-  letter-spacing: normal;
-  overflow-wrap: anywhere;
-  color: var(--color-text-secondary);
+@media (forced-colors: active) {
+  .translation-status-badge {
+    border-color: CanvasText;
+  }
 }
 
 .altcha-footer {
@@ -2702,6 +2702,29 @@ label.form-required::after,
 .block--image-with-description--full.block--image-with-description--no-image.hero-ground-soft * {
   color: var(--brand-text-color);
   text-shadow: none;
+}
+.block--image-with-description--full.block--image-with-description--no-image {
+  /* Plain over a page background image: "None" paints no ground, so the text
+   * sits on the page's scrim and takes the page's text treatment, whose
+   * pairing is already measured in _layout.scss (5.74:1 light, 7.37:1 dark).
+   * Without this the plain-page colours above win and render a brand heading
+   * and dark body copy on the darkened image. :where() keeps the specificity
+   * level with the rules above, so source order decides and the .contextual
+   * revert below still wins. */
+}
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none *,
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none h1,
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none h2 {
+  color: inherit;
+}
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none a {
+  text-decoration-color: currentColor;
+}
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none svg.ext {
+  fill: currentColor;
+}
+:where(.page--has-background) .block--image-with-description--full.block--image-with-description--no-image.hero-ground-none svg.ext path {
+  stroke: currentColor;
 }
 .block--image-with-description--full.block--image-with-description--no-image {
   /* The presets' `* { color }` outrank the with-image hero's .contextual
@@ -5114,6 +5137,35 @@ body.is-fixed {
       align-self: center;
 }
 
+.messages__header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-5xs);
+}
+
+.messages__icon {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+.messages__icon svg {
+  display: block;
+}
+
+.messages__title {
+  margin: 0;
+  font-size: var(--font-size-s);
+  font-weight: 700;
+  line-height: 1.2;
+  color: inherit;
+}
+
 .messages__close {
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
@@ -6087,6 +6139,11 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   color: var(--color-black);
 }
 
+/* Same opt-out as the page background, see _layout.scss. */
+.site-header--has-background.site-header--no-tint {
+  --mukurtu-header-scrim: transparent;
+}
+
 /* The nav sits on the image at desktop.
  *
  * .header-nav is the same element in two guises: a static bar at >=lg, and the
@@ -7005,7 +7062,12 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   inline-size: 100%;
 }
 
-.category-teaser:not(:has(.media--image)) a::before {
+.category-teaser.category-teaser--names-only a h2 {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+
+.category-teaser:not(:has(.media--image), .category-teaser--names-only) a::before {
   content: "";
   display: block;
   inline-size: 100%;
@@ -8867,6 +8929,10 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
   text-align: center;
   -webkit-margin-after: var(--v-space-2xs);
           margin-block-end: var(--v-space-2xs);
+}
+.layout--onecol .block-wrapper .category-grid:has(.category-teaser--names-only) {
+  -webkit-padding-after: var(--v-space-2xs);
+          padding-block-end: var(--v-space-2xs);
 }
 .layout--onecol .block-wrapper:has(.field--name-body) {
   padding-inline: var(--v-space-xs);

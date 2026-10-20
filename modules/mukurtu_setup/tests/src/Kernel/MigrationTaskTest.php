@@ -55,6 +55,7 @@ class MigrationTaskTest extends KernelTestBase {
       $this->container->get('entity_type.manager'),
       $this->container->get('config.factory'),
       $this->container->get('state'),
+      $this->container->get('module_handler'),
       new UserSession(['uid' => 2, 'roles' => $roles]),
     );
   }

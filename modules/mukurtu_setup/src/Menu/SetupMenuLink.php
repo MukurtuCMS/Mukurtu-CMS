@@ -40,13 +40,7 @@ class SetupMenuLink extends MenuLinkDefault {
   }
 
   public function getCacheTags(): array {
-    return array_merge(parent::getCacheTags(), [
-      'community_list',
-      'protocol_list',
-      'taxonomy_term_list',
-      'block_content_list',
-      'mukurtu_setup:tasks',
-    ]);
+    return array_merge(parent::getCacheTags(), SiteSetupTaskManager::CACHE_TAGS);
   }
 
   /**
