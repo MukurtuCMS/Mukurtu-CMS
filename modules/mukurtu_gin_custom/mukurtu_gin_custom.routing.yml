@@ -2,9 +2,10 @@ mukurtu_gin_custom.lb_pending_messages:
   path: '/mukurtu-gin-custom/layout-builder/pending-messages'
   defaults:
     _controller: '\Drupal\mukurtu_gin_custom\Controller\LbPendingMessagesController::build'
+  methods: [POST]
   requirements:
     _user_is_logged_in: 'TRUE'
-    _permission: 'configure any layout'
-    _csrf_token: 'TRUE'
+    _permission: 'configure any layout+configure editable page node layout overrides+configure editable landing_page node layout overrides'
+    _csrf_request_header_token: 'TRUE'
   options:
     _admin_route: TRUE

@@ -22,7 +22,7 @@
 
   Drupal.behaviors.mukurtuLbPendingStatusMessages = {
     attach: function (context) {
-      once('lb-pending-status-messages', '#layout-builder', context).forEach(function () {
+      once('lb-pending-status-messages', '#layout-builder', context).forEach(function (layoutBuilder) {
         if (typeof Toastify === 'undefined') {
           return;
         }
@@ -31,30 +31,74 @@
           .then(function (response) { return response.text(); })
           .then(function (token) {
             return fetch(Drupal.url('mukurtu-gin-custom/layout-builder/pending-messages'), {
+              method: 'POST',
               credentials: 'same-origin',
               headers: { 'X-CSRF-Token': token },
             });
           })
-          .then(function (response) { return response.json(); })
+          .then(function (response) { return response.ok ? response.json() : {}; })
           .then(function (data) {
             (data.statuses || []).forEach(function (message) {
               Drupal.announce(message);
-              Toastify({
-                text: message,
-                escapeMarkup: false,
-                close: true,
-                gravity: 'bottom',
-                position: 'right',
-                duration: -1,
-                className: 'glb-messages glb-messages--status',
-                style: {
-                  background: 'var(--colorGinStatusBackground)',
-                },
-              }).showToast();
+              showToast(message, layoutBuilder);
             });
           });
       });
     },
   };
+
+  /**
+   * Shows a persistent status toast that keyboard users can dismiss.
+   *
+   * Toastify hardcodes an English aria-label on its close button and drops
+   * focus to <body> when the toast is removed, so both are patched here. Its
+   * own aria-live attribute is removed because Drupal.announce() already
+   * speaks the message.
+   */
+  function showToast(message, fallbackFocus) {
+    var returnFocus = null;
+    var hadFocus = false;
+
+    var toast = Toastify({
+      text: message,
+      escapeMarkup: false,
+      close: true,
+      gravity: 'bottom',
+      position: 'right',
+      duration: -1,
+      className: 'glb-messages glb-messages--status',
+      style: {
+        background: 'var(--colorGinStatusBackground)',
+      },
+      callback: function () {
+        if (!hadFocus) {
+          return;
+        }
+        var target = returnFocus && document.contains(returnFocus) ? returnFocus : fallbackFocus;
+        if (target === fallbackFocus && !target.hasAttribute('tabindex')) {
+          target.setAttribute('tabindex', '-1');
+        }
+        target.focus();
+      },
+    }).showToast();
+
+    var element = toast.toastElement;
+    element.removeAttribute('aria-live');
+    var close = element.querySelector('.toast-close');
+    if (close) {
+      close.setAttribute('aria-label', Drupal.t('Close'));
+    }
+    element.addEventListener('focusin', function (event) {
+      if (!hadFocus && event.relatedTarget && !element.contains(event.relatedTarget)) {
+        returnFocus = event.relatedTarget;
+      }
+      hadFocus = true;
+    });
+    element.addEventListener('focusout', function (event) {
+      if (event.relatedTarget && !element.contains(event.relatedTarget)) {
+        hadFocus = false;
+      }
+    });
+  }
 
 })(Drupal, once);

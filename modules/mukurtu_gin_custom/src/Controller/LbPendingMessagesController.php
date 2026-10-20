@@ -19,9 +19,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  * back to this same page rather than the node's canonical view, so there's
  * no other page for it to naturally show on either.
  *
- * mukurtu-gin-custom.js calls this endpoint once per page load and displays
- * whatever it returns via a Toastify call it drives itself, since that's the
- * only reliable way to surface a message on this page at all.
+ * lb-pending-messages.js POSTs to this endpoint once per page load, with an
+ * X-CSRF-Token header, and displays whatever it returns via a Toastify call
+ * it drives itself, since that's the only reliable way to surface a message
+ * on this page at all.
  *
  * The "You have unsaved changes." warning is deliberately not handled here;
  * see LbSuppressUnsavedWarningSubscriber, which discards it entirely.
