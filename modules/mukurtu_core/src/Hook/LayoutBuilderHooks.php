@@ -13,12 +13,35 @@ use Drupal\node\NodeInterface;
 class LayoutBuilderHooks {
 
   /**
+   * Blocks non-administrators can add to basic pages.
+   *
+   * Matches the landing page allowlists in
+   * core.entity_view_display.node.landing_page.default, so editors get the
+   * same blocks on both content types.
+   */
+  public const NON_ADMIN_BLOCKS = [
+    'inline_block:basic',
+    'inline_block:call_to_action',
+    'inline_block:featured_content',
+    'inline_block:full_image_with_description',
+    'inline_block:horizontal_divider',
+    'inline_block:image_with_description',
+    'inline_block:local_contexts_block',
+    'inline_block:media_carousel_block',
+    'inline_block:vertical_image_with_description',
+    'views_block:mukurtu_browse_by_map-map_block',
+    'views_block:mukurtu_categories-browse_by_category_block',
+    'views_block:mukurtu_categories-browse_by_category_names_block',
+    'mukurtu_browse_by_community',
+  ];
+
+  /**
    * Implements hook_plugin_filter_block__layout_builder_alter().
    *
    * For basic pages only, administrators see every block except reusable
    * content blocks, the footer, and the "Custom" plugin blocks, and every other
-   * role is restricted to the curated set of inline block types. Other content
-   * types (landing pages etc.) manage their own restrictions via
+   * role gets the blocks landing pages offer (self::NON_ADMIN_BLOCKS). Other
+   * content types (landing pages etc.) manage their own restrictions via
    * layout_builder_restrictions config and are not altered here.
    */
   #[Hook('plugin_filter_block__layout_builder_alter')]
@@ -55,34 +78,8 @@ class LayoutBuilderHooks {
       return;
     }
 
-    $allowed_categories = [
-      // inline_block plugins created on this entity.
-      'Inline blocks',
-    ];
-
-    foreach ($definitions as $plugin_id => $definition) {
-      if (!in_array($this->untranslatedCategory($definition), $allowed_categories, TRUE)) {
-        unset($definitions[$plugin_id]);
-      }
-    }
-
-    // Within "Inline blocks", further restrict to the approved block types.
-    $allowed_inline_bundles = [
-      'basic',
-      'media_carousel_block',
-      'featured_content',
-      'local_contexts_block',
-      'horizontal_divider',
-      'call_to_action',
-    ];
-    foreach ($definitions as $plugin_id => $definition) {
-      if (str_starts_with($plugin_id, 'inline_block:')) {
-        $bundle = substr($plugin_id, strlen('inline_block:'));
-        if (!in_array($bundle, $allowed_inline_bundles, TRUE)) {
-          unset($definitions[$plugin_id]);
-        }
-      }
-    }
+    // Everyone else gets the same blocks landing pages offer.
+    $definitions = array_intersect_key($definitions, array_flip(self::NON_ADMIN_BLOCKS));
   }
 
   /**

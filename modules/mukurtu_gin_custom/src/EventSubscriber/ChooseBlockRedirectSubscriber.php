@@ -12,13 +12,15 @@ use Symfony\Component\HttpKernel\KernelEvents;
 /**
  * Skips the empty "Choose a block" page for inline-block-only roles.
  *
- * LayoutBuilderHooks::restrictBlocksForRole() limits non-administrators on
- * basic pages to a curated set of inline blocks. Separately, Drupal core's
- * ChooseBlockController::build() (route layout_builder.choose_block) always
- * excludes inline_block plugins from its own "block_categories" listing for
- * every role -- see layout_builder_plugin_filter_block_alter() -- because
- * inline blocks are only ever meant to be reached via the "Add a block"
- * button, which links to the separate choose_inline_block page.
+ * Block restrictions can leave a role with only inline blocks. Basic pages
+ * did this for non-administrators until they were given the landing page
+ * blocks (see LayoutBuilderHooks::NON_ADMIN_BLOCKS), and a site builder can
+ * still configure it through Layout Builder Restrictions. Separately, Drupal
+ * core's ChooseBlockController::build() (route layout_builder.choose_block)
+ * always excludes inline_block plugins from its own "block_categories"
+ * listing for every role -- see layout_builder_plugin_filter_block_alter() --
+ * because inline blocks are only ever meant to be reached via the "Add a
+ * block" button, which links to the separate choose_inline_block page.
  *
  * Combined, a role restricted to inline blocks only ends up with a
  * completely empty "Choose a block" page: no other categories (removed by

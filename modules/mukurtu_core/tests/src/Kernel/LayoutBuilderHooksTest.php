@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\KernelTests\KernelTestBase;
@@ -166,6 +167,41 @@ class LayoutBuilderHooksTest extends KernelTestBase {
     ];
 
     $this->assertSame(['consent_popup'], $this->filterDefinitions($definitions, 'landing_page'));
+  }
+
+  /**
+   * Non-administrators get the landing page blocks and nothing else.
+   */
+  public function testNonAdministratorGetsLandingPageBlocks(): void {
+    $this->logIn(FALSE);
+
+    $definitions = array_fill_keys(LayoutBuilderHooks::NON_ADMIN_BLOCKS, ['category' => new TranslatableMarkup('Lists (Views)')]);
+    $definitions += [
+      'system_menu_block:main' => ['category' => new TranslatableMarkup('Menus')],
+      'views_block:content_recent-block_1' => ['category' => new TranslatableMarkup('Lists (Views)')],
+      'mukurtu_community_protocol_list' => ['category' => new TranslatableMarkup('Mukurtu')],
+    ];
+
+    $this->assertSame(LayoutBuilderHooks::NON_ADMIN_BLOCKS, $this->filterDefinitions($definitions));
+  }
+
+  /**
+   * The basic page set must match what landing pages offer.
+   *
+   * The two lists live in different modules, so they can drift. Compare the
+   * hook's list with the allowlists in the shipped landing page display.
+   */
+  public function testNonAdministratorBlocksMatchLandingPages(): void {
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_landing_page');
+    $display = (new FileStorage($module_path . '/config/install'))->read('core.entity_view_display.node.landing_page.default');
+    $allowlists = $display['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction']['allowlisted_blocks'];
+
+    $landing_page_blocks = array_merge(...array_values($allowlists));
+    $basic_page_blocks = LayoutBuilderHooks::NON_ADMIN_BLOCKS;
+    sort($landing_page_blocks);
+    sort($basic_page_blocks);
+
+    $this->assertSame($landing_page_blocks, $basic_page_blocks);
   }
 
 }
