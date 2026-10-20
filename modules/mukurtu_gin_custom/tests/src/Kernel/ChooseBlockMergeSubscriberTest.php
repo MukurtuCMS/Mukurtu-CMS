@@ -131,22 +131,48 @@ class ChooseBlockMergeSubscriberTest extends KernelTestBase {
   }
 
   /**
-   * Users who cannot create content blocks see the dialog unchanged.
+   * Users who cannot create content blocks get no Content blocks group.
    */
-  public function testLeavesDialogAloneWithoutCreateAccess(): void {
+  public function testLeavesBlocksAloneWithoutCreateAccess(): void {
     $build = $this->chooseBuild(FALSE);
 
-    $this->assertSame($build, $this->dispatch($this->subscriber($this->inlineBuild()), $build));
+    $result = $this->dispatch($this->subscriber($this->inlineBuild()), $build);
+
+    $this->assertSame($build['block_categories'], $result['block_categories']);
+    $this->assertFalse($result['add_block']['#access']);
     $this->assertNull($this->inlineArguments);
   }
 
   /**
-   * With no inline blocks to offer, the button and dialog stay as they are.
+   * With no inline blocks to offer, the button and groups stay as they are.
    */
-  public function testLeavesDialogAloneWithNoInlineBlocks(): void {
+  public function testLeavesBlocksAloneWithNoInlineBlocks(): void {
     $build = $this->chooseBuild();
 
-    $this->assertSame($build, $this->dispatch($this->subscriber([]), $build));
+    $result = $this->dispatch($this->subscriber([]), $build);
+
+    $this->assertSame($build['block_categories'], $result['block_categories']);
+    $this->assertTrue($result['add_block']['#access']);
+  }
+
+  /**
+   * The filter box gets an id so its hidden label is linked to it.
+   *
+   * Core builds the dialog outside a form, so the search element has no id
+   * and the label's "for" is empty. This applies to every user, including
+   * those without the Content blocks group.
+   */
+  public function testFilterGetsAnId(): void {
+    foreach ([TRUE, FALSE] as $access) {
+      $result = $this->dispatch($this->subscriber($this->inlineBuild()), $this->chooseBuild($access));
+      $this->assertStringStartsWith('layout-builder-block-filter', $result['filter']['#id']);
+    }
+
+    // An id that is already set is kept.
+    $build = $this->chooseBuild();
+    $build['filter']['#id'] = 'existing';
+    $result = $this->dispatch($this->subscriber($this->inlineBuild()), $build);
+    $this->assertSame('existing', $result['filter']['#id']);
   }
 
   /**

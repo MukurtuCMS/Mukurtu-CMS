@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_gin_custom\EventSubscriber;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Controller\ControllerResolverInterface;
 use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -25,6 +26,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Merge them: add the second list as a "Content blocks" group at the top of
  * the first and hide the button. The links come from getBlockLinks(), so the
  * "Filter by block name" box covers them too.
+ *
+ * It also gives the filter box an id, so its hidden "Filter by block name"
+ * label is linked to it for screen readers.
  *
  * The list is built by whatever controller the choose_inline_block route
  * uses rather than core's directly, because Layout Builder Restrictions
@@ -69,10 +73,22 @@ class ChooseBlockMergeSubscriber implements EventSubscriberInterface {
       return;
     }
 
+    $build = $event->getControllerResult();
+    if (!is_array($build)) {
+      return;
+    }
+
+    // Core renders the filter outside a form, so it never gets an id and its
+    // visually hidden label has no "for" to point at. Screen readers then fall
+    // back to the title attribute. Give it an id so the label is used.
+    if (isset($build['filter']) && empty($build['filter']['#id'])) {
+      $build['filter']['#id'] = Html::getUniqueId('layout-builder-block-filter');
+      $event->setControllerResult($build);
+    }
+
     // Core only adds the button when inline blocks are allowed here, and
     // hides it from users who cannot create content blocks. Follow both.
-    $build = $event->getControllerResult();
-    if (!is_array($build) || empty($build['add_block']['#access'])) {
+    if (empty($build['add_block']['#access'])) {
       return;
     }
 
