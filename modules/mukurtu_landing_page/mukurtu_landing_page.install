@@ -205,3 +205,61 @@ function mukurtu_landing_page_update_40204(): string {
 
   return (string) t('Landing pages now offer the Browse by Category (names only) block.');
 }
+
+/**
+ * Hides the Custom block category and the Mukurtu Footer block from the landing page block chooser.
+ */
+function mukurtu_landing_page_update_40205(): string {
+  $config = \Drupal::configFactory()
+    ->getEditable('core.entity_view_display.node.landing_page.default');
+  $settings = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction');
+
+  // With no settings at all, Layout Builder Restrictions bails out and every
+  // block is offered. Restricting two of them here would be the first
+  // restriction this site has, so leave that decision to the site builder.
+  if (empty($settings)) {
+    return (string) t('Landing page block restrictions are not configured on this site; nothing to change.');
+  }
+
+  $changes = [];
+
+  // Layout Builder Restrictions renames the "Custom" category to "Custom
+  // blocks" before comparing it against restricted_categories, so a
+  // restriction stored as "Custom" never matched. That let the Consent Popup
+  // and Mukurtu Footer plugin blocks through to the landing page chooser.
+  //
+  // Skip sites with per-block "Custom blocks" rules: the module then files
+  // every reusable content block under "Custom blocks" too, and restricting
+  // that category would hide all of them.
+  $restricted = $settings['restricted_categories'] ?? [];
+  $per_block_rules = isset($settings['allowlisted_blocks']['Custom blocks']) || isset($settings['denylisted_blocks']['Custom blocks']);
+  if (in_array('Custom', $restricted, TRUE) && !$per_block_rules) {
+    $restricted = array_values(array_diff($restricted, ['Custom']));
+    if (!in_array('Custom blocks', $restricted, TRUE)) {
+      $restricted[] = 'Custom blocks';
+    }
+    $settings['restricted_categories'] = $restricted;
+    $changes[] = (string) t('Hid the Custom block category from landing pages.');
+  }
+
+  // The footer is a reusable content block, so it was offered in the "Content
+  // block" category alongside the homepage hero blocks. It belongs in the
+  // footer region only, which the mukurtu_footer plugin block already handles.
+  // Reusable content blocks are checked by bundle under "Custom block types".
+  $denied = $settings['denylisted_blocks']['Custom block types'] ?? [];
+  if (!in_array('mukurtu_footer', $denied, TRUE)) {
+    $denied[] = 'mukurtu_footer';
+    $settings['denylisted_blocks']['Custom block types'] = $denied;
+    $changes[] = (string) t('Hid the Mukurtu Footer content block from landing pages.');
+  }
+
+  if (!$changes) {
+    return (string) t('Landing page block restrictions were already up to date.');
+  }
+
+  $config
+    ->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction', $settings)
+    ->save();
+
+  return implode(' ', $changes);
+}

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_landing_page\Kernel;
 
+use Drupal\block_content\Entity\BlockContent;
+use Drupal\block_content\Entity\BlockContentType;
 use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
 use Drupal\Core\Config\FileStorage;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\layout_builder\SectionStorageInterface;
 use PHPUnit\Framework\Attributes\Group;
@@ -29,7 +32,8 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
    * The block_content module is deliberately absent. EntityViewModeRestriction
    * only queries the block_content tables when that module is installed, so
    * leaving it out keeps this test off the database without changing any of the
-   * code paths exercised here.
+   * code paths exercised here. The one test that needs real content blocks
+   * enables it for itself.
    */
   protected static $modules = [
     'system',
@@ -166,6 +170,53 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
     $allowed = $this->filterDefinitions($definitions);
 
     $this->assertSame([], $allowed, 'Only Browse by Community should be offered from the Mukurtu categories.');
+  }
+
+  /**
+   * The "Custom" plugin blocks must not be offered on landing pages.
+   *
+   * Layout Builder Restrictions renames "Custom" to "Custom blocks" before
+   * checking restricted_categories, so the config has to use the new name.
+   * The categories must be TranslatableMarkup, as real plugin definitions
+   * are: a plain string skips the rename and would hide the bug.
+   */
+  public function testCustomCategoryIsUnavailable(): void {
+    $definitions = [
+      'consent_popup' => ['category' => new TranslatableMarkup('Custom'), 'provider' => 'consent_popup'],
+      'mukurtu_footer' => ['category' => new TranslatableMarkup('Custom'), 'provider' => 'mukurtu_footer'],
+    ];
+
+    $this->assertSame([], $this->filterDefinitions($definitions));
+  }
+
+  /**
+   * The footer content block is hidden, other reusable blocks are not.
+   *
+   * The footer is placed in the footer region by the mukurtu_footer plugin.
+   * Offering the entity in the "Content block" category put a second
+   * "Mukurtu Footer" next to the homepage hero blocks.
+   */
+  public function testFooterContentBlockIsUnavailable(): void {
+    $this->enableModules(['block_content', 'text', 'filter']);
+    $this->installEntitySchema('block_content');
+
+    $blocks = [];
+    foreach (['mukurtu_footer', 'image_with_description'] as $bundle) {
+      BlockContentType::create(['id' => $bundle, 'label' => $bundle])->save();
+      $block = BlockContent::create(['type' => $bundle, 'info' => $bundle]);
+      $block->save();
+      $blocks[$bundle] = 'block_content:' . $block->uuid();
+    }
+
+    $definitions = [];
+    foreach ($blocks as $plugin_id) {
+      $definitions[$plugin_id] = ['category' => new TranslatableMarkup('Content block'), 'provider' => 'block_content'];
+    }
+
+    $allowed = $this->filterDefinitions($definitions);
+
+    $this->assertNotContains($blocks['mukurtu_footer'], $allowed);
+    $this->assertContains($blocks['image_with_description'], $allowed);
   }
 
   /**

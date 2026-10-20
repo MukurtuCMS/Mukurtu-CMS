@@ -246,7 +246,14 @@ class DefaultLandingPageTest extends KernelTestBase {
 
     $first_block_storage = $this->container->get('entity_type.manager')->getStorage('block_content');
     $first_count = count($first_block_storage->loadMultiple());
-    $this->assertSame(4, $first_count, 'The first call should create exactly 4 block_content entities.');
+    $this->assertSame(2, $first_count, 'The first call should create exactly 2 block_content entities: the hero and Featured Content.');
+
+    // The vertical and full-background hero variants used to be created as
+    // well, but nothing placed them, so they sat in the content block library
+    // looking orphaned. Editors build those from "Add a block" instead.
+    $bundles = array_map(static fn($block) => $block->bundle(), $first_block_storage->loadMultiple());
+    $this->assertNotContains('vertical_image_with_description', $bundles);
+    $this->assertNotContains('full_image_with_description', $bundles);
 
     $second_node = $service->createDefaultLandingPage();
     $this->assertNotNull($second_node);
@@ -260,7 +267,7 @@ class DefaultLandingPageTest extends KernelTestBase {
     // Reset the static cache so we get a fresh count from storage.
     $second_block_storage->resetCache();
     $second_count = count($second_block_storage->loadMultiple());
-    $this->assertSame(4, $second_count, 'The second call must not create duplicate block_content entities.');
+    $this->assertSame(2, $second_count, 'The second call must not create duplicate block_content entities.');
 
     $second_block_uuids = $this->getBlockUuidsFromLayout();
     $this->assertNotEmpty($second_block_uuids);
@@ -325,13 +332,13 @@ class DefaultLandingPageTest extends KernelTestBase {
     $block_storage->delete([$deleted_block]);
 
     $block_storage->resetCache();
-    $this->assertCount(3, $block_storage->loadMultiple());
+    $this->assertCount(1, $block_storage->loadMultiple());
 
     $service->createDefaultLandingPage();
     $block_storage->resetCache();
 
-    // The deleted block was recreated, not duplicated - back to 4 total.
-    $this->assertCount(4, $block_storage->loadMultiple());
+    // The deleted block was recreated, not duplicated - back to 2 total.
+    $this->assertCount(2, $block_storage->loadMultiple());
 
     $second_block_uuids = $this->getBlockUuidsFromLayout();
 
