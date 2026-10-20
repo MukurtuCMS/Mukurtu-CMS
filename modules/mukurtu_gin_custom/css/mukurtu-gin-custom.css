@@ -606,6 +606,16 @@ short fields themselves. Shrink it in these dialogs specifically. */
     height: auto !important;
 }
 
+/* gin_lb draws the arrow on Layout Builder off-canvas list links (e.g. the
+   "Choose a block" block links) as an absolutely positioned ::before, 1em
+   wide and 16px from the right edge, but gives the link no right padding.
+   Long names such as "Full Image With Description" then run under the arrow
+   on narrow screens. Reserve its width plus an 8px gap. gin_lb keeps the
+   arrow on the right in RTL too, so this stays a physical padding-right. */
+#drupal-off-canvas .glb-list a {
+    padding-right: calc(16px + 1.5em) !important;
+}
+
 /* Media library modal: compact upload form, sticky type sidebar. */
 .media-library-add-form__input-wrapper {
     padding: var(--space-xs) var(--space-m) !important;
