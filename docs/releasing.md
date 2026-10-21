@@ -66,7 +66,8 @@ them from drifting apart again.
    `hook_update_N()` must be numbered above the module's existing maximum, and
    above its `hook_update_last_removed()` if it has one.
 3. **Compile SCSS** if the theme changed, without minifying `style.css`.
-4. **Bump the version** with `scripts/set-version.sh`, as above.
+4. **Bump the version** with `scripts/set-version.sh`, as above, and add the
+   release's entry to `CHANGELOG.md`.
 5. **Merge to `main`.** If the release work is a stack of pull requests, confirm
    each one's base actually moved before merging the next — see
    [stacked-prs.md](stacked-prs.md), which documents three occasions where a
