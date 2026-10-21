@@ -23,6 +23,8 @@ trap 'rm -f "$BUILD_LOG"' EXIT
 # Build arguments every build needs: none. The template version is pinned by the
 # Dockerfile's own default. (Override with --build-arg MUKURTU_TEMPLATE_VERSION=...)
 DEFAULT_BUILD_ARGS=()
+# Set COMPOSER_AUDIT_FLAGS=--ignore-unreachable to build while Drupal's advisory service is down.
+[[ -z "${COMPOSER_AUDIT_FLAGS:-}" ]] || DEFAULT_BUILD_ARGS+=(--build-arg "COMPOSER_AUDIT_FLAGS=$COMPOSER_AUDIT_FLAGS")
 
 pass() { TESTS_RUN=$((TESTS_RUN + 1)); echo "  ok   $1"; }
 fail() { TESTS_RUN=$((TESTS_RUN + 1)); TESTS_FAILED=$((TESTS_FAILED + 1)); echo "  FAIL $1"; }

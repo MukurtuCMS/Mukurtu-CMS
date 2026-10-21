@@ -101,11 +101,14 @@ RUN set -eux; \
 # Fail the build on a known security advisory. Advisories the profile already
 # triages (config.audit.ignore in its composer.json) are copied into the root
 # project's config first, because Composer only reads that setting from the
-# root project.
+# root project. (COMPOSER_AUDIT_FLAGS is empty, and so strict, unless a build is started
+# by hand while Drupal's advisory service is down: --ignore-unreachable. The Trivy scan
+# in the pipeline still checks the finished image against its own advisory database.)
+ARG COMPOSER_AUDIT_FLAGS=
 RUN set -eux; \
     ignore="$(php -r 'echo json_encode((object) (json_decode(file_get_contents("/src/mukurtu/composer.json"), true)["config"]["audit"]["ignore"] ?? []));')"; \
     composer config --json audit.ignore "$ignore"; \
-    composer audit --no-dev --abandoned=report
+    composer audit --no-dev --abandoned=report $COMPOSER_AUDIT_FLAGS
 
 # Drop what the running site never reads: version-control metadata and test
 # suites (including Drupal core's own, whose fixtures also trip vulnerability

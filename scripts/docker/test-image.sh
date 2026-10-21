@@ -13,6 +13,8 @@ dockerfile="$(<"$REPO_ROOT/Dockerfile")"
 assert_contains "$dockerfile" "ARG MUKURTU_TEMPLATE_VERSION=" "the template version is pinned by a default in the Dockerfile"
 pinned="$(sed -n 's/^ARG MUKURTU_TEMPLATE_VERSION=//p' "$REPO_ROOT/Dockerfile" | head -1)"
 [[ "$pinned" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] && pass "the pinned template version looks like a version ($pinned)" || fail "the pinned template version looks like a version (got '$pinned')"
+assert_contains "$dockerfile" "ARG COMPOSER_AUDIT_FLAGS=" "the audit's extra flags are a build argument that defaults to none (strict)"
+[[ "$(sed -n 's/^ARG COMPOSER_AUDIT_FLAGS=//p' "$REPO_ROOT/Dockerfile")" == "" ]] && pass "the audit is strict by default" || fail "the audit is strict by default"
 assert_not_contains "$dockerfile" "AS guard" "there is no guard stage: the default replaces it"
 # The media tools are part of every image. An option to leave them out would let a user
 # build an image that silently lacks thumbnails, and there is no slim variant to publish.
@@ -51,7 +53,7 @@ build_in 'test -f /app/web/profiles/mukurtu/LICENSE.txt' && pass "licence file k
 
 # The build runs this too; running it again here does not depend on BuildKit
 # having shown the output of a cached layer.
-if docker run --rm -w /app --entrypoint composer "$BUILD_TAG" audit --no-dev --abandoned=report >/dev/null 2>&1; then
+if docker run --rm -w /app --entrypoint composer "$BUILD_TAG" audit --no-dev --abandoned=report ${COMPOSER_AUDIT_FLAGS:-} >/dev/null 2>&1; then
   pass "composer audit finds no advisories"
 else
   fail "composer audit finds no advisories"

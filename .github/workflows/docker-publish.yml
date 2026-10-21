@@ -32,6 +32,11 @@ on:
         required: false
         type: boolean
         default: false
+      audit_unreachable:
+        description: "Go on if Drupal's security-advisory service is down (composer audit --ignore-unreachable). Leave unticked unless that service is failing; the Trivy scan still runs."
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -118,6 +123,8 @@ jobs:
       IMAGE: ghcr.io/${{ github.repository_owner }}/mukurtu
       VERSION: ${{ needs.resolve.outputs.version }}
       ARCH: ${{ matrix.arch }}
+      # Empty unless a person ticked the box on a manual run; a release is always strict.
+      COMPOSER_AUDIT_FLAGS: ${{ inputs.audit_unreachable && '--ignore-unreachable' || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -133,6 +140,8 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          build-args: |
+            COMPOSER_AUDIT_FLAGS=${{ env.COMPOSER_AUDIT_FLAGS }}
           load: true
           push: false
           tags: mukurtu-ci:image

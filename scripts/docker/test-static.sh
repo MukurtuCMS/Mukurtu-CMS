@@ -190,8 +190,17 @@ if "attest-sbom" not in yaml.dump(build):
 if "needs" not in publish or "build" not in (publish["needs"] if isinstance(publish["needs"], list) else [publish["needs"]]):
     errors.append("publish must need the build job")
 
-# A development build is manual only, takes a commit, and never moves `latest`.
 inputs = on["workflow_dispatch"].get("inputs", {})
+# The audit is strict unless someone asks, by hand, to go on when Drupal's advisory service
+# is down. A release never asks.
+if inputs.get("audit_unreachable", {}).get("default") not in (False, "false"):
+    errors.append("the audit_unreachable input must exist and default to false")
+if "COMPOSER_AUDIT_FLAGS" not in text:
+    errors.append("the workflow must pass COMPOSER_AUDIT_FLAGS to the build and the tests")
+if "--ignore-unreachable" not in text or "inputs.audit_unreachable" not in text:
+    errors.append("COMPOSER_AUDIT_FLAGS must be --ignore-unreachable, and only when audit_unreachable is ticked")
+
+# A development build is manual only, takes a commit, and never moves `latest`.
 if "ref" not in inputs or "dev" not in inputs:
     errors.append("workflow_dispatch needs the inputs ref and dev")
 if "compute-tags.sh --dev" not in text:
