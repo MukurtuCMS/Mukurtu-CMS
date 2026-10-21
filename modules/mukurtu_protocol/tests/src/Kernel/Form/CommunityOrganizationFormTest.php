@@ -91,10 +91,15 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
     $this->assertArrayNotHasKey(static::MISSING_ID, $rows);
     $this->assertCount(3, $rows['#header']);
 
-    // The parent select offers top level and every other existing community.
+    // A parent select offers top level and every community that isn't the
+    // row itself or nested inside it.
     $this->assertEquals(
-      [0, $this->child->id(), $this->orphan->id(), $this->unlisted->id()],
+      [0, $this->orphan->id(), $this->unlisted->id()],
       array_keys($rows[$this->parent->id()]['parent']['#options']),
+    );
+    $this->assertEquals(
+      [0, $this->orphan->id(), $this->parent->id(), $this->unlisted->id()],
+      array_keys($rows[$this->child->id()]['parent']['#options']),
     );
 
     $this->assertSame(0, $rows[$this->parent->id()]['parent']['#default_value']);
@@ -191,16 +196,17 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
-   * Tests that a missing or self-referencing parent is rejected.
+   * Tests that a missing, self-referencing or descendant parent is rejected.
    */
   public function testSubmitRejectsInvalidParent(): void {
     $before = $this->getOrganization();
     $errors = $this->submitParents([
-      $this->parent->id() => 0,
+      $this->parent->id() => $this->child->id(),
       $this->child->id() => static::MISSING_ID,
       $this->orphan->id() => $this->orphan->id(),
     ])->getErrors();
 
+    $this->assertArrayHasKey("communities][{$this->parent->id()}][parent", $errors);
     $this->assertArrayHasKey("communities][{$this->child->id()}][parent", $errors);
     $this->assertArrayHasKey("communities][{$this->orphan->id()}][parent", $errors);
     $this->assertSame($before, $this->getOrganization());
@@ -210,30 +216,34 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
    * Tests that a parent loop is rejected with one error.
    */
   public function testSubmitRejectsParentLoop(): void {
+    // No single choice here picks a community's own descendant, but together
+    // they form a loop.
     $before = $this->getOrganization();
     $errors = $this->submitParents([
-      $this->parent->id() => $this->child->id(),
-      $this->child->id() => $this->orphan->id(),
-      $this->orphan->id() => $this->parent->id(),
+      $this->parent->id() => $this->orphan->id(),
+      $this->child->id() => $this->parent->id(),
+      $this->orphan->id() => $this->unlisted->id(),
       $this->unlisted->id() => $this->parent->id(),
     ])->getErrors();
 
     $this->assertSame(["communities][{$this->parent->id()}][parent"], array_keys($errors));
     $this->assertEquals(
-      "Parent can't be placed under Child, because Child is already inside Parent.",
+      'Choose a different parent for Parent. Orphan is already inside Parent.',
       (string) reset($errors),
     );
     $this->assertSame($before, $this->getOrganization());
   }
 
   /**
-   * Tests that a parent loop is reported on the community that was changed.
+   * Tests that a parent loop is reported on a community that was changed.
    */
   public function testParentLoopErrorIsOnChangedCommunity(): void {
-    // Child is already under Parent, so only Parent's select changes.
+    // Child keeps its saved parent and is checked first, so the error must
+    // skip it and land on Parent, the first changed community in the loop.
     $errors = $this->submitParents([
       $this->child->id() => $this->parent->id(),
-      $this->parent->id() => $this->child->id(),
+      $this->parent->id() => $this->orphan->id(),
+      $this->orphan->id() => $this->child->id(),
     ])->getErrors();
 
     $this->assertSame(["communities][{$this->parent->id()}][parent"], array_keys($errors));

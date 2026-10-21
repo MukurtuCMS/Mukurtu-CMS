@@ -25,7 +25,7 @@ class CommunityOrganizationForm extends FormBase {
 
     $form['description'] = [
       '#type' => 'item',
-      '#description' => $this->t('Drag and indent the communities in the order you would like them to be shown on the site. This only changes site structure and does not impact community or cultural protocol memberships.'),
+      '#description' => $this->t('Drag and indent the communities in the order you would like them to be shown on the site. To choose a parent without dragging, select Show row weights. This only changes site structure and does not impact community or cultural protocol memberships.'),
     ];
 
     $form['communities'] = [
@@ -95,7 +95,7 @@ class CommunityOrganizationForm extends FormBase {
           '#type' => 'select',
           '#title' => $this->t('Parent for @title', ['@title' => $names[$id]]),
           '#title_display' => 'invisible',
-          '#options' => [0 => $this->t('Top level')] + array_diff_key($names, [$id => TRUE]),
+          '#options' => [0 => $this->t('Top level')] + array_filter($names, fn($other) => !$this->isInside($other, $id, $org), ARRAY_FILTER_USE_KEY),
           '#default_value' => $parent ?? 0,
           '#attributes' => ['class' => ['field-parent']],
         ];
@@ -192,6 +192,31 @@ class CommunityOrganizationForm extends FormBase {
   }
 
   /**
+   * Checks whether a community is, or is nested inside, another community.
+   *
+   * @param int|string $id
+   *   The community ID.
+   * @param int|string $ancestor
+   *   The possible ancestor's community ID.
+   * @param array $org
+   *   The organization, keyed by community ID.
+   *
+   * @return bool
+   *   TRUE if $id is $ancestor or one of its descendants.
+   */
+  protected function isInside($id, $ancestor, array $org): bool {
+    $seen = [];
+    while ($id && !isset($seen[$id])) {
+      if ($id == $ancestor) {
+        return TRUE;
+      }
+      $seen[$id] = TRUE;
+      $id = $org[$id]['parent'] ?? 0;
+    }
+    return FALSE;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
@@ -214,7 +239,7 @@ class CommunityOrganizationForm extends FormBase {
       $reported += $chain;
       $changed = array_filter(array_keys($chain), fn($member) => $parents[$member] != $form['communities'][$member]['parent']['#default_value']);
       $member = $changed ? reset($changed) : $id;
-      $form_state->setError($form['communities'][$member]['parent'], $this->t("@community can't be placed under @parent, because @parent is already inside @community.", [
+      $form_state->setError($form['communities'][$member]['parent'], $this->t('Choose a different parent for @community. @parent is already inside @community.', [
         '@community' => $names[$member] ?? $member,
         '@parent' => $names[$parents[$member]] ?? $parents[$member],
       ]));
