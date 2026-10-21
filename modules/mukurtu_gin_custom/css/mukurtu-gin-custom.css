@@ -1017,6 +1017,31 @@ problem by 2px at 768px; with min-width: 0 its fields wrap instead. */
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
+  /* !important: gin_lb's .glb-messages sets padding: 1em !important. */
+  padding-inline-end: 3rem !important;
+}
+
+/* Toastify dims its close button to opacity: .4 (2.83:1 against the status
+   toast) and leaves the browser's default focus ring, which nearly vanishes
+   on the toast's dark background. Use the toast's own text color, which
+   gin_lb already sets with enough contrast for each message type, for both
+   the glyph and the focus ring. Logical inset so the button sits at the
+   end edge in RTL, and padding on the toast above keeps text clear of it.
+   mukurtu_v4's button:hover/button:focus fill would otherwise paint the
+   brand color behind the glyph. */
+.toastify.glb-messages .toast-close {
+  right: auto;
+  inset-inline-end: 0.5rem;
+  min-inline-size: 1.5rem;
+  min-block-size: 1.5rem;
+  color: currentColor;
+  background: transparent;
+  opacity: 1;
+}
+
+.toastify.glb-messages .toast-close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
 /* Entity Browser's own Modal display hardcodes its sticky form-actions bar
