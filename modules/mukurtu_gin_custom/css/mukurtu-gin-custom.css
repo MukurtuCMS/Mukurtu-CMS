@@ -674,6 +674,56 @@ short fields themselves. Shrink it in these dialogs specifically. */
     padding-bottom: 16px !important;
 }
 
+/* #2401: keep "Apply filters" level with the Name and Sort by fields.
+
+Gin bottom-aligns the actions wrapper in an exposed form (align-self:
+flex-end, margin-block-end: 0), which lines the button up with the bottom of
+the flex line. The two dialog-wide spacing rules earlier in this file move
+that line: .js-form-item's 1rem margin-block-end puts 16px under each field,
+so the line ends 16px below them, and the submit's 0.5rem margin-block-start
+pushes the button down inside its wrapper. Measured, the button's bottom edge
+sat 16px below the fields'.
+
+Same specificity as those rules and later in the file, so no !important is
+needed. The gap above the media grid comes from the 16px padding-bottom
+above, so the fields don't need their own. */
+.media-library-widget-modal .views-exposed-form .js-form-item {
+    margin-block-end: 0;
+}
+
+.media-library-widget-modal .views-exposed-form .views-exposed-form__item--actions input[type="submit"] {
+    margin-block-start: 0;
+}
+
+/* Nothing sizes the Name input but its size="30", which Chromium turns into
+303px on macOS and 382px on Linux from the same font. At 382px "Apply
+filters" no longer fits beside the fields in a 1280px window and wraps under
+them. gin_lb's version of the form, in Layout Builder, wrapped on every
+platform: its wider button left the row 12px short.
+
+Let the Name field take whatever room the row has left instead. The row then
+fits whenever there is space for a 12rem field beside the others, and wraps
+cleanly when there isn't. */
+.media-library-widget-modal .views-exposed-form .form-item--name,
+.media-library-widget-modal .glb-views-exposed-form .form-item-name {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.media-library-widget-modal .views-exposed-form .form-item--name .form-element,
+.media-library-widget-modal .glb-views-exposed-form .form-item-name .glb-form-element {
+    width: 100%;
+}
+
+/* WCAG 1.4.4 Resize Text: Gin caps exposed-form selects at max-width: 240px,
+which doesn't grow with the text. At 200% text size "Sort by" showed
+"Newest f". Let the select fit its options, up to the width of the dialog.
+Gin raises its rule to ID specificity with :is(#extra-specificity-hack), so
+this needs !important. */
+.media-library-widget-modal .views-exposed-form .form-element--type-select {
+    max-width: 100% !important;
+}
+
 /* gin_lb adds its own background-image:url(chevron.svg) !important arrow to every
    .glb-form-element--type-select it renders (media library, and every Layout Builder
    add/configure/move block dialog), already color-matched to Gin's light/dark admin
@@ -723,6 +773,102 @@ short fields themselves. Shrink it in these dialogs specifically. */
 .media-library-widget-modal .media-library-wrapper > ul {
     margin-right: 0 !important;
     margin-left: 0 !important;
+}
+
+/* WCAG 1.4.10 Reflow: stack the media type menu above the library content on
+narrow screens.
+
+Claro lays the menu and content out side by side at every width. At a 320px
+viewport the dialog content is 278px wide; the menu takes 120px and the
+content cannot shrink below 208px, so it ran 50px past the dialog and could
+only be reached by scrolling sideways inside it.
+
+Stacked, the menu spans the full width above the content. position: static
+and align-self: stretch undo the sticky menu above: sticky would pin the whole
+stacked menu over the content while scrolling, and its flex-start alignment
+shrinks the menu to its text in a column. gin_lb's 14em menu width needs the
+same !important that sets it. */
+@media (max-width: 30em) {
+    .media-library-widget-modal .media-library-wrapper {
+        flex-direction: column;
+    }
+
+    .media-library-widget-modal .media-library-menu,
+    .media-library-widget-modal .glb-media-library-menu {
+        position: static;
+        align-self: stretch;
+        width: auto !important;
+    }
+
+    /* Claro's width: 100% plus its padding overflows once the content no
+    longer shrinks as a flex item in a row. */
+    .media-library-widget-modal .media-library-content {
+        width: auto;
+    }
+
+    /* At 320px with 200% text, the title bar and button pane took the
+    dialog's whole height and left the library 0px tall. Trim their padding,
+    which Gin sets with !important, and let the count and "Insert selected"
+    share a row when they fit instead of always stacking. Claro's side margins
+    on the count squeezed it to one word per line. gin_lb loads after this file
+    and sets the column with the same specificity, so this adds .ui-dialog. */
+    .media-library-widget-modal .ui-dialog-titlebar,
+    .media-library-widget-modal .ui-dialog-buttonpane {
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .ui-dialog.media-library-widget-modal .ui-dialog-buttonpane {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 1rem;
+    }
+
+    .media-library-widget-modal .ui-dialog-buttonpane .media-library-selected-count {
+        margin: 0;
+    }
+}
+
+/* WCAG 1.4.10 Reflow: keep the dialog's text and buttons inside it on narrow
+screens and with large text.
+
+gin_lb cuts the title off with an ellipsis ("Add or select ...") at 320px.
+Its Grid and Table links sit on one unbreakable line, which ran 45px past the
+dialog at 200% text. "Apply filters" and "Insert selected" don't wrap their
+text, so at 200% text they ran past the dialog too. The header selector
+matches gin_lb's, which loads after this file, plus one class. */
+.media-library-widget-modal .ui-dialog-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.media-library-widget-modal .glb-media-library-view .glb-view-header {
+    display: inline-flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.media-library-widget-modal .ui-dialog-buttonpane .button,
+.media-library-widget-modal .views-exposed-form input[type="submit"],
+.media-library-widget-modal .glb-views-exposed-form input[type="submit"] {
+    max-width: 100%;
+    white-space: normal;
+}
+
+/* WCAG 1.4.10 Reflow: let the media table scroll inside its own wrapper.
+
+Gin already wraps the media table in a sideways-scrolling container, but
+.media-library-content and the results' .view-content are flex items with
+the default min-width: auto, so each grew to the table's width (441px) and
+pushed the whole dialog body sideways instead. With media in the library the
+body overflowed at every width up to 768px, and focusing a row's Edit link
+scrolled the menu and filters out of view. .view-filters had the same
+problem by 2px at 768px; with min-width: 0 its fields wrap instead. */
+.media-library-widget-modal .media-library-content,
+.media-library-widget-modal .media-library-view .view-filters,
+.media-library-widget-modal .media-library-view .view-content {
+    min-width: 0;
 }
 
 /* gin_lb puts the button (form-actions) BEFORE the count and gives it flex:1,
@@ -1548,8 +1694,19 @@ the sidebar trigger (32px) and the gaps between them come to 402px, inside a
 It already carries flex-wrap: wrap, so Gin clearly intends those controls to
 wrap onto more lines when space is tight. They never get the chance, because
 the bar is sized to its max-content width and so there is nothing to wrap
-within. Letting it shrink is all that is needed; the existing wrap then does
-the work.
+within. Capping it at max-width: 100% is all that is needed; the existing
+wrap then does the work.
+
+It is capped rather than allowed to shrink. A first version set
+flex-shrink: 1 and min-width: 0 instead, which fixed 320px but also shrank
+the bar on wide screens where it fits: it shares its row with the page title
+block (flex: 1 1 auto), and two shrinkable items give up space in proportion
+to their size, so at 1920px the bar lost about 80px it did not need and the
+"Save as" label wrapped above its select. With the cap, Gin's own
+flex-shrink: 0 stays in force, so the bar keeps its natural width whenever it
+fits and only narrows, and wraps, when the container is smaller than it. No
+min-width is needed either, because a flex item's automatic minimum is itself
+clamped by its max-width.
 
 Worth noting what was blamed first: the element sitting at the page's right
 edge is a 1px span.visually-hidden ("Show sidebar panel") inside the sidebar
@@ -1561,27 +1718,16 @@ the controls wrap. That is the right way round, since the alternative is
 horizontal scrolling, but it is a real cost on a short screen and the bar
 could probably be made to pack more tightly as a follow-up.
 
-!important is required, and the reason is worth recording because it is not
-the usual specificity story. Gin ships these declarations as
+No !important is needed. Gin's rules on this element are only as specific
+as a plain class (they use :where(*)), and this stylesheet loads before
+Gin's, so a property Gin also sets would lose here without !important. Gin
+sets no max-width on the bar, so this one has nothing to overrule.
 
-  :where(*) .gin-sticky-form-actions,
-  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions
-
-The :is() branch carries an id's specificity but only matches under
-[data-drupal-admin-styles]; elsewhere only the :where(*) branch applies, and
-:where() contributes nothing, so Gin's rule and a plain class selector here
-are *equally* specific and document order decides. This module's stylesheet
-loads before Gin's, so without !important the declarations below are simply
-overruled. A first version of this change was written without it and had no
-effect at all while appearing correct in a browser devtools experiment, where
-an injected <style> wins by being last.
-
-Self-regulating, so no media query: the bar only shrinks when it has to.
-Measured identical above 480px, unchanged at 1024, 1280 and 1600px, with no
-control clipped or pushed off screen at any width from 320px to 1600px. */
+Self-regulating, so no media query: the bar only narrows when it has to.
+Measured at its natural width from 768px to 1920px, with no control clipped
+or pushed off screen at any width from 320px to 1920px. */
 .gin-sticky-form-actions {
-  flex-shrink: 1 !important;
-  min-width: 0 !important;
+  max-width: 100%;
 }
 
 /* Fourth and last cause of the admin reflow failures in #2336, on the
