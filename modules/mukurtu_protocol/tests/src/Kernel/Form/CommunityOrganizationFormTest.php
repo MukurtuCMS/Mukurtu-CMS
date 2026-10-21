@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_protocol\Kernel\Form;
 
 use Drupal\Core\Form\FormState;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Form\CommunityOrganizationForm;
@@ -88,20 +89,25 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
     $rows = $form['communities'];
 
     $this->assertArrayNotHasKey(static::MISSING_ID, $rows);
-    // The parent input sits in the community cell, so there's no Parent column.
-    $this->assertCount(2, $rows['#header']);
+    $this->assertCount(3, $rows['#header']);
 
-    $this->assertSame(0, $rows[$this->parent->id()]['label']['parent']['#default_value']);
+    // The parent select offers top level and every other existing community.
+    $this->assertEquals(
+      [0, $this->child->id(), $this->orphan->id(), $this->unlisted->id()],
+      array_keys($rows[$this->parent->id()]['parent']['#options']),
+    );
+
+    $this->assertSame(0, $rows[$this->parent->id()]['parent']['#default_value']);
     $this->assertSame(0, $rows[$this->parent->id()]['label'][0]['#size']);
 
-    $this->assertEquals($this->parent->id(), $rows[$this->child->id()]['label']['parent']['#default_value']);
+    $this->assertEquals($this->parent->id(), $rows[$this->child->id()]['parent']['#default_value']);
     $this->assertSame(1, $rows[$this->child->id()]['label'][0]['#size']);
 
-    $this->assertSame(0, $rows[$this->orphan->id()]['label']['parent']['#default_value']);
+    $this->assertSame(0, $rows[$this->orphan->id()]['parent']['#default_value']);
     $this->assertSame(0, $rows[$this->orphan->id()]['label'][0]['#size']);
 
     $this->assertArrayHasKey($this->unlisted->id(), $rows);
-    $this->assertSame(0, $rows[$this->unlisted->id()]['label']['parent']['#default_value']);
+    $this->assertSame(0, $rows[$this->unlisted->id()]['parent']['#default_value']);
     $this->assertSame(3, $rows[$this->unlisted->id()]['weight']['#default_value']);
   }
 
@@ -148,10 +154,10 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
    * @param array $parents
    *   Parent IDs, keyed by community ID.
    *
-   * @return array
-   *   The saved organization.
+   * @return \Drupal\Core\Form\FormStateInterface
+   *   The submitted form state.
    */
-  protected function submitParents(array $parents): array {
+  protected function submitParents(array $parents): FormStateInterface {
     $rows = [];
     $weight = 0;
     foreach ($parents as $id => $parent) {
@@ -159,8 +165,13 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
     }
     $form_state = (new FormState())->setValues(['communities' => $rows, 'op' => 'Save']);
     $this->container->get('form_builder')->submitForm(CommunityOrganizationForm::class, $form_state);
-    $this->assertSame([], $form_state->getErrors());
+    return $form_state;
+  }
 
+  /**
+   * Gets the saved organization.
+   */
+  protected function getOrganization(): array {
     return $this->config('mukurtu_protocol.community_organization')->get('organization');
   }
 
@@ -174,25 +185,58 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
 
     $parents = array_fill_keys(array_keys(Community::loadMultiple()), 0);
     $parents[$this->child->id()] = $highParent->id();
-    $org = $this->submitParents($parents);
+    $this->assertSame([], $this->submitParents($parents)->getErrors());
 
-    $this->assertEquals($highParent->id(), $org[$this->child->id()]['parent']);
+    $this->assertEquals($highParent->id(), $this->getOrganization()[$this->child->id()]['parent']);
   }
 
   /**
-   * Tests that a missing or self-referencing parent is saved as top level.
+   * Tests that a missing or self-referencing parent is rejected.
    */
-  public function testSubmitDropsInvalidParent(): void {
-    $org = $this->submitParents([
+  public function testSubmitRejectsInvalidParent(): void {
+    $before = $this->getOrganization();
+    $errors = $this->submitParents([
       $this->parent->id() => 0,
       $this->child->id() => static::MISSING_ID,
       $this->orphan->id() => $this->orphan->id(),
-      $this->unlisted->id() => $this->parent->id(),
-    ]);
+    ])->getErrors();
 
-    $this->assertSame(0, $org[$this->child->id()]['parent']);
-    $this->assertSame(0, $org[$this->orphan->id()]['parent']);
-    $this->assertEquals($this->parent->id(), $org[$this->unlisted->id()]['parent']);
+    $this->assertArrayHasKey("communities][{$this->child->id()}][parent", $errors);
+    $this->assertArrayHasKey("communities][{$this->orphan->id()}][parent", $errors);
+    $this->assertSame($before, $this->getOrganization());
+  }
+
+  /**
+   * Tests that a parent loop is rejected with one error.
+   */
+  public function testSubmitRejectsParentLoop(): void {
+    $before = $this->getOrganization();
+    $errors = $this->submitParents([
+      $this->parent->id() => $this->child->id(),
+      $this->child->id() => $this->orphan->id(),
+      $this->orphan->id() => $this->parent->id(),
+      $this->unlisted->id() => $this->parent->id(),
+    ])->getErrors();
+
+    $this->assertSame(["communities][{$this->parent->id()}][parent"], array_keys($errors));
+    $this->assertEquals(
+      "Parent can't be placed under Child, because Child is already inside Parent.",
+      (string) reset($errors),
+    );
+    $this->assertSame($before, $this->getOrganization());
+  }
+
+  /**
+   * Tests that a parent loop is reported on the community that was changed.
+   */
+  public function testParentLoopErrorIsOnChangedCommunity(): void {
+    // Child is already under Parent, so only Parent's select changes.
+    $errors = $this->submitParents([
+      $this->child->id() => $this->parent->id(),
+      $this->parent->id() => $this->child->id(),
+    ])->getErrors();
+
+    $this->assertSame(["communities][{$this->parent->id()}][parent"], array_keys($errors));
   }
 
 }

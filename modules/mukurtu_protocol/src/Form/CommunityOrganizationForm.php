@@ -21,6 +21,7 @@ class CommunityOrganizationForm extends FormBase {
     $communities = \Drupal::entityTypeManager()->getStorage('community')->loadMultiple();
     $config = $this->config('mukurtu_protocol.community_organization');
     $org = $this->reconcileOrganization($config->get('organization') ?? [], $communities);
+    $names = $this->getCommunityNames($communities);
 
     $form['description'] = [
       '#type' => 'item',
@@ -33,6 +34,7 @@ class CommunityOrganizationForm extends FormBase {
       '#header' => [
         $this->t('Community'),
         $this->t('Weight'),
+        $this->t('Parent'),
       ],
       '#empty' => $this->t('No communities have been created on this site.'),
       '#tableselect' => FALSE,
@@ -43,8 +45,7 @@ class CommunityOrganizationForm extends FormBase {
           'group' => 'field-parent',
           'subgroup' => 'field-parent',
           'source' => 'community-id',
-          // The parent input shares the community cell, so keep it shown.
-          'hidden' => FALSE,
+          'hidden' => TRUE,
         ],
         [
           'action' => 'order',
@@ -57,7 +58,6 @@ class CommunityOrganizationForm extends FormBase {
     // Build rows, but only if there are communities on the site.
     if ($communities) {
       foreach ($org as $id => $communityOrg) {
-        /** @var \Drupal\mukurtu_browse\Entity\CommunityInterface $community */
         $community = $communities[$id];
         $parent = $communityOrg['parent'];
         $weight = $communityOrg['weight'];
@@ -71,7 +71,7 @@ class CommunityOrganizationForm extends FormBase {
             '#size' => $org[$id]['level'],
           ],
           [
-            '#plain_text' => $community->getName(),
+            '#plain_text' => $names[$id],
           ],
           [
             '#type' => 'hidden',
@@ -79,22 +79,25 @@ class CommunityOrganizationForm extends FormBase {
             '#value' => $community->id(),
             '#attributes' => ['class' => ['community-id']],
           ],
-          // A hidden input, not a weight select, so tabledrag can set any
-          // community ID as the parent.
-          'parent' => [
-            '#type' => 'hidden',
-            '#default_value' => $parent ?? 0,
-            '#parents' => ['communities', $id, 'parent'],
-            '#attributes' => ['class' => ['field-parent']],
-          ],
         ];
 
         $form['communities'][$id]['weight'] = [
           '#type' => 'weight',
-          '#title' => $this->t('Weight for @title', ['@title' => $community->getName()]),
+          '#title' => $this->t('Weight for @title', ['@title' => $names[$id]]),
           '#title_display' => 'invisible',
           '#default_value' => $weight ?? 0,
           '#attributes' => ['class' => ['field-weight']],
+        ];
+
+        // Shown with the row weights, so people can nest a community without
+        // dragging. Tabledrag keeps it in sync when they do drag.
+        $form['communities'][$id]['parent'] = [
+          '#type' => 'select',
+          '#title' => $this->t('Parent for @title', ['@title' => $names[$id]]),
+          '#title_display' => 'invisible',
+          '#options' => [0 => $this->t('Top level')] + array_diff_key($names, [$id => TRUE]),
+          '#default_value' => $parent ?? 0,
+          '#attributes' => ['class' => ['field-parent']],
         ];
       }
     }
@@ -105,6 +108,22 @@ class CommunityOrganizationForm extends FormBase {
       '#value' => $this->t('Save'),
     ];
     return $form;
+  }
+
+  /**
+   * Gets the community names to display, sorted by name.
+   *
+   * @param \Drupal\mukurtu_protocol\Entity\CommunityInterface[] $communities
+   *   The communities, keyed by ID.
+   *
+   * @return string[]
+   *   The names in the current content language, keyed by community ID.
+   */
+  protected function getCommunityNames(array $communities): array {
+    $entityRepository = \Drupal::service('entity.repository');
+    $names = array_map(fn($community) => $entityRepository->getTranslationFromContext($community)->getName(), $communities);
+    natcasesort($names);
+    return $names;
   }
 
   /**
@@ -175,16 +194,42 @@ class CommunityOrganizationForm extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $parents = array_map(fn($row) => intval($row['parent']), $form_state->getValue('communities') ?? []);
+    $names = $this->getCommunityNames(\Drupal::entityTypeManager()->getStorage('community')->loadMultiple(array_keys($parents)));
+
+    // The parent selects can form a loop that dragging can't. Report each
+    // loop once, on a community whose parent was changed.
+    $reported = [];
+    foreach ($parents as $id => $parent) {
+      $chain = [$id => TRUE];
+      $ancestor = $parent;
+      while ($ancestor && isset($parents[$ancestor]) && !isset($chain[$ancestor])) {
+        $chain[$ancestor] = TRUE;
+        $ancestor = $parents[$ancestor];
+      }
+      if ($ancestor !== $id || isset($reported[$id])) {
+        continue;
+      }
+      $reported += $chain;
+      $changed = array_filter(array_keys($chain), fn($member) => $parents[$member] != $form['communities'][$member]['parent']['#default_value']);
+      $member = $changed ? reset($changed) : $id;
+      $form_state->setError($form['communities'][$member]['parent'], $this->t("@community can't be placed under @parent, because @parent is already inside @community.", [
+        '@community' => $names[$member] ?? $member,
+        '@parent' => $names[$parents[$member]] ?? $parents[$member],
+      ]));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = \Drupal::service('config.factory')->getEditable('mukurtu_protocol.community_organization');
     $values = $form_state->getValues();
     $communities = $values['communities'] ?? [];
-    foreach ($communities as $id => &$community) {
+    foreach ($communities as &$community) {
       $community['parent'] = intval($community['parent']);
-      // The parent is a hidden input, so only accept another listed community.
-      if ($community['parent'] == $id || !isset($communities[$community['parent']])) {
-        $community['parent'] = 0;
-      }
       $community['weight'] = intval($community['weight']);
       if (isset($community['label'])) {
         unset($community['label']);
