@@ -24,10 +24,12 @@ services:
       - '@?plugin.manager.layout_builder.section_storage'
       - '@entity.repository'
 
-  mukurtu_gin_custom.choose_block_redirect_subscriber:
-    class: Drupal\mukurtu_gin_custom\EventSubscriber\ChooseBlockRedirectSubscriber
+  mukurtu_gin_custom.choose_block_merge_subscriber:
+    class: Drupal\mukurtu_gin_custom\EventSubscriber\ChooseBlockMergeSubscriber
     arguments:
-      - '@class_resolver'
+      - '@router.route_provider'
+      - '@controller_resolver'
+      - '@string_translation'
     tags:
       - { name: event_subscriber }
 

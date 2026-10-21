@@ -60,9 +60,25 @@ final class VisitorsLocationReportController implements ContainerInjectionInterf
   public const REMOVED_DISPLAYS = ['distinct_countries_list'];
 
   /**
+   * Drill-down routes that also get a map, keyed to the method serving each.
+   *
+   * The city route is left alone: its report is a list of that city's
+   * individual visits, and a map of one circle adds nothing to it.
+   */
+  public const DRILL_DOWN_ROUTES = [
+    'visitors.location.country' => 'country',
+    'visitors.location.region' => 'region',
+  ];
+
+  /**
    * The contrib controller whose output is being extended.
    */
   private const DELEGATE = '\Drupal\visitors\Controller\Report\ReportController';
+
+  /**
+   * The visitors_geoip controller behind the region drill-down.
+   */
+  private const GEOIP_DELEGATE = '\Drupal\visitors_geoip\Controller\ReportController';
 
   /**
    * The class resolver.
@@ -121,6 +137,36 @@ final class VisitorsLocationReportController implements ContainerInjectionInterf
   }
 
   /**
+   * Builds a country's drill-down report with that country's map above it.
+   *
+   * @param string|null $country
+   *   The country code from the route.
+   *
+   * @return array
+   *   A render array for the page.
+   */
+  public function country($country = NULL): array {
+    $build = $this->classResolver->getInstanceFromDefinition(self::DELEGATE)->country($country);
+    return static::addMapRow($build, $country ? $this->countryMap->build($country) : [], 0);
+  }
+
+  /**
+   * Builds a region drill-down report with its map above it.
+   *
+   * @param string|null $country
+   *   The country code from the route.
+   * @param string|null $region
+   *   The region from the route; '_none' for visits with no region.
+   *
+   * @return array
+   *   A render array for the page.
+   */
+  public function region($country = NULL, $region = NULL): array {
+    $build = $this->classResolver->getInstanceFromDefinition(self::GEOIP_DELEGATE)->region($country, $region);
+    return static::addMapRow($build, $country ? $this->countryMap->build($country, $region) : [], 0);
+  }
+
+  /**
    * Drops one embedded display from the report build.
    *
    * Whatever is left in that row keeps report.css's flex: 1 1 45%, so a row
@@ -173,11 +219,15 @@ final class VisitorsLocationReportController implements ContainerInjectionInterf
    *   The render array returned by the contrib controller.
    * @param array $map
    *   The map render array, or an empty array to leave the build alone.
+   * @param int $position
+   *   How many report rows to put before the map: 1, after the Continent /
+   *   Country row it plots, on the Locations report; 0, above the single
+   *   table, on the drill-down reports.
    *
    * @return array
-   *   The render array with a map row after the first report row.
+   *   The render array with the map row in place.
    */
-  public static function addMapRow(array $build, array $map): array {
+  public static function addMapRow(array $build, array $map, int $position = 1): array {
     if (!$map) {
       return $build;
     }
@@ -196,25 +246,28 @@ final class VisitorsLocationReportController implements ContainerInjectionInterf
     // Upstream keys its rows '1', '2', '3', which PHP stores as integer keys,
     // so a new string-keyed row appended here would sort to the bottom of the
     // page rather than into position. Give every row an explicit weight and
-    // slot the map in after the first one, which is the Continent/Country pair
-    // it plots. Reading the rows back out of the render array instead of
-    // hardcoding those keys keeps this working if upstream adds or renames a
-    // row.
-    $weight = 0;
-    foreach ($rows as $row) {
-      $build['main'][$row]['#weight'] = $weight++;
+    // slot the map in at $position. Reading the rows back out of the render
+    // array instead of hardcoding those keys keeps this working if upstream
+    // adds or renames a row.
+    $map_row = [
+      [
+        // layout-row is upstream's row class, from visitors/css/report.css.
+        '#prefix' => '<div class="layout-row layout-row--map">',
+        'blocks' => [$map],
+        '#suffix' => '</div>',
+      ],
+    ];
+    $position = min(max($position, 0), count($rows));
 
-      if ($weight === 1) {
-        $build['main']['country_map'] = [
-          [
-            // layout-row is upstream's row class, from visitors/css/report.css.
-            '#prefix' => '<div class="layout-row layout-row--map">',
-            'blocks' => [$map],
-            '#suffix' => '</div>',
-          ],
-          '#weight' => $weight++,
-        ];
+    $weight = 0;
+    foreach (array_values($rows) as $index => $row) {
+      if ($index === $position) {
+        $build['main']['country_map'] = $map_row + ['#weight' => $weight++];
       }
+      $build['main'][$row]['#weight'] = $weight++;
+    }
+    if ($position === count($rows)) {
+      $build['main']['country_map'] = $map_row + ['#weight' => $weight];
     }
 
     return $build;

@@ -142,13 +142,15 @@ third_party_settings:
         'Lists (Views)':
           - 'views_block:mukurtu_browse_by_map-map_block'
           - 'views_block:mukurtu_categories-browse_by_category_block'
+          - 'views_block:mukurtu_categories-browse_by_category_names_block'
         Mukurtu:
           - mukurtu_browse_by_community
       restricted_categories:
         - 'Chaos Tools'
         - 'Config Pages'
         - 'Content fields'
-        - Custom
+        - 'Custom block types'
+        - 'Custom blocks'
         - Devel
         - Facets
         - Forms

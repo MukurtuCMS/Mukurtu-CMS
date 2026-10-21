@@ -2,6 +2,7 @@
 
 - [ ] I have checked for and if required, created update hooks.
 - [ ] I have run an accessibility check, and resolved any issues.
+- [ ] If this PR fixes something the conformance report cites, I have updated that row in [`docs/accessibility/acr/mukurtu-acr.yaml`](../docs/accessibility/acr/mukurtu-acr.yaml). A note still describing a fixed defect understates the product, which nobody reports.
 - [ ] I have recompiled SCSS if required.
 - [ ] I have updated or created CI/CD tests, if required.
 - [ ] I have updated from `main` and resolved any merge conflicts.

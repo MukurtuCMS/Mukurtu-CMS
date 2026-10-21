@@ -179,3 +179,91 @@ function mukurtu_landing_page_update_40203(): string {
 
   return implode(' ', $changes);
 }
+
+/**
+ * Offer the names-only Browse by Category block on landing pages.
+ */
+function mukurtu_landing_page_update_40204(): string {
+  $config = \Drupal::configFactory()
+    ->getEditable('core.entity_view_display.node.landing_page.default');
+  $views = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks.Lists (Views)');
+
+  // Only extend an allowlist that already exists. If the key is absent the
+  // category is unrestricted, and adding it would take the other view blocks
+  // away instead of offering a new one. See
+  // mukurtu_landing_page_update_40203().
+  $block = 'views_block:mukurtu_categories-browse_by_category_names_block';
+  if (!is_array($views) || in_array($block, $views, TRUE)) {
+    return (string) t('Landing page block restrictions were already up to date.');
+  }
+
+  $views[] = $block;
+  sort($views);
+  $config
+    ->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks.Lists (Views)', $views)
+    ->save();
+
+  return (string) t('Landing pages now offer the Browse by Category (names only) block.');
+}
+
+/**
+ * Hides the Custom block category and reusable content blocks from the landing page block chooser.
+ */
+function mukurtu_landing_page_update_40205(): string {
+  $config = \Drupal::configFactory()
+    ->getEditable('core.entity_view_display.node.landing_page.default');
+  $settings = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction');
+
+  // With no settings at all, Layout Builder Restrictions bails out and every
+  // block is offered. Restricting some of them here would be the first
+  // restriction this site has, so leave that decision to the site builder.
+  if (empty($settings)) {
+    return (string) t('Landing page block restrictions are not configured on this site; nothing to change.');
+  }
+
+  // With per-block "Custom blocks" rules, the module files every reusable
+  // content block under "Custom blocks" instead of "Custom block types".
+  // Restricting "Custom blocks" would then hide content blocks the site
+  // builder chose to allow, and restricting "Custom block types" would do
+  // nothing, so leave such a site alone.
+  if (isset($settings['allowlisted_blocks']['Custom blocks']) || isset($settings['denylisted_blocks']['Custom blocks'])) {
+    return (string) t('Landing page block restrictions were already up to date.');
+  }
+
+  $changes = [];
+  $restricted = $settings['restricted_categories'] ?? [];
+
+  // Layout Builder Restrictions renames the "Custom" category to "Custom
+  // blocks" before comparing it against restricted_categories, so a
+  // restriction stored as "Custom" never matched. That let the Consent Popup
+  // and Mukurtu Footer plugin blocks through to the landing page chooser.
+  if (in_array('Custom', $restricted, TRUE)) {
+    $restricted = array_diff($restricted, ['Custom']);
+    $restricted[] = 'Custom blocks';
+    $changes[] = (string) t('Hid the Custom block category from landing pages.');
+  }
+
+  // Reusable content blocks are checked under "Custom block types". Offering
+  // them alongside new content blocks put the same block types in the
+  // chooser twice, and placing a reusable block shares one entity across
+  // pages.
+  // Respect a site builder's own per-type allowlist or denylist.
+  $type_rules = isset($settings['allowlisted_blocks']['Custom block types']) || isset($settings['denylisted_blocks']['Custom block types']);
+  if (!$type_rules && !in_array('Custom block types', $restricted, TRUE)) {
+    $restricted[] = 'Custom block types';
+    $changes[] = (string) t('Hid reusable content blocks from landing pages.');
+  }
+
+  if (!$changes) {
+    return (string) t('Landing page block restrictions were already up to date.');
+  }
+
+  $restricted = array_values(array_unique($restricted));
+  sort($restricted);
+  $settings['restricted_categories'] = $restricted;
+  $config
+    ->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction', $settings)
+    ->save();
+
+  return implode(' ', $changes);
+}

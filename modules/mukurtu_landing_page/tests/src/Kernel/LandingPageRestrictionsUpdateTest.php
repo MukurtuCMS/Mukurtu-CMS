@@ -9,9 +9,9 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_landing_page_update_40203().
+ * Tests mukurtu_landing_page_update_40203(), 40204() and 40205().
  *
- * The hook widens two allowlists on an existing site. The happy path matters
+ * The hooks widen allowlists on an existing site. The happy path matters
  * less than the guard rails: an allowlist key that is absent means the
  * category is unrestricted, so writing one would take block availability away
  * rather than grant it. These tests pin that behaviour.
@@ -22,6 +22,8 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   protected const DISPLAY = 'core.entity_view_display.node.landing_page.default';
 
   protected const LEGACY_VIEW = 'views_block:browse_by_community-community_browse_block';
+
+  protected const NAMES_BLOCK = 'views_block:mukurtu_categories-browse_by_category_names_block';
 
   protected const HEROES = [
     'inline_block:full_image_with_description',
@@ -98,8 +100,31 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
       $allowlists = &$restrictions['entity_view_mode_restriction']['allowlisted_blocks'];
       $allowlists['Inline blocks'] = array_values(array_diff($allowlists['Inline blocks'], self::HEROES));
       unset($allowlists['Mukurtu']);
+      $allowlists['Lists (Views)'] = array_values(array_diff($allowlists['Lists (Views)'], [self::NAMES_BLOCK]));
       array_unshift($allowlists['Lists (Views)'], self::LEGACY_VIEW);
     });
+    $this->rollBackCustomRestrictions();
+  }
+
+  /**
+   * Rolls the "Custom" restrictions back to how they shipped before 40205.
+   */
+  protected function rollBackCustomRestrictions(): void {
+    $config = \Drupal::configFactory()->getEditable(self::DISPLAY);
+    $key = 'third_party_settings.layout_builder_restrictions.entity_view_mode_restriction';
+    $settings = $config->get($key);
+    $settings['restricted_categories'] = array_values(array_diff($settings['restricted_categories'], ['Custom blocks', 'Custom block types']));
+    $settings['restricted_categories'][] = 'Custom';
+    $settings['denylisted_blocks'] = [];
+    $config->set($key, $settings)->save();
+  }
+
+  /**
+   * Returns the current entity_view_mode_restriction settings.
+   */
+  protected function restrictions(): array {
+    return \Drupal::config(self::DISPLAY)
+      ->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction') ?? [];
   }
 
   /**
@@ -134,17 +159,21 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   /**
    * An updated site must land on exactly what a fresh install ships.
    *
-   * The hook and config/install are maintained separately, so they can drift.
-   * This pins them together: whatever a 4.0.1 site ends up with after the
-   * update has to equal the allowlists in the shipped display.
+   * The hooks and config/install are maintained separately, so they can
+   * drift. This pins them together: whatever a 4.0.1 site ends up with after
+   * the updates has to equal the allowlists in the shipped display.
    */
   public function testPostUpdateStateMatchesShippedConfig(): void {
     $this->writePreFixDisplay();
 
     mukurtu_landing_page_update_40203();
+    mukurtu_landing_page_update_40204();
+    mukurtu_landing_page_update_40205();
 
-    $shipped = $this->shipped['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction']['allowlisted_blocks'];
-    $this->assertSame($shipped, $this->allowlists());
+    $shipped = $this->shipped['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction'];
+    $this->assertSame($shipped['allowlisted_blocks'], $this->allowlists());
+    $this->assertSame($shipped['denylisted_blocks'], $this->restrictions()['denylisted_blocks']);
+    $this->assertEqualsCanonicalizing($shipped['restricted_categories'], $this->restrictions()['restricted_categories']);
   }
 
   /**
@@ -221,6 +250,123 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
     $message = mukurtu_landing_page_update_40203();
 
     $this->assertSame([], $this->allowlists());
+    $this->assertStringContainsString('not configured', $message);
+  }
+
+  /**
+   * Update 40204 offers the names-only category block, keeping the others.
+   */
+  public function testAddsNamesOnlyCategoryBlock(): void {
+    $this->writePreFixDisplay();
+    $before = $this->allowlists()['Lists (Views)'];
+    $this->assertNotContains(self::NAMES_BLOCK, $before);
+
+    $message = mukurtu_landing_page_update_40204();
+
+    $after = $this->allowlists()['Lists (Views)'];
+    $this->assertContains(self::NAMES_BLOCK, $after);
+    $this->assertSame([], array_diff($before, $after));
+    $this->assertStringContainsString('names only', $message);
+
+    // Running it again changes nothing.
+    $message = mukurtu_landing_page_update_40204();
+    $this->assertSame($after, $this->allowlists()['Lists (Views)']);
+    $this->assertStringContainsString('already up to date', $message);
+  }
+
+  /**
+   * Update 40204 does not create a views allowlist where none exists.
+   *
+   * An absent key means every views block is offered, so writing one would
+   * take the others away.
+   */
+  public function testNamesOnlyBlockLeavesUnrestrictedViewsAlone(): void {
+    $this->writeDisplay(static function (array &$restrictions): void {
+      unset($restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Lists (Views)']);
+    });
+
+    mukurtu_landing_page_update_40204();
+
+    $this->assertArrayNotHasKey('Lists (Views)', $this->allowlists());
+  }
+
+  /**
+   * Update 40205 hides the Custom category and reusable content blocks.
+   */
+  public function testHidesCustomCategoryAndReusableBlocks(): void {
+    $this->writeDisplay();
+    $this->rollBackCustomRestrictions();
+    $this->assertContains('Custom', $this->restrictions()['restricted_categories']);
+
+    $message = mukurtu_landing_page_update_40205();
+
+    $after = $this->restrictions()['restricted_categories'];
+    $this->assertNotContains('Custom', $after);
+    $this->assertContains('Custom blocks', $after);
+    $this->assertContains('Custom block types', $after);
+    $this->assertStringContainsString('Custom block category', $message);
+    $this->assertStringContainsString('reusable content blocks', $message);
+
+    // Running it again changes nothing.
+    $before_rerun = $this->restrictions();
+    $message = mukurtu_landing_page_update_40205();
+    $this->assertSame($before_rerun, $this->restrictions());
+    $this->assertStringContainsString('already up to date', $message);
+  }
+
+  /**
+   * Update 40205 keeps a site builder's own per-type content block rules.
+   */
+  public function testRespectsContentBlockTypeRules(): void {
+    $this->writeDisplay();
+    $this->rollBackCustomRestrictions();
+    $config = \Drupal::configFactory()->getEditable(self::DISPLAY);
+    $config->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.denylisted_blocks', [
+      'Custom block types' => ['call_to_action'],
+    ])->save();
+
+    mukurtu_landing_page_update_40205();
+
+    $after = $this->restrictions();
+    $this->assertNotContains('Custom block types', $after['restricted_categories']);
+    $this->assertContains('Custom blocks', $after['restricted_categories']);
+    $this->assertSame(['call_to_action'], $after['denylisted_blocks']['Custom block types']);
+  }
+
+  /**
+   * Update 40205 leaves "Custom" alone on sites with per-block rules.
+   *
+   * With a "Custom blocks" allowlist or denylist, Layout Builder Restrictions
+   * files every reusable content block under "Custom blocks" too. Restricting
+   * that category would hide all of them, not just the plugin blocks.
+   */
+  public function testLeavesCustomAloneWithPerBlockRules(): void {
+    $this->writeDisplay();
+    $this->rollBackCustomRestrictions();
+    $config = \Drupal::configFactory()->getEditable(self::DISPLAY);
+    $config->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks.Custom blocks', [
+      'block_content:00000000-0000-0000-0000-000000000000',
+    ])->save();
+
+    mukurtu_landing_page_update_40205();
+
+    $after = $this->restrictions()['restricted_categories'];
+    $this->assertContains('Custom', $after);
+    $this->assertNotContains('Custom blocks', $after);
+    $this->assertNotContains('Custom block types', $after);
+  }
+
+  /**
+   * Update 40205 does not add the first restriction to an unrestricted site.
+   */
+  public function testCustomFixLeavesAnUnrestrictedSiteAlone(): void {
+    $this->writeDisplay(static function (array &$restrictions): void {
+      $restrictions['entity_view_mode_restriction'] = [];
+    });
+
+    $message = mukurtu_landing_page_update_40205();
+
+    $this->assertSame([], $this->restrictions());
     $this->assertStringContainsString('not configured', $message);
   }
 
