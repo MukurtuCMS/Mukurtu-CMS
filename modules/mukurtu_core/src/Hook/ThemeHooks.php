@@ -15,7 +15,7 @@ class ThemeHooks {
    *
    * Kept in sync with the bundle-specific override permissions this
    * codebase already hardcodes elsewhere
-   * (@see LayoutBuilderHooks::restrictBlocksForRole()) and the
+   * (@see LayoutBuilderHooks::restrictBasicPageBlocks()) and the
    * layout_builder__layout field on the page/landing_page bundles. Add a
    * bundle's override permission here if it gains Layout Builder overrides
    * in the future.
