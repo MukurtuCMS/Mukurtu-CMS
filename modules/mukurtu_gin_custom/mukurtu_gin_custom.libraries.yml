@@ -15,11 +15,13 @@ mukurtu-gin-custom:
     js/gin-more-actions-aria.js: {}
     js/gin-collapsed-tab-trap.js: {}
     js/gin-secondary-tray-escape.js: {}
+    js/lb-pending-messages.js: {}
   dependencies:
     - core/jquery
     - core/drupal
     - core/once
     - core/drupalSettings
+    - core/drupal.announce
 
 entity-browser-toggle:
   version: 1.x
