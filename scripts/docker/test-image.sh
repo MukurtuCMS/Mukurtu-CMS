@@ -118,10 +118,14 @@ echo "runtime: PDFs whose fonts are not embedded still produce a thumbnail"
 # A one-page PDF that names the standard Helvetica font without embedding it, as many
 # PDFs do. Without fonts in the image, pdftoppm logs "Couldn't find a font" and draws a
 # blank page, while pdftotext still works, so the loss is easy to miss.
-pdf_out="$(docker run --rm --entrypoint sh "$IMAGE" -c '
+# The PDF is made by the host's printf and handed to the container.
+pdf_content="BT /F1 48 Tf 20 30 Td (Mukurtu) Tj ET"
+nofonts_pdf="$(printf "%%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 100]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n4 0 obj<</Length %d>>stream\n%s\nendstream endobj\n5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\ntrailer<</Root 1 0 R/Size 6>>\n%%%%EOF\n" "${#pdf_content}" "$pdf_content")"
+# It runs as the Compose examples run the image: read-only root, tmpfs at /tmp and /run.
+pdf_out="$(docker run --rm --read-only --tmpfs /tmp:mode=1777 --tmpfs /run:mode=1777 -e PDF="$nofonts_pdf" --entrypoint sh "$IMAGE" -c '
+  mkdir -p /run/mukurtu
   cd /tmp
-  content="BT /F1 48 Tf 20 30 Td (Mukurtu) Tj ET"
-  printf "%%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 100]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n4 0 obj<</Length %d>>stream\n%s\nendstream endobj\n5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\ntrailer<</Root 1 0 R/Size 6>>\n%%%%EOF\n" "${#content}" "$content" > nofonts.pdf
+  printf "%s\n" "$PDF" > nofonts.pdf
   pdftoppm -png -singlefile -r 72 nofonts.pdf thumb 2>/tmp/pdftoppm.err
   echo "TEXT=$(pdftotext nofonts.pdf - 2>/dev/null | tr -d "\n\f")"
   echo "FONTERR=$(grep -c "find a font" /tmp/pdftoppm.err)"
@@ -129,6 +133,17 @@ pdf_out="$(docker run --rm --entrypoint sh "$IMAGE" -c '
 ' 2>&1)"
 assert_contains "$pdf_out" "TEXT=Mukurtu" "text extraction works on the font-less PDF"
 assert_contains "$pdf_out" "FONTERR=0" "pdftoppm finds a font for Helvetica"
+# A font cache that does not match the file system (as when an image is unpacked by a
+# different storage driver) is rebuilt on first use. With a read-only root and no home
+# directory, fontconfig then logs "No writable cache directories" on every render unless
+# the image points XDG_CACHE_HOME at the tmpfs.
+fc_out="$(docker run --rm --user 0 --tmpfs /tmp:mode=1777 --tmpfs /run:mode=1777 -e PDF="$nofonts_pdf" --entrypoint sh "$IMAGE" -c '
+  mkdir -p /run/mukurtu; chown mukurtu /run/mukurtu
+  find /usr/share/fonts -type d -exec touch {} +
+  cd /tmp; printf "%s\n" "$PDF" > nofonts.pdf; chmod 644 nofonts.pdf
+  su mukurtu -s /bin/sh -c "export HOME=/nonexistent; pdftoppm -png -singlefile -r 72 nofonts.pdf thumb 2>/tmp/fc.err; echo FCNOISE=\$(grep -c Fontconfig /tmp/fc.err)"
+' 2>&1)"
+assert_contains "$fc_out" "FCNOISE=0" "a stale font cache and no home directory: pdftoppm logs no fontconfig error"
 inked="$(sed -n 's/^INKED=//p' <<<"$pdf_out")"
 [[ "${inked:-0}" -gt 200 ]] && pass "the thumbnail is not blank ($inked inked pixels)" || fail "the thumbnail is not blank (inked pixels: '${inked:-none}')"
 check "$IMAGE" "has the CMap and encoding data for non-Latin PDFs (poppler-data)" 'test -d /usr/share/poppler'

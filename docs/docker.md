@@ -437,7 +437,10 @@ docker compose up -d mukurtu
 
 At start-up the container applies database updates and rebuilds caches
 (`MUKURTU_RUN_UPDATES=true`), then serves requests. The pending updates are
-listed in the log (`pending database updates:`) just before they run. Read the
+listed in the log (`pending database updates:`, or `none`) just before they run. Some
+releases queue work for cron, such as a full search reindex: search results can be
+incomplete until cron has caught up, which on a large site takes several runs (every
+hour by default; see `MUKURTU_CRON_INTERVAL`). Read the
 release notes: some releases must be passed through rather than
 skipped. To go back, restore the backup and run the previous tag; databases are
 not downgraded.

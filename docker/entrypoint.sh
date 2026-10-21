@@ -103,8 +103,13 @@ case "$state" in
     if [ "$MUKURTU_RUN_UPDATES" = true ]; then
       # Show what is about to run, so the log says what an upgrade changed. There is no
       # backup step: take one before upgrading (see "Upgrades and backups" in docs/docker.md).
-      log "pending database updates:"
-      drush updatedb:status || true
+      pending="$(drush updatedb:status 2>&1 || true)"
+      if [ -z "$pending" ] || printf '%s' "$pending" | grep -q "No database updates required"; then
+        log "pending database updates: none"
+      else
+        log "pending database updates:"
+        printf '%s\n' "$pending"
+      fi
       log "running database updates"
       drush updatedb --yes
       drush cache:rebuild

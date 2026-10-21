@@ -94,7 +94,7 @@ if start_site "$NEW_IMAGE"; then pass "the new image serves the old site"; else 
 log="$(docker logs "$SITE" 2>&1)"
 assert_contains "$log" "existing installation found" "the new image found the installation"
 assert_not_contains "$log" "Installing Mukurtu" "the new image did not install over it"
-assert_contains "$log" "pending database updates:" "the log lists the pending updates"
+assert_contains "$log" "pending database updates" "the log reports the pending updates"
 assert_eq "200" "$(site_code /)" "the front page is served"
 assert_eq "200" "$(site_code /user/login)" "the login page is served"
 assert_eq "$users_before" "$(docker exec "$DB" mariadb -uroot -proot -N -B mukurtu -e 'select count(*) from users_field_data' 2>/dev/null)" "users are unchanged"

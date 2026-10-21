@@ -223,8 +223,8 @@ assert_eq "$salt_before" "$(docker exec "$SITE" cat /var/www/files/private/.hash
 restart_log="$(docker logs --since "$restart_at" "$SITE" 2>&1)"
 assert_not_contains "$restart_log" "Installing Mukurtu" "restart log shows no installation"
 assert_contains "$restart_log" "existing installation" "restart log says an installation exists"
-assert_contains "$restart_log" "pending database updates:" "restart log lists the pending updates before they run"
-[[ "$restart_log" == *"pending database updates:"*"running database updates"* ]] && pass "the list comes before the updates run" || fail "the list comes before the updates run"
+assert_contains "$restart_log" "pending database updates: none" "restart log says there are no pending updates, not an empty list"
+[[ "$restart_log" == *"pending database updates"*"running database updates"* ]] && pass "the pending updates are reported before they run" || fail "the pending updates are reported before they run"
 
 echo "entrypoint: sigterm"
 start=$SECONDS

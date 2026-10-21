@@ -193,8 +193,11 @@ RUN mkdir -p /run/mukurtu && chown mukurtu:mukurtu /run/mukurtu
 
 # PHPRC makes every command-line PHP (Drush, `docker exec ... drush`) read the
 # rendered CLI ini instead of PHP's 128M defaults.
+# XDG_CACHE_HOME gives fontconfig (used by pdftoppm) a writable place for its cache; the
+# root file system is read-only, and without one every PDF render logs two errors.
 ENV MUKURTU_RUN_DIR=/run/mukurtu \
-    PHPRC=/run/mukurtu/cli
+    PHPRC=/run/mukurtu/cli \
+    XDG_CACHE_HOME=/run/mukurtu/cache
 
 WORKDIR /var/www/html
 USER mukurtu
