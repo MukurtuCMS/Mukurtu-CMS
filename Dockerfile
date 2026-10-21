@@ -45,7 +45,7 @@ RUN set -eux; \
       libzip-dev; \
     docker-php-ext-configure gd --with-avif --with-freetype --with-jpeg --with-webp; \
     docker-php-ext-install -j"$(nproc)" gd intl pdo_mysql zip bcmath; \
-    pecl install apcu maxminddb; \
+    for attempt in 1 2 3; do pecl install apcu maxminddb && break; [ "$attempt" -lt 3 ] || exit 1; sleep 10; done; \
     docker-php-ext-enable apcu maxminddb; \
     apk del --no-network .build-deps; \
     rm -rf /tmp/pear /var/cache/apk/*

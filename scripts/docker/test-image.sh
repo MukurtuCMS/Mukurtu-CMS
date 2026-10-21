@@ -15,6 +15,8 @@ pinned="$(sed -n 's/^ARG MUKURTU_TEMPLATE_VERSION=//p' "$REPO_ROOT/Dockerfile" |
 [[ "$pinned" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] && pass "the pinned template version looks like a version ($pinned)" || fail "the pinned template version looks like a version (got '$pinned')"
 assert_contains "$dockerfile" "ARG COMPOSER_AUDIT_FLAGS=" "the audit's extra flags are a build argument that defaults to none (strict)"
 [[ "$(sed -n 's/^ARG COMPOSER_AUDIT_FLAGS=//p' "$REPO_ROOT/Dockerfile")" == "" ]] && pass "the audit is strict by default" || fail "the audit is strict by default"
+# pecl.php.net sometimes answers a download with HTTP 500; one such answer must not fail a release.
+assert_contains "$dockerfile" "for attempt in 1 2 3; do pecl install" "the PECL extensions are downloaded with retries"
 assert_not_contains "$dockerfile" "AS guard" "there is no guard stage: the default replaces it"
 # The media tools are part of every image. An option to leave them out would let a user
 # build an image that silently lacks thumbnails, and there is no slim variant to publish.
