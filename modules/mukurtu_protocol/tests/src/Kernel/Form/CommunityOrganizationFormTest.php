@@ -140,4 +140,57 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
     $this->assertSame(0, $org[$this->unlisted->id()]['parent']);
   }
 
+  /**
+   * Submits the form with the given parent for each community.
+   *
+   * @param array $parents
+   *   Parent IDs, keyed by community ID.
+   *
+   * @return array
+   *   The saved organization.
+   */
+  protected function submitParents(array $parents): array {
+    $rows = [];
+    $weight = 0;
+    foreach ($parents as $id => $parent) {
+      $rows[$id] = ['weight' => $weight++, 'parent' => $parent];
+    }
+    $form_state = (new FormState())->setValues(['communities' => $rows, 'op' => 'Save']);
+    $this->container->get('form_builder')->submitForm(CommunityOrganizationForm::class, $form_state);
+    $this->assertSame([], $form_state->getErrors());
+
+    return $this->config('mukurtu_protocol.community_organization')->get('organization');
+  }
+
+  /**
+   * Tests that a parent with an ID above the weight select range is saved.
+   */
+  public function testSubmitSavesParentWithHighId(): void {
+    do {
+      $highParent = $this->createCommunity('High ID parent');
+    } while ($highParent->id() <= 10);
+
+    $parents = array_fill_keys(array_keys(Community::loadMultiple()), 0);
+    $parents[$this->child->id()] = $highParent->id();
+    $org = $this->submitParents($parents);
+
+    $this->assertEquals($highParent->id(), $org[$this->child->id()]['parent']);
+  }
+
+  /**
+   * Tests that a missing or self-referencing parent is saved as top level.
+   */
+  public function testSubmitDropsInvalidParent(): void {
+    $org = $this->submitParents([
+      $this->parent->id() => 0,
+      $this->child->id() => static::MISSING_ID,
+      $this->orphan->id() => $this->orphan->id(),
+      $this->unlisted->id() => $this->parent->id(),
+    ]);
+
+    $this->assertSame(0, $org[$this->child->id()]['parent']);
+    $this->assertSame(0, $org[$this->orphan->id()]['parent']);
+    $this->assertEquals($this->parent->id(), $org[$this->unlisted->id()]['parent']);
+  }
+
 }

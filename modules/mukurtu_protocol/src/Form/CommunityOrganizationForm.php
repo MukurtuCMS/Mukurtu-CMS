@@ -89,10 +89,10 @@ class CommunityOrganizationForm extends FormBase {
           '#attributes' => ['class' => ['field-weight']],
         ];
 
+        // A hidden input, not a weight select, so tabledrag can set any
+        // community ID as the parent.
         $form['communities'][$id]['parent'] = [
-          '#type' => 'weight',
-          '#title' => $this->t('Parent for @title', ['@title' => $community->getName()]),
-          '#title_display' => 'invisible',
+          '#type' => 'hidden',
           '#default_value' => $parent ?? 0,
           '#attributes' => ['class' => ['field-parent']],
         ];
@@ -176,12 +176,15 @@ class CommunityOrganizationForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // @todo We need validation.
     $config = \Drupal::service('config.factory')->getEditable('mukurtu_protocol.community_organization');
     $values = $form_state->getValues();
     $communities = $values['communities'] ?? [];
-    foreach ($communities as &$community) {
+    foreach ($communities as $id => &$community) {
       $community['parent'] = intval($community['parent']);
+      // The parent is a hidden input, so only accept another listed community.
+      if ($community['parent'] == $id || !isset($communities[$community['parent']])) {
+        $community['parent'] = 0;
+      }
       $community['weight'] = intval($community['weight']);
       if (isset($community['label'])) {
         unset($community['label']);
