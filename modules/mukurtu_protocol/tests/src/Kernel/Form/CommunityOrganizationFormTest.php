@@ -88,18 +88,20 @@ class CommunityOrganizationFormTest extends ProtocolAwareEntityTestBase {
     $rows = $form['communities'];
 
     $this->assertArrayNotHasKey(static::MISSING_ID, $rows);
+    // The parent input sits in the community cell, so there's no Parent column.
+    $this->assertCount(2, $rows['#header']);
 
-    $this->assertSame(0, $rows[$this->parent->id()]['parent']['#default_value']);
+    $this->assertSame(0, $rows[$this->parent->id()]['label']['parent']['#default_value']);
     $this->assertSame(0, $rows[$this->parent->id()]['label'][0]['#size']);
 
-    $this->assertEquals($this->parent->id(), $rows[$this->child->id()]['parent']['#default_value']);
+    $this->assertEquals($this->parent->id(), $rows[$this->child->id()]['label']['parent']['#default_value']);
     $this->assertSame(1, $rows[$this->child->id()]['label'][0]['#size']);
 
-    $this->assertSame(0, $rows[$this->orphan->id()]['parent']['#default_value']);
+    $this->assertSame(0, $rows[$this->orphan->id()]['label']['parent']['#default_value']);
     $this->assertSame(0, $rows[$this->orphan->id()]['label'][0]['#size']);
 
     $this->assertArrayHasKey($this->unlisted->id(), $rows);
-    $this->assertSame(0, $rows[$this->unlisted->id()]['parent']['#default_value']);
+    $this->assertSame(0, $rows[$this->unlisted->id()]['label']['parent']['#default_value']);
     $this->assertSame(3, $rows[$this->unlisted->id()]['weight']['#default_value']);
   }
 

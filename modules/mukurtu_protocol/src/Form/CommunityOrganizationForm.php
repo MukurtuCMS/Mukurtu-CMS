@@ -33,7 +33,6 @@ class CommunityOrganizationForm extends FormBase {
       '#header' => [
         $this->t('Community'),
         $this->t('Weight'),
-        $this->t('Parent'),
       ],
       '#empty' => $this->t('No communities have been created on this site.'),
       '#tableselect' => FALSE,
@@ -44,7 +43,8 @@ class CommunityOrganizationForm extends FormBase {
           'group' => 'field-parent',
           'subgroup' => 'field-parent',
           'source' => 'community-id',
-          'hidden' => TRUE,
+          // The parent input shares the community cell, so keep it shown.
+          'hidden' => FALSE,
         ],
         [
           'action' => 'order',
@@ -79,6 +79,14 @@ class CommunityOrganizationForm extends FormBase {
             '#value' => $community->id(),
             '#attributes' => ['class' => ['community-id']],
           ],
+          // A hidden input, not a weight select, so tabledrag can set any
+          // community ID as the parent.
+          'parent' => [
+            '#type' => 'hidden',
+            '#default_value' => $parent ?? 0,
+            '#parents' => ['communities', $id, 'parent'],
+            '#attributes' => ['class' => ['field-parent']],
+          ],
         ];
 
         $form['communities'][$id]['weight'] = [
@@ -87,14 +95,6 @@ class CommunityOrganizationForm extends FormBase {
           '#title_display' => 'invisible',
           '#default_value' => $weight ?? 0,
           '#attributes' => ['class' => ['field-weight']],
-        ];
-
-        // A hidden input, not a weight select, so tabledrag can set any
-        // community ID as the parent.
-        $form['communities'][$id]['parent'] = [
-          '#type' => 'hidden',
-          '#default_value' => $parent ?? 0,
-          '#attributes' => ['class' => ['field-parent']],
         ];
       }
     }
