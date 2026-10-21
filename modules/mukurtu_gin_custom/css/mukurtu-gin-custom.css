@@ -1548,8 +1548,19 @@ the sidebar trigger (32px) and the gaps between them come to 402px, inside a
 It already carries flex-wrap: wrap, so Gin clearly intends those controls to
 wrap onto more lines when space is tight. They never get the chance, because
 the bar is sized to its max-content width and so there is nothing to wrap
-within. Letting it shrink is all that is needed; the existing wrap then does
-the work.
+within. Capping it at max-width: 100% is all that is needed; the existing
+wrap then does the work.
+
+It is capped rather than allowed to shrink. A first version set
+flex-shrink: 1 and min-width: 0 instead, which fixed 320px but also shrank
+the bar on wide screens where it fits: it shares its row with the page title
+block (flex: 1 1 auto), and two shrinkable items give up space in proportion
+to their size, so at 1920px the bar lost about 80px it did not need and the
+"Save as" label wrapped above its select. With the cap, Gin's own
+flex-shrink: 0 stays in force, so the bar keeps its natural width whenever it
+fits and only narrows, and wraps, when the container is smaller than it. No
+min-width is needed either, because a flex item's automatic minimum is itself
+clamped by its max-width.
 
 Worth noting what was blamed first: the element sitting at the page's right
 edge is a 1px span.visually-hidden ("Show sidebar panel") inside the sidebar
@@ -1561,27 +1572,16 @@ the controls wrap. That is the right way round, since the alternative is
 horizontal scrolling, but it is a real cost on a short screen and the bar
 could probably be made to pack more tightly as a follow-up.
 
-!important is required, and the reason is worth recording because it is not
-the usual specificity story. Gin ships these declarations as
+No !important is needed. Gin's rules on this element are only as specific
+as a plain class (they use :where(*)), and this stylesheet loads before
+Gin's, so a property Gin also sets would lose here without !important. Gin
+sets no max-width on the bar, so this one has nothing to overrule.
 
-  :where(*) .gin-sticky-form-actions,
-  :is(#extra-specificity-hack, [data-drupal-admin-styles]) .gin-sticky-form-actions
-
-The :is() branch carries an id's specificity but only matches under
-[data-drupal-admin-styles]; elsewhere only the :where(*) branch applies, and
-:where() contributes nothing, so Gin's rule and a plain class selector here
-are *equally* specific and document order decides. This module's stylesheet
-loads before Gin's, so without !important the declarations below are simply
-overruled. A first version of this change was written without it and had no
-effect at all while appearing correct in a browser devtools experiment, where
-an injected <style> wins by being last.
-
-Self-regulating, so no media query: the bar only shrinks when it has to.
-Measured identical above 480px, unchanged at 1024, 1280 and 1600px, with no
-control clipped or pushed off screen at any width from 320px to 1600px. */
+Self-regulating, so no media query: the bar only narrows when it has to.
+Measured at its natural width from 768px to 1920px, with no control clipped
+or pushed off screen at any width from 320px to 1920px. */
 .gin-sticky-form-actions {
-  flex-shrink: 1 !important;
-  min-width: 0 !important;
+  max-width: 100%;
 }
 
 /* Fourth and last cause of the admin reflow failures in #2336, on the

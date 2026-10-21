@@ -54,6 +54,27 @@ test.describe('Reflow (admin)', () => {
     });
   }
 
+  // The 320px fix for the sticky form actions bar must not narrow it on wide
+  // screens, where a first version made the "Save as" label wrap above its
+  // select.
+  for (const path of ['/node/add/digital_heritage', '/node/add/dictionary_word']) {
+    test(`Reflow: the moderation state label stays beside its select at 1920px on ${path}`, async ({ page }) => {
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page.goto(path);
+
+      const select = page.locator('.gin-sticky-form-actions .field--name-moderation-state select');
+      await expect(select).toBeVisible();
+      const id = await select.getAttribute('id');
+      const label = page.locator(`label[for="${id}"]`);
+      await expect(label).toBeVisible();
+
+      const labelBox = await label.boundingBox();
+      const selectBox = await select.boundingBox();
+      expect(labelBox!.y + labelBox!.height, 'label ends below the top of the select, so it is on the same row').toBeGreaterThan(selectBox!.y);
+      expect(labelBox!.x + labelBox!.width, 'label is to the left of the select').toBeLessThanOrEqual(selectBox!.x + 1);
+    });
+  }
+
   // The tooltip supplies the link's accessible name, so any future fix that
   // hides it with display:none would trade 1.4.10 for 4.1.2. Pin that.
   test('Reflow: the shortcut tooltip keeps the link its accessible name', async ({ page }) => {
