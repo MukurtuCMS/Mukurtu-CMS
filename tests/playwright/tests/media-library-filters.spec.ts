@@ -51,9 +51,9 @@ async function openBlockMediaWidget(page: Page) {
   const front = await page.getByRole('textbox', { name: 'Default front page' }).inputValue();
   await gotoReady(page, `${front}/layout`);
   await page.getByRole('link', { name: /^Add block/ }).first().click();
-  // Each step replaces the off-canvas tray's content over AJAX.
+  // The tray loads over AJAX. mukurtu_gin_custom lists content blocks in it
+  // directly, so there is no "Add a block" step.
   const tray = page.locator('#drupal-off-canvas');
-  await tray.getByRole('link', { name: 'Add a block', exact: true }).click({ timeout: SETTLE });
   await tray.getByRole('link', { name: 'Image with Description', exact: true }).click({ timeout: SETTLE });
 }
 
@@ -85,7 +85,7 @@ test.describe('Media modal filters', () => {
 
   for (const where of ['node form', 'Layout Builder'] as const) {
     test(`"Apply filters" lines up with the Name and Sort by fields (${where})`, async ({ page }) => {
-      // Three AJAX requests and two dialogs before the filters appear, which
+      // Two AJAX requests and two dialogs before the filters appear, which
       // a busy site can stretch past the default timeout.
       test.slow(where === 'Layout Builder', 'Layout Builder opens the library in several steps');
       const { name, sort, apply } = await openMediaLibrary(page, where);
