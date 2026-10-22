@@ -59,7 +59,7 @@ class PersonalCollectionAddItemController extends ControllerBase {
 
     // New Personal Collection.
     $newCollection = PersonalCollection::create([
-      'uid' => $this->currentUser()->id(),
+      'user_id' => $this->currentUser()->id(),
     ]);
     $newCollection->add($node);
 
