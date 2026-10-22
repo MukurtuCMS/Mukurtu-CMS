@@ -112,7 +112,9 @@ jobs:
         run: |
           mkdir -p web/sites/simpletest/browser_output
           chmod -R 777 web/sites/simpletest
-          php -S 127.0.0.1:8888 -t web web/.ht.router.php > /tmp/php-server.log 2>&1 &
+          # The server changes into the docroot before loading the router,
+          # so the router path must be absolute.
+          php -S 127.0.0.1:8888 -t web "$GITHUB_WORKSPACE/web/.ht.router.php" > /tmp/php-server.log 2>&1 &
           echo "SIMPLETEST_BASE_URL=http://127.0.0.1:8888" >> "$GITHUB_ENV"
           echo "BROWSERTEST_OUTPUT_DIRECTORY=$GITHUB_WORKSPACE/web/sites/simpletest/browser_output" >> "$GITHUB_ENV"
 

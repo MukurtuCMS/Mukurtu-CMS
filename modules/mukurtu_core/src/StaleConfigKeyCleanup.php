@@ -81,6 +81,9 @@ final class StaleConfigKeyCleanup {
       $displays = $view->get('display');
       $changed = FALSE;
       foreach ($displays as &$display) {
+        if (!isset($display['display_options'])) {
+          continue;
+        }
         $options = &$display['display_options'];
 
         foreach ($options['exposed_form']['options']['bef']['filter'] ?? [] as $filter_id => $filter) {
@@ -223,8 +226,8 @@ final class StaleConfigKeyCleanup {
   /**
    * Re-saves the default thumbnail settings so their file IDs are cast.
    *
-   * mukurtu_media's installer stored them as strings and the settings form
-   * as integers, before the settings had a schema.
+   * Before the settings had a schema, mukurtu_media's installer stored them
+   * as strings and the settings form as integers.
    */
   public function castThumbnailSettings(): void {
     $config = $this->configFactory->getEditable('mukurtu_thumbnail.settings');
