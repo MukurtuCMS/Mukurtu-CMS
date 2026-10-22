@@ -1,9 +1,38 @@
-(function (Drupal) {
+(function (Drupal, drupalSettings) {
+  /**
+   * Tell screen reader users why Enter did nothing.
+   *
+   * Sighted users see the loading text or the "No matching suggestions" row.
+   * Reuses Tagify's own strings, which are already translated.
+   */
+  function announceBlockedEnter(instance) {
+    const announce = instance.DOM.originalInput.__mukurtuAnnounce;
+    const text = instance.DOM.input.textContent.trim();
+    if (!announce || !text) {
+      return;
+    }
+    if (instance.DOM.scope.querySelector('.tagify--loading-text')) {
+      announce(Drupal.t('Loading...'));
+    }
+    else if (instance.DOM.dropdown.isConnected) {
+      const noMatch = drupalSettings.tagify?.information_message?.no_matching_suggestions;
+      if (noMatch) {
+        // announce() decodes HTML entities, so escape the typed text first.
+        announce(`${noMatch} ${Drupal.checkPlain(text)}`);
+      }
+    }
+  }
+
   /**
    * Update a Tagify instance to stop creating terms on delimiter input.
    *
    * We intentionally disable delimiter-based tokenization so commas can be
    * part of a term value (e.g. "Wynne, Michael"), while Enter still commits.
+   *
+   * On fields that can't create terms, Enter or blur before the suggestions
+   * load, or with no matching suggestion, turned the typed text into a red
+   * invalid tag that was then dropped on submit. Keep that text in the input
+   * instead: Enter only adds a highlighted suggestion, and blur adds nothing.
    */
   function patchTagifyInstance(instance) {
     if (!instance || instance.__mukurtuPatched) {
@@ -11,6 +40,28 @@
     }
 
     instance.settings.delimiters = null;
+    if (instance.settings.enforceWhitelist) {
+      instance.settings.addTagOnBlur = false;
+      // Capture on the wrapper so this runs before Tagify's own Enter
+      // handlers on the input.
+      instance.DOM.scope.addEventListener('keydown', (event) => {
+        // Let Enter through when it confirms an IME composition.
+        if (event.key !== 'Enter' || event.isComposing
+          || event.target !== instance.DOM.input
+          || !instance.settings.enforceWhitelist) {
+          return;
+        }
+        // A closed list keeps its last highlight, so only trust an open one.
+        const { dropdown } = instance.DOM;
+        const active = dropdown.isConnected
+          && dropdown.querySelector('.tagify__dropdown__item--active');
+        if (!active || active.getAttribute('value') === 'noMatch') {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          announceBlockedEnter(instance);
+        }
+      }, true);
+    }
     instance.__mukurtuPatched = true;
   }
 
@@ -99,7 +150,11 @@
       }
       input.__mukurtuFocusPatched = true;
       input.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowDown' || event.key === 'Down') {
+        // Only open the list when it is closed. Re-clicking while it is open
+        // refetches the suggestions and resets the highlight, so Down Arrow
+        // could never move past the first option.
+        if ((event.key === 'ArrowDown' || event.key === 'Down')
+          && tagsElement.getAttribute('aria-expanded') !== 'true') {
           input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         }
       });
@@ -139,19 +194,27 @@
       original.insertAdjacentElement('afterend', liveRegion);
 
       const announce = (message) => {
+        // Drupal.t() HTML-escapes "@" placeholders, but this is written as
+        // textContent, so decode it or "Arts & Crafts" is read as "&amp;".
+        const text = new DOMParser().parseFromString(message, 'text/html').documentElement.textContent;
         // Clear first so repeated identical messages still trigger a re-read.
         liveRegion.textContent = '';
-        setTimeout(() => { liveRegion.textContent = message; }, 50);
+        setTimeout(() => { liveRegion.textContent = text; }, 50);
       };
+      original.__mukurtuAnnounce = announce;
 
       original.__tagify.on('add', (event) => {
-        const value = event.detail?.data?.value;
+        const data = event.detail?.data;
+        // Entity tags store the entity ID as their value; announce the label.
+        const value = data?.label || data?.value;
         if (value) {
           announce(Drupal.t('Added @tag', { '@tag': value }));
         }
       });
       original.__tagify.on('remove', (event) => {
-        const value = event.detail?.data?.value;
+        const data = event.detail?.data;
+        // Entity tags store the entity ID as their value; announce the label.
+        const value = data?.label || data?.value;
         if (value) {
           announce(Drupal.t('Removed @tag', { '@tag': value }));
         }
@@ -173,4 +236,4 @@
       setTimeout(() => runAll(context), 0);
     },
   };
-})(Drupal);
+})(Drupal, drupalSettings);

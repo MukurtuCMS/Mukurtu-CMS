@@ -48,6 +48,17 @@ class GinCustomLibraryTest extends KernelTestBase {
   }
 
   /**
+   * Tests the library includes the media library dialog fixes (#2401).
+   */
+  public function testLibraryIncludesMediaLibraryDialog(): void {
+    $library = $this->container->get('library.discovery')
+      ->getLibraryByName('mukurtu_gin_custom', 'mukurtu-gin-custom');
+
+    $files = array_column($library['js'], 'data');
+    $this->assertNotEmpty(array_filter($files, fn($file) => str_ends_with($file, 'js/media-library-dialog.js')));
+  }
+
+  /**
    * Tests select-all-name.js loads with core's tableselect library (#2397).
    */
   public function testTableselectLoadsSelectAllName(): void {
