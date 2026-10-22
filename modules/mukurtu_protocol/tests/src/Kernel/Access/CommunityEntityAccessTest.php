@@ -118,7 +118,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $this->community = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
   }
 
@@ -193,7 +193,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $testCommunity = Community::create([
       'name' => $name,
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
     $this->assertEquals($name, $testCommunity->getName());
   }
@@ -206,7 +206,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
 
     $testCommunity->setName('newName');
@@ -222,7 +222,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
       'field_description' => $description,
     ]);
     $this->assertEquals($description, $testCommunity->getDescription());
@@ -236,7 +236,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
 
     $testCommunity->setDescription('new description');
@@ -272,7 +272,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
       'field_access_mode' => 'public',
     ]);
     $this->assertEquals('public', $testCommunity->getSharingSetting());
@@ -286,7 +286,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
 
     $testCommunity->setSharingSetting('community-only');
@@ -302,7 +302,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
       'created' => $createdTime,
     ]);
 
@@ -317,7 +317,7 @@ class CommunityEntityAccessTest extends KernelTestBase {
     $testCommunity = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
 
     $createdTime = 1677537655;
