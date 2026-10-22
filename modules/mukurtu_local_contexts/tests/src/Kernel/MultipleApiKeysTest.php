@@ -90,7 +90,7 @@ class MultipleApiKeysTest extends KernelTestBase {
     $this->community = Community::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $owner->id(),
+      'user_id' => $owner->id(),
     ]);
     $this->community->save();
 

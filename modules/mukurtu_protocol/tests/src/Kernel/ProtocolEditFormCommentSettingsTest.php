@@ -118,7 +118,7 @@ class ProtocolEditFormCommentSettingsTest extends KernelTestBase {
     $this->protocol = Protocol::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $owner->id(),
+      'user_id' => $owner->id(),
     ]);
     $this->protocol->save();
 
