@@ -5,7 +5,8 @@
 # The version appears in VERSION.md (which the dashboard reads), in the
 # `version:` key of the profile, every custom module and the theme (which is
 # what /admin/modules and /admin/appearance display), and in the build tooling's
-# package.json files. Before this script existed these were edited by hand,
+# package.json and package-lock.json files. Before this script existed these
+# were edited by hand,
 # which is why every one of them still read "4.x-dev" at 4.0.0-rc.
 #
 # Usage: scripts/set-version.sh 4.0.1
@@ -57,6 +58,17 @@ for pkg in package.json themes/mukurtu_v4/package.json; do
   if [ -f "$pkg" ]; then
     perl -pi -e "s{^(\\s*\"version\":\\s*\")[^\"]*(\",?)\$}{\${1}$VERSION\${2}}" "$pkg"
     echo "  $pkg -> $VERSION"
+    changed=$((changed + 1))
+  fi
+done
+
+# npm copies the version into the lock file, in the top-level object and in the
+# root package entry (""), and only rewrites it on the next `npm install`. Left
+# alone, the lock trails the release it ships in.
+for lock in package-lock.json themes/mukurtu_v4/package-lock.json; do
+  if [ -f "$lock" ]; then
+    perl -0pi -e "s{\\A(\\{\\n(?:  [^\\n]*\\n)*?  \"version\": \")[^\"]*(\")}{\${1}$VERSION\${2}}; s{(\\n    \"\": \\{\\n(?:      [^\\n]*\\n)*?      \"version\": \")[^\"]*(\")}{\${1}$VERSION\${2}}" "$lock"
+    echo "  $lock -> $VERSION"
     changed=$((changed + 1))
   fi
 done

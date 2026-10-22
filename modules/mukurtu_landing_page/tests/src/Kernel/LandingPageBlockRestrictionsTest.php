@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_landing_page\Kernel;
 
+use Drupal\block_content\Entity\BlockContent;
+use Drupal\block_content\Entity\BlockContentType;
 use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
 use Drupal\Core\Config\FileStorage;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\layout_builder\SectionStorageInterface;
 use PHPUnit\Framework\Attributes\Group;
@@ -29,7 +32,8 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
    * The block_content module is deliberately absent. EntityViewModeRestriction
    * only queries the block_content tables when that module is installed, so
    * leaving it out keeps this test off the database without changing any of the
-   * code paths exercised here.
+   * code paths exercised here. The one test that needs real content blocks
+   * enables it for itself.
    */
   protected static $modules = [
     'system',
@@ -166,6 +170,48 @@ class LandingPageBlockRestrictionsTest extends KernelTestBase {
     $allowed = $this->filterDefinitions($definitions);
 
     $this->assertSame([], $allowed, 'Only Browse by Community should be offered from the Mukurtu categories.');
+  }
+
+  /**
+   * The "Custom" plugin blocks must not be offered on landing pages.
+   *
+   * Layout Builder Restrictions renames "Custom" to "Custom blocks" before
+   * checking restricted_categories, so the config has to use the new name.
+   * The categories must be TranslatableMarkup, as real plugin definitions
+   * are: a plain string skips the rename and would hide the bug.
+   */
+  public function testCustomCategoryIsUnavailable(): void {
+    $definitions = [
+      'consent_popup' => ['category' => new TranslatableMarkup('Custom'), 'provider' => 'consent_popup'],
+      'mukurtu_footer' => ['category' => new TranslatableMarkup('Custom'), 'provider' => 'mukurtu_footer'],
+    ];
+
+    $this->assertSame([], $this->filterDefinitions($definitions));
+  }
+
+  /**
+   * Reusable content blocks are not offered on landing pages.
+   *
+   * Editors create new content blocks instead. Offering reusable ones as well
+   * put the same block types in the chooser twice, and placing one shares a
+   * single entity across pages.
+   */
+  public function testReusableContentBlocksAreUnavailable(): void {
+    $this->enableModules(['block_content', 'text', 'filter']);
+    $this->installEntitySchema('block_content');
+
+    $definitions = [];
+    foreach (['mukurtu_footer', 'image_with_description'] as $bundle) {
+      BlockContentType::create(['id' => $bundle, 'label' => $bundle])->save();
+      $block = BlockContent::create(['type' => $bundle, 'info' => $bundle]);
+      $block->save();
+      $definitions['block_content:' . $block->uuid()] = [
+        'category' => new TranslatableMarkup('Content block'),
+        'provider' => 'block_content',
+      ];
+    }
+
+    $this->assertSame([], $this->filterDefinitions($definitions));
   }
 
   /**

@@ -150,21 +150,6 @@ class DefaultLandingPage {
     // Store UUID for Layout Builder reference
     $hero_block_uuid = $hero_block_content->uuid();
 
-    // Vertical Image with Description block content.
-    $this->getOrCreateBlock('vertical_hero', 'vertical_image_with_description', [
-      'type' => 'vertical_image_with_description',
-      'info' => $this->t('Welcome to Your Mukurtu CMS Site (Vertical)'),
-      'body' => [
-        'value' => '<p>To start using your Mukurtu site, create a community, cultural protocol, and category.</p>',
-        'format' => 'basic_html',
-      ],
-      'region' => 'content',
-      'weight' => 2,
-      'theme' => 'mukurtu_v4',
-      // Initialize the image field to avoid issues.
-      'field_image' => [],
-    ]);
-
     // Featured Content block content.
     $featured_block_content = $this->getOrCreateBlock('featured', 'featured_content', [
       'type' => 'featured_content',
@@ -179,23 +164,6 @@ class DefaultLandingPage {
       // Initialize the featured content field to avoid issues.
       'field_featured_content' => [],
     ], reusable: FALSE);
-
-    // Full Image with Description block content.
-    $this->getOrCreateBlock('full_image', 'full_image_with_description', [
-      'type' => 'full_image_with_description',
-      'info' => $this->t('Welcome to Your Mukurtu CMS Site (Full Background)'),
-      'body' => [
-        'value' => '<p>To start using your Mukurtu site, create a community, cultural protocol, and category.</p>',
-        'format' => 'basic_html',
-      ],
-      'region' => 'content',
-      'weight' => 2,
-      'theme' => 'mukurtu_v4',
-      // Initialize the image field to avoid issues.
-      'field_image' => [],
-      // Initialize the text color field to avoid issues.
-      'field_text_color' => [],
-    ]);
 
     // Language switcher block is now managed by config/install/block.block.mukurtu_v4_languageswitcher_1.yml
 
