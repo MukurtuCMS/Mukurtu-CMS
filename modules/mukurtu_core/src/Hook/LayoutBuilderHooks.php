@@ -12,85 +12,49 @@ use Drupal\node\NodeInterface;
 class LayoutBuilderHooks {
 
   /**
+   * Blocks that can be added to basic pages, for every role.
+   *
+   * Matches the landing page allowlists in
+   * core.entity_view_display.node.landing_page.default, so editors get the
+   * same blocks on both content types. Reusable content blocks are left out:
+   * editors create a new content block per placement instead, so the same
+   * block types do not appear in the chooser twice and one entity is never
+   * shared across pages by accident.
+   */
+  public const ALLOWED_BLOCKS = [
+    'inline_block:basic',
+    'inline_block:call_to_action',
+    'inline_block:featured_content',
+    'inline_block:full_image_with_description',
+    'inline_block:horizontal_divider',
+    'inline_block:image_with_description',
+    'inline_block:local_contexts_block',
+    'inline_block:media_carousel_block',
+    'inline_block:vertical_image_with_description',
+    'views_block:mukurtu_browse_by_map-map_block',
+    'views_block:mukurtu_categories-browse_by_category_block',
+    'views_block:mukurtu_categories-browse_by_category_names_block',
+    'mukurtu_browse_by_community',
+  ];
+
+  /**
    * Implements hook_plugin_filter_block__layout_builder_alter().
    *
-   * Administrators see all blocks. For basic pages only, every other role is
-   * restricted to the curated set of inline block types. Other content types
-   * (landing pages etc.) manage their own restrictions via layout_builder_restrictions
+   * Limits basic pages to self::ALLOWED_BLOCKS. Other content types (landing
+   * pages etc.) manage their own restrictions via layout_builder_restrictions
    * config and are not altered here.
    */
   #[Hook('plugin_filter_block__layout_builder_alter')]
-  public function restrictBlocksForRole(array &$definitions, array $extra): void {
-    // Only restrict on basic pages. Other content types (e.g. landing pages)
-    // have their own restrictions configured via layout_builder_restrictions.
-    if (isset($extra['section_storage']) && $extra['section_storage'] instanceof OverridesSectionStorageInterface) {
-      $entity = $extra['section_storage']->getContextValue('entity');
-      if (!($entity instanceof NodeInterface) || $entity->bundle() !== 'page') {
-        return;
-      }
+  public function restrictBasicPageBlocks(array &$definitions, array $extra): void {
+    if (!isset($extra['section_storage']) || !$extra['section_storage'] instanceof OverridesSectionStorageInterface) {
+      return;
     }
-    else {
+    $entity = $extra['section_storage']->getContextValue('entity');
+    if (!($entity instanceof NodeInterface) || $entity->bundle() !== 'page') {
       return;
     }
 
-    // These block_content bundles are only meant to be placed via "Create
-    // custom block" (a fresh, non-reusable entity per placement). Strip any
-    // already-saved reusable instance of them from the "Content block"
-    // library so editors -- including administrators -- can't accidentally
-    // place the same entity in more than one spot.
-    $no_reuse_bundles = [
-      'media_carousel_block',
-      'featured_content',
-      'local_contexts_block',
-      'horizontal_divider',
-      'call_to_action',
-    ];
-    $block_content_storage = \Drupal::entityTypeManager()->getStorage('block_content');
-    foreach ($definitions as $plugin_id => $definition) {
-      if (str_starts_with($plugin_id, 'block_content:')) {
-        $block_uuid = substr($plugin_id, strlen('block_content:'));
-        $block_content = $block_content_storage->loadByProperties(['uuid' => $block_uuid]);
-        $block_content = $block_content ? reset($block_content) : NULL;
-        if ($block_content && in_array($block_content->bundle(), $no_reuse_bundles, TRUE)) {
-          unset($definitions[$plugin_id]);
-        }
-      }
-    }
-
-    // Administrators see everything else -- no further filtering needed.
-    if (\Drupal::currentUser()->hasRole('administrator')) {
-      return;
-    }
-
-    $allowed_categories = [
-      // inline_block plugins created on this entity.
-      'Inline blocks',
-    ];
-
-    foreach ($definitions as $plugin_id => $definition) {
-      $category = (string) ($definition['category'] ?? '');
-      if (!in_array($category, $allowed_categories, TRUE)) {
-        unset($definitions[$plugin_id]);
-      }
-    }
-
-    // Within "Inline blocks", further restrict to the approved block types.
-    $allowed_inline_bundles = [
-      'basic',
-      'media_carousel_block',
-      'featured_content',
-      'local_contexts_block',
-      'horizontal_divider',
-      'call_to_action',
-    ];
-    foreach ($definitions as $plugin_id => $definition) {
-      if (str_starts_with($plugin_id, 'inline_block:')) {
-        $bundle = substr($plugin_id, strlen('inline_block:'));
-        if (!in_array($bundle, $allowed_inline_bundles, TRUE)) {
-          unset($definitions[$plugin_id]);
-        }
-      }
-    }
+    $definitions = array_intersect_key($definitions, array_flip(self::ALLOWED_BLOCKS));
   }
 
 }

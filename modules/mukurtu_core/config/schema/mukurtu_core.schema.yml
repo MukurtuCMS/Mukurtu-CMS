@@ -902,3 +902,11 @@ mukurtu_core.person_roles:
       sequence:
         type: string
         label: 'Field name'
+
+mukurtu_core.visitors_map:
+  type: config_object
+  label: 'Visitor map settings'
+  mapping:
+    city_threshold:
+      type: integer
+      label: 'Minimum unique visitors for a city to appear on the visitor map on its own'
