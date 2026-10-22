@@ -140,7 +140,7 @@ content:
       gesture_handling: false
       reset_map:
         control: false
-        position: topright
+        options: '{"position":"topright","title":"Reset View"}'
       popup: false
       popup_content: ''
       map_position:

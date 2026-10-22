@@ -22,13 +22,6 @@ class UserSetRandomPasswordActionTest extends BrowserTestBase {
   protected bool $usesSuperUserAccessPolicy = FALSE;
 
   /**
-   * Bypass pre-existing flat_taxonomy schema validation in the mukurtu profile.
-   *
-   * {@inheritdoc}
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * {@inheritdoc}
    */
   protected static $modules = [];

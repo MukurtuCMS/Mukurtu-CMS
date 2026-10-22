@@ -11,3 +11,9 @@ mukurtu_search.settings:
     collapse_community_records:
       type: boolean
       label: 'Show only original records in search results by default, not community records'
+    header_search_enabled:
+      type: boolean
+      label: 'Show the search box in the site header'
+    header_search_path:
+      type: path
+      label: 'Path the header search box submits to'
