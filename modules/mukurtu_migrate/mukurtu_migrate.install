@@ -185,3 +185,32 @@ function mukurtu_migrate_update_40206(): ?string {
     '@count' => $count,
   ]);
 }
+
+/**
+ * Map Mukurtu 3 community and language community visibility to valid values.
+ */
+function mukurtu_migrate_update_40207(): ?string {
+  // Both migrations could write "open" or "strict", which are protocol
+  // values, so migrated communities were hidden from everyone. Only replace
+  // the shipped values; a site that has customized them is left alone.
+  $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_language_communities');
+  if (!$config->isNew() && $config->get('process.field_access_mode') === [
+    [
+      'plugin' => 'static_map',
+      'map' => [0 => 'open', 2 => 'strict'],
+      'default_value' => 'open',
+    ],
+  ]) {
+    $config->set('process.field_access_mode', [
+      'plugin' => 'default_value',
+      'default_value' => 'community-only',
+    ])->save();
+  }
+
+  $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_communities');
+  if (!$config->isNew() && $config->get('process.field_access_mode.0.default_value') === 'strict') {
+    $config->set('process.field_access_mode.0.default_value', 'community-only')->save();
+  }
+
+  return NULL;
+}

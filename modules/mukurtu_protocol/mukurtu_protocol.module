@@ -284,6 +284,20 @@ function mukurtu_protocol_entity_delete($entity)
   if ($entity instanceof ProtocolInterface) {
     Drupal::configFactory()->getEditable('mukurtu_local_contexts.settings')->clear('mukurtu_local_contexts_manage_protocol_' . $entity->id() . '_projects_directory_description')->save();
   }
+  // OG leaves a deleted group's memberships behind unless its delete_orphans
+  // setting is on, and that setting also deletes the group's content. Delete
+  // just the memberships.
+  if ($entity instanceof CommunityInterface || $entity instanceof ProtocolInterface) {
+    $storage = Drupal::entityTypeManager()->getStorage('og_membership');
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('entity_type', $entity->getEntityTypeId())
+      ->condition('entity_id', $entity->id())
+      ->execute();
+    if ($ids) {
+      $storage->delete($storage->loadMultiple($ids));
+    }
+  }
   if ($entity instanceof CulturalProtocolControlledInterface) {
     $entity->removeAccessGrants();
   }

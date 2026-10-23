@@ -37,7 +37,7 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
   /**
    * A user with the Mukurtu delete permission but not OG's.
    */
-  protected UserInterface $partialDeleter;
+  protected UserInterface $mukurtuDeleter;
 
   /**
    * {@inheritdoc}
@@ -55,10 +55,11 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
     $deleter_role->grantPermission('administer organic groups');
     $deleter_role->save();
 
-    // Holds only the Mukurtu permission, so OG still forbids the delete.
-    $partial_role = Role::create(['id' => 'partial', 'label' => 'Partial']);
-    $partial_role->grantPermission('delete community entities');
-    $partial_role->save();
+    // Holds only the Mukurtu permission. mukurtu_protocol grants OG's
+    // 'delete group' for communities from it.
+    $mukurtu_role = Role::create(['id' => 'mukurtu_deleter', 'label' => 'Mukurtu deleter']);
+    $mukurtu_role->grantPermission('delete community entities');
+    $mukurtu_role->save();
 
     $this->community = Community::create([
       'name' => 'Community',
@@ -68,7 +69,7 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
 
     $this->deleter = $this->createUser([], NULL, FALSE, ['roles' => ['deleter']]);
     $this->viewer = $this->createUser();
-    $this->partialDeleter = $this->createUser([], NULL, FALSE, ['roles' => ['partial']]);
+    $this->mukurtuDeleter = $this->createUser([], NULL, FALSE, ['roles' => ['mukurtu_deleter']]);
   }
 
   /**
@@ -116,8 +117,8 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertTrue($this->community->access('delete', $this->deleter));
     $this->assertTrue($handler->deleteFormAccess($this->community, $this->deleter)->isAllowed());
     $this->assertFalse($handler->deleteFormAccess($this->community, $this->viewer)->isAllowed());
-    $this->assertFalse($this->community->access('delete', $this->partialDeleter));
-    $this->assertFalse($handler->deleteFormAccess($this->community, $this->partialDeleter)->isAllowed());
+    $this->assertTrue($this->community->access('delete', $this->mukurtuDeleter));
+    $this->assertTrue($handler->deleteFormAccess($this->community, $this->mukurtuDeleter)->isAllowed());
 
     $this->createProtocol('Open protocol', 'open');
     $this->resetAccessCache();
@@ -125,7 +126,8 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertFalse($community->access('delete', $this->deleter));
     $this->assertTrue($handler->deleteFormAccess($community, $this->deleter)->isAllowed());
     $this->assertFalse($handler->deleteFormAccess($community, $this->viewer)->isAllowed());
-    $this->assertFalse($handler->deleteFormAccess($community, $this->partialDeleter)->isAllowed());
+    $this->assertFalse($community->access('delete', $this->mukurtuDeleter));
+    $this->assertTrue($handler->deleteFormAccess($community, $this->mukurtuDeleter)->isAllowed());
 
     // Cached results must be cleared when protocols or the hierarchy change.
     $tags = $handler->deleteFormAccess($community, $this->deleter)->getCacheTags();
