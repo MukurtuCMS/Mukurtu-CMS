@@ -3,13 +3,16 @@ import fs = require('fs');
 import path = require('path');
 
 /**
- * Issue #2487: the horizontal "Image with description" block scrolled the
- * page sideways at large text sizes (WCAG 1.4.10 Reflow).
+ * Issue #2487: the default home page scrolled sideways at large text sizes
+ * (WCAG 1.4.10 Reflow), for two reasons.
  *
- * The block's grid track was a bare `1fr`, which is `minmax(auto, 1fr)` and so
- * can't shrink below its content's min-content width. The heading and the
- * card's padding are in rem, so that floor grew with the text size until it
- * was wider than a phone-width viewport.
+ * - The horizontal "Image with description" block's grid track was a bare
+ *   `1fr`, which is `minmax(auto, 1fr)` and so can't shrink below its
+ *   content's min-content width. The heading and the card's padding are in
+ *   rem, so that floor grew with the text size until it was wider than a
+ *   phone-width viewport.
+ * - Landing page block titles couldn't break mid-word, and at 200% text the
+ *   word "Community" in "Browse by Community" is wider than a 320px screen.
  *
  * Tests against the real compiled theme CSS with a static fixture (see
  * page-background.offline.spec.ts) rather than the seeded home page, so it
@@ -91,3 +94,29 @@ test('Image with description block keeps two equal columns from md', async ({ pa
   expect(columns).toHaveLength(2);
   expect(Math.abs(columns[0] - columns[1])).toBeLessThanOrEqual(1);
 });
+
+// Mirrors a landing page block with a title and no body field, such as the
+// home page's "Browse by Community".
+const TITLE_BLOCK = `
+  <div class="layout-container">
+    <main role="main">
+      <div class="layout layout--onecol">
+        <div class="layout__region layout__region--content">
+          <div class="block-wrapper"><h2>Browse by Community</h2></div>
+        </div>
+      </div>
+    </main>
+  </div>
+`;
+
+for (const textScale of [1.5, 2]) {
+  test(`Landing page block title fits 320px at ${textScale * 100}% text`, async ({ page }) => {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Page.setFontSizes', { fontSizes: { standard: 16 * textScale } });
+    await page.setViewportSize({ width: 320, height: 720 });
+    await page.setContent(`<!DOCTYPE html><html><head><title>Landing page title fixture</title><style>${THEME_CSS}</style></head><body>${TITLE_BLOCK}</body></html>`);
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow, 'no horizontal scroll').toBeLessThanOrEqual(1);
+  });
+}

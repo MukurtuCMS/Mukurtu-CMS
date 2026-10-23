@@ -9011,6 +9011,8 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   text-align: center;
   -webkit-margin-after: var(--v-space-2xs);
           margin-block-end: var(--v-space-2xs);
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .layout--onecol .block-wrapper .category-grid:has(.category-teaser--names-only) {
   -webkit-padding-after: var(--v-space-2xs);
