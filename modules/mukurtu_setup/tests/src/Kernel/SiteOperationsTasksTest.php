@@ -31,6 +31,7 @@ class SiteOperationsTasksTest extends KernelTestBase {
       $this->container->get('config.factory'),
       $this->container->get('state'),
       $this->container->get('module_handler'),
+      $this->container->get('current_user'),
     );
   }
 

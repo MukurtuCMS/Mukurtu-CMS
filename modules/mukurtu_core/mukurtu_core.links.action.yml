@@ -17,7 +17,7 @@ mukurtu_core.add_media:
   appears_on:
     - view.mukurtu_manage_all_media.mukurtu_manage_media
 mukurtu_core.add_content:
-  route_name: mukurtu_core.add_page
+  route_name: node.add_page
   title: 'Add content'
   appears_on:
     - mukurtu_core.manage_content
