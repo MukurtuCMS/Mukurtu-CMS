@@ -144,7 +144,7 @@ class ProtocolEntityAccessTest extends KernelTestBase {
       'title' => $this->randomString(),
       'type' => 'protocol',
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
     $protocol->setCommunities($this->communities);
     $protocol->save();

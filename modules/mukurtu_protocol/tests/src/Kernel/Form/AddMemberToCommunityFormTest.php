@@ -90,7 +90,7 @@ class AddMemberToCommunityFormTest extends KernelTestBase {
     $this->community = Community::create([
       'name' => 'Test community',
       'status' => TRUE,
-      'uid' => $owner->id(),
+      'user_id' => $owner->id(),
     ]);
     $this->community->save();
   }
