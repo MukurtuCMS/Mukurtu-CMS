@@ -91,7 +91,7 @@ class CommunityForm extends ContentEntityForm {
         '#type' => 'inline_template',
         '#template' => '{{ reason }} {{ link }}',
         '#context' => [
-          'reason' => $this->t("This community can't be deleted because it still has cultural protocols or child communities."),
+          'reason' => $this->t("This community can't be deleted because it still has cultural protocols or sub-communities."),
           'link' => $entity->toLink($this->t('See why'), 'delete-form')->toRenderable(),
         ],
       ]);

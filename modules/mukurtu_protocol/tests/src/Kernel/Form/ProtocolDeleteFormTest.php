@@ -225,8 +225,7 @@ class ProtocolDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertStringContainsString("This cultural protocol can't be deleted because 4 items still use it.", $output);
     $this->assertStringContainsString('Remove the protocol from these items first.', $output);
     $this->assertStringContainsString('Items using this protocol', $output);
-    $this->assertStringContainsString("1 of these items is in a cultural protocol you don't have access to.", $output);
-    $this->assertStringContainsString('Contact a protocol steward to update them.', $output);
+    $this->assertStringContainsString("You don't have access to 1 of these items. Contact a protocol steward to update it.", $output);
     $this->assertStringNotContainsString($restricted_node->label(), $output);
     $this->assertStringContainsString($viewable_node->label() . '</a> (Protocol Aware Content)', $output);
     $this->assertStringContainsString($media->label() . '</a> (Test)', $output);

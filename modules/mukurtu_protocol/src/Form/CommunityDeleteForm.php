@@ -13,7 +13,7 @@ use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 /**
  * Provides a form for deleting Community entities.
  *
- * While the community still has protocols or child communities, the form
+ * While the community still has protocols or sub-communities, the form
  * explains what is blocking the delete instead of offering to delete.
  *
  * @ingroup mukurtu_protocol
@@ -66,7 +66,10 @@ class CommunityDeleteForm extends ContentEntityDeleteForm {
             "This community can't be deleted because 1 cultural protocol still belongs to it.",
             "This community can't be deleted because @count cultural protocols still belong to it."
           ),
-          'action' => $this->t('Delete these protocols, or remove this community from them, first.'),
+          'action' => $this->formatPlural(count($protocol_ids),
+            'Delete this protocol, or remove this community from it, first.',
+            'Delete these protocols, or remove this community from them, first.'
+          ),
         ],
       ]);
 
@@ -77,8 +80,8 @@ class CommunityDeleteForm extends ContentEntityDeleteForm {
           '#type' => 'html_tag',
           '#tag' => 'p',
           '#value' => $this->formatPlural($sorted['restricted'],
-            "1 of these cultural protocols is one you don't have access to. Contact a community manager to update it.",
-            "@count of these cultural protocols are ones you don't have access to. Contact a community manager to update them."
+            "You don't have access to 1 of these cultural protocols. Contact a community manager to update it.",
+            "You don't have access to @count of these cultural protocols. Contact a community manager to update them."
           ),
         ];
       }
@@ -92,14 +95,17 @@ class CommunityDeleteForm extends ContentEntityDeleteForm {
         '#template' => '{{ reason }} {{ action }}',
         '#context' => [
           'reason' => $this->formatPlural(count($child_ids),
-            "This community can't be deleted because it has 1 child community.",
-            "This community can't be deleted because it has @count child communities."
+            "This community can't be deleted because it has 1 sub-community.",
+            "This community can't be deleted because it has @count sub-communities."
           ),
-          'action' => $this->t('Remove the child communities first.'),
+          'action' => $this->formatPlural(count($child_ids),
+            'Remove the sub-community first.',
+            'Remove the sub-communities first.'
+          ),
         ],
       ]);
 
-      $form['children'] = $this->buildDeleteBlockerList($this->t('Child communities'), $sorted);
+      $form['children'] = $this->buildDeleteBlockerList($this->t('Sub-communities'), $sorted);
     }
 
     $form['actions'] = [

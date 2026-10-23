@@ -61,23 +61,25 @@ class ProtocolDeleteForm extends ContentEntityDeleteForm {
       '#template' => '{{ reason }} {{ action }}',
       '#context' => [
         'reason' => $this->buildBlockedReason($total),
-        'action' => $this->t('Remove the protocol from these items first.'),
+        'action' => $this->formatPlural($total,
+          'Remove the protocol from this item first.',
+          'Remove the protocol from these items first.'
+        ),
       ],
     ]);
 
     $form['blockers'] = $this->buildDeleteBlockerList($this->t('Items using this protocol'), $sorted);
 
     if ($sorted['restricted'] > 0) {
+      // Items can be hidden for any reason, such as a strict protocol or an
+      // unpublished draft, so don't say which.
       $form['restricted'] = [
-        '#type' => 'inline_template',
-        '#template' => '<p>{{ count }} {{ action }}</p>',
-        '#context' => [
-          'count' => $this->formatPlural($sorted['restricted'],
-            "1 of these items is in a cultural protocol you don't have access to.",
-            "@count of these items are in cultural protocols you don't have access to."
-          ),
-          'action' => $this->t('Contact a protocol steward to update them.'),
-        ],
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->formatPlural($sorted['restricted'],
+          "You don't have access to 1 of these items. Contact a protocol steward to update it.",
+          "You don't have access to @count of these items. Contact a protocol steward to update them."
+        ),
       ];
     }
 

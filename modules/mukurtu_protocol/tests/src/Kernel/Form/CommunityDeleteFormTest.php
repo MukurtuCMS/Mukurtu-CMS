@@ -167,7 +167,7 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertStringContainsString("This community can't be deleted because 2 cultural protocols still belong to it.", $output);
     $this->assertStringContainsString('Delete these protocols, or remove this community from them, first.', $output);
     $this->assertStringContainsString('Cultural protocols in this community', $output);
-    $this->assertStringContainsString("1 of these cultural protocols is one you don't have access to. Contact a community manager to update it.", $output);
+    $this->assertStringContainsString("You don't have access to 1 of these cultural protocols. Contact a community manager to update it.", $output);
     $this->assertStringNotContainsString('Strict protocol', $output);
   }
 
@@ -196,9 +196,9 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertEquals(['Child community'], $linked);
 
     $output = $this->renderPlain($form);
-    $this->assertStringContainsString("This community can't be deleted because it has 1 child community.", $output);
-    $this->assertStringContainsString('Remove the child communities first.', $output);
-    $this->assertStringContainsString('Child communities', $output);
+    $this->assertStringContainsString("This community can't be deleted because it has 1 sub-community.", $output);
+    $this->assertStringContainsString('Remove the sub-community first.', $output);
+    $this->assertStringContainsString('Sub-communities', $output);
   }
 
   /**
@@ -235,7 +235,7 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
     $form = $this->container->get('entity.form_builder')->getForm(Community::load($this->community->id()), 'edit');
     $this->assertArrayHasKey('delete_blocked_notice', $form);
     $output = $this->renderPlain($form['delete_blocked_notice']);
-    $this->assertStringContainsString("This community can't be deleted because it still has cultural protocols or child communities.", $output);
+    $this->assertStringContainsString("This community can't be deleted because it still has cultural protocols or sub-communities.", $output);
     $this->assertStringContainsString('See why', $output);
     $this->assertStringContainsString($this->community->toUrl('delete-form')->toString(), $output);
   }
