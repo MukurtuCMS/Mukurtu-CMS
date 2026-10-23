@@ -900,6 +900,19 @@ function mukurtu_core_update_40220(): ?string {
 }
 
 /**
+ * Point Mukurtu's add content links at the core /node/add paths.
+ */
+function mukurtu_core_update_40221(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // #2399 moves every "Add" menu and action link from the old
+  // /admin/node/add routes, which now redirect, to core's node.add and
+  // node.add_page. Rebuilding menu links picks up the new route names.
+  \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
+
+/**
  * Remove unused settings that fail config schema checks.
  */
 function mukurtu_core_update_40222(): void {

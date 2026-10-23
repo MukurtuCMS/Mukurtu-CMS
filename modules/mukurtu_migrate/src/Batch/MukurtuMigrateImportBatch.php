@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_migrate\Batch;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\StringTranslation\PluralTranslatableMarkup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\migrate_drupal_ui\Batch\MigrateMessageCapture;
@@ -304,6 +305,15 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
     $store = \Drupal::service('tempstore.private')->get('mukurtu_migrate');
     $create_landing_page = $store->get('create_landing_page');
     if ($success && $failures == 0 && $row_failures == 0) {
+      // Record that this site has been migrated. mukurtu_setup reads this
+      // key to complete its "Migrate from Mukurtu CMS 3" task and hide the
+      // dashboard's Migration panel. A run that brought nothing over does
+      // not count.
+      if ($row_created_or_updated > 0) {
+        \Drupal::state()->set('mukurtu_migrate.migration_succeeded', TRUE);
+        Cache::invalidateTags(['mukurtu_setup:tasks']);
+      }
+
       if ($create_landing_page) {
         try {
           $landing_page_service = \Drupal::service('mukurtu_landing_page.default_landing_page');
