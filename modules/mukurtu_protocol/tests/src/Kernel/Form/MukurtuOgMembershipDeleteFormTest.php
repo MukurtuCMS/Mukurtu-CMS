@@ -9,6 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_protocol\Form\MukurtuOgMembershipDeleteForm;
+use Drupal\mukurtu_protocol\Hook\MembershipPageLabelHooks;
 use Drupal\og\Entity\OgMembership;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
@@ -18,6 +19,8 @@ use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Route;
 
 /**
  * Tests that removing a single member talks about removal, not deletion.
@@ -26,6 +29,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_protocol')]
 #[CoversClass(MukurtuOgMembershipDeleteForm::class)]
+#[CoversClass(MembershipPageLabelHooks::class)]
 class MukurtuOgMembershipDeleteFormTest extends KernelTestBase {
 
   use UserCreationTrait;
@@ -179,6 +183,70 @@ class MukurtuOgMembershipDeleteFormTest extends KernelTestBase {
     $this->assertNull(OgMembership::load($membership->id()), 'The membership is gone.');
     $messages = \Drupal::messenger()->messagesByType('status');
     $this->assertSame('Removed <em class="placeholder">removable_member</em> from <em class="placeholder">Test protocol</em>.', (string) reset($messages));
+  }
+
+  /**
+   * Tests that the membership page's tab says "Remove", not "Delete".
+   */
+  public function testRemoveTabLabel(): void {
+    $definition = \Drupal::service('plugin.manager.menu.local_task')
+      ->getDefinition('entity.og_membership.delete_form');
+    $this->assertSame('Remove', (string) $definition['title']);
+  }
+
+  /**
+   * Tests that the breadcrumb preprocess runs after the theme's own.
+   */
+  public function testBreadcrumbPreprocessRunsLast(): void {
+    $this->container->get('theme_installer')->install(['claro']);
+    $this->config('system.theme')->set('default', 'claro')->save();
+    $preprocess = \Drupal::service('theme.registry')->get()['breadcrumb']['preprocess functions'];
+    $this->assertSame(MembershipPageLabelHooks::class . '::preprocessBreadcrumb', end($preprocess));
+  }
+
+  /**
+   * Tests that the unlinked operation item Gin adds is relabelled.
+   */
+  public function testBreadcrumbRelabel(): void {
+    $gin_breadcrumb = [
+      ['text' => 'Back to site', 'url' => '/'],
+      ['text' => 'Members', 'url' => '/group/protocol/1/admin/members'],
+      ['text' => 'Delete Cultural Protocol', 'url' => ''],
+    ];
+
+    $this->setRouteName('entity.og_membership.delete_form');
+    $variables = ['breadcrumb' => $gin_breadcrumb];
+    MembershipPageLabelHooks::preprocessBreadcrumb($variables);
+    $this->assertSame('Remove member', (string) $variables['breadcrumb'][2]['text']);
+    $this->assertSame('Members', $variables['breadcrumb'][1]['text'], 'Linked items are left alone.');
+
+    $this->setRouteName('entity.og_membership.canonical');
+    $variables = ['breadcrumb' => $gin_breadcrumb];
+    MembershipPageLabelHooks::preprocessBreadcrumb($variables);
+    $this->assertSame('Manage roles', (string) $variables['breadcrumb'][2]['text']);
+
+    // Without Gin's unlinked item, the last item is a link and is kept.
+    $variables = ['breadcrumb' => array_slice($gin_breadcrumb, 0, 2)];
+    MembershipPageLabelHooks::preprocessBreadcrumb($variables);
+    $this->assertSame('Members', $variables['breadcrumb'][1]['text']);
+
+    // Other routes are not touched.
+    $this->setRouteName('entity.protocol.delete_form');
+    $variables = ['breadcrumb' => $gin_breadcrumb];
+    MembershipPageLabelHooks::preprocessBreadcrumb($variables);
+    $this->assertSame('Delete Cultural Protocol', $variables['breadcrumb'][2]['text']);
+  }
+
+  /**
+   * Makes the current route match report the given route name.
+   */
+  protected function setRouteName(string $route_name): void {
+    $request = Request::create('/');
+    $request->setSession($this->container->get('request_stack')->getCurrentRequest()->getSession());
+    $request->attributes->set('_route', $route_name);
+    $request->attributes->set('_route_object', new Route('/'));
+    $this->container->get('request_stack')->push($request);
+    $this->container->get('current_route_match')->resetRouteMatch();
   }
 
 }
