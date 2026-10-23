@@ -24,7 +24,8 @@ async function addRows(page: Page, labels: string[]): Promise<Locator> {
   const list = page.locator(LIST).first();
   await list.evaluate((el, items) => {
     el.innerHTML = items.map((label, i) =>
-      `<div class="item-container" data-entity-id="node:${i + 1}" style="padding:1rem;border:1px solid">${label}</div>`,
+      `<div class="item-container" id="item-${i + 1}" data-entity-id="node:${i + 1}" style="padding:1rem;border:1px solid">`
+      + `<span id="item-${i + 1}-title">${label}</span></div>`,
     ).join('');
   }, labels);
   // The collection form's lists sit far below the fold, and mouse events
@@ -78,6 +79,13 @@ test.describe('Entity Browser list reordering', () => {
       await clone.evaluate((el) => getComputedStyle(el).backgroundColor),
       'the dragged copy has a solid background',
     ).not.toBe('rgba(0, 0, 0, 0)');
+
+    // The copy is a visual stand-in only: no repeated IDs, nothing focusable.
+    expect(await clone.evaluate((el) => ({
+      inert: (el as HTMLElement).inert,
+      hidden: el.getAttribute('aria-hidden'),
+      ids: el.id ? 1 : el.querySelectorAll('[id]').length,
+    }))).toEqual({ inert: true, hidden: 'true', ids: 0 });
 
     const ghost = list.locator('.sortable-ghost');
     await expect(ghost, 'the drop spot is marked').toHaveCount(1);

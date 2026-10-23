@@ -42,6 +42,28 @@
             ),
           );
           options.forceFallback = true;
+
+          // The copy is a full clone of the item, made just before the start
+          // event, so for the length of the drag it would repeat the item's
+          // IDs and add a second focusable Remove button. It is only a visual
+          // stand-in, so take it out of the accessibility tree and focus
+          // order, and drop its IDs.
+          const { onStart } = options;
+          options.onStart = (event) => {
+            const copy = Sortable.ghost;
+            if (copy) {
+              copy.inert = true;
+              copy.setAttribute('aria-hidden', 'true');
+              copy.removeAttribute('id');
+              copy.querySelectorAll('[id]').forEach((element) => {
+                element.removeAttribute('id');
+              });
+            }
+            if (onStart) {
+              onStart(event);
+            }
+          };
+
           sortable.destroy();
           Sortable.create(list, options);
         });
