@@ -13,6 +13,10 @@ use Drupal\media_library\MediaLibraryUiBuilder;
  * - Adds an "All media" tab that shows every allowed media type combined,
  *   with a Media type exposed filter and no add form.
  * - Opens the "All media" tab by default.
+ * - Sorts the per-type tabs by label in the CKEditor dialog, undoing core's
+ *   workaround that moves Image to the front (drupal.org #3073799). The
+ *   "All media" tab is always first and active here, so that workaround is
+ *   not needed.
  *
  * The "All media" flag is stored in opener_parameters so it is included in
  * the HMAC hash and survives every AJAX round-trip, including exposed-filter
@@ -87,6 +91,13 @@ class MukurtuMediaLibraryUiBuilder extends MediaLibraryUiBuilder {
     // should navigate to type-specific views, not stay in "All media" mode.
     $clean_state = $this->stateWithoutAllMedia($state);
     $menu = parent::buildMediaTypeMenu($clean_state);
+
+    if ($state->getOpenerId() === 'media_library.opener.editor' && !empty($menu['#links'])) {
+      uasort($menu['#links'], fn($a, $b) => strnatcasecmp(
+        (string) $a['attributes']['data-title'],
+        (string) $b['attributes']['data-title']
+      ));
+    }
 
     $allowed_type_ids = $state->getAllowedTypeIds();
     if (count($allowed_type_ids) <= 1) {
