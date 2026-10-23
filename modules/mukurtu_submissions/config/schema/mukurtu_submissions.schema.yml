@@ -88,3 +88,7 @@ field.widget.settings.mukurtu_simple_media_upload:
       label: 'Allowed media bundles'
       sequence:
         type: string
+
+views.access.mukurtu_pending_submissions_access:
+  type: mapping
+  label: 'Pending submissions access'
