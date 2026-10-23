@@ -72,6 +72,12 @@ test.describe('Entity Browser list reordering', () => {
     const clone = page.locator('.sortable-fallback');
     await expect(clone, 'a dragged copy is shown').toBeVisible();
     expect(await clone.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
+    // Gin's cards have no background, so without one of its own the clone
+    // shows whatever it passes over, which is as hard to read as a faded one.
+    expect(
+      await clone.evaluate((el) => getComputedStyle(el).backgroundColor),
+      'the dragged copy has a solid background',
+    ).not.toBe('rgba(0, 0, 0, 0)');
 
     const ghost = list.locator('.sortable-ghost');
     await expect(ghost, 'the drop spot is marked').toHaveCount(1);
