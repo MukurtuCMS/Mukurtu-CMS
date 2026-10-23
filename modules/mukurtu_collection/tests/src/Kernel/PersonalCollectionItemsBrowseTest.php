@@ -147,7 +147,7 @@ class PersonalCollectionItemsBrowseTest extends KernelTestBase {
     $this->personalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $owner->id(),
+      'user_id' => $owner->id(),
       'field_items_in_collection' => array_map(
         fn(Node $node) => $node->id(),
         $this->items
@@ -211,7 +211,7 @@ class PersonalCollectionItemsBrowseTest extends KernelTestBase {
     $otherPersonalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
       'field_items_in_collection' => [$otherNode->id()],
     ]);
     $otherPersonalCollection->save();
