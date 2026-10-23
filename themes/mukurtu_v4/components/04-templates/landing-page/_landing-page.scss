@@ -61,8 +61,11 @@
     }
 
     // Text block: add breathing room around the body content.
+    // Capped by the viewport for the same reason as the image with
+    // description card (#2487): 12.5vw is 40px at 320px, so the cap only
+    // applies at large text sizes on narrow screens.
     &:has(.field--name-body) {
-      padding-inline: var(--v-space-xs);
+      padding-inline: min(var(--v-space-xs), 12.5vw);
       padding-block-end: var(--v-space-xs);
     }
   }
