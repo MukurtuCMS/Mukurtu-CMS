@@ -14,6 +14,7 @@ use Drupal\mukurtu_protocol\CulturalProtocols;
 use Drupal\mukurtu_protocol\Entity\MukurtuMedia;
 use Drupal\mukurtu_protocol\Entity\MukurtuNode;
 use Drupal\mukurtu_protocol\Entity\MukurtuUser;
+use Drupal\mukurtu_protocol\Form\MukurtuOgMembershipDeleteForm;
 use Drupal\node\NodeInterface;
 use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
@@ -165,12 +166,16 @@ function mukurtu_protocol_views_data_alter(array &$data)
  * "no access" error message, which crashes with a TypeError on NULL. Using the
  * 'state' field as the label gives memberships a non-null string ("active",
  * "pending", or "blocked") that satisfies the type requirement.
+ *
+ * The membership delete form is also swapped for one that talks about
+ * removing a member, rather than unsubscribing or deleting them (#2009).
  */
 function mukurtu_protocol_entity_type_alter(array &$entity_types): void {
   if (isset($entity_types['og_membership'])) {
     $entity_keys = $entity_types['og_membership']->get('entity_keys');
     $entity_keys['label'] = 'state';
     $entity_types['og_membership']->set('entity_keys', $entity_keys);
+    $entity_types['og_membership']->setFormClass('delete', MukurtuOgMembershipDeleteForm::class);
   }
 }
 
