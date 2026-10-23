@@ -175,12 +175,15 @@ class MukurtuOgMembershipDeleteFormTest extends KernelTestBase {
   public function testSubmitRemovesMember(): void {
     $membership = Og::getMembership($this->protocol, $this->member);
     $form_object = $this->deleteForm($membership);
+    $cache = \Drupal::cache();
+    $cache->set('member_page', 'cached', tags: ["user:{$this->member->id()}"]);
 
     $form_state = (new FormState())->setValues(['op' => 'Remove']);
     \Drupal::formBuilder()->submitForm($form_object, $form_state);
 
     $this->assertEmpty($form_state->getErrors());
     $this->assertNull(OgMembership::load($membership->id()), 'The membership is gone.');
+    $this->assertFalse($cache->get('member_page'), "The member's cached pages are cleared.");
     $messages = \Drupal::messenger()->messagesByType('status');
     $this->assertSame('Removed <em class="placeholder">removable_member</em> from <em class="placeholder">Test protocol</em>.', (string) reset($messages));
   }

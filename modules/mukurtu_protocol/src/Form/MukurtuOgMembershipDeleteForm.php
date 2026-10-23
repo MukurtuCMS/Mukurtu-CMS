@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_protocol\Form;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\og\Form\OgMembershipDeleteForm;
 
 /**
@@ -50,6 +52,22 @@ class MukurtuOgMembershipDeleteForm extends OgMembershipDeleteForm {
    */
   public function getConfirmText() {
     return $this->t('Remove');
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Clears the member's cached pages too, as every other membership change in
+   * Mukurtu does, since OG only clears its own membership list tags.
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    /** @var \Drupal\og\OgMembershipInterface $membership */
+    $membership = $this->getEntity();
+    $owner = $membership->getOwner();
+    parent::submitForm($form, $form_state);
+    if ($owner) {
+      Cache::invalidateTags(["user:{$owner->id()}"]);
+    }
   }
 
   /**
