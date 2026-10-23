@@ -152,7 +152,7 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
 
     $this->assertArrayNotHasKey('submit', $form['actions']);
     $this->assertArrayHasKey('cancel', $form['actions']);
-    $linked = array_map(fn($item) => (string) $item['link']['#title'], $form['protocols']['list']['#items']);
+    $linked = array_map(fn($item) => (string) $item['#context']['link']['#title'], $form['protocols']['list']['#items']);
     $this->assertEquals(['Open protocol'], $linked);
     $this->assertArrayNotHasKey('children_warning', $form);
 
@@ -185,7 +185,7 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
 
     $this->assertArrayNotHasKey('submit', $form['actions']);
     $this->assertArrayNotHasKey('protocols_warning', $form);
-    $linked = array_map(fn($item) => (string) $item['link']['#title'], $form['children']['list']['#items']);
+    $linked = array_map(fn($item) => (string) $item['#context']['link']['#title'], $form['children']['list']['#items']);
     $this->assertEquals(['Child community'], $linked);
 
     $output = $this->renderPlain($form);

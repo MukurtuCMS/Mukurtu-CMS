@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class ProtocolForm extends ContentEntityForm {
 
+  use DeleteBlockerListTrait;
   use MukurtuAdvancedSidebarFormTrait;
 
   /**
@@ -84,26 +85,18 @@ class ProtocolForm extends ContentEntityForm {
 
     $total = $access->isAllowed() ? array_sum(array_map('count', $entity->getReferencingEntityIds())) : 0;
     if ($total > 0) {
-      $form['delete_blocked_notice'] = [
-        '#theme' => 'status_messages',
-        '#message_list' => [
-          'warning' => [
-            [
-              '#type' => 'inline_template',
-              '#template' => '{{ reason }} {{ link }}',
-              '#context' => [
-                'reason' => $this->formatPlural($total,
-                  "This cultural protocol can't be deleted because 1 item still uses it.",
-                  "This cultural protocol can't be deleted because @count items still use it."
-                ),
-                'link' => $entity->toLink($this->t('See which items'), 'delete-form')->toRenderable(),
-              ],
-            ],
-          ],
+      $form['delete_blocked_notice'] = $this->buildDeleteBlockedWarning([
+        '#type' => 'inline_template',
+        '#template' => '{{ reason }} {{ link }}',
+        '#context' => [
+          'reason' => $this->formatPlural($total,
+            "This cultural protocol can't be deleted because 1 item still uses it.",
+            "This cultural protocol can't be deleted because @count items still use it."
+          ),
+          'link' => $entity->toLink($this->t('See which items'), 'delete-form')->toRenderable(),
         ],
-        '#status_headings' => ['warning' => $this->t('Warning message')],
-        '#weight' => -1000,
-      ];
+      ]);
+      $form['delete_blocked_notice']['#weight'] = -1000;
     }
 
     $cacheability->merge(CacheableMetadata::createFromRenderArray($form))->applyTo($form);

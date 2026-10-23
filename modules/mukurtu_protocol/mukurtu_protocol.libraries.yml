@@ -35,3 +35,9 @@ protocol-community-browser:
     - core/jquery
     - core/drupal
     - core/once
+
+delete-blocked:
+  version: 1.x
+  css:
+    theme:
+      css/delete-blocked.css: {}

@@ -68,14 +68,15 @@ trait DeleteBlockerListTrait {
           if (count($items) < $this->blockerLinkLimit) {
             $entity = $this->entityRepository->getTranslationFromContext($entity);
             $cacheability->addCacheableDependency($entity);
-            $item = [
-              'link' => $entity->toLink()->toRenderable(),
+            $bundle_label = $entity->getEntityType()->hasKey('bundle') ? ($bundle_info[$entity->bundle()]['label'] ?? NULL) : NULL;
+            $items[] = [
+              '#type' => 'inline_template',
+              '#template' => '{{ link }}{% if bundle %} ({{ bundle }}){% endif %}',
+              '#context' => [
+                'link' => $entity->toLink()->toRenderable(),
+                'bundle' => $bundle_label,
+              ],
             ];
-            $bundle_label = $bundle_info[$entity->bundle()]['label'] ?? NULL;
-            if ($bundle_label && $entity->getEntityType()->hasKey('bundle')) {
-              $item['bundle'] = ['#plain_text' => ' (' . $bundle_label . ')'];
-            }
-            $items[] = $item;
           }
         }
         // Free memory before loading the next chunk.
@@ -93,17 +94,39 @@ trait DeleteBlockerListTrait {
   /**
    * Builds a warning message render array.
    *
+   * Uses the same markup and classes as a status message, without the
+   * contentinfo landmark, the data-drupal-messages container, or the dismiss
+   * button. The warning sits inside the page content, explains the page, and
+   * must not become the target for JavaScript status messages.
+   *
    * @param array $message
    *   The message render array.
    *
    * @return array
-   *   A status_messages render array.
+   *   A render array.
    */
   protected function buildDeleteBlockedWarning(array $message): array {
     return [
-      '#theme' => 'status_messages',
-      '#message_list' => ['warning' => [$message]],
-      '#status_headings' => ['warning' => $this->t('Warning message')],
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['messages', 'messages--warning', 'mukurtu-delete-blocked'],
+      ],
+      'header' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages__header']],
+        'title' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#value' => $this->t('Warning message'),
+          '#attributes' => ['class' => ['messages__title']],
+        ],
+      ],
+      'content' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['messages__content']],
+        'message' => $message,
+      ],
+      '#attached' => ['library' => ['mukurtu_protocol/delete-blocked']],
     ];
   }
 

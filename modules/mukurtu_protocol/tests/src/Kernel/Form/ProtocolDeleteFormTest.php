@@ -67,7 +67,7 @@ class ProtocolDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->installSchema('file', 'file_usage');
     $this->installEntitySchema('media');
     $this->installConfig(['media']);
-    $this->createMediaType('test', ['id' => 'test']);
+    $this->createMediaType('test', ['id' => 'test', 'label' => 'Test']);
 
     $role = OgRole::create([
       'name' => 'community_manager',
@@ -211,7 +211,7 @@ class ProtocolDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertArrayNotHasKey('submit', $form['actions']);
     $this->assertArrayHasKey('cancel', $form['actions']);
 
-    $linked = array_map(fn($item) => $item['link']['#title'], $form['blockers']['list']['#items']);
+    $linked = array_map(fn($item) => $item['#context']['link']['#title'], $form['blockers']['list']['#items']);
     $this->assertEqualsCanonicalizing([$viewable_node->label(), $media->label(), $draft->label()], $linked);
     $this->assertNotContains($restricted_node->label(), $linked);
     $this->assertArrayNotHasKey('more', $form['blockers']);
@@ -223,6 +223,13 @@ class ProtocolDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertStringContainsString("1 of these items is in a cultural protocol you don't have access to.", $output);
     $this->assertStringContainsString('Contact a protocol steward to update them.', $output);
     $this->assertStringNotContainsString($restricted_node->label(), $output);
+    $this->assertStringContainsString($viewable_node->label() . '</a> (Protocol Aware Content)', $output);
+    $this->assertStringContainsString($media->label() . '</a> (Test)', $output);
+
+    // The warning is part of the page, not a status message region.
+    $this->assertStringContainsString('messages--warning', $output);
+    $this->assertStringNotContainsString('data-drupal-messages', $output);
+    $this->assertStringNotContainsString('contentinfo', $output);
   }
 
   /**

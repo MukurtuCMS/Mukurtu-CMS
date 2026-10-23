@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class CommunityForm extends ContentEntityForm {
 
+  use DeleteBlockerListTrait;
   use MukurtuAdvancedSidebarFormTrait;
 
   /**
@@ -86,23 +87,15 @@ class CommunityForm extends ContentEntityForm {
     $cacheability->addCacheableDependency($access);
 
     if ($access->isAllowed() && ($entity->isParentCommunity() || !empty($entity->getProtocols()))) {
-      $form['delete_blocked_notice'] = [
-        '#theme' => 'status_messages',
-        '#message_list' => [
-          'warning' => [
-            [
-              '#type' => 'inline_template',
-              '#template' => '{{ reason }} {{ link }}',
-              '#context' => [
-                'reason' => $this->t("This community can't be deleted because it still has cultural protocols or child communities."),
-                'link' => $entity->toLink($this->t('See why'), 'delete-form')->toRenderable(),
-              ],
-            ],
-          ],
+      $form['delete_blocked_notice'] = $this->buildDeleteBlockedWarning([
+        '#type' => 'inline_template',
+        '#template' => '{{ reason }} {{ link }}',
+        '#context' => [
+          'reason' => $this->t("This community can't be deleted because it still has cultural protocols or child communities."),
+          'link' => $entity->toLink($this->t('See why'), 'delete-form')->toRenderable(),
         ],
-        '#status_headings' => ['warning' => $this->t('Warning message')],
-        '#weight' => -1000,
-      ];
+      ]);
+      $form['delete_blocked_notice']['#weight'] = -1000;
     }
 
     $cacheability->merge(CacheableMetadata::createFromRenderArray($form))->applyTo($form);
