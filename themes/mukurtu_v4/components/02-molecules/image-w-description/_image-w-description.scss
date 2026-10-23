@@ -2,6 +2,7 @@
 
 .block--image-with-description {
   display: grid;
+
   // minmax(0, 1fr), not 1fr: a bare 1fr can't shrink below its content's
   // min-content width. The heading and padding are in rem, so at large text
   // sizes the track grew past a phone-width viewport and the page scrolled
@@ -19,6 +20,7 @@
 
   .block-wrapper__second {
     padding-block: var(--v-space-s);
+
     // Capped by the viewport so large text can't eat the text column on a
     // phone (#2487). 10vw is 32px at 320px, so nothing changes at the
     // default text size; the cap only applies once 2rem grows past it.
