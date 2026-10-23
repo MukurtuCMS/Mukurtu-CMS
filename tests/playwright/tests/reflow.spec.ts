@@ -49,39 +49,79 @@ const overlaps = (a: Box, b: Box) =>
   a.x + 1 < b.x + b.width && b.x + 1 < a.x + a.width &&
   a.y + 1 < b.y + b.height && b.y + 1 < a.y + a.height;
 
-for (const width of [320, 360, 412, 600]) {
-  for (const textScale of [1, 1.5, 2]) {
-    test(`Reflow: mobile header logo, search and menu button do not overlap at ${width}px, ${textScale * 100}% text`, async ({ page, browserName }) => {
-      test.skip(browserName !== 'chromium', 'Setting the default font size needs the Chrome DevTools Protocol.');
-      const cdp = await page.context().newCDPSession(page);
-      await cdp.send('Page.setFontSizes', { fontSizes: { standard: 16 * textScale } });
-      await page.setViewportSize({ width, height: 720 });
-      await page.goto('/');
+// Issue #2481: the site name gets a different layout from a logo, and the
+// test sites show a logo only, so the site name modes are simulated by
+// editing the branding link in place. The header's :has() rules pick that up
+// as they would the real markup (see block--system-branding-block.html.twig).
+type Branding = 'as configured' | 'site name' | 'logo and site name';
 
-      test.skip(await page.locator('.header-search--mobile').count() === 0, 'Header search is turned off on this site.');
-      const logoImage = page.locator('.header__logo img');
-      test.skip(await logoImage.count() === 0, 'No site branding block in the header.');
+async function useBranding(page: Page, branding: Branding): Promise<boolean> {
+  if (branding === 'as configured') {
+    return page.locator('.header__logo a').count().then((count) => count > 0);
+  }
+  return page.evaluate((branding) => {
+    const link = document.querySelector('.header__logo a');
+    if (!link || (branding === 'logo and site name' && !link.querySelector('img'))) {
+      return false;
+    }
+    if (branding === 'site name') {
+      link.querySelectorAll('img').forEach((img) => img.remove());
+    }
+    if (!link.querySelector('.header__logo-text')) {
+      const name = document.createElement('span');
+      name.className = 'header__logo-text';
+      name.textContent = 'Mukurtu Community Heritage Archive';
+      link.append(name);
+    }
+    return true;
+  }, branding);
+}
 
-      const boxes: Record<string, Box | null> = {
-        logo: await logoImage.boundingBox(),
-        input: await page.locator('.header-search--mobile .header-search__input').boundingBox(),
-        submit: await page.locator('.header-search--mobile .header-search__button').boundingBox(),
-        menu: await page.locator('.mobile-nav-button').boundingBox(),
-      };
-      const names = Object.keys(boxes);
-      for (const name of names) {
-        expect(boxes[name], `${name} is rendered`).not.toBeNull();
-        expect(boxes[name]!.x + boxes[name]!.width, `${name} fits in the viewport`).toBeLessThanOrEqual(width + 1);
-      }
-      for (let i = 0; i < names.length; i++) {
-        for (let j = i + 1; j < names.length; j++) {
-          expect(overlaps(boxes[names[i]]!, boxes[names[j]]!), `${names[i]} overlaps ${names[j]}`).toBe(false);
+for (const branding of ['as configured', 'site name', 'logo and site name'] as Branding[]) {
+  for (const width of [320, 360, 412, 600]) {
+    for (const textScale of [1, 1.5, 2]) {
+      test(`Reflow: mobile header branding, search and menu button do not overlap at ${width}px, ${textScale * 100}% text, ${branding}`, async ({ page, browserName }) => {
+        test.skip(browserName !== 'chromium', 'Setting the default font size needs the Chrome DevTools Protocol.');
+        const cdp = await page.context().newCDPSession(page);
+        await cdp.send('Page.setFontSizes', { fontSizes: { standard: 16 * textScale } });
+        await page.setViewportSize({ width, height: 720 });
+        await page.goto('/');
+
+        test.skip(await page.locator('.header-search--mobile').count() === 0, 'Header search is turned off on this site.');
+        test.skip(!await useBranding(page, branding), `This site's branding cannot be shown as "${branding}".`);
+
+        // The link wraps the logo and the name, so it covers both.
+        const boxes: Record<string, Box | null> = {
+          branding: await page.locator('.header__logo a').boundingBox(),
+          input: await page.locator('.header-search--mobile .header-search__input').boundingBox(),
+          submit: await page.locator('.header-search--mobile .header-search__button').boundingBox(),
+          menu: await page.locator('.mobile-nav-button').boundingBox(),
+        };
+        const names = Object.keys(boxes);
+        for (const name of names) {
+          expect(boxes[name], `${name} is rendered`).not.toBeNull();
+          expect(boxes[name]!.x + boxes[name]!.width, `${name} fits in the viewport`).toBeLessThanOrEqual(width + 1);
         }
-      }
-      // The input still has room for text, not only its padding. 3rem is what
-      // a full-width search row leaves at 320px and 200% text.
-      expect(boxes.input!.width, 'input has room for text').toBeGreaterThanOrEqual(3 * 16 * textScale);
-    });
+        for (let i = 0; i < names.length; i++) {
+          for (let j = i + 1; j < names.length; j++) {
+            expect(overlaps(boxes[names[i]]!, boxes[names[j]]!), `${names[i]} overlaps ${names[j]}`).toBe(false);
+          }
+        }
+        // The input still has room for text, not only its padding. 3rem is what
+        // a full-width search row leaves at 320px and 200% text.
+        expect(boxes.input!.width, 'input has room for text').toBeGreaterThanOrEqual(3 * 16 * textScale);
+
+        // Squeezed beside the logo, the name broke one letter per line. It
+        // should get 5em, or the whole branding cell when that is narrower.
+        const name = page.locator('.header__logo-text');
+        if (await name.count() > 0) {
+          const nameWidth = (await name.boundingBox())!.width;
+          const cellWidth = (await page.locator('.header__logo').boundingBox())!.width;
+          const fontSize = await name.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+          expect(nameWidth, 'site name has room for whole words').toBeGreaterThanOrEqual(Math.min(5 * fontSize, cellWidth) - 2);
+        }
+      });
+    }
   }
 }
 
