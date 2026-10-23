@@ -294,8 +294,8 @@ function mukurtu_protocol_entity_delete($entity)
       ->condition('entity_type', $entity->getEntityTypeId())
       ->condition('entity_id', $entity->id())
       ->execute();
-    if ($ids) {
-      $storage->delete($storage->loadMultiple($ids));
+    foreach (array_chunk($ids, 50) as $chunk) {
+      $storage->delete($storage->loadMultiple($chunk));
     }
   }
   if ($entity instanceof CulturalProtocolControlledInterface) {
@@ -644,8 +644,10 @@ function mukurtu_protocol_query_community_access_alter(AlterableInterface $query
       $membership_alias = $query->leftJoin('og_membership', 'ogm_community',
         "{$community_table}.id = ogm_community.entity_id AND ogm_community.entity_type = 'community' AND ogm_community.state = 'active'");
 
+      // Match CommunityAccessControlHandler, which treats any value other
+      // than "public" as community-only.
       $private_member_conditions = $query->andConditionGroup()
-        ->condition("{$community_table}.field_access_mode", 'community-only')
+        ->condition("{$community_table}.field_access_mode", 'public', '<>')
         ->condition("{$membership_alias}.uid", $account->id());
 
       $conditions->condition($private_member_conditions);
