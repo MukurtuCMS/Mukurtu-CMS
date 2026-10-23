@@ -43,4 +43,12 @@ class SetupMenuLink extends MenuLinkDefault {
     return array_merge(parent::getCacheTags(), SiteSetupTaskManager::CACHE_TAGS);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContexts(): array {
+    // Some tasks are shown to specific roles only, so the counts vary by role.
+    return array_merge(parent::getCacheContexts(), ['user.roles']);
+  }
+
 }

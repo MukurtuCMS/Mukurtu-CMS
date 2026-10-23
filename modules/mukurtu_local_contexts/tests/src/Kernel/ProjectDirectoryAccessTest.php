@@ -116,13 +116,13 @@ class ProjectDirectoryAccessTest extends KernelTestBase {
    */
   public function testStrictProtocolDirectoryIsNotPublic(): void {
     $owner = $this->user();
-    $community = Community::create(['name' => 'Test community', 'status' => TRUE, 'uid' => $owner->id()]);
+    $community = Community::create(['name' => 'Test community', 'status' => TRUE, 'user_id' => $owner->id()]);
     $community->save();
 
     $protocol = Protocol::create([
       'name' => 'Strict protocol',
       'status' => TRUE,
-      'uid' => $owner->id(),
+      'user_id' => $owner->id(),
       'field_communities' => [$community->id()],
       'field_access_mode' => 'strict',
     ]);
@@ -153,13 +153,13 @@ class ProjectDirectoryAccessTest extends KernelTestBase {
    */
   public function testOpenProtocolDirectoryStaysPublic(): void {
     $owner = $this->user();
-    $community = Community::create(['name' => 'Test community', 'status' => TRUE, 'uid' => $owner->id()]);
+    $community = Community::create(['name' => 'Test community', 'status' => TRUE, 'user_id' => $owner->id()]);
     $community->save();
 
     $protocol = Protocol::create([
       'name' => 'Open protocol',
       'status' => TRUE,
-      'uid' => $owner->id(),
+      'user_id' => $owner->id(),
       'field_communities' => [$community->id()],
       'field_access_mode' => 'open',
     ]);
@@ -176,11 +176,11 @@ class ProjectDirectoryAccessTest extends KernelTestBase {
   public function testCommunityDirectoryFollowsCommunityAccess(): void {
     $owner = $this->user();
 
-    $private = Community::create(['name' => 'Members only', 'status' => TRUE, 'uid' => $owner->id()]);
+    $private = Community::create(['name' => 'Members only', 'status' => TRUE, 'user_id' => $owner->id()]);
     $private->setSharingSetting('community-only');
     $private->save();
 
-    $public = Community::create(['name' => 'Open to all', 'status' => TRUE, 'uid' => $owner->id()]);
+    $public = Community::create(['name' => 'Open to all', 'status' => TRUE, 'user_id' => $owner->id()]);
     $public->setSharingSetting('public');
     $public->save();
 
