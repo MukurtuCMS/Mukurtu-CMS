@@ -172,6 +172,11 @@ class ProtocolDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertFalse($this->protocol->access('delete', $this->member));
     $this->assertFalse($handler->deleteFormAccess($this->protocol, $this->member)->isAllowed());
 
+    // Cached results must be cleared when content changes.
+    $tags = $handler->deleteFormAccess($this->protocol, $this->manager)->getCacheTags();
+    $this->assertContains('node_list', $tags);
+    $this->assertContains('media_list', $tags);
+
     // The route uses the same check.
     $url = $this->protocol->toUrl('delete-form');
     $this->assertTrue($url->access($this->manager));

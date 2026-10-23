@@ -127,6 +127,13 @@ class CommunityDeleteFormTest extends ProtocolAwareEntityTestBase {
     $this->assertFalse($handler->deleteFormAccess($community, $this->viewer)->isAllowed());
     $this->assertFalse($handler->deleteFormAccess($community, $this->partialDeleter)->isAllowed());
 
+    // Cached results must be cleared when protocols or the hierarchy change.
+    $tags = $handler->deleteFormAccess($community, $this->deleter)->getCacheTags();
+    $this->assertContains('protocol_list', $tags);
+    $this->assertContains('config:mukurtu_protocol.community_organization', $tags);
+    $tags = $community->access('delete', $this->deleter, TRUE)->getCacheTags();
+    $this->assertContains('protocol_list', $tags);
+
     $url = $community->toUrl('delete-form');
     $this->assertTrue($url->access($this->deleter));
     $this->assertFalse($url->access($this->viewer));

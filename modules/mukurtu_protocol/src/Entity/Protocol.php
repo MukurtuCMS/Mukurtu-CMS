@@ -279,8 +279,10 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface, 
    * {@inheritdoc}
    */
   public function inUse(): bool {
-    foreach ($this->getReferencingEntityIds() as $ids) {
-      if (!empty($ids)) {
+    // Only check that one item exists, since this runs on every delete
+    // access check.
+    foreach ($this->getReferencingEntityQueries() as $query) {
+      if (!empty($query->range(0, 1)->execute())) {
         return TRUE;
       }
     }
@@ -291,8 +293,22 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface, 
    * {@inheritdoc}
    */
   public function getReferencingEntityIds(): array {
-    $entityFieldManager = \Drupal::service('entity_field.manager');
     $referencing = [];
+    foreach ($this->getReferencingEntityQueries() as $entity_type_id => $query) {
+      $referencing[$entity_type_id] = array_values($query->execute());
+    }
+    return $referencing;
+  }
+
+  /**
+   * Builds queries for the content and media that use this protocol.
+   *
+   * @return \Drupal\Core\Entity\Query\QueryInterface[]
+   *   Entity queries keyed by entity type ID.
+   */
+  protected function getReferencingEntityQueries(): array {
+    $entityFieldManager = \Drupal::service('entity_field.manager');
+    $queries = [];
 
     foreach (['node', 'media'] as $entity_type_id) {
       try {
@@ -310,15 +326,13 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface, 
         continue;
       }
 
-      // Find every entity that references this protocol.
-      $query = $storage->getQuery();
-      $query->condition('field_cultural_protocols.protocols', "|{$this->id()}|", 'CONTAINS')
+      $queries[$entity_type_id] = $storage->getQuery()
+        ->condition('field_cultural_protocols.protocols', "|{$this->id()}|", 'CONTAINS')
         ->accessCheck(FALSE)
         ->sort($storage->getEntityType()->getKey('id'));
-      $referencing[$entity_type_id] = array_values($query->execute());
     }
 
-    return $referencing;
+    return $queries;
   }
 
   /**
