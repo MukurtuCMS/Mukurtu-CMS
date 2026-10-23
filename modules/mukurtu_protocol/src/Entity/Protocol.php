@@ -279,12 +279,26 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface, 
    * {@inheritdoc}
    */
   public function inUse(): bool {
+    foreach ($this->getReferencingEntityIds() as $ids) {
+      if (!empty($ids)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getReferencingEntityIds(): array {
     $entityFieldManager = \Drupal::service('entity_field.manager');
+    $referencing = [];
 
     foreach (['node', 'media'] as $entity_type_id) {
       try {
         $storage = $this->entityTypeManager()->getStorage($entity_type_id);
-      } catch (Exception $e) {
+      }
+      catch (Exception $e) {
         continue;
       }
 
@@ -296,17 +310,15 @@ class Protocol extends EditorialContentEntityBase implements ProtocolInterface, 
         continue;
       }
 
-      // Check if any entity has a reference to this protocol.
+      // Find every entity that references this protocol.
       $query = $storage->getQuery();
       $query->condition('field_cultural_protocols.protocols', "|{$this->id()}|", 'CONTAINS')
-        ->accessCheck(FALSE);
-      $results = $query->execute();
-      if (!empty($results)) {
-        return TRUE;
-      }
+        ->accessCheck(FALSE)
+        ->sort($storage->getEntityType()->getKey('id'));
+      $referencing[$entity_type_id] = array_values($query->execute());
     }
 
-    return FALSE;
+    return $referencing;
   }
 
   /**

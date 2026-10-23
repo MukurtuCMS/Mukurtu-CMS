@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol\Form;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -58,9 +59,53 @@ class CommunityForm extends ContentEntityForm {
         '#default_value' => FALSE,
       ];
       $this->groupAdvancedSidebarRevisionCheckbox($form);
+      $this->addDeleteBlockedNotice($form);
     }
 
     return $form;
+  }
+
+  /**
+   * Explains why the community can't be deleted, when that applies.
+   *
+   * Shown only to users who can reach the delete form, which lists what is
+   * blocking the delete.
+   *
+   * @param array $form
+   *   The form.
+   */
+  protected function addDeleteBlockedNotice(array &$form): void {
+    $entity = $this->entity;
+    $cacheability = (new CacheableMetadata())->addCacheTags([
+      'protocol_list',
+      'config:mukurtu_protocol.community_organization',
+    ]);
+    /** @var \Drupal\mukurtu_protocol\CommunityAccessControlHandler $handler */
+    $handler = $this->entityTypeManager->getAccessControlHandler('community');
+    $access = $handler->deleteFormAccess($entity, $this->currentUser());
+    $cacheability->addCacheableDependency($access);
+
+    if ($access->isAllowed() && ($entity->isParentCommunity() || !empty($entity->getProtocols()))) {
+      $form['delete_blocked_notice'] = [
+        '#theme' => 'status_messages',
+        '#message_list' => [
+          'warning' => [
+            [
+              '#type' => 'inline_template',
+              '#template' => '{{ reason }} {{ link }}',
+              '#context' => [
+                'reason' => $this->t("This community can't be deleted because it still has cultural protocols or child communities."),
+                'link' => $entity->toLink($this->t('See why'), 'delete-form')->toRenderable(),
+              ],
+            ],
+          ],
+        ],
+        '#status_headings' => ['warning' => $this->t('Warning message')],
+        '#weight' => -1000,
+      ];
+    }
+
+    $cacheability->merge(CacheableMetadata::createFromRenderArray($form))->applyTo($form);
   }
 
   /**
