@@ -13,13 +13,27 @@
 
 @use "../../../external/include-media";
 
-/* Default (is-always-mobile-nav): full-width strip in the header grid. */
+/* Default: a row of its own in the header grid. A logo-only header puts it
+ * on the logo's row instead, below lg or once the menu collapses (see
+ * _header.scss).
+ *
+ * On its own row it spans to the last column and sits at its end, so it lines
+ * up under the menu button. justify-self also stops the grid stretching it, so it keeps
+ * the size the desktop instance has instead of growing to fill the row - 544px
+ * at 928px before this. No inline padding, so its edge is the grid's edge,
+ * the same line the menu button's cell ends on. */
 .header-search--mobile {
   grid-column: 1 / -1;
-  border-block-start: 1px solid var(--color-divider, #e0e0e0);
-  padding-inline: var(--v-space-5xs);
+  justify-self: end;
+  max-inline-size: 100%;
   padding-block: var(--v-space-5xs);
-  background: var(--color-white);
+
+  /* The desktop basis, so the box is the size people see everywhere else.
+   * Shrink stays at 1 so that where the row is narrower than that, the input
+   * gives way rather than pushing the submit button out of the box. */
+  .header-search__input {
+    flex: 0 1 200px;
+  }
 }
 
 body:not(.is-always-mobile-nav) {
@@ -30,8 +44,6 @@ body:not(.is-always-mobile-nav) {
     & .header-search--mobile {
       grid-row: 1;
       align-self: center;
-      border-block-start: none;
-      background: transparent;
     }
   }
 
@@ -71,6 +83,22 @@ body:not(.is-always-mobile-nav) {
   display: flex;
   align-items: stretch;
   inline-size: 100%;
+}
+
+/* Over a header or page background image the box sits on the photo, where
+ * its grey border measured as low as 2.3:1 against light areas - under the
+ * 3:1 a field's boundary needs (1.4.11). A white ring gives the border a
+ * known ground on any photo and any tint setting, including no tint: #767676
+ * on white is 4.54:1. Both instances, because with a page background the
+ * desktop nav bar turns transparent too (see _layout.scss); on its usual
+ * white bar the ring is invisible.
+ *
+ * box-shadow rather than outline, which the input uses for focus. Forced
+ * colours drops the shadow and keeps the system-colour borders. */
+.site-header--has-background .header-search__form,
+.page--has-background .site-header .header-search__form {
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--color-white);
 }
 
 .header-search__input {

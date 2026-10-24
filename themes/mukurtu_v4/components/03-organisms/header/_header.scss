@@ -55,6 +55,13 @@ header {
         display: inline-flex;
         align-items: center;
         gap: var(--v-space-4xxs);
+
+        /* Until there is not room for it. Kept beside the 100px logo at
+         * 320px and 200% text, the name got about 60px and broke one letter
+         * per line, running the header over 900px tall. With the 5em basis
+         * on the name below, it moves under the logo instead once it would
+         * get less than that beside it. */
+        flex-wrap: wrap;
       }
     }
 
@@ -71,6 +78,9 @@ header {
        * sized to the whole unbreakable word and the page scrolled sideways -
        * measured at 123px past a 320px viewport. */
       overflow-wrap: anywhere;
+
+      // The narrowest the name gets beside a logo before wrapping under it.
+      flex: 1 1 5em;
 
       /* Two scales, because the branding cell is a very different share of the
        * row either side of lg. Below lg the nav is a drawer, so branding has
@@ -133,22 +143,38 @@ header {
  * logo's, so an auto track squeezed the search box to 16px beside a long
  * name. Text branding has its own layout below, with the search on a row of
  * its own. */
-body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
-  @include include-media.media('<lg') {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    column-gap: var(--v-space-5xs);
 
-    & .header__logo {
-      grid-column: 1;
-    }
+/* From 2xl the layout padding is 0 and the shared grid's outer tracks centre
+ * an 80rem content area. Content-sized header tracks have no outer margin, so
+ * pad to the same edges instead, or the branding sits against the viewport. */
+@mixin header-content-edges {
+  @include include-media.media('>=2xl') {
+    padding-inline: max(var(--layout-padding-xs), calc((100% - 80rem) / 2));
+  }
+}
 
-    & .header-search--mobile {
-      grid-column: 2;
-    }
+@mixin header-logo-row {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: var(--v-space-5xs);
 
-    & .mobile-buttons {
-      grid-column: 3;
-    }
+  @include header-content-edges;
+
+  & .header__logo {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  // Sharing the row, the padding keeps it clear of the menu button's label.
+  & .header-search--mobile {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    padding-inline: var(--v-space-5xs);
+  }
+
+  & .mobile-buttons {
+    grid-column: 3;
+    grid-row: 1;
   }
 
   /* When one row cannot fit the logo, a usable search box and the menu
@@ -163,9 +189,25 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
       grid-column: 1 / -1;
       grid-row: 2;
 
-      // Line up with the logo instead of sitting inset from it.
+      // Line up with the menu button above instead of sitting inset from it.
       padding-inline: 0;
     }
+  }
+}
+
+.header:not(:has(.header__logo-text)) {
+  body:not(.is-always-mobile-nav) & {
+    @include include-media.media('<lg') {
+      @include header-logo-row;
+    }
+  }
+
+  /* The same row at any width once nav-resize.js collapses the menu to the
+   * drawer, so the header looks the way it does below lg. Without this the
+   * search dropped to a row of its own the moment the menu collapsed - at
+   * 960px on a site with a long menu - and the header grew a row. */
+  body.is-always-mobile-nav & {
+    @include header-logo-row;
   }
 }
 
@@ -224,95 +266,108 @@ body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
  * simply spans the row.
  */
 .site-header:has(.header__logo-text) {
-  /* Below lg the mobile search is pinned to grid-row 1 across columns 2 to -2,
-   * so a wide branding cell collided with it and got pushed below - putting
-   * the search above the site name. Branding takes row 1 up to the menu
-   * button, and the search moves to row 2 underneath, at its normal width. */
+  /* Branding and the menu button share row 1, and the search has row 2 to
+   * itself, lined up under the button as it is everywhere else (see
+   * _header-search.scss).
+   *
+   * Two tracks sized to their content, not the shared 6-column grid. There the
+   * button had one or two columns, and the rem gutters grow with the phone's
+   * text size: at 320px and 200% text they took the whole row, the button's
+   * column came out 0px wide, and the 64px button ran 24px off the screen
+   * (1.4.10). Here the button always gets its own width and branding takes
+   * the rest, wrapping the name to fit.
+   *
+   * Not limited to below lg. From lg the flex row below replaces this while
+   * the nav is shown, and once the nav collapses this is the layout wanted. */
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--v-space-5xs);
+
+  @include header-content-edges;
+
   .header__logo {
-    grid-column: 1 / -2;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .mobile-buttons {
+    grid-column: 2;
     grid-row: 1;
   }
 
   .header-search--mobile {
     grid-row: 2;
-
-    /* Spans to the last column and sits at its end, so it lines up under the
-     * menu button rather than stopping short of it. justify-self also stops
-     * the grid stretching it, so it keeps its own width instead of growing to
-     * fill the row - 544px at 928px before this. */
     grid-column: 1 / -1;
-    justify-self: end;
-    max-inline-size: 100%;
-
-    /* The same basis the desktop instance uses, so the box is the size people
-     * see everywhere else. */
-    .header-search__input {
-      flex: 0 0 200px;
-      max-inline-size: 100%;
-    }
   }
 
   /* .site-header and .header are the same element, not nested, so the flex
-   * properties go here rather than on a descendant selector. */
+   * properties go here rather than on a descendant selector.
+   *
+   * Only while the nav is in the header. Once nav-resize.js collapses it to
+   * the drawer there is nothing to share the row with, and the flex row put
+   * the search beside the menu button instead of under it. The grid above
+   * already handles that layout. nav-resize.js removes the class before it
+   * measures, so the nav is always measured in the flex row. */
   @include include-media.media('>=lg') {
-    display: flex;
-    align-items: center;
-    gap: var(--gutter);
-    padding-inline: var(--layout-padding-xs);
+    body:not(.is-always-mobile-nav) & {
+      display: flex;
+      align-items: center;
+      gap: var(--gutter);
+      padding-inline: var(--layout-padding-xs);
 
-    /* .header sets justify-content: center for the grid. In a flex row that
-     * centres the whole lot and pulls the wordmark away from the page edge. */
-    justify-content: space-between;
+      /* .header sets justify-content: center for the grid. In a flex row that
+       * centres the whole lot and pulls the wordmark away from the page edge. */
+      justify-content: space-between;
 
-    /* When the wordmark and the menu cannot sit side by side, they stack onto
-     * two rows rather than the wordmark being crushed into a narrow column.
-     * The menu stays expanded either way, which matters more than the header
-     * staying one row high. */
-    flex-wrap: wrap;
+      /* When the wordmark and the menu cannot sit side by side, they stack onto
+       * two rows rather than the wordmark being crushed into a narrow column.
+       * The menu stays expanded either way, which matters more than the header
+       * staying one row high. */
+      flex-wrap: wrap;
 
-    .header__logo {
-      /* Takes whatever the nav leaves and wraps into it. Keeping the menu
-       * expanded matters more than keeping the wordmark on one line, so the
-       * branding is what gives way. min-inline-size lets it shrink past its
-       * content width, and break-word stops a long word forcing the row wider
-       * than the viewport. */
-      flex: 1 1 auto;
+      .header__logo {
+        /* Takes whatever the nav leaves and wraps into it. Keeping the menu
+         * expanded matters more than keeping the wordmark on one line, so the
+         * branding is what gives way. min-inline-size lets it shrink past its
+         * content width, and break-word stops a long word forcing the row wider
+         * than the viewport. */
+        flex: 1 1 auto;
 
-      /* Enough room for the longest word. Below this the header wraps and the
-       * wordmark gets a row of its own rather than being crushed. */
-      min-inline-size: 12rem;
-    }
+        /* Enough room for the longest word. Below this the header wraps and the
+         * wordmark gets a row of its own rather than being crushed. */
+        min-inline-size: 12rem;
+      }
 
-    .header-nav {
-      /* Basis auto, so the nav asks for its natural width and the header wraps
-       * around it rather than squeezing it: nav-resize.js collapses to the
-       * mobile menu when the primary nav <ul> wraps onto a second line, and
-       * branding taking room should not be what triggers that. The wordmark
-       * gives way first.
-       *
-       * But shrink stays at 1. Pinned at `flex: 0 0 auto` the nav kept its
-       * 931px even when the row was narrower, so at lg (960px) it ran 19px
-       * past the viewport and the page scrolled sideways - and a text-spacing
-       * override (1.4.12) or a longer set of translated labels widened that
-       * further. Allowed to shrink, the <ul> wraps instead, which is exactly
-       * the signal nav-resize.js watches for, so the menu collapses to the
-       * drawer the way it does at any other too-narrow width (1.4.10).
-       */
-      flex: 0 1 auto;
+      .header-nav {
+        /* Basis auto, so the nav asks for its natural width and the header wraps
+         * around it rather than squeezing it: nav-resize.js collapses to the
+         * mobile menu when the primary nav <ul> wraps onto a second line, and
+         * branding taking room should not be what triggers that. The wordmark
+         * gives way first.
+         *
+         * But shrink stays at 1. Pinned at `flex: 0 0 auto` the nav kept its
+         * 931px even when the row was narrower, so at lg (960px) it ran 19px
+         * past the viewport and the page scrolled sideways - and a text-spacing
+         * override (1.4.12) or a longer set of translated labels widened that
+         * further. Allowed to shrink, the <ul> wraps instead, which is exactly
+         * the signal nav-resize.js watches for, so the menu collapses to the
+         * drawer the way it does at any other too-narrow width (1.4.10).
+         */
+        flex: 0 1 auto;
 
-      /* Pushes the nav right. space-between already does that while the two
-       * sit side by side, but once the header wraps the nav is alone on its
-       * row and would otherwise sit hard left. */
-      margin-inline-start: auto;
+        /* Pushes the nav right. space-between already does that while the two
+         * sit side by side, but once the header wraps the nav is alone on its
+         * row and would otherwise sit hard left. */
+        margin-inline-start: auto;
 
-      /* The drawer sets a full width for its mobile guise, which in a flex row
-       * makes it claim the whole header and leaves branding nothing. */
-      inline-size: auto;
+        /* The drawer sets a full width for its mobile guise, which in a flex row
+         * makes it claim the whole header and leaves branding nothing. */
+        inline-size: auto;
 
-      /* The nav sets margin-block-start: auto to sit at the bottom of its grid
-       * cell. In a flex row that overrides align-items and drops it below the
-       * wordmark's baseline. */
-      margin-block-start: 0;
+        /* The nav sets margin-block-start: auto to sit at the bottom of its grid
+         * cell. In a flex row that overrides align-items and drops it below the
+         * wordmark's baseline. */
+        margin-block-start: 0;
+      }
     }
   }
 }

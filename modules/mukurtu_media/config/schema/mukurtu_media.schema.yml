@@ -25,12 +25,62 @@ mukurtu_thumbnail.settings:
   type: config_object
   label: 'Mukurtu Thumbnail Settings'
   mapping:
-    default_thumbnail:
+    audio_default_thumbnail:
       type: sequence
-      label: 'Default thumbnails for media bundles.'
+      label: 'Audio default thumbnail'
       sequence:
-        type: string
-        label: 'Thumbnail fid.'
+        type: integer
+        label: 'Thumbnail file ID'
+    video_default_thumbnail:
+      type: sequence
+      label: 'Video default thumbnail'
+      sequence:
+        type: integer
+        label: 'Thumbnail file ID'
+    document:
+      type: sequence
+      label: 'Document default thumbnail'
+      sequence:
+        type: integer
+        label: 'Thumbnail file ID'
+    image:
+      type: sequence
+      label: 'Image default thumbnail'
+      sequence:
+        type: integer
+        label: 'Thumbnail file ID'
+    external_embed:
+      type: sequence
+      label: 'External embed default thumbnail'
+      sequence:
+        type: integer
+        label: 'Thumbnail file ID'
+    remote_video:
+      type: sequence
+      label: 'Remote video default thumbnail'
+      sequence:
+        type: integer
+        label: 'Thumbnail file ID'
+    soundcloud:
+      type: sequence
+      label: 'SoundCloud default thumbnail'
+      sequence:
+        type: integer
+        label: 'Thumbnail file ID'
+    # Older sites stored audio and video under the bare bundle name, and
+    # AudioHelper still reads the audio one.
+    audio:
+      type: sequence
+      label: 'Audio default thumbnail (legacy key)'
+      sequence:
+        type: integer
+        label: 'Thumbnail file ID'
+    video:
+      type: sequence
+      label: 'Video default thumbnail (legacy key)'
+      sequence:
+        type: integer
+        label: 'Thumbnail file ID'
 
 field.storage_settings.mukurtu_video_track:
   type: field.storage_settings.file

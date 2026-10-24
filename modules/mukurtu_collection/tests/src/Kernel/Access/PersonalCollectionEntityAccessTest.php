@@ -138,7 +138,7 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $testPersonalCollection = PersonalCollection::create([
       'name' => $collectionName,
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
     $this->assertEquals($collectionName, $testPersonalCollection->getName());
   }
@@ -151,7 +151,7 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $testPersonalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
 
     $testPersonalCollection->setName('newName');
@@ -167,7 +167,7 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $testPersonalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
       'created' => $createdTime
     ]);
 
@@ -182,7 +182,7 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $testPersonalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
 
     $createdTime = 1677537655;
@@ -198,7 +198,7 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $testPersonalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
       'field_pc_privacy' => 'public',
     ]);
 
@@ -213,7 +213,7 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $testPersonalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
     ]);
 
     $testPersonalCollection->setPrivacy('private');
@@ -228,14 +228,14 @@ class PersonalCollectionEntityAccessTest extends KernelTestBase
     $publicPersonalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
       'field_pc_privacy' => 'public',
     ]);
 
     $privatePersonalCollection = PersonalCollection::create([
       'name' => $this->randomString(),
       'status' => TRUE,
-      'uid' => $this->owner->id(),
+      'user_id' => $this->owner->id(),
       'field_pc_privacy' => 'private',
     ]);
 

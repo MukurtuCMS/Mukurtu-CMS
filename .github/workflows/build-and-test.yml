@@ -34,6 +34,11 @@ jobs:
         env:
           MUKURTU_LINT_STRICT: '1'
 
+      - name: Check for owner keys that create() ignores
+        run: node ./scripts/lint/entity-owner-key.js
+        env:
+          MUKURTU_LINT_STRICT: '1'
+
   testing:
     name: Mukurtu v4 - PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
@@ -41,7 +46,7 @@ jobs:
       fail-fast: false
       matrix:
         php-versions: ['8.4']
-        test-suite: ["kernel", "unit"]
+        test-suite: ["kernel", "unit", "functional"]
     services:
       mariadb:
         image: mariadb:10.6
@@ -104,7 +109,31 @@ jobs:
           composer install --no-interaction --optimize-autoloader
           cp ./web/profiles/mukurtu/phpunit.xml ./phpunit.xml
 
+      # Functional tests drive a real site over HTTP, so they need a web
+      # server. PHPUnit's <env> values don't override variables already set,
+      # so the ones exported here win over phpunit.xml.
+      - name: Start web server for Functional tests
+        if: matrix.test-suite == 'functional'
+        run: |
+          mkdir -p web/sites/simpletest/browser_output
+          chmod -R 777 web/sites/simpletest
+          # The server changes into the docroot before loading the router,
+          # so the router path must be absolute.
+          php -S 127.0.0.1:8888 -t web "$GITHUB_WORKSPACE/web/.ht.router.php" > /tmp/php-server.log 2>&1 &
+          echo "SIMPLETEST_BASE_URL=http://127.0.0.1:8888" >> "$GITHUB_ENV"
+          echo "BROWSERTEST_OUTPUT_DIRECTORY=$GITHUB_WORKSPACE/web/sites/simpletest/browser_output" >> "$GITHUB_ENV"
+
       - name: Mukurtu Tests
         run: |
           ./vendor/bin/phpunit --display-all-issues --testsuite "${{ matrix.test-suite }}"
         continue-on-error: false
+
+      - name: Upload Functional test output
+        if: failure() && matrix.test-suite == 'functional'
+        uses: actions/upload-artifact@v7
+        with:
+          name: functional-browser-output
+          path: |
+            web/sites/simpletest/browser_output
+            /tmp/php-server.log
+          if-no-files-found: ignore
