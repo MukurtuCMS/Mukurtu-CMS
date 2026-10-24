@@ -9,12 +9,13 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests that Entity Browser lists get the opaque drag styles and script.
+ * Tests that Entity Browser lists get the reordering styles and scripts.
  *
  * Without them, an item dragged to reorder a collection was drawn as a faint,
- * translucent image (#808). The script switches Sortable to its fallback
- * mode, and has to run after the Entity Browser script that creates the
- * Sortable instances, so it is appended to that library's own JS list.
+ * translucent image (#808), and there was no way to reorder without dragging
+ * (#2498). Both scripts have to run after the Entity Browser script that
+ * creates the Sortable instances and the reorder function, so they are
+ * appended to that library's own JS list.
  *
  * Runs the hook against entity_browser's real library definitions rather
  * than through library.discovery, because enabling mukurtu_core in a Kernel
@@ -55,13 +56,28 @@ class EntityBrowserSortableLibraryTest extends KernelTestBase {
   }
 
   /**
-   * The script is the last one in entity_reference, after Entity Browser's.
+   * The scripts load after Entity Browser's, the drag mode first.
    */
-  public function testScriptLoadsAfterEntityBrowser(): void {
+  public function testScriptsLoadAfterEntityBrowser(): void {
     $scripts = array_keys($this->libraries['entity_reference']['js']);
-    $this->assertSame($this->corePath . '/js/entity-browser-sortable.js', end($scripts));
-    $this->assertContains('js/entity_browser.entity_reference.js', $scripts);
+    $this->assertSame([
+      'js/entity_browser.entity_reference.js',
+      $this->corePath . '/js/entity-browser-sortable.js',
+      $this->corePath . '/js/entity-browser-reorder.js',
+    ], array_slice($scripts, -3));
     $this->assertFileExists(\Drupal::root() . $this->corePath . '/js/entity-browser-sortable.js');
+    $this->assertFileExists(\Drupal::root() . $this->corePath . '/js/entity-browser-reorder.js');
+  }
+
+  /**
+   * The reorder buttons get their styles and what their script needs.
+   */
+  public function testReorderButtonsHaveStylesAndDependencies(): void {
+    $library = $this->libraries['entity_reference'];
+    $this->assertArrayHasKey($this->corePath . '/css/entity-browser-reorder.css', $library['css']['component']);
+    $this->assertFileExists(\Drupal::root() . $this->corePath . '/css/entity-browser-reorder.css');
+    $this->assertContains('core/drupal.announce', $library['dependencies']);
+    $this->assertContains('core/once', $library['dependencies']);
   }
 
   /**

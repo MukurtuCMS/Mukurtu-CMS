@@ -64,6 +64,17 @@
             }
           };
 
+          // Sortable only calls its option callbacks and fires no DOM events,
+          // so tell anything else watching the list (the reorder buttons in
+          // entity-browser-reorder.js) that a drag changed the order.
+          const { onEnd } = options;
+          options.onEnd = (event) => {
+            if (onEnd) {
+              onEnd(event);
+            }
+            list.dispatchEvent(new CustomEvent('mukurtu-eb-reordered'));
+          };
+
           sortable.destroy();
           Sortable.create(list, options);
         });
