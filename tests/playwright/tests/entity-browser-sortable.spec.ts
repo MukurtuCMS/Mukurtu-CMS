@@ -22,17 +22,22 @@ import { adminAccount } from '~helpers/a11y-credentials';
 const FORM_PATH = '/node/add/collection';
 const LIST = '.field--widget-entity-browser-entity-reference .entities-list.sortable';
 
-async function addRows(page: Page, labels: string[]): Promise<Locator> {
+async function addRows(page: Page, labels: string[], labelOnly = false): Promise<Locator> {
   const list = page.locator(LIST).first();
-  await list.evaluate((el, items) => {
+  await list.evaluate((el, { items, plain }) => {
+    // Widgets set to display labels have no card: just the label text and
+    // the Remove button.
     el.innerHTML = items.map((label, i) =>
       `<div class="item-container" id="item-${i + 1}" data-entity-id="node:${i + 1}" style="padding:1rem;border:1px solid">`
-      + `<h3 class="eb-form-selection-card__title" id="item-${i + 1}-title">${label}</h3></div>`,
+      + (plain
+        ? `${label} <input type="submit" class="remove-button" value="Remove">`
+        : `<h3 class="eb-form-selection-card__title" id="item-${i + 1}-title">${label}</h3>`)
+      + '</div>',
     ).join('');
     const w = window as any;
     w.once.remove('mukurtu-eb-reorder', el);
     w.Drupal.behaviors.mukurtuEntityBrowserReorder.attach(el.parentElement);
-  }, labels);
+  }, { items: labels, plain: labelOnly });
   // The collection form's lists sit far below the fold, and mouse events
   // outside the viewport hit nothing.
   await list.locator('.item-container').first().scrollIntoViewIfNeeded();
@@ -127,6 +132,12 @@ test.describe('Entity Browser list reordering without dragging', () => {
     await expect(list.getByRole('button', { name: 'Move Second item later' })).toBeEnabled();
     await expect(list.getByRole('button', { name: 'Move Third item earlier' })).toBeEnabled();
     await expect(list.getByRole('button', { name: 'Move Third item later' })).toBeDisabled();
+  });
+
+  test('label-only items are named by their label, not their buttons', async ({ page }) => {
+    const list = await addRows(page, ['First item', 'Second item'], true);
+    await expect(list.getByRole('button', { name: 'Move First item later', exact: true })).toBeEnabled();
+    await expect(list.getByRole('button', { name: 'Move Second item earlier', exact: true })).toBeEnabled();
   });
 
   test('the keyboard moves an item, saves the order and announces it', async ({ page }) => {
