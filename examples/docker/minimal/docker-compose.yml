@@ -1,0 +1,46 @@
+# Try Mukurtu with nothing to prepare: throwaway passwords, written in this file.
+# How to run it: README.md. For anything real use ../single-site.
+services:
+  db:
+    image: mariadb:11.8
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --transaction-isolation=READ-COMMITTED
+      - --binlog-format=ROW
+    environment:
+      MARIADB_DATABASE: mukurtu
+      MARIADB_USER: mukurtu
+      MARIADB_PASSWORD: mukurtu
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      retries: 12
+
+  mukurtu:
+    image: ghcr.io/cbenning/mukurtu:4.0.6-rc2
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      MUKURTU_DB_HOST: db
+      MUKURTU_DB_NAME: mukurtu
+      MUKURTU_DB_USER: mukurtu
+      MUKURTU_DB_PASSWORD: mukurtu
+      MUKURTU_TRUSTED_HOSTS: localhost
+      MUKURTU_BASE_URL: http://localhost:8080
+      MUKURTU_ADMIN_PASSWORD: Mukurtu-Test-1
+      MUKURTU_ADMIN_EMAIL: admin@example.org
+    volumes:
+      - public:/var/www/files/public
+      - private:/var/www/files/private
+
+volumes:
+  db:
+  public:
+  private:
