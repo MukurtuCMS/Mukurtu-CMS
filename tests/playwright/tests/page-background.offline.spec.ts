@@ -152,3 +152,58 @@ test.describe('Background scrim', () => {
     expect(await backgroundImage(p, '.site-header')).toContain('linear-gradient(rgba(0, 0, 0, 0)');
   });
 });
+
+// Issue #2483: over a background image the header search sits on the photo,
+// where its grey border measured as low as 2.3:1 against light areas. A white
+// ring gives the border a known ground whatever the photo or tint.
+test.describe('Header search over a background image', () => {
+  // Mirrors block--mukurtu-v4-main-menu.html.twig, without the icon.
+  const search = (instance: 'mobile' | 'desktop') => `
+    <div class="header-search header-search--${instance}">
+      <form class="header-search__form" role="search" aria-label="Search">
+        <input class="header-search__input" type="search" aria-label="Search">
+        <button class="header-search__button" type="submit" aria-label="Search"></button>
+      </form>
+    </div>`;
+  const header = (classes: string) => `
+    <header class="site-header header${classes}" style="--mukurtu-header-background-image: ${IMAGE};">
+      ${search('mobile')}
+      <div id="header-nav" class="header-nav"><div class="header__main-nav">${search('desktop')}</div></div>
+    </header>`;
+
+  const shadows = (p: Page) => p.locator('.header-search__form').evaluateAll(
+    (forms) => forms.map((form) => getComputedStyle(form).boxShadow),
+  );
+  const RING = `${WHITE} 0px 0px 0px 2px`;
+
+  for (const tint of [true, false]) {
+    test(`rings the search over a header image${tint ? '' : ' with no tint'}`, async ({ page: p }) => {
+      await load(p, header(` site-header--has-background site-header--text-dark${tint ? '' : ' site-header--no-tint'}`));
+      expect(await shadows(p)).toEqual([RING, RING]);
+    });
+
+    test(`rings the search over a page image${tint ? '' : ' with no tint'}`, async ({ page: p }) => {
+      await load(p, page(header(''), { treatment: 'light', tint }));
+      expect(await shadows(p)).toEqual([RING, RING]);
+    });
+  }
+
+  test('leaves the search alone on a plain header', async ({ page: p }) => {
+    await load(p, header(''));
+    expect(await shadows(p)).toEqual(['none', 'none']);
+  });
+
+  test('the border meets 3:1 against the ring', async ({ page: p }) => {
+    await load(p, header(' site-header--has-background site-header--text-light'));
+    const ratio = await p.locator('.header-search--mobile .header-search__input').evaluate((el) => {
+      const [r, g, b] = getComputedStyle(el).borderTopColor.match(/\d+/g)!.map(Number);
+      const channel = (c: number) => {
+        const s = c / 255;
+        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      };
+      const luminance = 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+      return 1.05 / (luminance + 0.05);
+    });
+    expect(ratio).toBeGreaterThanOrEqual(3);
+  });
+});

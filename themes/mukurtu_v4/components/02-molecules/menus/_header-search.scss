@@ -85,6 +85,22 @@ body:not(.is-always-mobile-nav) {
   inline-size: 100%;
 }
 
+/* Over a header or page background image the box sits on the photo, where
+ * its grey border measured as low as 2.3:1 against light areas - under the
+ * 3:1 a field's boundary needs (1.4.11). A white ring gives the border a
+ * known ground on any photo and any tint setting, including no tint: #767676
+ * on white is 4.54:1. Both instances, because with a page background the
+ * desktop nav bar turns transparent too (see _layout.scss); on its usual
+ * white bar the ring is invisible.
+ *
+ * box-shadow rather than outline, which the input uses for focus. Forced
+ * colours drops the shadow and keeps the system-colour borders. */
+.site-header--has-background .header-search__form,
+.page--has-background .site-header .header-search__form {
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--color-white);
+}
+
 .header-search__input {
   appearance: none;
   flex: 1 1 auto;
