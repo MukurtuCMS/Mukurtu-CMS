@@ -149,6 +149,18 @@ test.describe('Entity Browser list reordering without dragging', () => {
     await expect(list.getByRole('button', { name: 'Move First item earlier' })).toBeFocused();
   });
 
+  test('a focused arrow keeps a visible outline in forced colors', async ({ page }) => {
+    // Gin shows focus as a box-shadow, which forced colors drops.
+    await page.emulateMedia({ forcedColors: 'active' });
+    const list = await addRows(page, ['First item', 'Second item']);
+    const later = list.getByRole('button', { name: 'Move First item later' });
+    await later.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(later).toBeFocused();
+    expect(await later.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe('solid');
+  });
+
   test('the end arrows follow a drag', async ({ page }) => {
     const list = await addRows(page, ['First item', 'Second item', 'Third item']);
     const from = (await list.locator('.item-container').first().locator('h3').boundingBox())!;

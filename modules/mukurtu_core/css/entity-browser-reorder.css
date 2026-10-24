@@ -32,9 +32,15 @@
   background-color: var(--gin-bg-item-hover, Canvas);
 }
 
-.mukurtu-eb-move__button:focus-visible {
-  outline: 2px solid var(--gin-color-focus, Highlight);
-  outline-offset: 2px;
+/* Gin draws focus as a box-shadow, which forced colors removes, leaving no
+ * focus indicator at all (WCAG 2.4.7). Gin's ring stays in normal modes. The
+ * extra class outranks Gin's `:where(*) .page-wrapper :focus` reset, which
+ * loads later and sets outline: none. */
+@media (forced-colors: active) {
+  .entities-list .mukurtu-eb-move__button:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }
 
 /* Disabled controls are exempt from contrast minimums, and fading these makes
