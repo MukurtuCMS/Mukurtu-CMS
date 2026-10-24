@@ -48,9 +48,15 @@
       box-shadow: none;
     }
 
+    // At large text sizes on a phone, one word of a block title can be wider
+    // than the screen ("Community" is 394px at 320px and 200% text), so allow
+    // a mid-word break as a last resort rather than scrolling the page
+    // sideways (WCAG 1.4.10, #2487).
     h2 {
       text-align: center;
       margin-block-end: var(--v-space-2xs);
+      overflow-wrap: anywhere;
+      word-break: normal;
     }
 
     // Names-only category cards zero their heading margin so the focus ring
@@ -61,8 +67,11 @@
     }
 
     // Text block: add breathing room around the body content.
+    // Capped by the viewport for the same reason as the image with
+    // description card (#2487): 12.5vw is 40px at 320px, so the cap only
+    // applies at large text sizes on narrow screens.
     &:has(.field--name-body) {
-      padding-inline: var(--v-space-xs);
+      padding-inline: min(var(--v-space-xs), 12.5vw);
       padding-block-end: var(--v-space-xs);
     }
   }

@@ -139,11 +139,15 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
    * {@inheritdoc}
    */
   public function massageFormValues($values, array $form, FormStateInterface $form_state): array {
-    $names = json_decode((string) ($values['names'] ?? ''), associative: TRUE);
+    // Tagify submits JSON strings. When the widget is hidden, as it is for an
+    // untranslatable field on a translation form, the names element falls
+    // back to its #default_value instead, which is an array when the field
+    // is empty.
+    $names = is_string($values['names'] ?? NULL) ? json_decode($values['names'], associative: TRUE) : NULL;
     if (!is_array($names)) {
       return [];
     }
-    $roles = json_decode((string) ($values['roles'] ?? ''), associative: TRUE);
+    $roles = is_string($values['roles'] ?? NULL) ? json_decode($values['roles'], associative: TRUE) : NULL;
     $roles = is_array($roles) ? array_values($roles) : [];
 
     $items = [];
