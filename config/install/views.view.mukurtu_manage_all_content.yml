@@ -115,6 +115,10 @@ display:
                 label_override: Delete
             43:
               action_id: mukurtu_export_adhoc_export_action
+            44:
+              action_id: mukurtu_add_to_collection_action
+            45:
+              action_id: mukurtu_add_to_word_list_action
         title:
           id: title
           table: node_field_data

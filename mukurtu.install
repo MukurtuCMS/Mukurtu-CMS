@@ -919,3 +919,41 @@ function mukurtu_update_40033(): string {
 
   return $messages ? ucfirst(implode('; ', $messages)) . '.' : 'Display style was already present; nothing to do.';
 }
+
+/**
+ * Add the Add to Collection and Add to Word List bulk actions to Manage content.
+ */
+function mukurtu_update_40034(): string {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return (string) t('The Manage content view is not installed on this site; nothing to change.');
+  }
+
+  // Merge into whatever actions the site already offers rather than replacing
+  // the list, so sites that removed or added actions keep their choices.
+  $wanted = ['mukurtu_add_to_collection_action', 'mukurtu_add_to_word_list_action'];
+  $added = [];
+  $displays = $config->get('display') ?? [];
+  foreach ($displays as $display_id => $display) {
+    $path = "display.$display_id.display_options.fields.views_bulk_operations_bulk_form.selected_actions";
+    $actions = $config->get($path);
+    if (!is_array($actions)) {
+      continue;
+    }
+    $present = array_column($actions, 'action_id');
+    foreach ($wanted as $action_id) {
+      if (!in_array($action_id, $present, TRUE)) {
+        $actions[$actions ? max(array_keys($actions)) + 1 : 0] = ['action_id' => $action_id];
+        $added[$action_id] = TRUE;
+      }
+    }
+    $config->set($path, $actions);
+  }
+
+  if (!$added) {
+    return (string) t('The Manage content view already offers both actions, or has no bulk operations; nothing to change.');
+  }
+
+  $config->save();
+  return (string) t('Added the Add to Collection and Add to Word List bulk actions to Manage content.');
+}
