@@ -4,7 +4,7 @@ namespace Drupal\mukurtu_dictionary\Plugin\Action;
 
 use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\mukurtu_core\Plugin\Action\AddToContainerActionBase;
+use Drupal\mukurtu_core\Plugin\Action\ContainerMembershipActionBase;
 use Drupal\mukurtu_dictionary\Entity\WordList;
 use Drupal\node\NodeInterface;
 
@@ -16,7 +16,7 @@ use Drupal\node\NodeInterface;
   label: new TranslatableMarkup('Add to Word List'),
   type: 'node',
 )]
-class MukurtuAddToWordListAction extends AddToContainerActionBase {
+class MukurtuAddToWordListAction extends ContainerMembershipActionBase {
 
   /**
    * {@inheritdoc}
@@ -63,14 +63,14 @@ class MukurtuAddToWordListAction extends AddToContainerActionBase {
   /**
    * {@inheritdoc}
    */
-  protected function addedMessage(string $label): TranslatableMarkup {
+  protected function doneMessage(string $label): TranslatableMarkup {
     return $this->t('Added to @list', ['@list' => $label]);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function alreadyMessage(string $label): TranslatableMarkup {
+  protected function skippedMessage(string $label): TranslatableMarkup {
     return $this->t('Already in @list', ['@list' => $label]);
   }
 

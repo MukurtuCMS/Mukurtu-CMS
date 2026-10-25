@@ -921,7 +921,7 @@ function mukurtu_update_40033(): string {
 }
 
 /**
- * Add the Add to Collection and Add to Word List bulk actions to Manage content.
+ * Add bulk actions to add items to, and remove them from, collections and word lists.
  */
 function mukurtu_update_40034(): string {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
@@ -931,7 +931,13 @@ function mukurtu_update_40034(): string {
 
   // Merge into whatever actions the site already offers rather than replacing
   // the list, so sites that removed or added actions keep their choices.
-  $wanted = ['mukurtu_add_to_collection_action', 'mukurtu_add_to_word_list_action'];
+  // Removing is harder to notice than adding, so those actions ask first.
+  $wanted = [
+    'mukurtu_add_to_collection_action' => [],
+    'mukurtu_add_to_word_list_action' => [],
+    'mukurtu_remove_from_collection_action' => ['add_confirmation' => TRUE],
+    'mukurtu_remove_from_word_list_action' => ['add_confirmation' => TRUE],
+  ];
   $added = [];
   $displays = $config->get('display') ?? [];
   foreach ($displays as $display_id => $display) {
@@ -941,9 +947,9 @@ function mukurtu_update_40034(): string {
       continue;
     }
     $present = array_column($actions, 'action_id');
-    foreach ($wanted as $action_id) {
+    foreach ($wanted as $action_id => $preconfiguration) {
       if (!in_array($action_id, $present, TRUE)) {
-        $actions[$actions ? max(array_keys($actions)) + 1 : 0] = ['action_id' => $action_id];
+        $actions[$actions ? max(array_keys($actions)) + 1 : 0] = ['action_id' => $action_id] + ($preconfiguration ? ['preconfiguration' => $preconfiguration] : []);
         $added[$action_id] = TRUE;
       }
     }
@@ -951,9 +957,9 @@ function mukurtu_update_40034(): string {
   }
 
   if (!$added) {
-    return (string) t('The Manage content view already offers both actions, or has no bulk operations; nothing to change.');
+    return (string) t('The Manage content view already offers these actions, or has no bulk operations; nothing to change.');
   }
 
   $config->save();
-  return (string) t('Added the Add to Collection and Add to Word List bulk actions to Manage content.');
+  return (string) t('Added bulk actions to add items to, and remove them from, collections and word lists on Manage content.');
 }

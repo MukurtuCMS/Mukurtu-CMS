@@ -8,15 +8,16 @@ use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the Add to Collection bulk action.
+ * Tests the Add to Collection and Remove from Collection bulk actions.
  */
 #[Group('mukurtu_collection')]
-class AddToCollectionActionTest extends CollectionTestBase {
+class CollectionMembershipActionTest extends CollectionTestBase {
 
   /**
    * {@inheritdoc}
@@ -66,9 +67,9 @@ class AddToCollectionActionTest extends CollectionTestBase {
   /**
    * Returns a configured action instance.
    */
-  protected function action(?int $collection_id = NULL) {
+  protected function action(?int $collection_id = NULL, string $plugin_id = 'mukurtu_add_to_collection_action') {
     $action = $this->container->get('plugin.manager.views_bulk_operations_action')
-      ->createInstance('mukurtu_add_to_collection_action');
+      ->createInstance($plugin_id);
     $action->setConfiguration(['container' => $collection_id ?? $this->collection->id()]);
     return $action;
   }
@@ -210,6 +211,59 @@ class AddToCollectionActionTest extends CollectionTestBase {
     $this->assertSame('item', $form['container']['#type']);
     $this->assertSame('There are no collections you can add items to.', (string) $form['container']['#markup']);
     $this->assertFalse($form['actions']['submit']['#access']);
+  }
+
+  /**
+   * Removing takes items out in one revision and skips ones not present.
+   */
+  public function testRemovesItemsInOneRevision(): void {
+    $a = $this->person('A');
+    $b = $this->person('B');
+    $c = $this->person('C');
+    $this->action()->executeMultiple([$a, $b]);
+    $storage = $this->container->get('entity_type.manager')->getStorage('node');
+    $revisions_before = count($storage->revisionIds($this->collection));
+
+    $results = $this->action(NULL, 'mukurtu_remove_from_collection_action')->executeMultiple([$a, $c, $a]);
+
+    $this->assertSame([(int) $b->id()], $this->itemIds());
+    $this->assertSame(['status', 'warning', 'warning'], array_column($results, 'type'));
+    $this->assertSame('Removed from Collection A', $results[0]['message']);
+    $this->assertSame('Not in Collection A', $results[1]['message']);
+    $this->assertCount($revisions_before + 1, $storage->revisionIds($this->collection));
+    $latest = $storage->loadRevision($storage->getLatestRevisionId($this->collection->id()));
+    $this->assertSame('Removed 1 item in a bulk operation.', $latest->getRevisionLogMessage());
+  }
+
+  /**
+   * Any item can be removed, even a type that can't be added.
+   */
+  public function testRemoveAccessIgnoresBundle(): void {
+    // Page isn't protocol controlled here, so view access comes from
+    // node_access_test's grants.
+    $role = Role::load('authenticated');
+    $role->grantPermission('node test view');
+    $role->save();
+    $page = $this->buildItem('Page');
+    $page->save();
+
+    $this->assertTrue($this->action(NULL, 'mukurtu_remove_from_collection_action')->access($page, $this->editor));
+  }
+
+  /**
+   * Removing from a collection the editor can't update is refused.
+   */
+  public function testRemoveRefusesCollectionWithoutUpdateAccess(): void {
+    $a = $this->person('A');
+    $this->action()->executeMultiple([$a]);
+    $outsider = User::create(['name' => 'outsider']);
+    $outsider->save();
+    $this->container->get('current_user')->setAccount($outsider);
+
+    $results = $this->action(NULL, 'mukurtu_remove_from_collection_action')->executeMultiple([$a]);
+
+    $this->assertSame([(int) $a->id()], $this->itemIds());
+    $this->assertSame("Couldn't remove from Collection A", $results[0]['message']);
   }
 
 }

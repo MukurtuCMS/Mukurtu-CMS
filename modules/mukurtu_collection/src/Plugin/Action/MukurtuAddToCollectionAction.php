@@ -5,7 +5,7 @@ namespace Drupal\mukurtu_collection\Plugin\Action;
 use Drupal\Core\Action\Attribute\Action;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController;
-use Drupal\mukurtu_core\Plugin\Action\AddToContainerActionBase;
+use Drupal\mukurtu_core\Plugin\Action\ContainerMembershipActionBase;
 use Drupal\node\NodeInterface;
 
 /**
@@ -16,7 +16,7 @@ use Drupal\node\NodeInterface;
   label: new TranslatableMarkup('Add to Collection'),
   type: 'node',
 )]
-class MukurtuAddToCollectionAction extends AddToContainerActionBase {
+class MukurtuAddToCollectionAction extends ContainerMembershipActionBase {
 
   /**
    * {@inheritdoc}
@@ -63,14 +63,14 @@ class MukurtuAddToCollectionAction extends AddToContainerActionBase {
   /**
    * {@inheritdoc}
    */
-  protected function addedMessage(string $label): TranslatableMarkup {
+  protected function doneMessage(string $label): TranslatableMarkup {
     return $this->t('Added to @collection', ['@collection' => $label]);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function alreadyMessage(string $label): TranslatableMarkup {
+  protected function skippedMessage(string $label): TranslatableMarkup {
     return $this->t('Already in @collection', ['@collection' => $label]);
   }
 

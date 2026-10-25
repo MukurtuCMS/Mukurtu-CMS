@@ -119,6 +119,14 @@ display:
               action_id: mukurtu_add_to_collection_action
             45:
               action_id: mukurtu_add_to_word_list_action
+            46:
+              action_id: mukurtu_remove_from_collection_action
+              preconfiguration:
+                add_confirmation: true
+            47:
+              action_id: mukurtu_remove_from_word_list_action
+              preconfiguration:
+                add_confirmation: true
         title:
           id: title
           table: node_field_data

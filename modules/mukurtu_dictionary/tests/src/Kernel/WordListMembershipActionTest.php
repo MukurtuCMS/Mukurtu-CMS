@@ -12,10 +12,10 @@ use Drupal\user\UserInterface;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the Add to Word List bulk action.
+ * Tests the Add to Word List and Remove from Word List bulk actions.
  */
 #[Group('mukurtu_dictionary')]
-class AddToWordListActionTest extends DictionaryTestBase {
+class WordListMembershipActionTest extends DictionaryTestBase {
 
   /**
    * {@inheritdoc}
@@ -62,9 +62,9 @@ class AddToWordListActionTest extends DictionaryTestBase {
   /**
    * Returns a configured action instance.
    */
-  protected function action() {
+  protected function action(string $plugin_id = 'mukurtu_add_to_word_list_action') {
     $action = $this->container->get('plugin.manager.views_bulk_operations_action')
-      ->createInstance('mukurtu_add_to_word_list_action');
+      ->createInstance($plugin_id);
     $action->setConfiguration(['container' => $this->list->id()]);
     return $action;
   }
@@ -132,6 +132,37 @@ class AddToWordListActionTest extends DictionaryTestBase {
 
     $this->assertSame('There are no word lists you can add words to.', (string) $form['container']['#markup']);
     $this->assertFalse($form['actions']['submit']['#access']);
+  }
+
+  /**
+   * Removing takes words out and skips words not in the list.
+   */
+  public function testRemovesWordsAndSkipsMissing(): void {
+    $a = $this->buildDictionaryWord('a');
+    $a->save();
+    $b = $this->buildDictionaryWord('b');
+    $b->save();
+    $this->action()->executeMultiple([$a]);
+
+    $results = $this->action('mukurtu_remove_from_word_list_action')->executeMultiple([$a, $b]);
+
+    $this->assertSame([], $this->wordIds());
+    $this->assertSame('Removed from List A', $results[0]['message']);
+    $this->assertSame('Not in List A', $results[1]['message']);
+    $this->assertSame('warning', $results[1]['type']);
+  }
+
+  /**
+   * With no list to pick, the remove form says so in its own words.
+   */
+  public function testRemovePickerWithNoWordLists(): void {
+    $outsider = User::create(['name' => 'outsider']);
+    $outsider->save();
+    $this->container->get('current_user')->setAccount($outsider);
+
+    $form = $this->action('mukurtu_remove_from_word_list_action')->buildConfigurationForm(['actions' => ['submit' => []]], new FormState());
+
+    $this->assertSame('There are no word lists you can remove words from.', (string) $form['container']['#markup']);
   }
 
 }

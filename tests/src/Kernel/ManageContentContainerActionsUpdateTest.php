@@ -11,9 +11,9 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests mukurtu_update_40034().
  *
- * The hook adds the Add to Collection and Add to Word List bulk actions to the
- * Manage content view on existing sites, keeping any actions the site has
- * added or removed.
+ * The hook adds bulk actions to add items to, and remove them from,
+ * collections and word lists on the Manage content view of existing sites,
+ * keeping any actions the site has added or removed.
  */
 #[Group('mukurtu')]
 class ManageContentContainerActionsUpdateTest extends KernelTestBase {
@@ -82,6 +82,8 @@ class ManageContentContainerActionsUpdateTest extends KernelTestBase {
       50 => ['action_id' => 'site_custom_action', 'preconfiguration' => ['label_override' => 'Custom']],
       51 => ['action_id' => 'mukurtu_add_to_collection_action'],
       52 => ['action_id' => 'mukurtu_add_to_word_list_action'],
+      53 => ['action_id' => 'mukurtu_remove_from_collection_action', 'preconfiguration' => ['add_confirmation' => TRUE]],
+      54 => ['action_id' => 'mukurtu_remove_from_word_list_action', 'preconfiguration' => ['add_confirmation' => TRUE]],
     ], $this->storedActions());
     $this->assertStringContainsString('Added', $message);
   }
@@ -99,6 +101,8 @@ class ManageContentContainerActionsUpdateTest extends KernelTestBase {
     $this->assertSame([
       4 => ['action_id' => 'mukurtu_add_to_collection_action'],
       5 => ['action_id' => 'mukurtu_add_to_word_list_action'],
+      6 => ['action_id' => 'mukurtu_remove_from_collection_action', 'preconfiguration' => ['add_confirmation' => TRUE]],
+      7 => ['action_id' => 'mukurtu_remove_from_word_list_action', 'preconfiguration' => ['add_confirmation' => TRUE]],
     ], $this->storedActions());
   }
 
@@ -125,15 +129,26 @@ class ManageContentContainerActionsUpdateTest extends KernelTestBase {
   }
 
   /**
-   * The shipped view offers both actions, so new sites match updated ones.
+   * The shipped view and the hook add the same actions and settings.
+   *
+   * New sites then match updated ones, including the confirmation step on the
+   * remove actions.
    */
-  public function testShippedViewOffersBothActions(): void {
+  public function testShippedViewMatchesUpdate(): void {
     $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
     $data = (new FileStorage($profile_path . '/config/install'))->read('views.view.mukurtu_manage_all_content');
-    $ids = array_column($data['display']['default']['display_options']['fields']['views_bulk_operations_bulk_form']['selected_actions'], 'action_id');
+    $shipped = [];
+    foreach ($data['display']['default']['display_options']['fields']['views_bulk_operations_bulk_form']['selected_actions'] as $action) {
+      $shipped[$action['action_id']] = $action['preconfiguration'] ?? [];
+    }
 
-    $this->assertContains('mukurtu_add_to_collection_action', $ids);
-    $this->assertContains('mukurtu_add_to_word_list_action', $ids);
+    $this->writeView([]);
+    mukurtu_update_40034();
+    foreach ($this->storedActions() as $action) {
+      $this->assertArrayHasKey($action['action_id'], $shipped);
+      $this->assertSame($shipped[$action['action_id']], $action['preconfiguration'] ?? []);
+    }
+    $this->assertCount(4, $this->storedActions());
   }
 
 }

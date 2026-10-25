@@ -22,14 +22,15 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Base for bulk actions that add the selected items to one container node.
+ * Base for bulk actions that add items to, or remove them from, a container.
  *
  * A container is a node that lists other nodes in a multi-value reference
  * field, such as a collection or a word list. The editor picks one container
- * they can update. Items already in it are skipped, and the container is
- * saved once per batch, as a new revision, rather than once per item.
+ * they can update. Items that are already in it (when adding) or not in it
+ * (when removing) are skipped, and the container is saved once per batch, as
+ * a new revision, rather than once per item.
  */
-abstract class AddToContainerActionBase extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface, PluginFormInterface {
+abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface, PluginFormInterface {
 
   use StringTranslationTrait;
 
@@ -73,6 +74,13 @@ abstract class AddToContainerActionBase extends ViewsBulkOperationsActionBase im
   abstract protected function itemsField(): string;
 
   /**
+   * Whether this action removes items rather than adding them.
+   */
+  protected function removes(): bool {
+    return FALSE;
+  }
+
+  /**
    * Whether the node can be added to this kind of container at all.
    */
   abstract protected function isEligibleItem(NodeInterface $node): bool;
@@ -93,19 +101,28 @@ abstract class AddToContainerActionBase extends ViewsBulkOperationsActionBase im
   abstract protected function noContainersMessage(): TranslatableMarkup;
 
   /**
-   * Result for an item that was added.
+   * Result for an item that was added or removed.
    */
-  abstract protected function addedMessage(string $label): TranslatableMarkup;
+  abstract protected function doneMessage(string $label): TranslatableMarkup;
 
   /**
-   * Result for an item that was already in the container.
+   * Result for an item that was already in, or not in, the container.
    */
-  abstract protected function alreadyMessage(string $label): TranslatableMarkup;
+  abstract protected function skippedMessage(string $label): TranslatableMarkup;
 
   /**
-   * Result for an item that couldn't be added.
+   * Result for an item that couldn't be added or removed.
    */
   abstract protected function failedMessage(string $label): TranslatableMarkup;
+
+  /**
+   * The container's revision log message for a batch.
+   */
+  protected function revisionLogMessage(int $count): string {
+    return $this->removes()
+      ? (string) $this->formatPlural($count, 'Removed 1 item in a bulk operation.', 'Removed @count items in a bulk operation.')
+      : (string) $this->formatPlural($count, 'Added 1 item in a bulk operation.', 'Added @count items in a bulk operation.');
+  }
 
   /**
    * {@inheritdoc}
@@ -137,25 +154,33 @@ abstract class AddToContainerActionBase extends ViewsBulkOperationsActionBase im
     $present = array_flip(array_column($container->get($this->itemsField())->getValue(), 'target_id'));
 
     // /admin/content lists one row per translation, so the same node can
-    // arrive more than once in a batch. Track additions by ID.
+    // arrive more than once in a batch. Track membership by ID as it changes.
     $results = [];
-    $added = [];
+    $changed = [];
     foreach ($objects as $delta => $entity) {
-      if (isset($present[$entity->id()])) {
-        $results[$delta] = $this->result($this->alreadyMessage($label), 'warning');
+      $id = $entity->id();
+      $skip = $this->removes() ? !isset($present[$id]) : isset($present[$id]);
+      if ($skip) {
+        $results[$delta] = $this->result($this->skippedMessage($label), 'warning');
         continue;
       }
-      $present[$entity->id()] = TRUE;
-      $added[$delta] = $entity;
-      $container->add($entity);
-      $results[$delta] = $this->result($this->addedMessage($label));
+      if ($this->removes()) {
+        unset($present[$id]);
+        $container->remove($entity);
+      }
+      else {
+        $present[$id] = TRUE;
+        $container->add($entity);
+      }
+      $changed[$delta] = $entity;
+      $results[$delta] = $this->result($this->doneMessage($label));
     }
 
-    if ($added) {
+    if ($changed) {
       $container->setNewRevision(TRUE);
       $container->setRevisionUserId($this->currentUser->id());
       $container->setRevisionCreationTime($this->time->getRequestTime());
-      $container->setRevisionLogMessage((string) $this->formatPlural(count($added), 'Added 1 item in a bulk operation.', 'Added @count items in a bulk operation.'));
+      $container->setRevisionLogMessage($this->revisionLogMessage(count($changed)));
 
       // Validate only the items field. Whole-entity validation also rechecks
       // unrelated references, such as a blocked owner, that the editor can't
@@ -163,7 +188,7 @@ abstract class AddToContainerActionBase extends ViewsBulkOperationsActionBase im
       $saved = FALSE;
       $violations = $container->get($this->itemsField())->validate();
       if ($violations->count() > 0) {
-        $this->logger->warning('Bulk add to @container failed validation: @property: @message', [
+        $this->logger->warning('Bulk change to @container failed validation: @property: @message', [
           '@container' => $container->id(),
           '@property' => $violations[0]->getPropertyPath(),
           '@message' => $violations[0]->getMessage(),
@@ -179,7 +204,7 @@ abstract class AddToContainerActionBase extends ViewsBulkOperationsActionBase im
         }
       }
       if (!$saved) {
-        foreach (array_keys($added) as $delta) {
+        foreach (array_keys($changed) as $delta) {
           $results[$delta] = $this->result($this->failedMessage($label), 'error');
         }
       }
