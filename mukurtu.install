@@ -947,3 +947,19 @@ function mukurtu_update_40035(): string {
 
   return $messages ? implode(' ', $messages) : (string) t('The Bulk Editor role and permission are already in place; nothing to change.');
 }
+
+/**
+ * Add the bulk edit page, one tab per content type.
+ */
+function mukurtu_update_40036(): string {
+  $storage = \Drupal::entityTypeManager()->getStorage('view');
+  if ($storage->load('mukurtu_bulk_edit_content')) {
+    return (string) t('The bulk edit page is already installed; nothing to change.');
+  }
+
+  // Import the shipped view rather than rebuilding it here, so the update
+  // and a fresh install can't drift apart.
+  $source = new FileStorage(\Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install');
+  $storage->create($source->read('views.view.mukurtu_bulk_edit_content'))->save();
+  return (string) t('Added the bulk edit page.');
+}

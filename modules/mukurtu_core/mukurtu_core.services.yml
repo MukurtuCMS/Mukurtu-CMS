@@ -68,3 +68,6 @@ services:
   mukurtu_core.klaro_config_keeper:
     class: Drupal\mukurtu_core\Service\KlaroConfigKeeper
     arguments: ['@config.storage', '@config.factory', '@config.manager', '@entity_type.manager', '@config.typed', '@state', '@extension.list.profile']
+  mukurtu_core.bulk_edit_columns:
+    class: Drupal\mukurtu_core\BulkEdit\BulkEditColumns
+    arguments: ['@entity_type.manager', '@entity_field.manager', '@user.data']

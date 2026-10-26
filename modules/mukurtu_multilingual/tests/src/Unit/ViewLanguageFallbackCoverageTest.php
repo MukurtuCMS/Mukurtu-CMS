@@ -37,6 +37,7 @@ class ViewLanguageFallbackCoverageTest extends UnitTestCase {
   private const EXEMPTIONS = [
     // Admin-only listings (not visitor-facing browse/search).
     'mukurtu_manage_all_content' => 'admin/content - editorial content management, not a visitor-facing listing',
+    'mukurtu_bulk_edit_content' => 'admin/content/bulk - editorial bulk editing; lists one row per translation on purpose so each can be selected',
     'mukurtu_all_paragraphs' => 'admin/paragraphs-list - admin tooling',
     'mukurtu_import_results_communities' => 'admin import-results review UI',
     'mukurtu_import_results_content' => 'admin import-results review UI',
