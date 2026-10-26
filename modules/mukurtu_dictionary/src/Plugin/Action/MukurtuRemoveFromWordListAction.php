@@ -42,15 +42,15 @@ class MukurtuRemoveFromWordListAction extends MukurtuAddToWordListAction {
   /**
    * {@inheritdoc}
    */
-  protected function doneMessage(string $label): TranslatableMarkup {
-    return $this->t('Removed from @list', ['@list' => $label]);
+  protected function doneMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Removed from <a href=":url">@list</a>', ['@list' => $label, ':url' => $url]);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function skippedMessage(string $label): TranslatableMarkup {
-    return $this->t('Not in @list', ['@list' => $label]);
+  protected function skippedMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Not in <a href=":url">@list</a>', ['@list' => $label, ':url' => $url]);
   }
 
   /**

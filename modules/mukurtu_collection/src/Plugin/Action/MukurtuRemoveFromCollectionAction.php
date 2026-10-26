@@ -42,15 +42,15 @@ class MukurtuRemoveFromCollectionAction extends MukurtuAddToCollectionAction {
   /**
    * {@inheritdoc}
    */
-  protected function doneMessage(string $label): TranslatableMarkup {
-    return $this->t('Removed from @collection', ['@collection' => $label]);
+  protected function doneMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Removed from <a href=":url">@collection</a>', ['@collection' => $label, ':url' => $url]);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function skippedMessage(string $label): TranslatableMarkup {
-    return $this->t('Not in @collection', ['@collection' => $label]);
+  protected function skippedMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Not in <a href=":url">@collection</a>', ['@collection' => $label, ':url' => $url]);
   }
 
   /**

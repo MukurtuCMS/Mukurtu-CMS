@@ -79,6 +79,13 @@ class WordListMembershipActionTest extends DictionaryTestBase {
   }
 
   /**
+   * Returns the result message markup that links to List A.
+   */
+  protected function linked(string $prefix): string {
+    return $prefix . ' <a href="' . $this->list->toUrl()->toString() . '">List A</a>';
+  }
+
+  /**
    * The editor is a real, non-admin account with update access to the list.
    */
   public function testEditorIsNotUidOne(): void {
@@ -99,9 +106,9 @@ class WordListMembershipActionTest extends DictionaryTestBase {
     $second = $this->action()->executeMultiple([$a, $b]);
 
     $this->assertSame([(int) $a->id(), (int) $b->id()], $this->wordIds());
-    $this->assertSame('Added to List A', $first[0]['message']);
+    $this->assertSame($this->linked('Added to'), $first[0]['message']);
     $this->assertSame(['warning', 'status'], array_column($second, 'type'));
-    $this->assertSame('Already in List A', $second[0]['message']);
+    $this->assertSame($this->linked('Already in'), $second[0]['message']);
   }
 
   /**
@@ -147,8 +154,8 @@ class WordListMembershipActionTest extends DictionaryTestBase {
     $results = $this->action('mukurtu_remove_from_word_list_action')->executeMultiple([$a, $b]);
 
     $this->assertSame([], $this->wordIds());
-    $this->assertSame('Removed from List A', $results[0]['message']);
-    $this->assertSame('Not in List A', $results[1]['message']);
+    $this->assertSame($this->linked('Removed from'), $results[0]['message']);
+    $this->assertSame($this->linked('Not in'), $results[1]['message']);
     $this->assertSame('warning', $results[1]['type']);
   }
 

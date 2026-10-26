@@ -50,6 +50,8 @@ class CollectionMembershipActionTest extends CollectionTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+    // Result messages link to the collection, which looks up path aliases.
+    $this->installEntitySchema('path_alias');
 
     // A bundle collections accept; page (from the base) isn't one.
     NodeType::create(['type' => 'person', 'name' => 'Person'])->save();
@@ -95,6 +97,13 @@ class CollectionMembershipActionTest extends CollectionTestBase {
   }
 
   /**
+   * Returns the result message markup that links to Collection A.
+   */
+  protected function linked(string $prefix): string {
+    return $prefix . ' <a href="' . $this->collection->toUrl()->toString() . '">Collection A</a>';
+  }
+
+  /**
    * The editor is a real, non-admin account.
    */
   public function testEditorIsNotUidOne(): void {
@@ -114,7 +123,7 @@ class CollectionMembershipActionTest extends CollectionTestBase {
 
     $this->assertSame([(int) $a->id(), (int) $b->id()], $this->itemIds());
     $this->assertSame(['status', 'status'], array_column($results, 'type'));
-    $this->assertSame('Added to Collection A', $results[0]['message']);
+    $this->assertSame($this->linked('Added to'), $results[0]['message']);
 
     $storage = $this->container->get('entity_type.manager')->getStorage('node');
     $this->assertCount($revisions_before + 1, $storage->revisionIds($this->collection));
@@ -136,7 +145,7 @@ class CollectionMembershipActionTest extends CollectionTestBase {
 
     $this->assertSame([(int) $a->id(), (int) $b->id()], $this->itemIds());
     $this->assertSame(['warning', 'status', 'warning'], array_column($results, 'type'));
-    $this->assertSame('Already in Collection A', $results[0]['message']);
+    $this->assertSame($this->linked('Already in'), $results[0]['message']);
   }
 
   /**
@@ -199,6 +208,18 @@ class CollectionMembershipActionTest extends CollectionTestBase {
   }
 
   /**
+   * The collection name in the result link is escaped.
+   */
+  public function testLinkTextIsEscaped(): void {
+    $collection = $this->buildCollection('<em>B</em>');
+    $collection->save();
+
+    $results = $this->action((int) $collection->id())->executeMultiple([$this->person('A')]);
+
+    $this->assertSame('Added to <a href="' . $collection->toUrl()->toString() . '">&lt;em&gt;B&lt;/em&gt;</a>', $results[0]['message']);
+  }
+
+  /**
    * With nothing to pick, the form explains why and hides Apply.
    */
   public function testPickerWithNoCollections(): void {
@@ -228,8 +249,8 @@ class CollectionMembershipActionTest extends CollectionTestBase {
 
     $this->assertSame([(int) $b->id()], $this->itemIds());
     $this->assertSame(['status', 'warning', 'warning'], array_column($results, 'type'));
-    $this->assertSame('Removed from Collection A', $results[0]['message']);
-    $this->assertSame('Not in Collection A', $results[1]['message']);
+    $this->assertSame($this->linked('Removed from'), $results[0]['message']);
+    $this->assertSame($this->linked('Not in'), $results[1]['message']);
     $this->assertCount($revisions_before + 1, $storage->revisionIds($this->collection));
     $latest = $storage->loadRevision($storage->getLatestRevisionId($this->collection->id()));
     $this->assertSame('Removed 1 item in a bulk operation.', $latest->getRevisionLogMessage());

@@ -101,14 +101,16 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
   abstract protected function noContainersMessage(): TranslatableMarkup;
 
   /**
-   * Result for an item that was added or removed.
+   * Result for an item that was added or removed, linking to the container.
    */
-  abstract protected function doneMessage(string $label): TranslatableMarkup;
+  abstract protected function doneMessage(string $label, string $url): TranslatableMarkup;
 
   /**
    * Result for an item that was already in, or not in, the container.
+   *
+   * Links to the container, like the done message.
    */
-  abstract protected function skippedMessage(string $label): TranslatableMarkup;
+  abstract protected function skippedMessage(string $label, string $url): TranslatableMarkup;
 
   /**
    * Result for an item that couldn't be added or removed.
@@ -151,6 +153,7 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
     }
 
     $label = $this->label($container);
+    $url = $this->entityRepository->getTranslationFromContext($container)->toUrl()->toString();
     $present = array_flip(array_column($container->get($this->itemsField())->getValue(), 'target_id'));
 
     // /admin/content lists one row per translation, so the same node can
@@ -161,7 +164,7 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
       $id = $entity->id();
       $skip = $this->removes() ? !isset($present[$id]) : isset($present[$id]);
       if ($skip) {
-        $results[$delta] = $this->result($this->skippedMessage($label), 'warning');
+        $results[$delta] = $this->result($this->skippedMessage($label, $url), 'warning');
         continue;
       }
       if ($this->removes()) {
@@ -173,7 +176,7 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
         $container->add($entity);
       }
       $changed[$delta] = $entity;
-      $results[$delta] = $this->result($this->doneMessage($label));
+      $results[$delta] = $this->result($this->doneMessage($label, $url));
     }
 
     if ($changed) {

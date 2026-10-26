@@ -63,15 +63,15 @@ class MukurtuAddToCollectionAction extends ContainerMembershipActionBase {
   /**
    * {@inheritdoc}
    */
-  protected function doneMessage(string $label): TranslatableMarkup {
-    return $this->t('Added to @collection', ['@collection' => $label]);
+  protected function doneMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Added to <a href=":url">@collection</a>', ['@collection' => $label, ':url' => $url]);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function skippedMessage(string $label): TranslatableMarkup {
-    return $this->t('Already in @collection', ['@collection' => $label]);
+  protected function skippedMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Already in <a href=":url">@collection</a>', ['@collection' => $label, ':url' => $url]);
   }
 
   /**

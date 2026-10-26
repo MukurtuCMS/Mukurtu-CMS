@@ -63,15 +63,15 @@ class MukurtuAddToWordListAction extends ContainerMembershipActionBase {
   /**
    * {@inheritdoc}
    */
-  protected function doneMessage(string $label): TranslatableMarkup {
-    return $this->t('Added to @list', ['@list' => $label]);
+  protected function doneMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Added to <a href=":url">@list</a>', ['@list' => $label, ':url' => $url]);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function skippedMessage(string $label): TranslatableMarkup {
-    return $this->t('Already in @list', ['@list' => $label]);
+  protected function skippedMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Already in <a href=":url">@list</a>', ['@list' => $label, ':url' => $url]);
   }
 
   /**
