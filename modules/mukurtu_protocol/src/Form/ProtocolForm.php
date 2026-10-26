@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_protocol\Form;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -13,6 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class ProtocolForm extends ContentEntityForm {
 
+  use DeleteBlockerListTrait;
   use MukurtuAdvancedSidebarFormTrait;
 
   /**
@@ -58,9 +60,46 @@ class ProtocolForm extends ContentEntityForm {
         '#default_value' => FALSE,
       ];
       $this->groupAdvancedSidebarRevisionCheckbox($form);
+      $this->addDeleteBlockedNotice($form);
     }
 
     return $form;
+  }
+
+  /**
+   * Explains why the protocol can't be deleted, when that applies.
+   *
+   * Shown only to users who can reach the delete form, which lists what is
+   * blocking the delete.
+   *
+   * @param array $form
+   *   The form.
+   */
+  protected function addDeleteBlockedNotice(array &$form): void {
+    $entity = $this->entity;
+    $cacheability = (new CacheableMetadata())->addCacheTags(['node_list', 'media_list']);
+    /** @var \Drupal\mukurtu_protocol\ProtocolAccessControlHandler $handler */
+    $handler = $this->entityTypeManager->getAccessControlHandler('protocol');
+    $access = $handler->deleteFormAccess($entity, $this->currentUser());
+    $cacheability->addCacheableDependency($access);
+
+    $total = $access->isAllowed() ? array_sum(array_map('count', $entity->getReferencingEntityIds())) : 0;
+    if ($total > 0) {
+      $form['delete_blocked_notice'] = $this->buildDeleteBlockedWarning([
+        '#type' => 'inline_template',
+        '#template' => '{{ reason }} {{ link }}',
+        '#context' => [
+          'reason' => $this->formatPlural($total,
+            "This cultural protocol can't be deleted because 1 item still uses it.",
+            "This cultural protocol can't be deleted because @count items still use it."
+          ),
+          'link' => $entity->toLink($this->t('See which items'), 'delete-form')->toRenderable(),
+        ],
+      ]);
+      $form['delete_blocked_notice']['#weight'] = -1000;
+    }
+
+    $cacheability->merge(CacheableMetadata::createFromRenderArray($form))->applyTo($form);
   }
 
   /**
