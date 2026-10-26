@@ -1,0 +1,26 @@
+/**
+ * @file
+ * Dragging to reorder an Entity Browser list (#808).
+ *
+ * entity-browser-sortable.js puts Sortable in fallback mode, so the item
+ * under the pointer is a real cloned element (.sortable-fallback) and the
+ * item left in the list marks where it will land (.sortable-ghost).
+ */
+
+/* Sortable sets an inline opacity of 0.8 on the clone, so this needs
+ * !important to keep what is being moved fully readable. Gin's item cards
+ * have no background of their own, so the clone takes the panel's, or the
+ * items it passes over would show through it. The shadow shows it is lifted
+ * off the list. */
+.entities-list.sortable .sortable-fallback {
+  opacity: 1 !important;
+  background-color: var(--gin-bg-layer, Canvas);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
+}
+
+/* The drop spot. currentColor follows the item's own text colour, so the
+ * outline has the same contrast as the text in light and dark mode. */
+.entities-list.sortable .sortable-ghost {
+  outline: 2px dashed currentColor;
+  outline-offset: 2px;
+}
