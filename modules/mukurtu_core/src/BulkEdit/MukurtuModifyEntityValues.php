@@ -105,15 +105,23 @@ class MukurtuModifyEntityValues extends ModifyEntityValues {
     // Only the changed fields: unrelated problems, such as a blocked owner,
     // aren't the editor's to fix here.
     foreach (array_keys($values) as $field) {
-      $violations = $entity->get($field)->validate();
+      $items = $entity->get($field);
+      $violations = $items->validate();
       if ($violations->count() > 0) {
-        return [
-          'message' => (string) $this->t("Couldn't change @item: @message", [
+        $definition = $items->getFieldDefinition();
+        // The validator's text for an empty required field ("This value
+        // should not be null.") doesn't say which field or how to fix it.
+        $message = $definition->isRequired() && $items->isEmpty()
+          ? $this->t("Couldn't change @item: @field is required.", [
+            '@item' => $entity->label(),
+            '@field' => $definition->getLabel(),
+          ])
+          : $this->t("Couldn't change @field on @item: @message", [
+            '@field' => $definition->getLabel(),
             '@item' => $entity->label(),
             '@message' => strip_tags((string) $violations[0]->getMessage()),
-          ]),
-          'type' => 'error',
-        ];
+          ]);
+        return ['message' => (string) $message, 'type' => 'error'];
       }
     }
 

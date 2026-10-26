@@ -199,7 +199,20 @@ class BulkFieldEditTest extends KernelTestBase {
     $result = $this->action(['field_summary' => []])->execute($node);
 
     $this->assertSame('error', $result['type']);
-    $this->assertStringStartsWith("Couldn't change A:", $result['message']);
+    $this->assertSame("Couldn't change A: Summary is required.", $result['message']);
+    $this->assertSame('Original', $this->reload($node)->get('field_summary')->value);
+  }
+
+  /**
+   * Other problems with a changed field name the field and the item.
+   */
+  public function testReportsOtherViolationsWithField(): void {
+    $node = $this->article('A');
+
+    $result = $this->action(['field_summary' => [['value' => str_repeat('x', 300)]]])->execute($node);
+
+    $this->assertSame('error', $result['type']);
+    $this->assertStringStartsWith("Couldn't change Summary on A: ", $result['message']);
     $this->assertSame('Original', $this->reload($node)->get('field_summary')->value);
   }
 
