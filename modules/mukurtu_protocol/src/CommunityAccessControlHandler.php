@@ -6,6 +6,8 @@ use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\og\Og;
 
 /**
@@ -66,22 +68,62 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
           : $result->addCacheTags(["user:{$account->id()}"]);
 
       case 'delete':
-        // Cannot delete a parent community. Depends on entity structure.
+        // Cannot delete a parent community. Depends on the community
+        // organization config.
         if ($entity->isParentCommunity()) {
-          return AccessResult::forbidden()->addCacheableDependency($entity);
+          return AccessResult::forbidden()
+            ->addCacheableDependency($entity)
+            ->addCacheTags(['config:mukurtu_protocol.community_organization']);
         }
 
         // Cannot delete a community with protocols. Depends on entity field.
+        // Tag with protocol_list so adding or removing a protocol
+        // invalidates the cached result.
         $protocols = $entity->getProtocols();
         if (!empty($protocols)) {
-          return AccessResult::forbidden()->addCacheableDependency($entity);
+          return AccessResult::forbidden()
+            ->addCacheableDependency($entity)
+            ->addCacheTags(['protocol_list', 'config:mukurtu_protocol.community_organization']);
         }
         return AccessResult::allowedIfHasPermission($account, 'delete community entities')
-          ->addCacheableDependency($entity);
+          ->addCacheableDependency($entity)
+          ->addCacheTags(['protocol_list', 'config:mukurtu_protocol.community_organization']);
     }
 
     // Unknown operation, no opinion.
     return AccessResult::neutral();
+  }
+
+  /**
+   * Checks delete-form access for a community.
+   *
+   * Entity delete access is forbidden while the community has protocols or
+   * child communities. The delete form is still reachable for users with the
+   * delete permission, so the form can explain what is blocking the delete.
+   *
+   * @param \Drupal\mukurtu_protocol\Entity\CommunityInterface $community
+   *   The community.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function deleteFormAccess(CommunityInterface $community, AccountInterface $account): AccessResultInterface {
+    $access = $this->access($community, 'delete', $account, TRUE);
+    if ($access->isAllowed() || !($community->isParentCommunity() || !empty($community->getProtocols()))) {
+      return $access;
+    }
+    // og_entity_access() also has a say in deleting a group, so require what
+    // it requires: the global OG admin permission or OG's 'delete group'.
+    $og_access = $account->hasPermission('administer organic groups')
+      ? AccessResult::allowed()->cachePerPermissions()
+      : \Drupal::service('og.access')->userAccessEntityOperation('delete', $community, $account);
+
+    return AccessResult::allowedIfHasPermission($account, 'delete community entities')
+      ->andIf($og_access)
+      ->addCacheableDependency($community)
+      ->addCacheTags(['protocol_list', 'config:mukurtu_protocol.community_organization']);
   }
 
   /**

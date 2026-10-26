@@ -110,6 +110,17 @@ interface ProtocolInterface extends MukurtuGroupInterface, ContentEntityInterfac
   public function inUse() : bool;
 
   /**
+   * Gets the IDs of the content and media that use this protocol.
+   *
+   * These are the same items that make inUse() return TRUE. Only default
+   * revisions are checked, and access is not checked.
+   *
+   * @return array
+   *   Entity IDs keyed by entity type ID ('node', 'media').
+   */
+  public function getReferencingEntityIds() : array;
+
+  /**
    * Gets the comment status setting.
    *
    * @return boolean
