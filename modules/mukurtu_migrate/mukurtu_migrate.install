@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for the Mukurtu Migrate module.
  */
 
+use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\migrate\Plugin\migrate\id_map\Sql;
 
 /**
@@ -259,18 +260,26 @@ function mukurtu_migrate_update_40208(): ?string {
   }
 
   // Core shortens long map table names on prefixed databases, so ask each
-  // migration's id map for its table instead of building the name.
+  // migration's id map for its table instead of building the name. Loading
+  // a migration discovers every migration on the site, so one broken
+  // migration elsewhere would throw; fall back to core's default name then.
   $migration_manager = \Drupal::service('plugin.manager.migration');
   $map_tables = [];
   foreach (['mukurtu_cms_v3_language_communities', 'mukurtu_cms_v3_language_community_protocols'] as $id) {
-    if (!$migration_manager->hasDefinition($id)) {
+    try {
+      if (!$migration_manager->hasDefinition($id)) {
+        return NULL;
+      }
+      $id_map = $migration_manager->createInstance($id)->getIdMap();
+      $map_table = $id_map instanceof Sql ? $id_map->mapTableName() : NULL;
+    }
+    catch (PluginException) {
+      $map_table = mb_substr('migrate_map_' . $id, 0, 63 - strlen($database->getPrefix()));
+    }
+    if (!$map_table || !$schema->tableExists($map_table)) {
       return NULL;
     }
-    $id_map = $migration_manager->createInstance($id)->getIdMap();
-    if (!$id_map instanceof Sql || !$schema->tableExists($id_map->mapTableName())) {
-      return NULL;
-    }
-    $map_tables[] = $id_map->mapTableName();
+    $map_tables[] = $map_table;
   }
 
   $manager_role = $entity_type_manager->getStorage('og_role')->load('community-community-community_manager');

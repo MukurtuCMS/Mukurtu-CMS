@@ -163,6 +163,30 @@ class LanguageStewardCommunityManagerUpdateTest extends ProtocolAwareEntityTestB
   }
 
   /**
+   * Tests that a broken migration elsewhere on the site doesn't stop repair.
+   *
+   * Loading any migration discovers them all, and a migration whose source
+   * plugin is gone makes that throw.
+   */
+  public function testBrokenMigrationDoesNotStopRepair(): void {
+    $this->createMapTables((int) $this->community->id(), (int) $this->protocol->id());
+    \Drupal::entityTypeManager()->getStorage('migration')->create([
+      'id' => 'broken_example',
+      'label' => 'Broken example',
+      'migration_tags' => [],
+      'migration_dependencies' => [],
+      'source' => ['plugin' => 'removed_module_source'],
+      'process' => [],
+      'destination' => ['plugin' => 'entity:user'],
+    ])->save();
+    $steward = $this->createMember([], ['language_steward']);
+
+    $this->assertNotNull(mukurtu_migrate_update_40208());
+    \Drupal::entityTypeManager()->getStorage('og_membership')->resetCache();
+    $this->assertTrue($this->isManager($steward));
+  }
+
+  /**
    * Tests that a site without the migrate map tables is skipped.
    */
   public function testMissingMapTablesAreSkipped(): void {
