@@ -168,6 +168,7 @@ dependencies:
   - 'token:token'
   - 'turnstile:turnstile'
   - 'turnstile_protect:turnstile_protect'
+  - 'views_bulk_edit:views_bulk_edit'
   - 'views_bulk_operations:views_bulk_operations'
 
 

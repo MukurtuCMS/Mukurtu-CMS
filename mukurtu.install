@@ -14,6 +14,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\shortcut\Entity\Shortcut;
 use Drupal\captcha\Entity\CaptchaPoint;
+use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeAccessRebuild;
 
 /**
@@ -962,4 +963,60 @@ function mukurtu_update_40036(): string {
   $source = new FileStorage(\Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install');
   $storage->create($source->read('views.view.mukurtu_bulk_edit_content'))->save();
   return (string) t('Added the bulk edit page.');
+}
+
+/**
+ * Turn on bulk field editing for the bulk edit page.
+ */
+function mukurtu_update_40037(): string {
+  $messages = [];
+
+  if (!\Drupal::moduleHandler()->moduleExists('views_bulk_edit')) {
+    \Drupal::service('module_installer')->install(['views_bulk_edit']);
+    $messages[] = (string) t('Enabled Views Bulk Edit.');
+  }
+
+  // The form mode, then each content type's bulk_edit form, from the module
+  // that ships it. Sites that already have one keep theirs.
+  $extensions = \Drupal::service('extension.list.module');
+  $displays = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  $modes = \Drupal::entityTypeManager()->getStorage('entity_form_mode');
+  if (!$modes->load('node.bulk_edit')) {
+    $source = new FileStorage($extensions->getPath('mukurtu_core') . '/config/install');
+    $modes->create($source->read('core.entity_form_mode.node.bulk_edit'))->save();
+  }
+  $added = [];
+  foreach ([
+    'digital_heritage' => 'mukurtu_digital_heritage',
+    'dictionary_word' => 'mukurtu_dictionary',
+    'word_list' => 'mukurtu_dictionary',
+    'collection' => 'mukurtu_collection',
+    'person' => 'mukurtu_person',
+    'place' => 'mukurtu_place',
+  ] as $type => $module) {
+    if ($displays->load("node.$type.bulk_edit") || !\Drupal::moduleHandler()->moduleExists($module) || !NodeType::load($type)) {
+      continue;
+    }
+    $source = new FileStorage($extensions->getPath($module) . '/config/install');
+    $displays->create($source->read("core.entity_form_display.node.$type.bulk_edit"))->save();
+    $added[] = $type;
+  }
+  if ($added) {
+    $messages[] = (string) t('Added bulk edit forms for @types.', ['@types' => implode(', ', $added)]);
+  }
+
+  // Offer the action on the bulk edit page, keeping any site changes.
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_bulk_edit_content');
+  $path = 'display.default.display_options.fields.views_bulk_operations_bulk_form.selected_actions';
+  $actions = $config->get($path);
+  if (is_array($actions) && !in_array('views_bulk_edit', array_column($actions, 'action_id'), TRUE)) {
+    $actions[$actions ? max(array_keys($actions)) + 1 : 0] = [
+      'action_id' => 'views_bulk_edit',
+      'preconfiguration' => ['add_confirmation' => TRUE],
+    ];
+    $config->set($path, $actions)->save();
+    $messages[] = (string) t('Added field editing to the bulk edit page.');
+  }
+
+  return $messages ? implode(' ', $messages) : (string) t('Bulk field editing is already set up; nothing to change.');
 }

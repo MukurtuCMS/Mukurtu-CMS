@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+  enforced:
+    module:
+      - mukurtu_core
+id: node.bulk_edit
+label: 'Bulk edit'
+description: ''
+targetEntityType: node
+cache: true
