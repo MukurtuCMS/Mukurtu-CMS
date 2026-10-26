@@ -97,7 +97,7 @@ class BulkEditColumnsTest extends KernelTestBase {
   }
 
   /**
-   * Without a bulk_edit form mode, keywords and category stand in.
+   * Without any form display, keywords and category stand in.
    */
   public function testAvailableWithoutFormMode(): void {
     $available = array_map('strval', $this->columns->available('digital_heritage'));
@@ -110,6 +110,34 @@ class BulkEditColumnsTest extends KernelTestBase {
       'field_keywords' => 'Keywords',
       'changed' => 'Updated',
     ], $available);
+  }
+
+  /**
+   * Without a bulk_edit form mode, the regular edit form's fields are used.
+   *
+   * Settings such as the URL alias, promotion and Published are left out.
+   */
+  public function testAvailableFallsBackToEditForm(): void {
+    $display = EntityFormDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'digital_heritage',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+    foreach (array_keys($display->getComponents()) as $name) {
+      $display->removeComponent($name);
+    }
+    $display
+      ->setComponent('field_summary', ['type' => 'string_textfield', 'weight' => 1])
+      ->setComponent('promote', ['type' => 'boolean_checkbox', 'weight' => 2])
+      ->setComponent('status', ['type' => 'boolean_checkbox', 'weight' => 3])
+      ->setComponent('field_keywords', ['type' => 'string_textfield', 'weight' => 4])
+      ->save();
+
+    $this->assertSame(
+      ['langcode', 'protocols', 'sharing', 'community', 'field_summary', 'field_keywords', 'changed'],
+      array_keys($this->columns->available('digital_heritage')),
+    );
   }
 
   /**

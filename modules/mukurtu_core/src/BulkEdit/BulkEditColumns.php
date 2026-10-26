@@ -17,8 +17,8 @@ use Drupal\user\UserDataInterface;
  * a few columns every type has (language, protocols, sharing, community,
  * status, updated) plus the fields of the type's "bulk_edit" form mode, so
  * the table shows what bulk editing can change. Before a type has that form
- * mode, keywords and category stand in. Each editor's choice is saved per
- * type in user data.
+ * mode, the fields of its regular edit form stand in. Each editor's choice
+ * is saved per type in user data.
  */
 class BulkEditColumns {
 
@@ -40,7 +40,7 @@ class BulkEditColumns {
   public const ITEM_COLUMNS = ['langcode', 'protocols', 'sharing', 'community', 'moderation_state', 'changed'];
 
   /**
-   * Fields offered when a type has no bulk_edit form mode yet.
+   * Fields offered when a type has no form display at all.
    */
   protected const FALLBACK_FIELDS = ['field_keywords', 'field_category'];
 
@@ -59,6 +59,11 @@ class BulkEditColumns {
     'moderation_state',
     'changed',
     'revision_log',
+    // Settings rather than content, or duplicated by Status.
+    'path',
+    'promote',
+    'sticky',
+    'status',
   ];
 
   public function __construct(
@@ -95,7 +100,7 @@ class BulkEditColumns {
     }
 
     foreach ($this->fieldNames($type) as $name) {
-      if (isset($definitions[$name]) && !in_array($name, self::NOT_FIELD_COLUMNS, TRUE)) {
+      if (isset($definitions[$name]) && !in_array($name, self::NOT_FIELD_COLUMNS, TRUE) && $definitions[$name]->getType() !== 'comment') {
         $columns[$name] = $definitions[$name]->getLabel();
       }
     }
@@ -134,14 +139,17 @@ class BulkEditColumns {
   }
 
   /**
-   * Returns the field names in a type's bulk_edit form mode, or the fallback.
+   * Returns the field names of a type's bulk_edit form, or its edit form.
    */
   protected function fieldNames(string $type): array {
-    $display = $this->entityTypeManager->getStorage('entity_form_display')->load("node.$type.bulk_edit");
-    if ($display && $display->status()) {
-      $components = $display->getComponents();
-      uasort($components, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
-      return array_keys($components);
+    $storage = $this->entityTypeManager->getStorage('entity_form_display');
+    foreach (['bulk_edit', 'default'] as $mode) {
+      $display = $storage->load("node.$type.$mode");
+      if ($display && $display->status()) {
+        $components = $display->getComponents();
+        uasort($components, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
+        return array_keys($components);
+      }
     }
     return self::FALLBACK_FIELDS;
   }
