@@ -83,7 +83,8 @@ display:
           buttons: false
           action_title: Action
           clear_on_exposed: true
-          force_selection_info: false
+          show_multipage_selection_box: default
+          show_select_all: default
           selected_actions:
             4:
               action_id: mukurtu_export_add_to_list_action

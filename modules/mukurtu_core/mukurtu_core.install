@@ -11,6 +11,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_core\EntityReferenceRoleConverter;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
 use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
+use Drupal\mukurtu_core\StaleConfigKeyCleanup;
 use Drupal\user\Entity\Role;
 
 /**
@@ -909,4 +910,16 @@ function mukurtu_core_update_40221(): void {
   // /admin/node/add routes, which now redirect, to core's node.add and
   // node.add_page. Rebuilding menu links picks up the new route names.
   \Drupal::service('plugin.manager.menu.link')->rebuild();
+}
+
+/**
+ * Remove unused settings that fail config schema checks.
+ */
+function mukurtu_core_update_40222(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Earlier versions shipped config with keys nothing reads (#2386). They do
+  // nothing, but they fail strict config schema checks.
+  (new StaleConfigKeyCleanup(\Drupal::entityTypeManager(), \Drupal::configFactory()))->cleanAll();
 }

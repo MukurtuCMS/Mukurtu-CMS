@@ -194,7 +194,7 @@ content:
           set_marker: false
       map_lazy_load:
         lazy_load: false
-      include_related_coverage: '1'
+      include_related_coverage: true
     third_party_settings: {  }
     weight: 80
     region: content

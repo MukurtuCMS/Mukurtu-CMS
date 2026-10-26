@@ -1,4 +1,5 @@
 import { Page, test, expect } from '@playwright/test';
+import { memberAccount } from '~helpers/a11y-credentials';
 import { ADMIN_STATE, MEMBER_STATE } from '~helpers/auth-state';
 
 /**
@@ -91,8 +92,14 @@ test.describe('Input purpose: the account form', () => {
    * widened to every edit, an administrator would be offered their own saved
    * details on someone else's account, which is the problem core's "off"
    * exists to prevent.
+   *
+   * Needs a member account that is not the administrator. Without the A11Y_*
+   * credentials (a pull request from a fork gets no secrets) the member falls
+   * back to admin/admin, and there is no second account to edit.
    */
   test('Input purpose: the account fields keep autofill off when editing someone else\'s account', async ({ page, browser }) => {
+    test.skip(memberAccount().isFallback, 'No member credentials: the member falls back to the administrator account.');
+
     const memberContext = await browser.newContext({ storageState: MEMBER_STATE });
     const memberUid = await signedInUid(await memberContext.newPage());
     await memberContext.close();

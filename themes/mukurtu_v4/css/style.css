@@ -2437,15 +2437,17 @@ label.form-required::after,
 
 .block--image-with-description {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--v-space-2xs);
 }
 .block--image-with-description h1, .block--image-with-description h2 {
   color: var(--brand-primary-dark);
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .block--image-with-description .block-wrapper__second {
   padding-block: var(--v-space-s);
-  padding-inline: var(--v-space-2xs);
+  padding-inline: min(var(--v-space-2xs), 10vw);
 }
 .block--image-with-description--horizontal {
   gap: 0;
@@ -2468,7 +2470,7 @@ label.form-required::after,
 }
 @media (min-width: 48rem) {
   .block--image-with-description--horizontal {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 .block--image-with-description--vertical .block-wrapper__second {
@@ -5029,6 +5031,23 @@ body:not(.is-always-mobile-nav) {
   inline-size: 100%;
 }
 
+/* Over a header or page background image the box sits on the photo, where
+ * its grey border measured as low as 2.3:1 against light areas - under the
+ * 3:1 a field's boundary needs (1.4.11). A white ring gives the border a
+ * known ground on any photo and any tint setting, including no tint: #767676
+ * on white is 4.54:1. Both instances, because with a page background the
+ * desktop nav bar turns transparent too (see _layout.scss); on its usual
+ * white bar the ring is invisible.
+ *
+ * box-shadow rather than outline, which the input uses for focus. Forced
+ * colours drops the shadow and keeps the system-colour borders. */
+.site-header--has-background .header-search__form,
+.page--has-background .site-header .header-search__form {
+  border-radius: 4px;
+  -webkit-box-shadow: 0 0 0 2px var(--color-white);
+          box-shadow: 0 0 0 2px var(--color-white);
+}
+
 .header-search__input {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -5809,6 +5828,13 @@ header {
       -ms-flex-align: center;
           align-items: center;
   gap: var(--v-space-4xxs);
+  /* Until there is not room for it. Kept beside the 100px logo at
+   * 320px and 200% text, the name got about 60px and broke one letter
+   * per line, running the header over 900px tall. With the 5em basis
+   * on the name below, it moves under the logo instead once it would
+   * get less than that beside it. */
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
 }
 .header__logo-text {
   /* A long single word - a site name with no spaces, or a compound in a
@@ -5823,6 +5849,9 @@ header {
    * sized to the whole unbreakable word and the page scrolled sideways -
    * measured at 123px past a 320px viewport. */
   overflow-wrap: anywhere;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 5em;
+          flex: 1 1 5em;
   /* Two scales, because the branding cell is a very different share of the
    * row either side of lg. Below lg the nav is a drawer, so branding has
    * most of the width - 688px at 928px - and can run near full size. From
@@ -5883,15 +5912,15 @@ header {
  * logo's, so an auto track squeezed the search box to 16px beside a long
  * name. Text branding has its own layout below, with the search on a row of
  * its own. */
+/* From 2xl the layout padding is 0 and the shared grid's outer tracks centre
+ * an 80rem content area. Content-sized header tracks have no outer margin, so
+ * pad to the same edges instead, or the branding sits against the viewport. */
 @media (max-width: 59.9rem) {
   body:not(.is-always-mobile-nav) .header:not(:has(.header__logo-text)) {
     grid-template-columns: auto minmax(0, 1fr) auto;
     -webkit-column-gap: var(--v-space-5xs);
        -moz-column-gap: var(--v-space-5xs);
             column-gap: var(--v-space-5xs);
-    /* From 2xl the layout padding is 0 and the shared grid's outer tracks
-     * centre an 80rem content area. These tracks have no outer margin, so pad
-     * to the same edges instead, or the logo sits against the viewport. */
     /* When one row cannot fit the logo, a usable search box and the menu
      * button, give the search box its own row. The width that row needs:
      * layout padding (3rem), column gaps (1rem), search wrapper padding
@@ -5940,9 +5969,6 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   -webkit-column-gap: var(--v-space-5xs);
      -moz-column-gap: var(--v-space-5xs);
           column-gap: var(--v-space-5xs);
-  /* From 2xl the layout padding is 0 and the shared grid's outer tracks
-   * centre an 80rem content area. These tracks have no outer margin, so pad
-   * to the same edges instead, or the logo sits against the viewport. */
 }
 @media (min-width: 90rem) {
   body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
@@ -6032,27 +6058,35 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
  * simply spans the row.
  */
 .site-header:has(.header__logo-text) {
-  /* Below lg the mobile search is pinned to grid-row 1, so a wide branding
-   * cell collided with it and got pushed below - putting the search above the
-   * site name. Branding takes row 1 up to the menu button, and the search
-   * moves to row 2 underneath, lined up under the button as it is everywhere
-   * else (see _header-search.scss).
+  /* Branding and the menu button share row 1, and the search has row 2 to
+   * itself, lined up under the button as it is everywhere else (see
+   * _header-search.scss).
    *
-   * From sm the button spans the last two columns rather than one (see
-   * _nav-button-mobile.scss), so branding stops a column earlier. Spanning to
-   * -2 left the button no room on row 1, and with the search holding row 2
-   * the grid put it on row 3, below the search. */
+   * Two tracks sized to their content, not the shared 6-column grid. There the
+   * button had one or two columns, and the rem gutters grow with the phone's
+   * text size: at 320px and 200% text they took the whole row, the button's
+   * column came out 0px wide, and the 64px button ran 24px off the screen
+   * (1.4.10). Here the button always gets its own width and branding takes
+   * the rest, wrapping the name to fit.
+   *
+   * Not limited to below lg. From lg the flex row below replaces this while
+   * the nav is shown, and once the nav collapses this is the layout wanted. */
+  grid-template-columns: minmax(0, 1fr) auto;
+  -webkit-column-gap: var(--v-space-5xs);
+     -moz-column-gap: var(--v-space-5xs);
+          column-gap: var(--v-space-5xs);
 }
-.site-header:has(.header__logo-text) .header__logo {
-  grid-column: 1/-2;
-  grid-row: 1;
-}
-@media (min-width: 30rem) {
-  .site-header:has(.header__logo-text) .header__logo {
-    grid-column: 1/-3;
+@media (min-width: 90rem) {
+  .site-header:has(.header__logo-text) {
+    padding-inline: max(var(--layout-padding-xs), (100% - 80rem) / 2);
   }
 }
+.site-header:has(.header__logo-text) .header__logo {
+  grid-column: 1;
+  grid-row: 1;
+}
 .site-header:has(.header__logo-text) .mobile-buttons {
+  grid-column: 2;
   grid-row: 1;
 }
 .site-header:has(.header__logo-text) .header-search--mobile {
@@ -9009,13 +9043,15 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   text-align: center;
   -webkit-margin-after: var(--v-space-2xs);
           margin-block-end: var(--v-space-2xs);
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 .layout--onecol .block-wrapper .category-grid:has(.category-teaser--names-only) {
   -webkit-padding-after: var(--v-space-2xs);
           padding-block-end: var(--v-space-2xs);
 }
 .layout--onecol .block-wrapper:has(.field--name-body) {
-  padding-inline: var(--v-space-xs);
+  padding-inline: min(var(--v-space-xs), 12.5vw);
   -webkit-padding-after: var(--v-space-xs);
           padding-block-end: var(--v-space-xs);
 }

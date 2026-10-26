@@ -44,3 +44,19 @@ field.storage_settings.local_contexts_project:
 
 field.storage_settings.local_contexts_label_and_notice:
   type: field.storage_settings.string
+
+views.filter.mukurtu_node_local_contexts_project_filter:
+  type: views.filter.in_operator
+  label: 'Node Local Contexts project filter'
+
+views.filter.mukurtu_node_local_contexts_label_filter:
+  type: views.filter.in_operator
+  label: 'Node Local Contexts label and notice filter'
+
+plugin.plugin_configuration.facets_processor.local_contexts_project_facet_label_processor:
+  type: mapping
+  label: 'Local Contexts project facet label processor'
+
+plugin.plugin_configuration.facets_processor.local_contexts_label_facet_label_processor:
+  type: mapping
+  label: 'Local Contexts label and notice facet label processor'
