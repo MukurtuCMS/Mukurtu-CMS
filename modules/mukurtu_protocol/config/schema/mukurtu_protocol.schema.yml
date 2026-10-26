@@ -98,3 +98,34 @@ views.access.site_and_mukurtu_role:
         type: string
         label: 'Permission'
 
+field.formatter.settings.mukurtu_comment_default:
+  type: field.formatter.settings.comment_default
+  label: 'Mukurtu comment display format settings'
+
+views.filter.user_community_filter:
+  type: views.filter.in_operator
+  label: 'User community filter'
+
+plugin.plugin_configuration.facets_processor.cultural_protocol_facet_label_processor:
+  type: mapping
+  label: 'Cultural protocol facet label processor'
+
+action.configuration.mukurtu_approve_user_from_membership_action:
+  type: action_configuration_default
+  label: 'Approve user from membership action configuration'
+
+action.configuration.mukurtu_manage_community_roles_action:
+  type: action_configuration_default
+  label: 'Manage community roles action configuration'
+
+action.configuration.mukurtu_manage_protocol_roles_action:
+  type: action_configuration_default
+  label: 'Manage cultural protocol roles action configuration'
+
+action.configuration.mukurtu_set_pending_user_action:
+  type: action_configuration_default
+  label: 'Set user to pending action configuration'
+
+action.configuration.mukurtu_unblock_user_action:
+  type: action_configuration_default
+  label: 'Unblock user action configuration'

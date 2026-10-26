@@ -31,15 +31,6 @@ use PHPUnit\Framework\Attributes\Group;
 class MukurtuLeafletFormatterTest extends KernelTestBase {
 
   /**
-   * Contrib leaflet's formatter settings schema (leaflet_popup.value,
-   * geocoder.settings.set_marker, etc.) is incomplete - unrelated to the
-   * behavior under test here.
-   *
-   * {@inheritdoc}
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * {@inheritdoc}
    */
   protected static $modules = [

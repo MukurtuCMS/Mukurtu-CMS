@@ -169,7 +169,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_language:
                 plugin_id: default
                 advanced:
@@ -182,7 +181,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_community_title:
                 plugin_id: default
                 advanced:
@@ -195,7 +193,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_field_cultural_protocols:
                 plugin_id: default
                 advanced:
@@ -208,7 +205,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_field_local_contexts_projects:
                 plugin_id: default
                 advanced:
@@ -221,7 +217,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_field_local_contexts_labels_and_notices:
                 plugin_id: default
                 advanced:
@@ -234,7 +229,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_type:
                 plugin_id: default
                 advanced:
@@ -247,7 +241,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_word_type:
                 plugin_id: default
                 advanced:
@@ -260,7 +253,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_keyword:
                 plugin_id: default
                 advanced:
@@ -273,7 +265,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
               facets_word_lists:
                 plugin_id: default
                 advanced:
@@ -286,7 +277,6 @@ display:
                   is_secondary: false
                   hide_label: false
                   field_classes: ''
-                  sort_options_unsupported: ''
       access:
         type: perm
         options:
