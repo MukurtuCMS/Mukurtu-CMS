@@ -35,6 +35,11 @@ class BulkEditColumns {
   public const TYPES = ['digital_heritage', 'dictionary_word', 'word_list', 'collection', 'person', 'place'];
 
   /**
+   * Columns that aren't fields of the type, shown under "Item details".
+   */
+  public const ITEM_COLUMNS = ['langcode', 'protocols', 'sharing', 'community', 'moderation_state', 'changed'];
+
+  /**
    * Fields offered when a type has no bulk_edit form mode yet.
    */
   protected const FALLBACK_FIELDS = ['field_keywords', 'field_category'];
@@ -82,7 +87,7 @@ class BulkEditColumns {
   public function available(string $type): array {
     $definitions = $this->entityFieldManager->getFieldDefinitions('node', $type);
 
-    $columns = ['langcode' => $this->t('Language')];
+    $columns = ['langcode' => $this->t('Translation language')];
     if (isset($definitions['field_cultural_protocols'])) {
       $columns['protocols'] = $this->t('Cultural Protocols');
       $columns['sharing'] = $this->t('Sharing Setting');

@@ -1,0 +1,10 @@
+/**
+ * The "Columns" panel above the bulk edit table.
+ */
+
+/* Lay the checkboxes out in columns, wrapping to one on narrow screens. */
+.mukurtu-bulk-edit-columns .form-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+  column-gap: 1.5rem;
+}

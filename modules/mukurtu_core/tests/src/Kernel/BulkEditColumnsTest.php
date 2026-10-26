@@ -6,10 +6,12 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityFormMode;
+use Drupal\Core\Form\FormState;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\BulkEdit\BulkEditColumns;
+use Drupal\mukurtu_core\Form\BulkEditColumnsForm;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeAccessRebuild;
 use Drupal\user\Entity\Role;
@@ -101,7 +103,7 @@ class BulkEditColumnsTest extends KernelTestBase {
     $available = array_map('strval', $this->columns->available('digital_heritage'));
 
     $this->assertSame([
-      'langcode' => 'Language',
+      'langcode' => 'Translation language',
       'protocols' => 'Cultural Protocols',
       'sharing' => 'Sharing Setting',
       'community' => 'Community',
@@ -176,6 +178,33 @@ class BulkEditColumnsTest extends KernelTestBase {
     $access = $this->container->get('access_manager');
     $this->assertFalse($access->checkNamedRoute('mukurtu_core.bulk_edit', [], $without));
     $this->assertTrue($access->checkNamedRoute('mukurtu_core.bulk_edit', [], $with));
+  }
+
+  /**
+   * The Columns panel groups its checkboxes and saves the editor's choice.
+   */
+  public function testColumnsForm(): void {
+    // Burn uid 1, which bypasses every permission.
+    User::create(['name' => 'admin'])->save();
+    $editor = User::create(['name' => 'editor']);
+    $editor->save();
+    $this->container->get('current_user')->setAccount($editor);
+
+    $form = $this->container->get('form_builder')->getForm(BulkEditColumnsForm::class, 'digital_heritage');
+    $this->assertSame(['langcode', 'protocols', 'sharing', 'community', 'changed'], array_keys($form['picker']['item']['#options']));
+    $this->assertSame(['field_keywords'], array_keys($form['picker']['fields']['#options']));
+
+    $form_state = (new FormState())
+      ->setBuildInfo(['args' => ['digital_heritage']])
+      ->setValues([
+        'item' => ['sharing' => 'sharing'],
+        'fields' => ['field_keywords' => 'field_keywords'],
+        'op' => 'Apply columns',
+      ]);
+    $this->container->get('form_builder')->submitForm(BulkEditColumnsForm::class, $form_state, 'digital_heritage');
+
+    $this->assertSame([], $form_state->getErrors());
+    $this->assertSame(['sharing', 'field_keywords'], $this->columns->selected('digital_heritage', $editor));
   }
 
 }

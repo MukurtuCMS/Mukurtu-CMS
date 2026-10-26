@@ -1760,6 +1760,8 @@ function mukurtu_core_views_pre_render(ViewExecutable $view) {
   $type = $types[$view->args[0] ?? ''] ?? NULL;
   if ($type) {
     $view->setTitle((string) t('Bulk edit @type', ['@type' => \Drupal::service('entity.repository')->getTranslationFromContext($type)->label()]));
+    // Its own form above the table, apart from the filters.
+    $view->attachment_before[] = \Drupal::formBuilder()->getForm(\Drupal\mukurtu_core\Form\BulkEditColumnsForm::class, $type->id());
   }
 }
 
@@ -1767,10 +1769,10 @@ function mukurtu_core_views_pre_render(ViewExecutable $view) {
  * Adds the editor's chosen columns to the bulk edit page.
  *
  * The page's path carries the content type. Only types listed in
- * BulkEditColumns::TYPES have a page. Submitting the filter form also saves
- * the "Columns" checkboxes as the editor's choice for that type.
+ * BulkEditColumns::TYPES have a page. Editors choose the columns in the
+ * "Columns" panel above the table.
  *
- * @see \Drupal\mukurtu_core\Hook\BulkEditPageHooks::exposedFormAlter()
+ * @see \Drupal\mukurtu_core\Form\BulkEditColumnsForm
  */
 function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_id, array $args): void {
   /** @var \Drupal\mukurtu_core\BulkEdit\BulkEditColumns $columns */
@@ -1782,10 +1784,6 @@ function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_
   }
 
   $account = \Drupal::currentUser();
-  $input = $view->getExposedInput();
-  if (!empty($input['columns_submitted'])) {
-    $columns->save($type, $account, array_keys(array_filter((array) ($input['columns'] ?? []))));
-  }
 
   // The columns depend on the editor's saved choice.
   $view->element['#cache']['contexts'][] = 'user';

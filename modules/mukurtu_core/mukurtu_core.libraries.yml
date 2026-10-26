@@ -159,3 +159,9 @@ visitors-country-map:
     - core/jquery
     - core/drupal
     - leaflet/leaflet-drupal
+
+bulk_edit_columns:
+  version: 1.x
+  css:
+    component:
+      css/bulk-edit-columns.css: {}
