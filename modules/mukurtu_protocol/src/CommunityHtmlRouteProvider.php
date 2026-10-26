@@ -50,6 +50,24 @@ class CommunityHtmlRouteProvider extends AdminHtmlRouteProvider {
   }
 
   /**
+   * {@inheritdoc}
+   *
+   * The delete form explains what blocks a delete, so its access check also
+   * lets in users who are blocked only by what still depends on the
+   * community.
+   */
+  protected function getDeleteFormRoute(EntityTypeInterface $entity_type) {
+    $route = parent::getDeleteFormRoute($entity_type);
+    if ($route) {
+      $requirements = $route->getRequirements();
+      unset($requirements['_entity_access']);
+      $requirements['_custom_access'] = '\Drupal\mukurtu_protocol\Form\CommunityDeleteForm::access';
+      $route->setRequirements($requirements);
+    }
+    return $route;
+  }
+
+  /**
    * Gets the version history route.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type

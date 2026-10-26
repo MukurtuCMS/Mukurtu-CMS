@@ -44,6 +44,18 @@ async function addRows(page: Page, labels: string[], labelOnly = false): Promise
   return list;
 }
 
+/** Drags the first item past the last one, leaving the mouse pressed. */
+async function dragFirstToEnd(page: Page, list: Locator): Promise<void> {
+  const from = (await list.locator('.item-container').first().boundingBox())!;
+  const to = (await list.locator('.item-container').last().boundingBox())!;
+
+  // Entity Browser lays its items out side by side, so drag across to the
+  // far edge of the last one.
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width - 2, to.y + to.height / 2, { steps: 20 });
+}
+
 test.describe('Entity Browser list reordering', () => {
   test.beforeEach(async ({ page }) => {
     const account = adminAccount();
@@ -69,16 +81,7 @@ test.describe('Entity Browser list reordering', () => {
     );
     expect(forceFallback, 'Sortable uses its fallback drag mode').toBe(true);
 
-    const first = list.locator('.item-container').first();
-    const last = list.locator('.item-container').last();
-    const from = (await first.boundingBox())!;
-    const to = (await last.boundingBox())!;
-
-    // Entity Browser lays its items out side by side, so drag across to the
-    // far edge of the last one.
-    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(to.x + to.width - 2, to.y + to.height / 2, { steps: 20 });
+    await dragFirstToEnd(page, list);
 
     const clone = page.locator('.sortable-fallback');
     await expect(clone, 'a dragged copy is shown').toBeVisible();
@@ -107,6 +110,27 @@ test.describe('Entity Browser list reordering', () => {
     // Entity Browser's onEnd handler saves the new order to the field's hidden
     // input. The instance is recreated to switch drag modes, so this proves
     // the handler came across with it.
+    const targetIds = list.locator('xpath=..').locator('input[type="hidden"][name*="[target_id]"]');
+    await expect(targetIds).toHaveValue('node:2 node:3 node:1');
+  });
+
+  test('the list still reorders after behaviors attach again', async ({ page }) => {
+    const list = await addRows(page, ['First item', 'Second item', 'Third item']);
+
+    // Adding items from the browser is an AJAX request that attaches
+    // behaviors to the form again, and Entity Browser makes a new Sortable
+    // instance each time. Only one instance may be left listening, or two
+    // drags start from the same press and the list doesn't reorder.
+    await list.evaluate((el) => {
+      const field = el.closest('.field--widget-entity-browser-entity-reference');
+      (window as any).Drupal.attachBehaviors(field);
+      (window as any).Drupal.attachBehaviors(field);
+    });
+
+    await dragFirstToEnd(page, list);
+    await page.mouse.up();
+    await expect(list.locator('.item-container').first()).toHaveText('Second item');
+
     const targetIds = list.locator('xpath=..').locator('input[type="hidden"][name*="[target_id]"]');
     await expect(targetIds).toHaveValue('node:2 node:3 node:1');
   });

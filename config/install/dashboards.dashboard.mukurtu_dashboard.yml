@@ -2,19 +2,8 @@ langcode: en
 status: true
 dependencies:
   module:
-    - layout_builder_restrictions
     - mukurtu_bot_protection
     - mukurtu_setup
-third_party_settings:
-  layout_builder_restrictions:
-    allowed_block_categories: {  }
-    entity_view_mode_restriction:
-      whitelisted_blocks: {  }
-      blacklisted_blocks: {  }
-      restricted_categories: {  }
-      allowed_layouts: {  }
-_core:
-  default_config_hash: rVGaJigae-beV372fO5BQUxNElb3GXG-yxGn7pPVzko
 id: mukurtu_dashboard
 admin_label: 'Mukurtu Dashboard'
 category: ''

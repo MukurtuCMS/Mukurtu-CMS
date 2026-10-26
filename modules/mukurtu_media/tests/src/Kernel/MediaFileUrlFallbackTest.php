@@ -65,16 +65,6 @@ class MediaFileUrlFallbackTest extends KernelTestBase {
   ];
 
   /**
-   * {@inheritdoc}
-   *
-   * mukurtu_media.schema.yml declares mukurtu_thumbnail.settings' keys under a
-   * nested 'default_thumbnail' sequence while ThumbnailSettingsForm reads and
-   * writes flat per-bundle keys. Pre-existing mismatch, same escape hatch as
-   * ThumbnailSettingsFormPreviewTest.
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * Collects log records written during a test.
    */
   protected object $logger;

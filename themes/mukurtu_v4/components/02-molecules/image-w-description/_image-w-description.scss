@@ -2,16 +2,29 @@
 
 .block--image-with-description {
   display: grid;
-  grid-template-columns: 1fr;
+
+  // minmax(0, 1fr), not 1fr: a bare 1fr can't shrink below its content's
+  // min-content width. The heading and padding are in rem, so at large text
+  // sizes the track grew past a phone-width viewport and the page scrolled
+  // sideways (WCAG 1.4.10, #2487).
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--v-space-2xs);
 
+  // Once the track can shrink, a long word may still be wider than it, so
+  // allow a mid-word break as a last resort, same as the --full heading below.
   h1, h2 {
     color: var(--brand-primary-dark);
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   .block-wrapper__second {
     padding-block: var(--v-space-s);
-    padding-inline: var(--v-space-2xs);
+
+    // Capped by the viewport so large text can't eat the text column on a
+    // phone (#2487). 10vw is 32px at 320px, so nothing changes at the
+    // default text size; the cap only applies once 2rem grows past it.
+    padding-inline: min(var(--v-space-2xs), 10vw);
   }
 
   &--horizontal {
@@ -43,7 +56,7 @@
     }
 
     @include include-media.media('>=md') {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 

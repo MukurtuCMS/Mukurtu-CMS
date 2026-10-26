@@ -17,12 +17,23 @@
  * Sortable's plugins have already filled them with values their setters
  * reject.
  *
+ * Entity Browser's behavior has no once(), so every AJAX request that
+ * attaches behaviors to the form, such as adding items from the browser,
+ * creates another instance on each list. Sortable's constructor doesn't
+ * destroy the instance an element already has, so the old one keeps
+ * listening. Native instances tolerate that, but two fallback instances both
+ * start a drag from the same press and the list never reorders. The instance
+ * made here is kept in fallbackInstances so it can be destroyed when Entity
+ * Browser replaces it.
+ *
  * Appended to entity_browser/entity_reference by
  * mukurtu_core_library_info_alter(), so this file loads right after
  * entity_browser.entity_reference.js and its behavior attaches after the one
  * that creates the Sortable instances.
  */
 ((Drupal, Sortable) => {
+  const fallbackInstances = new WeakMap();
+
   Drupal.behaviors.mukurtuEntityBrowserSortable = {
     attach(context) {
       context
@@ -75,8 +86,11 @@
             list.dispatchEvent(new CustomEvent('mukurtu-eb-reordered'));
           };
 
+          // destroy() clears the list's link to its instance, so both go
+          // before the new one is created.
           sortable.destroy();
-          Sortable.create(list, options);
+          fallbackInstances.get(list)?.destroy();
+          fallbackInstances.set(list, Sortable.create(list, options));
         });
     },
   };
