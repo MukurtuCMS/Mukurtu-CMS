@@ -501,305 +501,12 @@ field.widget.settings.mukurtu_leaflet_formatter:
               label: 'Options'
 
 field.formatter.settings.mukurtu_leaflet_formatter:
-  type: mapping
-  label: 'Leaflet format settings'
+  type: field.formatter.settings.leaflet_formatter_default
+  label: 'Mukurtu Leaflet format settings'
   mapping:
-    multiple_map:
+    include_related_coverage:
       type: boolean
-      label: 'Multiple map'
-    leaflet_map:
-      type: string
-      label: 'Leaflet Map Tiles Layer'
-    height:
-      type: integer
-      label: 'Map height'
-    height_unit:
-      type: string
-      label: 'Height unit'
-    hide_empty_map:
-      type: boolean
-      label: 'Hide empty map'
-    disable_wheel:
-      type: boolean
-      label: 'Disable wheel'
-    gesture_handling:
-      type: boolean
-      label: 'Gesture handling'
-    fitbounds_options:
-      type: text
-      label: 'FitBounds Options'
-    reset_map:
-      type: mapping
-      label: 'Reset Map View'
-      mapping:
-        control:
-          type: boolean
-          label: 'Control'
-        options:
-          type: text
-          label: 'Options'
-    map_scale:
-      type: mapping
-      label: 'Map Scale Control'
-      mapping:
-        control:
-          type: boolean
-          label: 'Control'
-        options:
-          type: text
-          label: 'Options'
-    locate:
-      type: mapping
-      label: 'Locate User Position'
-      mapping:
-        control:
-          type: boolean
-          label: 'Control'
-        options:
-          type: text
-          label: 'Options'
-        automatic:
-          type: boolean
-          label: 'Automatically locate user current position'
-    leaflet_tooltip:
-      type: mapping
-      label: 'Tooltip Source'
-      mapping:
-        value:
-          type: string
-          label: 'Value'
-        options:
-          type: text
-          label: 'Tooltip Options'
-    # @TODO Keep this for backword compatibility with Leaflet < 2.x.
-    popup:
-      type: boolean
-      label: 'Leaflet Popup'
-    # @TODO Keep this for backword compatibility with Leaflet < 2.x.
-    popup_content:
-      type: text
-      label: 'Popup Content'
-    leaflet_popup:
-      type: mapping
-      label: 'Leaflet Popup'
-      mapping:
-        control:
-          type: string
-          label: 'Enable'
-        content:
-          type: text
-          label: 'Popup content'
-        options:
-          type: text
-          label: 'Popup Options'
-    map_position:
-      type: mapping
-      label: 'Map Position'
-      mapping:
-        force:
-          type: boolean
-          label: 'Force map center & zoom'
-        center:
-          type: mapping
-          label: 'Center'
-          mapping:
-            lat:
-              type: float
-              label: 'Latitude'
-            lon:
-              type: float
-              label: 'Longitude'
-        zoomControlPosition:
-          type: string
-          label: 'Position'
-        zoom:
-          type: integer
-          label: 'Zoom'
-        minZoom:
-          type: integer
-          label: 'Min zoom'
-        maxZoom:
-          type: integer
-          label: 'Max zoom'
-        zoomFiner:
-          type: integer
-          label: 'Zoom finer'
-    weight:
-      type: string
-      label: 'Weight'
-    icon:
-      type: mapping
-      label: 'Map icon'
-      mapping:
-        iconType:
-          type: string
-          label: 'Icon type'
-        iconUrl:
-          type: string
-          label: 'Icon URL'
-        shadowUrl:
-          type: string
-          label: 'Shadow URL'
-        className:
-          type: string
-          label: 'Icon class'
-        iconSize:
-          type: mapping
-          label: 'Icon size'
-          mapping:
-            x:
-              type: string
-              label: 'Width'
-            y:
-              type: string
-              label: 'Height'
-        iconAnchor:
-          type: mapping
-          label: 'Icon anchor'
-          mapping:
-            x:
-              type: string
-              label: 'Width'
-            y:
-              type: string
-              label: 'Height'
-        shadowSize:
-          type: mapping
-          label: 'Shadow anchor'
-          mapping:
-            x:
-              type: string
-              label: 'Width'
-            y:
-              type: string
-              label: 'Height'
-        shadowAnchor:
-          type: mapping
-          label: 'Shadow anchor'
-          mapping:
-            x:
-              type: string
-              label: 'Width'
-            y:
-              type: string
-              label: 'Height'
-        popupAnchor:
-          type: mapping
-          label: 'Popup anchor'
-          mapping:
-            x:
-              type: string
-              label: 'Width'
-            y:
-              type: string
-              label: 'Height'
-        html:
-          type: string
-          label: 'HTML'
-        html_class:
-          type: string
-          label: 'HTML class'
-        circle_marker_options:
-          type: string
-          label: 'Circle marker options'
-    leaflet_markercluster:
-      type: mapping
-      label: 'Leaflet Markercluster'
-      mapping:
-        control:
-          type: boolean
-          label: 'Control'
-        options:
-          type: text
-          label: 'Options'
-        excluded:
-          type: text
-          label: 'Exclude flag'
-        include_path:
-          type: boolean
-          label: 'Include Path'
-    fullscreen:
-      type: mapping
-      label: 'Leaflet Fullscreen'
-      mapping:
-        control:
-          type: boolean
-          label: 'Control'
-        options:
-          type: text
-          label: 'Options'
-    path:
-      type: text
-      label: 'Path'
-    feature_properties:
-      type: mapping
-      label: 'Feature Additional Properties'
-      mapping:
-        values:
-          type: text
-          label: 'Values'
-    geocoder:
-      type: mapping
-      label: 'Geocoder'
-      mapping:
-        control:
-          type: boolean
-          label: 'Enable Geocoder map control'
-        settings:
-          type: mapping
-          label: 'Geocoder settings'
-          mapping:
-            popup:
-              type: boolean
-              label: 'Popup'
-            autocomplete:
-              type: mapping
-              label: 'Autocomplete'
-              mapping:
-                placeholder:
-                  type: string
-                  label: 'Placeholder'
-                title:
-                  type: string
-                  label: 'Title'
-            position:
-              type: string
-              label: 'Position'
-            input_size:
-              type: integer
-              label: 'Input size'
-            providers:
-              type: sequence
-              label: 'Providers'
-              sequence:
-                type: mapping
-                label: 'Provider'
-                mapping:
-                  weight:
-                    type: integer
-                    label: 'Weight'
-                  checked:
-                    type: boolean
-                    label: 'Checked'
-            min_terms:
-              type: integer
-              label: 'Minimum terms'
-            delay:
-              type: integer
-              label: 'Delay'
-            zoom:
-              type: integer
-              label: 'Zoom'
-            options:
-              type: string
-              label: 'Options'
-    map_lazy_load:
-      type: mapping
-      label: Map lazy load
-      mapping:
-        lazy_load:
-          type: boolean
-          label: Lazy load
+      label: 'Include related coverage'
 
 block.settings.mukurtu_core_example:
   type: block_settings
@@ -910,3 +617,106 @@ mukurtu_core.visitors_map:
     city_threshold:
       type: integer
       label: 'Minimum unique visitors for a city to appear on the visitor map on its own'
+
+views.filter.mukurtu_node_community_filter:
+  type: views.filter.in_operator
+  label: 'Node community filter'
+
+views.filter.mukurtu_node_protocol_filter:
+  type: views.filter.in_operator
+  label: 'Node cultural protocol filter'
+
+views.filter.mukurtu_node_in_collection:
+  type: views.filter.in_operator
+  label: 'Node in collection filter'
+
+views.filter.mukurtu_node_in_word_list:
+  type: views.filter.in_operator
+  label: 'Node in word list filter'
+
+views.filter.mukurtu_media_community_filter:
+  type: views.filter.in_operator
+  label: 'Media community filter'
+
+views.filter.mukurtu_media_protocol_filter:
+  type: views.filter.in_operator
+  label: 'Media cultural protocol filter'
+
+views.filter.mukurtu_media_tag_filter:
+  type: views.filter.in_operator
+  label: 'Media tag filter'
+
+views_bulk_operations.action_config.mukurtu_change_moderation_state_action:
+  type: views_bulk_operations_action_config
+  label: 'Change moderation state action preconfiguration'
+  mapping:
+    target_state:
+      type: string
+      label: 'Target state'
+
+plugin.plugin_configuration.search_api_backend.mukurtu_db:
+  type: plugin.plugin_configuration.search_api_backend.search_api_db
+  label: 'Mukurtu database backend settings'
+
+# consent_popup ships no schema. ConfigSchemaHooks adds one
+# mukurtu_core.consent_popup_text key per configurable language.
+block.settings.consent_popup:
+  type: block_settings
+  label: 'Consent popup block settings'
+  mapping:
+    non_blocking:
+      type: integer
+      label: 'Non-blocking'
+    redirect:
+      type: integer
+      label: 'Redirect on decline'
+    cookie:
+      type: mapping
+      label: 'Cookie'
+      mapping:
+        cookie_name:
+          type: string
+          label: 'Cookie name'
+        cookie_life:
+          type: string
+          label: 'Cookie lifetime in days'
+    design:
+      type: mapping
+      label: 'Design'
+      mapping:
+        color:
+          type: color_hex
+          label: 'Background color'
+        color_opacity:
+          type: string
+          label: 'Background opacity'
+        blur:
+          type: string
+          label: 'Elements to blur'
+
+mukurtu_core.consent_popup_text:
+  type: mapping
+  label: 'Consent popup text'
+  mapping:
+    text:
+      type: string
+      label: 'Popup text'
+    text_decline:
+      type: string
+      label: 'Decline text'
+    accept:
+      type: string
+      label: 'Accept button text'
+    decline:
+      type: string
+      label: 'Decline button text'
+    decline_link:
+      type: mapping
+      label: 'Decline link'
+      mapping:
+        decline_url:
+          type: string
+          label: 'Decline link URL'
+        decline_url_text:
+          type: string
+          label: 'Decline link text'

@@ -60,13 +60,6 @@ class TranslationSaveWithProtocolsAndCommentsTest extends BrowserTestBase {
   protected $profile = 'mukurtu';
 
   /**
-   * Bypass pre-existing config schema errors in the mukurtu profile.
-   *
-   * {@inheritdoc}
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {

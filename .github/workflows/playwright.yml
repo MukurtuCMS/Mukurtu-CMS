@@ -196,7 +196,9 @@ jobs:
   playwright-tests:
     needs: wait-for-tugboat
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    # Pinned: Playwright's Chromium doesn't support ubuntu-latest (26.04) yet.
+    # See #2513.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -259,7 +261,9 @@ jobs:
           retention-days: 30
 
   playwright-tests-main:
-    runs-on: ubuntu-latest
+    # Pinned: Playwright's Chromium doesn't support ubuntu-latest (26.04) yet.
+    # See #2513.
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push'
     steps:
       - name: Checkout Repository
