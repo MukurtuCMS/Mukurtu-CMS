@@ -181,7 +181,7 @@ class MultipageItem extends RevisionableContentEntityBase implements MultipageIt
 
     $fields['field_pages'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Pages'))
-      ->setDescription(t('All pages included in the multipage item. Examples include yearbooks, scrapbooks, or photo albums.	<br />Select "Select Content" to choose from existing site content. Pages will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order. <br />The content types that can be included in multipage items must be configured by a Mukurtu Manager.'))
+      ->setDescription(t('All pages included in the multipage item. Examples include yearbooks, scrapbooks, or photo albums.	<br />Select "Select Content" to choose from existing site content. Pages will be displayed in the order they are added. To change the order, drag them into place, or use the arrow buttons on each one. <br />The content types that can be included in multipage items must be configured by a Mukurtu Manager.'))
       ->setSetting('target_type', 'node')
       ->setSetting('handler', 'default:node')
       ->setSetting('handler_settings', [
