@@ -6,6 +6,7 @@
  */
 
 use Drupal\block\Entity\Block;
+use Drupal\Core\Config\FileStorage;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\user\Entity\Role;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
@@ -538,6 +539,7 @@ function mukurtu_install() {
     'update mukurtu_single_node_insert message',
     'update mukurtu_single_node_update message',
     'update tokens',
+    'use mukurtu bulk edit',
     'use text format full_html',
     'view all community revisions',
     'view any message template',
@@ -570,6 +572,9 @@ function mukurtu_install() {
     'create mukurtu_import_strategy',
     'edit own mukurtu_import_strategy',
     'delete own mukurtu_import_strategy',
+  ];
+  $roles['mukurtu_bulk_editor'] = [
+    'use mukurtu bulk edit',
   ];
   foreach ($roles as $role_name => $permissions) {
     $role = Role::load($role_name);
@@ -918,4 +923,27 @@ function mukurtu_update_40033(): string {
   }
 
   return $messages ? ucfirst(implode('; ', $messages)) . '.' : 'Display style was already present; nothing to do.';
+}
+
+/**
+ * Add the Bulk Editor role and let Mukurtu Managers use bulk editing.
+ */
+function mukurtu_update_40035(): string {
+  $messages = [];
+
+  if (!Role::load('mukurtu_bulk_editor')) {
+    // Import the shipped role rather than rebuilding it here, so the update
+    // and a fresh install can't drift apart.
+    $source = new FileStorage(\Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install');
+    Role::create($source->read('user.role.mukurtu_bulk_editor'))->save();
+    $messages[] = (string) t('Added the Bulk Editor role.');
+  }
+
+  $manager = Role::load('mukurtu_manager');
+  if ($manager && !$manager->hasPermission('use mukurtu bulk edit')) {
+    $manager->grantPermission('use mukurtu bulk edit')->save();
+    $messages[] = (string) t('Mukurtu Managers can now use bulk editing.');
+  }
+
+  return $messages ? implode(' ', $messages) : (string) t('The Bulk Editor role and permission are already in place; nothing to change.');
 }
