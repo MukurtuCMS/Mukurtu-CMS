@@ -1788,6 +1788,16 @@ function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_
   // The columns depend on the editor's saved choice.
   $view->element['#cache']['contexts'][] = 'user';
 
+  // Community records and multipage items are switched on per content type
+  // in their settings. Only offer their filters where they're on.
+  $community_record_types = (array) \Drupal::config('mukurtu_community_records.settings')->get('allowed_community_record_bundles');
+  if (!in_array($type, $community_record_types, TRUE) && empty($community_record_types[$type])) {
+    $view->removeHandler($display_id, 'filter', 'is_community_record');
+  }
+  if (empty(\Drupal::config('mukurtu_multipage_items.settings')->get("bundles_config.$type"))) {
+    $view->removeHandler($display_id, 'filter', 'is_multipage_item');
+  }
+
   $available = $columns->available($type);
   foreach ($columns->selected($type, $account) as $column) {
     $view->addHandler($display_id, 'field', 'node_field_data', 'mukurtu_bulk_edit_column', [

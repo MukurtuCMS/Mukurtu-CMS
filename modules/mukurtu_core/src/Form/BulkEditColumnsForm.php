@@ -51,8 +51,14 @@ class BulkEditColumnsForm extends FormBase {
     $form['picker'] = [
       '#type' => 'details',
       '#title' => $this->t('Columns'),
-      '#description' => $this->t('Choose which columns to show. Your choice is saved for next time.'),
       '#open' => FALSE,
+    ];
+    // Plain content rather than the details' #description: the admin theme
+    // points aria-describedby at an id its template never prints.
+    $form['picker']['help'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $this->t('Choose which columns to show. Your choice is saved for next time.'),
     ];
     $form['picker']['item'] = [
       '#type' => 'checkboxes',
@@ -88,6 +94,7 @@ class BulkEditColumnsForm extends FormBase {
     );
     // With no redirect set, the form returns to this page, filters included.
     $this->columns->save($type, $this->currentUser(), $chosen);
+    $this->messenger()->addStatus($this->t('Columns updated.'));
   }
 
 }

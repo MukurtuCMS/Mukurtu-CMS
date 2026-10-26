@@ -847,7 +847,7 @@ display:
           override: true
           sticky: true
           summary: ''
-          empty_table: true
+          empty_table: false
           caption: ''
           description: ''
           class: ''

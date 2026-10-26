@@ -15,10 +15,10 @@ use Drupal\user\UserDataInterface;
  *
  * The page lists one content type at a time. Besides the title, it offers
  * a few columns every type has (language, protocols, sharing, community,
- * status, updated) plus the fields of the type's "bulk_edit" form mode, so
- * the table shows what bulk editing can change. Before a type has that form
- * mode, the fields of its regular edit form stand in. Each editor's choice
- * is saved per type in user data.
+ * status, updated) plus the fields of the type's "bulk_edit" form mode, in
+ * alphabetical order, so the table shows what bulk editing can change.
+ * Before a type has that form mode, the fields of its regular edit form
+ * stand in. Each editor's choice is saved per type in user data.
  */
 class BulkEditColumns {
 
@@ -99,11 +99,15 @@ class BulkEditColumns {
       $columns['community'] = $this->t('Community');
     }
 
+    $fields = [];
     foreach ($this->fieldNames($type) as $name) {
       if (isset($definitions[$name]) && !in_array($name, self::NOT_FIELD_COLUMNS, TRUE) && $definitions[$name]->getType() !== 'comment') {
-        $columns[$name] = $definitions[$name]->getLabel();
+        $fields[$name] = $definitions[$name]->getLabel();
       }
     }
+    // Alphabetical, so a long list is quick to scan.
+    uasort($fields, fn($a, $b) => strnatcasecmp((string) $a, (string) $b));
+    $columns += $fields;
 
     if (isset($definitions['moderation_state'])) {
       $columns['moderation_state'] = $this->t('Status');

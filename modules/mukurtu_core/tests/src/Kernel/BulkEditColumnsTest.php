@@ -135,13 +135,13 @@ class BulkEditColumnsTest extends KernelTestBase {
       ->save();
 
     $this->assertSame(
-      ['langcode', 'protocols', 'sharing', 'community', 'field_summary', 'field_keywords', 'changed'],
+      ['langcode', 'protocols', 'sharing', 'community', 'field_keywords', 'field_summary', 'changed'],
       array_keys($this->columns->available('digital_heritage')),
     );
   }
 
   /**
-   * With a bulk_edit form mode, its fields are offered in its order.
+   * With a bulk_edit form mode, its fields are offered alphabetically.
    */
   public function testAvailableFollowsFormMode(): void {
     EntityFormMode::create(['id' => 'node.bulk_edit', 'label' => 'Bulk edit', 'targetEntityType' => 'node'])->save();
@@ -163,7 +163,7 @@ class BulkEditColumnsTest extends KernelTestBase {
       ->save();
 
     $this->assertSame(
-      ['langcode', 'protocols', 'sharing', 'community', 'field_summary', 'field_keywords', 'changed'],
+      ['langcode', 'protocols', 'sharing', 'community', 'field_keywords', 'field_summary', 'changed'],
       array_keys($this->columns->available('digital_heritage')),
     );
   }
@@ -233,6 +233,7 @@ class BulkEditColumnsTest extends KernelTestBase {
 
     $this->assertSame([], $form_state->getErrors());
     $this->assertSame(['sharing', 'field_keywords'], $this->columns->selected('digital_heritage', $editor));
+    $this->assertContains('Columns updated.', array_map('strval', $this->container->get('messenger')->messagesByType('status')));
   }
 
 }
