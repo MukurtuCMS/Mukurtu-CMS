@@ -51,9 +51,12 @@ final class EntityReferenceRoleConverter {
 
     if (\Drupal::moduleHandler()->moduleExists('mukurtu_multilingual')) {
       $settings_storage = $entity_type_manager->getStorage('language_content_settings');
-      if (!$settings_storage->load('taxonomy_term.role')) {
-        $config = new FileStorage($module_list->getPath('mukurtu_multilingual') . '/config/install');
-        $settings_storage->createFromStorageRecord($config->read('language.content_settings.taxonomy_term.role'))->save();
+      // Shipped from config/optional, so the module can be turned off and
+      // back on; a missing file is skipped rather than aborting the update.
+      $config = new FileStorage($module_list->getPath('mukurtu_multilingual') . '/config/optional');
+      $values = $config->read('language.content_settings.taxonomy_term.role');
+      if ($values && !$settings_storage->load('taxonomy_term.role')) {
+        $settings_storage->createFromStorageRecord($values)->save();
       }
     }
   }

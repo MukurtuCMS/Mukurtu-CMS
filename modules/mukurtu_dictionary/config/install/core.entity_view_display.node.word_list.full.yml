@@ -133,12 +133,6 @@ content:
           set_marker: false
       map_lazy_load:
         lazy_load: false
-      geojson_overlays:
-        sources:
-          fields: {  }
-        path: '{"color":"#f71ed3","opacity":"0.7","stroke":true,"weight":2,"fillColor":"#ffddfe","fillOpacity":"0.1","radius":3,"dashArray":"5, 5"}'
-        zoom_to_geojson: true
-        snapping: true
     third_party_settings: {  }
     weight: 5
     region: content

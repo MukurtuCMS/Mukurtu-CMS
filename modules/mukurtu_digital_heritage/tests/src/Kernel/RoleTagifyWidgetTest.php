@@ -141,6 +141,17 @@ class RoleTagifyWidgetTest extends DigitalHeritageTestBase {
   }
 
   /**
+   * A hidden, empty widget submits arrays, which mean no names.
+   *
+   * On a translation form an untranslatable person field is hidden, and its
+   * Tagify element falls back to an empty #default_value array (#2386).
+   */
+  public function testHiddenEmptyWidgetHasNoNames(): void {
+    $this->assertSame([], $this->widget->massageFormValues(['names' => [], 'roles' => json_encode([])], [], new FormState()));
+    $this->assertSame([], $this->widget->massageFormValues(['names' => [], 'roles' => []], [], new FormState()));
+  }
+
+  /**
    * With several role vocabularies, an unknown role is an error, not lost.
    */
   public function testUnknownRoleIsAnErrorWhenItCannotBeCreated(): void {
