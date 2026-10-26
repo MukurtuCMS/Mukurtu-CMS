@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for the Mukurtu Migrate module.
  */
 
+use Drupal\migrate\Plugin\migrate\id_map\Sql;
+
 /**
  * Implements hook_update_last_removed().
  *
@@ -213,4 +215,109 @@ function mukurtu_migrate_update_40207(): ?string {
   }
 
   return NULL;
+}
+
+/**
+ * Give Mukurtu 3 language stewards the Community Manager role in their migrated language communities.
+ */
+function mukurtu_migrate_update_40208(): ?string {
+  // In Mukurtu 3, "language steward" administers a language community, and
+  // "administrator member" has no permissions. The migration only mapped
+  // "administrator member", so stewards arrived as plain community members
+  // and couldn't manage the community or its protocol. Only replace the
+  // shipped mapping; a site that has customized it is left alone.
+  $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_language_community_community_memberships');
+  if (!$config->isNew() && $config->get('process.roles') === [
+    [
+      'plugin' => 'static_map',
+      'source' => 'roles',
+      'map' => ['administrator member' => 'community-community-community_manager'],
+      'default_value' => 'community-community-member',
+    ],
+  ]) {
+    $config->set('process.roles', [
+      [
+        'plugin' => 'static_map',
+        'source' => 'roles',
+        'map' => [
+          'administrator member' => 'community-community-community_manager',
+          'language steward' => 'community-community-community_manager',
+        ],
+        'default_value' => 'community-community-member',
+      ],
+      ['plugin' => 'array_unique'],
+    ])->save();
+  }
+
+  // Repair language communities that were already migrated. Each one is
+  // paired with the protocol migrated from the same Mukurtu 3 node.
+  $database = \Drupal::database();
+  $schema = $database->schema();
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$entity_type_manager->hasDefinition('og_membership') || !$schema->tableExists('og_membership')) {
+    return NULL;
+  }
+
+  // Core shortens long map table names on prefixed databases, so ask each
+  // migration's id map for its table instead of building the name.
+  $migration_manager = \Drupal::service('plugin.manager.migration');
+  $map_tables = [];
+  foreach (['mukurtu_cms_v3_language_communities', 'mukurtu_cms_v3_language_community_protocols'] as $id) {
+    if (!$migration_manager->hasDefinition($id)) {
+      return NULL;
+    }
+    $id_map = $migration_manager->createInstance($id)->getIdMap();
+    if (!$id_map instanceof Sql || !$schema->tableExists($id_map->mapTableName())) {
+      return NULL;
+    }
+    $map_tables[] = $id_map->mapTableName();
+  }
+
+  $manager_role = $entity_type_manager->getStorage('og_role')->load('community-community-community_manager');
+  if (!$manager_role) {
+    return NULL;
+  }
+
+  $query = $database->select($map_tables[0], 'c');
+  $query->innerJoin($map_tables[1], 'p', '[p].[sourceid1] = [c].[sourceid1]');
+  $query->addField('p', 'destid1', 'protocol_id');
+  $query->addField('c', 'destid1', 'community_id');
+  $query->isNotNull('c.destid1');
+  $query->isNotNull('p.destid1');
+  $communities_by_protocol = $query->execute()->fetchAllKeyed();
+  if (!$communities_by_protocol) {
+    return NULL;
+  }
+
+  $storage = $entity_type_manager->getStorage('og_membership');
+  $steward_ids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('entity_type', 'protocol')
+    ->condition('entity_id', array_keys($communities_by_protocol), 'IN')
+    ->condition('roles', 'protocol-protocol-language_steward')
+    ->execute();
+
+  $count = 0;
+  foreach ($storage->loadMultiple($steward_ids) as $steward) {
+    // Stewards removed from the community since the migration stay removed.
+    $community_ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('entity_type', 'community')
+      ->condition('entity_id', $communities_by_protocol[$steward->getGroupId()])
+      ->condition('uid', $steward->getOwnerId())
+      ->execute();
+    foreach ($storage->loadMultiple($community_ids) as $membership) {
+      if (!$membership->hasRole($manager_role->id())) {
+        $membership->addRole($manager_role)->save();
+        $count++;
+      }
+    }
+  }
+  if ($count === 0) {
+    return NULL;
+  }
+
+  return (string) t('Gave the Community Manager role to @count Mukurtu 3 language stewards in their migrated language communities, so they can manage the community and its protocol.', [
+    '@count' => $count,
+  ]);
 }
