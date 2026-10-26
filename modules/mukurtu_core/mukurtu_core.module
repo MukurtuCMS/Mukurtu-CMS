@@ -1637,6 +1637,19 @@ function mukurtu_core_library_info_alter(&$libraries, $extension) {
   if ($extension === 'leaflet' && isset($libraries['leaflet-drupal'])) {
     $libraries['leaflet-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-circle-display.js'] = [];
   }
+
+  // Keep an Entity Browser item fully opaque while it is dragged to reorder
+  // the list (#808). The JS must load after entity_browser.entity_reference.js,
+  // which creates the Sortable instances it adjusts.
+  if ($extension === 'entity_browser') {
+    $path = '/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    if (isset($libraries['entity_reference'])) {
+      $libraries['entity_reference']['js'][$path . '/js/entity-browser-sortable.js'] = [];
+    }
+    if (isset($libraries['entity_list'])) {
+      $libraries['entity_list']['css']['component'][$path . '/css/entity-browser-sortable.css'] = [];
+    }
+  }
 }
 
 /**
