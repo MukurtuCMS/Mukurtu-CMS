@@ -69,6 +69,7 @@ class BulkEditHooks {
       $checkbox['#default_value'] = FALSE;
       $checkbox['#return_value'] = 'on';
       $checkbox['#attributes']['class'] = array_diff($checkbox['#attributes']['class'] ?? [], ['js-vbo-checkbox']);
+      $checkbox['#attributes']['class'][] = 'mukurtu-bulk-edit-view-only';
       $checkbox['#description'] = $this->t("You can't edit this item.");
       $checkbox['#description_display'] = 'invisible';
     }
