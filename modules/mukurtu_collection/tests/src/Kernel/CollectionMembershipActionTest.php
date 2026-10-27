@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_collection\Kernel;
 
 use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_collection\Entity\Collection;
+use Drupal\mukurtu_core\Hook\ContainerMembershipConfirmHooks;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\user\Entity\Role;
@@ -285,6 +286,66 @@ class CollectionMembershipActionTest extends CollectionTestBase {
 
     $this->assertSame([(int) $a->id()], $this->itemIds());
     $this->assertSame("Couldn't remove from Collection A", $results[0]['message']);
+  }
+
+  /**
+   * The remove confirmation names the collection and lists items not in it.
+   */
+  public function testRemoveConfirmNamesTargetAndSkips(): void {
+    $a = $this->person('A');
+    $c = $this->person('C');
+    $this->action()->executeMultiple([$a]);
+
+    // C appears twice, as a translation row would.
+    $form = $this->confirmForm('mukurtu_remove_from_collection_action', [
+      ['k1', 'en', 'node', $a->id()],
+      ['k2', 'en', 'node', $c->id()],
+      ['k3', 'en', 'node', $c->id()],
+    ]);
+
+    $notice = $form['mukurtu_container_target'];
+    $this->assertSame('The selected items will be removed from <em class="placeholder">Collection A</em>.', (string) $notice['target']['#value']);
+    $this->assertSame("These items aren't in <em class=\"placeholder\">Collection A</em> and will be skipped:", (string) $notice['skipped']['#value']);
+    $this->assertSame(['C'], $notice['skipped_items']['#items']);
+  }
+
+  /**
+   * With nothing to skip, or every result selected, only the target shows.
+   */
+  public function testRemoveConfirmTargetOnly(): void {
+    $a = $this->person('A');
+    $this->action()->executeMultiple([$a]);
+
+    foreach ([
+      $this->confirmForm('mukurtu_remove_from_collection_action', [['k1', 'en', 'node', $a->id()]]),
+      $this->confirmForm('mukurtu_remove_from_collection_action', [], TRUE),
+    ] as $form) {
+      $this->assertArrayHasKey('target', $form['mukurtu_container_target']);
+      $this->assertArrayNotHasKey('skipped', $form['mukurtu_container_target']);
+    }
+  }
+
+  /**
+   * Other actions' confirmation pages are left alone.
+   */
+  public function testConfirmIgnoresOtherActions(): void {
+    $this->assertArrayNotHasKey('mukurtu_container_target', $this->confirmForm('mukurtu_add_to_collection_action', []));
+  }
+
+  /**
+   * Runs the confirmation form alter with the given VBO data.
+   */
+  protected function confirmForm(string $action_id, array $list, bool $exclude_mode = FALSE): array {
+    $form = [];
+    $form_state = new FormState();
+    $form_state->set('views_bulk_operations', [
+      'action_id' => $action_id,
+      'configuration' => ['container' => $this->collection->id()],
+      'list' => $list,
+      'exclude_mode' => $exclude_mode,
+    ]);
+    (new ContainerMembershipConfirmHooks())->confirmActionAlter($form, $form_state);
+    return $form;
   }
 
 }
