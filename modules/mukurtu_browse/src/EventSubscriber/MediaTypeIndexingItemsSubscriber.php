@@ -9,7 +9,21 @@ use Drupal\search_api\Event\IndexingItemsEvent;
 class MediaTypeIndexingItemsSubscriber implements EventSubscriberInterface {
 
   /**
-   * Responds to indexing items event. Convert media asset bundles to bundle labels.
+   * Remote media bundles indexed as the local bundle of the same kind.
+   *
+   * This lets the media type facet show one Audio and one Video option
+   * regardless of where the file is hosted.
+   */
+  const MERGED_MEDIA_BUNDLES = [
+    'soundcloud' => 'audio',
+    'remote_video' => 'video',
+  ];
+
+  /**
+   * Responds to indexing items event.
+   *
+   * Merges remote media bundles into their local equivalents, then converts
+   * the Solr media type facet's bundles to bundle labels.
    *
    * @param \Drupal\search_api\Event\IndexingItemsEvent $event
    *   The indexing items event.
@@ -21,6 +35,16 @@ class MediaTypeIndexingItemsSubscriber implements EventSubscriberInterface {
 
     $items = $event->getItems();
     foreach ($items as $item_id => $item) {
+      foreach ($item->getFields() as $field) {
+        if ($field->getDatasourceId() === 'entity:node' && $field->getPropertyPath() === 'field_media_assets:entity:bundle') {
+          $values = [];
+          foreach ($field->getValues() as $value) {
+            $values[] = self::MERGED_MEDIA_BUNDLES[$value] ?? $value;
+          }
+          $field->setValues(array_values(array_unique($values)));
+        }
+      }
+
       if ($field = $item->getField('node__field_media_assets__bundle')) {
         $values = $field->getValues();
         foreach ($values as &$value) {
