@@ -23,7 +23,7 @@ class GeofieldMukurtuWidgetSinglePointZoomTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'field', 'geofield', 'leaflet', 'mukurtu_core'];
+  protected static $modules = ['system', 'field', 'geofield', 'leaflet', 'mukurtu_core', 'user'];
 
   /**
    * The default single point zoom must be distinct from the empty-map zoom.

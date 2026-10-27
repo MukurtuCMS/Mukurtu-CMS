@@ -221,3 +221,13 @@ mukurtu_core.dashboard_redirect:
     _controller: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::redirectToDashboard'
   requirements:
     _custom_access: '\Drupal\mukurtu_core\Controller\MukurtuDashboardController::access'
+
+mukurtu_core.bulk_edit:
+  path: '/admin/content/bulk'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\BulkEditController::redirectToFirstType'
+    _title: 'Bulk edit'
+  requirements:
+    _permission: 'use mukurtu bulk edit'
+  options:
+    _admin_route: TRUE

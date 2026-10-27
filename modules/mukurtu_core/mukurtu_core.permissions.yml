@@ -7,3 +7,6 @@ administer mukurtu not found page:
   restrict access: true
 administer mukurtu person role settings:
   title: 'Administer person role settings'
+use mukurtu bulk edit:
+  title: 'Use bulk editing'
+  description: 'Change cultural protocols, sharing settings and field values on many items at once. Editors can still only change items they can edit one at a time.'

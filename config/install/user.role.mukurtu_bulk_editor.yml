@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_core
+id: mukurtu_bulk_editor
+label: 'Bulk Editor'
+weight: 5
+is_admin: false
+permissions:
+  - 'use mukurtu bulk edit'

@@ -31,6 +31,9 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Render\Markup;
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\mukurtu_core\BulkEdit\BulkEditColumns;
+use Drupal\views\ViewExecutable;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Implements hook_theme().
@@ -1454,6 +1457,13 @@ function mukurtu_core_views_data_alter(array &$data)
   }
 
   if (isset($data['node_field_data'])) {
+    $data['node_field_data']['mukurtu_bulk_edit_column'] = [
+      'title' => t('Bulk edit column'),
+      'help' => t('One column of the bulk edit page, chosen by the editor.'),
+      'field' => [
+        'id' => 'mukurtu_bulk_edit_column',
+      ],
+    ];
     $data['node_field_data']['mukurtu_row_actions'] = [
       'title' => t('Row actions'),
       'field' => [
@@ -1725,4 +1735,85 @@ function mukurtu_core_warn_on_missing_email(array $form, FormStateInterface $for
   }
 
   \Drupal::messenger()->addWarning(t('This account has no email address. It will not receive notifications, and it cannot be used to reset the password. Add an address if either is needed.'));
+}
+
+/**
+ * Implements hook_views_pre_view().
+ *
+ * Handlers must be added here: by hook_views_pre_build() a page display has
+ * already set up its handlers, and late additions are never instantiated.
+ */
+function mukurtu_core_views_pre_view(ViewExecutable $view, $display_id, array &$args) {
+  if ($view->id() === BulkEditColumns::VIEW_ID) {
+    _mukurtu_core_bulk_edit_pre_view($view, $display_id, $args);
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function mukurtu_core_views_pre_render(ViewExecutable $view) {
+  if ($view->id() !== BulkEditColumns::VIEW_ID) {
+    return;
+  }
+  $types = \Drupal::service('mukurtu_core.bulk_edit_columns')->types();
+  $type = $types[$view->args[0] ?? ''] ?? NULL;
+  if ($type) {
+    $view->setTitle((string) t('Bulk edit @type', ['@type' => \Drupal::service('entity.repository')->getTranslationFromContext($type)->label()]));
+    // Its own form above the table, apart from the filters.
+    $view->attachment_before[] = \Drupal::formBuilder()->getForm(\Drupal\mukurtu_core\Form\BulkEditColumnsForm::class, $type->id());
+  }
+}
+
+/**
+ * Adds the editor's chosen columns to the bulk edit page.
+ *
+ * The page's path carries the content type. Only types listed in
+ * BulkEditColumns::TYPES have a page. Editors choose the columns in the
+ * "Columns" panel above the table.
+ *
+ * @see \Drupal\mukurtu_core\Form\BulkEditColumnsForm
+ */
+function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_id, array $args): void {
+  /** @var \Drupal\mukurtu_core\BulkEdit\BulkEditColumns $columns */
+  $columns = \Drupal::service('mukurtu_core.bulk_edit_columns');
+  $type = $args[0] ?? NULL;
+  $types = $columns->types();
+  if (!$type || !isset($types[$type])) {
+    throw new NotFoundHttpException();
+  }
+
+  $account = \Drupal::currentUser();
+
+  // The columns depend on the editor's saved choice.
+  $view->element['#cache']['contexts'][] = 'user';
+
+  // Community records and multipage items are switched on per content type
+  // in their settings. Only offer their filters where they're on.
+  $community_record_types = (array) \Drupal::config('mukurtu_community_records.settings')->get('allowed_community_record_bundles');
+  if (!in_array($type, $community_record_types, TRUE) && empty($community_record_types[$type])) {
+    $view->removeHandler($display_id, 'filter', 'is_community_record');
+  }
+  if (empty(\Drupal::config('mukurtu_multipage_items.settings')->get("bundles_config.$type"))) {
+    $view->removeHandler($display_id, 'filter', 'is_multipage_item');
+  }
+
+  // Only offer filters that can match this type: Category is a Digital
+  // Heritage field, Language is a dictionary word field, and word lists hold
+  // only dictionary words.
+  if (!isset(\Drupal::service('entity_field.manager')->getFieldDefinitions('node', $type)['field_category'])) {
+    $view->removeHandler($display_id, 'filter', 'field_category_target_id');
+  }
+  if ($type !== 'dictionary_word') {
+    $view->removeHandler($display_id, 'filter', 'field_dictionary_word_language_target_id');
+    $view->removeHandler($display_id, 'filter', 'in_word_list');
+  }
+
+  $available = $columns->available($type);
+  foreach ($columns->selected($type, $account) as $column) {
+    $view->addHandler($display_id, 'field', 'node_field_data', 'mukurtu_bulk_edit_column', [
+      'column' => $column,
+      'label' => (string) $available[$column],
+    ], "mukurtu_bulk_edit_$column");
+  }
 }

@@ -9,3 +9,13 @@ mukurtu_core.media_found_in:
 #  route_name: mukurtu_core.content_found_in
 #  base_route: entity.node.canonical
 #  weight: 60
+
+mukurtu_core.bulk_edit:
+  title: 'Bulk edit'
+  route_name: mukurtu_core.bulk_edit
+  base_route: system.admin_content
+  weight: 20
+
+mukurtu_core.bulk_edit_type:
+  class: \Drupal\Core\Menu\LocalTaskDefault
+  deriver: \Drupal\mukurtu_core\Plugin\Derivative\BulkEditTypeTasks
