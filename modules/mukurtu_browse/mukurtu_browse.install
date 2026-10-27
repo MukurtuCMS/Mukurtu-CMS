@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Install, update and uninstall functions for the Mukurtu Browse module.
+ */
+
 use Drupal\search_api\Entity\Index;
 
 /**

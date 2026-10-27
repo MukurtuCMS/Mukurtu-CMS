@@ -6,6 +6,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\search_api\Event\SearchApiEvents;
 use Drupal\search_api\Event\IndexingItemsEvent;
 
+/**
+ * Adjusts media asset bundles before content is indexed for browse.
+ */
 class MediaTypeIndexingItemsSubscriber implements EventSubscriberInterface {
 
   /**
@@ -34,7 +37,7 @@ class MediaTypeIndexingItemsSubscriber implements EventSubscriberInterface {
     $media_bundle_info = $bundle_info_service->getBundleInfo('media') ?? [];
 
     $items = $event->getItems();
-    foreach ($items as $item_id => $item) {
+    foreach ($items as $item) {
       foreach ($item->getFields() as $field) {
         if ($field->getDatasourceId() === 'entity:node' && $field->getPropertyPath() === 'field_media_assets:entity:bundle') {
           $values = [];

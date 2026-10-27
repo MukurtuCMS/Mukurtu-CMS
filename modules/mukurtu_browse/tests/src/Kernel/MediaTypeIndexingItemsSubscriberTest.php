@@ -55,7 +55,10 @@ class MediaTypeIndexingItemsSubscriberTest extends KernelTestBase {
       'External embed stays separate' => [['external_embed'], ['external_embed']],
       'Audio and SoundCloud count once' => [['audio', 'soundcloud'], ['audio']],
       'Video and remote video count once' => [['remote_video', 'video', 'remote_video'], ['video']],
-      'Mixed media keeps each kind once' => [['soundcloud', 'image', 'remote_video', 'audio'], ['audio', 'image', 'video']],
+      'Mixed media keeps each kind once' => [
+        ['soundcloud', 'image', 'remote_video', 'audio'],
+        ['audio', 'image', 'video'],
+      ],
     ];
   }
 
