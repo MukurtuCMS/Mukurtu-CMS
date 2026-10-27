@@ -53,7 +53,7 @@ class BulkProtocolActionsTest extends ProtocolAwareEntityTestBase {
       $this->p[$name]->save();
     }
 
-    $this->editor = $this->createUser();
+    $this->editor = $this->createUser(['use mukurtu bulk edit']);
     $community->addMember($this->editor);
     $this->p['A']->addMember($this->editor, ['protocol_steward']);
     $this->p['C']->addMember($this->editor, ['protocol_steward']);
@@ -174,13 +174,20 @@ class BulkProtocolActionsTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
-   * Only protocol-controlled items the editor can update pass access.
+   * Only editors with "Use bulk editing" pass, for items they can update.
    */
   public function testAccess(): void {
     $action = $this->action('mukurtu_change_sharing_action', ['sharing' => 'all']);
 
     $this->assertTrue($action->access($this->item(['A'], 'any'), $this->editor));
     $this->assertFalse($action->access($this->item(['B'], 'any'), $this->editor));
+
+    // A fellow steward of A, but without the permission.
+    $steward = $this->createUser();
+    $this->p['A']->addMember($steward, ['protocol_steward']);
+    $this->assertTrue($this->item(['A'], 'any')->access('update', $steward));
+    $this->assertTrue($action->access($this->item(['A'], 'any'), $steward, TRUE)->isForbidden());
+
     $result = $action->access($this->editor, $this->editor, TRUE);
     $this->assertTrue($result->isForbidden());
     $this->assertSame("This content doesn't use cultural protocols.", $result->getReason());

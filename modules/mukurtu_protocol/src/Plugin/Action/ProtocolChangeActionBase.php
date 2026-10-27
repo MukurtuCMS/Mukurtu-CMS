@@ -16,7 +16,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Utility\Error;
 use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
-use Drupal\views\ViewExecutable;
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -135,7 +134,13 @@ abstract class ProtocolChangeActionBase extends ViewsBulkOperationsActionBase im
    * {@inheritdoc}
    */
   public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
-    if (!$object instanceof CulturalProtocolControlledInterface) {
+    $account ??= $this->currentUser;
+    // VBO 4.4 has no action-level access check, so the "Use bulk editing"
+    // permission is checked here, for each item.
+    if (!$account->hasPermission('use mukurtu bulk edit')) {
+      $result = AccessResult::forbidden()->cachePerPermissions();
+    }
+    elseif (!$object instanceof CulturalProtocolControlledInterface) {
       $result = AccessResult::forbidden((string) $this->t("This content doesn't use cultural protocols."));
     }
     else {
@@ -143,13 +148,6 @@ abstract class ProtocolChangeActionBase extends ViewsBulkOperationsActionBase im
     }
 
     return $return_as_object ? $result : $result->isAllowed();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function customAccess(AccountInterface $account, ViewExecutable $view): bool {
-    return TRUE;
   }
 
   /**
