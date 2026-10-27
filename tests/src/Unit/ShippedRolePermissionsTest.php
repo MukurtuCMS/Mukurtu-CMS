@@ -124,6 +124,7 @@ class ShippedRolePermissionsTest extends UnitTestCase {
     yield 'unflag content for export' => ['unflag export_content'];
     yield 'flag media for export' => ['flag export_media'];
     yield 'unflag media for export' => ['unflag export_media'];
+    yield 'bulk editing' => ['use mukurtu bulk edit'];
   }
 
   #[DataProvider('managerPermissionProvider')]
@@ -225,6 +226,16 @@ class ShippedRolePermissionsTest extends UnitTestCase {
       $reviewer,
       'Reviewers must not also be able to administer the submission settings.'
     );
+  }
+
+  /**
+   * The Bulk Editor role ships with bulk editing and nothing else.
+   *
+   * Bulk editing only opens the tools; which items an editor can change still
+   * comes from their protocol memberships.
+   */
+  public function testBulkEditorRoleShipsWithBulkEditOnly(): void {
+    $this->assertSame(['use mukurtu bulk edit'], self::effectivePermissions('mukurtu_bulk_editor'));
   }
 
   /**
