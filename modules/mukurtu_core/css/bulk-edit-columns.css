@@ -28,7 +28,6 @@
    unavailable in light and dark modes. Inactive controls don't need 3:1. */
 .mukurtu-bulk-edit-view-only.form-checkbox {
   border-style: dashed;
-  background-color: transparent;
   opacity: 0.5;
   cursor: not-allowed;
 }
