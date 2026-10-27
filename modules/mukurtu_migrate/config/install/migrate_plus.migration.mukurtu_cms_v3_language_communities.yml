@@ -22,8 +22,12 @@ process:
   name: title
   status: status
   field_access_mode:
-    plugin: default_value
-    default_value: community-only
+    -
+      plugin: static_map
+      map:
+        0: open
+        2: strict
+      default_value: open
   mukurtu_migrate:
     plugin: default_value
     default_value: true

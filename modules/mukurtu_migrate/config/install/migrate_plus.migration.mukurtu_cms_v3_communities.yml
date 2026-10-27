@@ -28,7 +28,7 @@ process:
       map:
         0: public
         2: community-only
-      default_value: community-only
+      default_value: strict
   status: status
 
   # This is a flag to prevent any default side effects (e.g., the creating user

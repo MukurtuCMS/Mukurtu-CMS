@@ -37,14 +37,17 @@ class CommunityAccessControlHandler extends EntityAccessControlHandler {
             ->addCacheableDependency($entity);
         }
 
-        // Otherwise only members can view. This covers "community-only" and
-        // any invalid value, such as the "open" that older Mukurtu 3
-        // migrations wrote, so bad data can't lock out the members too.
-        $membership = Og::getMembership($entity, $account);
-        if ($membership) {
-          return AccessResult::allowedIfHasPermission($account, 'view published community entities')
-            ->addCacheableDependency($entity)
-            ->addCacheableDependency($membership);
+        // If field_access_mode is "community-only", only members can view.
+        if ($entity->getSharingSetting() == 'community-only') {
+          // Get membership.
+          $membership = Og::getMembership($entity, $account);
+
+          // Members can view community-only communities.
+          if ($membership) {
+            return AccessResult::allowedIfHasPermission($account, 'view published community entities')
+              ->addCacheableDependency($entity)
+              ->addCacheableDependency($membership);
+          }
         }
         // Forbidden: depends on sharing setting (entity) and membership status.
         return AccessResult::forbidden()
