@@ -12,10 +12,13 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\BulkEdit\BulkEditColumns;
 use Drupal\mukurtu_core\Form\BulkEditColumnsForm;
+use Drupal\mukurtu_core\Hook\BulkEditHooks;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeAccessRebuild;
+use Drupal\node\NodeInterface;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -235,6 +238,38 @@ class BulkEditColumnsTest extends KernelTestBase {
     $this->assertSame([], $form_state->getErrors());
     $this->assertSame(['sharing', 'field_keywords'], $this->columns->selected('digital_heritage', $editor));
     $this->assertContains('Columns updated.', array_map('strval', $this->container->get('messenger')->messagesByType('status')));
+  }
+
+  /**
+   * Rows the editor can view but not edit can't be selected.
+   */
+  public function testViewOnlyRowsDisabled(): void {
+    $row = function (bool $editable): ResultRow {
+      $entity = $this->createMock(NodeInterface::class);
+      $entity->method('access')->willReturn($editable);
+      return new ResultRow(['_entity' => $entity]);
+    };
+    $checkbox = fn(string $key) => [
+      '#type' => 'checkbox',
+      '#title' => 'Item',
+      '#return_value' => $key,
+      '#attributes' => ['class' => ['js-vbo-checkbox']],
+    ];
+    $view = $this->createMock(ViewExecutable::class);
+    $view->result = [$row(TRUE), $row(FALSE)];
+    $form = ['views_bulk_operations_bulk_form' => [$checkbox('editable-key'), $checkbox('view-only-key')]];
+    $form_state = (new FormState())->setBuildInfo(['args' => [$view]]);
+
+    (new BulkEditHooks())->bulkEditFormAlter($form, $form_state);
+
+    [$editable, $view_only] = $form['views_bulk_operations_bulk_form'];
+    $this->assertArrayNotHasKey('#disabled', $editable);
+    $this->assertSame('editable-key', $editable['#return_value']);
+    $this->assertTrue($view_only['#disabled']);
+    $this->assertSame('on', $view_only['#return_value']);
+    $this->assertNotContains('js-vbo-checkbox', $view_only['#attributes']['class']);
+    $this->assertSame("You can't edit this item.", (string) $view_only['#description']);
+    $this->assertSame('invisible', $view_only['#description_display']);
   }
 
   /**
