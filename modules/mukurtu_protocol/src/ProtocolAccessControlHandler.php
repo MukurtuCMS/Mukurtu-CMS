@@ -7,8 +7,10 @@ use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\og\Og;
 use Drupal\mukurtu_protocol\CulturalProtocols;
+use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
 
 /**
  * Access controller for the Protocol entity.
@@ -22,7 +24,6 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var \Drupal\mukurtu_protocol\Entity\ProtocolInterface $entity */
-    $communities = $entity->getCommunities();
 
     // Not attached to communities yet, we don't care.
     if ($entity->isNew()) {
@@ -70,6 +71,48 @@ class ProtocolAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::forbidden()->addCacheTags(['node_list', 'media_list']);
       }
     }
+
+    return $this->checkCommunityPermissions($entity, $operation, $account);
+  }
+
+  /**
+   * Checks delete-form access for a protocol.
+   *
+   * Entity delete access is forbidden while content still uses the protocol.
+   * The delete form is still reachable for users who would otherwise be
+   * allowed to delete, so the form can explain what is blocking the delete.
+   *
+   * @param \Drupal\mukurtu_protocol\Entity\ProtocolInterface $protocol
+   *   The protocol.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function deleteFormAccess(ProtocolInterface $protocol, AccountInterface $account): AccessResultInterface {
+    $access = $this->access($protocol, 'delete', $account, TRUE);
+    if ($access->isAllowed() || !$protocol->inUse()) {
+      return $access->addCacheTags(['node_list', 'media_list']);
+    }
+    return $this->checkCommunityPermissions($protocol, 'delete', $account);
+  }
+
+  /**
+   * Checks the OG permissions for an operation in each owning community.
+   *
+   * @param \Drupal\mukurtu_protocol\Entity\ProtocolInterface $entity
+   *   The protocol.
+   * @param string $operation
+   *   The operation.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  protected function checkCommunityPermissions(ProtocolInterface $entity, string $operation, AccountInterface $account): AccessResultInterface {
+    $communities = $entity->getCommunities();
 
     // If this protocol is attached to communities, user must have all
     // relevant OG permissions for each.
