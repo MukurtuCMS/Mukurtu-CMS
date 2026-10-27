@@ -128,7 +128,7 @@ class BulkProtocolActionsTest extends ProtocolAwareEntityTestBase {
     $this->assertSame((int) $this->editor->id(), (int) $latest->getRevisionUserId());
 
     $again = $this->action('mukurtu_add_protocol_action', ['protocol' => (int) $this->p['C']->id()])->execute($this->reload($node));
-    $this->assertSame(['message' => 'Already has this protocol', 'type' => 'warning'], $again);
+    $this->assertSame(['message' => 'A all: Already has this protocol', 'type' => 'warning'], $again);
   }
 
   /**
@@ -142,9 +142,9 @@ class BulkProtocolActionsTest extends ProtocolAwareEntityTestBase {
 
     $this->assertSame('Protocol removed', $this->action('mukurtu_remove_protocol_action', $configuration)->execute($both)['message']);
     $this->assertSame([['A'], 'any'], $this->state($both));
-    $this->assertSame("Can't remove the item's only protocol", $this->action('mukurtu_remove_protocol_action', $configuration)->execute($only)['message']);
+    $this->assertSame("C any: Can't remove the item's only protocol", $this->action('mukurtu_remove_protocol_action', $configuration)->execute($only)['message']);
     $this->assertSame([['C'], 'any'], $this->state($only));
-    $this->assertSame("Doesn't have this protocol", $this->action('mukurtu_remove_protocol_action', $configuration)->execute($without)['message']);
+    $this->assertSame("A any: Doesn't have this protocol", $this->action('mukurtu_remove_protocol_action', $configuration)->execute($without)['message']);
   }
 
   /**
@@ -158,7 +158,7 @@ class BulkProtocolActionsTest extends ProtocolAwareEntityTestBase {
     $this->assertSame('Sharing setting changed', $result['message']);
     $this->assertSame([['A', 'B'], 'all'], $this->state($node));
     $again = $this->action('mukurtu_change_sharing_action', ['sharing' => 'all'])->execute($this->reload($node));
-    $this->assertSame('Already uses this sharing setting', $again['message']);
+    $this->assertSame('A+B any: Already uses this sharing setting', $again['message']);
   }
 
   /**
@@ -169,7 +169,7 @@ class BulkProtocolActionsTest extends ProtocolAwareEntityTestBase {
 
     $result = $this->action('mukurtu_add_protocol_action', ['protocol' => (int) $this->p['B']->id()])->execute($node);
 
-    $this->assertSame(['message' => "Couldn't change this item", 'type' => 'error'], $result);
+    $this->assertSame(['message' => "Couldn't change A any", 'type' => 'error'], $result);
     $this->assertSame([['A'], 'any'], $this->state($node));
   }
 

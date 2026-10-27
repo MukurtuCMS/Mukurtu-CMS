@@ -100,9 +100,12 @@ abstract class ProtocolChangeActionBase extends ViewsBulkOperationsActionBase im
    * {@inheritdoc}
    */
   public function execute($entity = NULL) {
+    // Skips and failures name the item; VBO groups results by message, so
+    // successes still add up to one line.
+    $label = $this->label($entity);
     $skip = $this->change($entity);
     if ($skip) {
-      return $this->result($skip, 'warning');
+      return $this->result($this->t('@item: @reason', ['@item' => $label, '@reason' => $skip]), 'warning');
     }
 
     $expected_protocols = $this->sortedProtocolIds($entity);
@@ -118,13 +121,13 @@ abstract class ProtocolChangeActionBase extends ViewsBulkOperationsActionBase im
     }
     catch (\Exception $e) {
       Error::logException($this->logger, $e);
-      return $this->result($this->t("Couldn't change this item"), 'error');
+      return $this->result($this->t("Couldn't change @item", ['@item' => $label]), 'error');
     }
 
     // CulturalProtocolItem::preSave() quietly restores protocols the editor
     // may not remove and drops ones they may not add, so check the outcome.
     if ($this->sortedProtocolIds($entity) !== $expected_protocols || $entity->getSharingSetting() !== $expected_sharing) {
-      return $this->result($this->t("Couldn't change this item"), 'error');
+      return $this->result($this->t("Couldn't change @item", ['@item' => $label]), 'error');
     }
 
     return $this->result($this->doneMessage());
