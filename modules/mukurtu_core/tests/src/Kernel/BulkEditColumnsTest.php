@@ -16,6 +16,7 @@ use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeAccessRebuild;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use Drupal\views\ViewExecutable;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -234,6 +235,31 @@ class BulkEditColumnsTest extends KernelTestBase {
     $this->assertSame([], $form_state->getErrors());
     $this->assertSame(['sharing', 'field_keywords'], $this->columns->selected('digital_heritage', $editor));
     $this->assertContains('Columns updated.', array_map('strval', $this->container->get('messenger')->messagesByType('status')));
+  }
+
+  /**
+   * Filters that can't match a type are left off its page.
+   */
+  public function testFiltersFollowType(): void {
+    FieldStorageConfig::create(['field_name' => 'field_category', 'entity_type' => 'node', 'type' => 'string'])->save();
+    FieldConfig::create(['field_name' => 'field_category', 'entity_type' => 'node', 'bundle' => 'digital_heritage'])->save();
+    NodeType::create(['type' => 'dictionary_word', 'name' => 'Dictionary Word'])->save();
+
+    $removed = function (string $type): array {
+      $removed = [];
+      $view = $this->createMock(ViewExecutable::class);
+      $view->element = [];
+      $view->method('removeHandler')->willReturnCallback(function ($display_id, $handler_type, $id) use (&$removed) {
+        $removed[] = $id;
+      });
+      _mukurtu_core_bulk_edit_pre_view($view, 'page', [$type]);
+      return $removed;
+    };
+
+    $this->assertNotContains('field_category_target_id', $removed('digital_heritage'));
+    $this->assertContains('in_word_list', $removed('digital_heritage'));
+    $this->assertContains('field_category_target_id', $removed('dictionary_word'));
+    $this->assertNotContains('in_word_list', $removed('dictionary_word'));
   }
 
 }

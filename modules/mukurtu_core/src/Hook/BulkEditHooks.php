@@ -26,4 +26,29 @@ class BulkEditHooks {
     }
   }
 
+  /**
+   * Implements hook_form_FORM_ID_alter() for the bulk edit page.
+   *
+   * Keeps VBO's "Selected N items" list from growing the sticky action bar
+   * over the whole table: the list scrolls within a capped height. VBO
+   * replaces the list's contents as the selection changes but keeps this
+   * wrapper, so the wrapper carries the scroll region's attributes. It's
+   * focusable so keyboard users can scroll it, and named by the summary.
+   */
+  #[Hook('form_views_form_mukurtu_bulk_edit_content_page_alter')]
+  public function bulkEditFormAlter(array &$form): void {
+    if (!isset($form['header']['views_bulk_operations_bulk_form']['multipage']['list'])) {
+      return;
+    }
+    $selection = &$form['header']['views_bulk_operations_bulk_form']['multipage'];
+    $selection['#summary_attributes']['id'] = 'mukurtu-bulk-edit-selection-summary';
+    $selection['list']['#wrapper_attributes']['class'][] = 'mukurtu-bulk-edit-selection';
+    $selection['list']['#wrapper_attributes'] += [
+      'role' => 'region',
+      'tabindex' => '0',
+      'aria-labelledby' => 'mukurtu-bulk-edit-selection-summary',
+    ];
+    $form['#attached']['library'][] = 'mukurtu_core/bulk_edit_columns';
+  }
+
 }

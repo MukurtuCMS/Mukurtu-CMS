@@ -1798,6 +1798,15 @@ function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_
     $view->removeHandler($display_id, 'filter', 'is_multipage_item');
   }
 
+  // Only offer filters that can match this type: Category is a Digital
+  // Heritage field, and word lists hold only dictionary words.
+  if (!isset(\Drupal::service('entity_field.manager')->getFieldDefinitions('node', $type)['field_category'])) {
+    $view->removeHandler($display_id, 'filter', 'field_category_target_id');
+  }
+  if ($type !== 'dictionary_word') {
+    $view->removeHandler($display_id, 'filter', 'in_word_list');
+  }
+
   $available = $columns->available($type);
   foreach ($columns->selected($type, $account) as $column) {
     $view->addHandler($display_id, 'field', 'node_field_data', 'mukurtu_bulk_edit_column', [
