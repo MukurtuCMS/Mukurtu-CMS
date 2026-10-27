@@ -49,6 +49,8 @@ class BulkEditHooks {
       'aria-labelledby' => 'mukurtu-bulk-edit-selection-summary',
     ];
     $form['#attached']['library'][] = 'mukurtu_core/bulk_edit_columns';
+    // The action bar's own count covers only the current page.
+    $form['#attached']['library'][] = 'mukurtu_core/bulk_edit_selection_count';
   }
 
 }

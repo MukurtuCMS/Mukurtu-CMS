@@ -1799,11 +1799,13 @@ function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_
   }
 
   // Only offer filters that can match this type: Category is a Digital
-  // Heritage field, and word lists hold only dictionary words.
+  // Heritage field, Language is a dictionary word field, and word lists hold
+  // only dictionary words.
   if (!isset(\Drupal::service('entity_field.manager')->getFieldDefinitions('node', $type)['field_category'])) {
     $view->removeHandler($display_id, 'filter', 'field_category_target_id');
   }
   if ($type !== 'dictionary_word') {
+    $view->removeHandler($display_id, 'filter', 'field_dictionary_word_language_target_id');
     $view->removeHandler($display_id, 'filter', 'in_word_list');
   }
 
