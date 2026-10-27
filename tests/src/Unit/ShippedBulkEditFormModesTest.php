@@ -80,6 +80,11 @@ class ShippedBulkEditFormModesTest extends UnitTestCase {
       $this->assertNotContains($component['type'] ?? '', self::EXCLUDED_WIDGETS, "$type's bulk_edit form uses the {$component['type']} widget for $name.");
     }
     $this->assertArrayNotHasKey('field_group', $display['third_party_settings'] ?? [], "$type's bulk_edit form has field groups.");
+
+    // A dependency nothing ships stops the site from installing.
+    foreach ($display['dependencies']['config'] ?? [] as $dependency) {
+      $this->assertNotEmpty(glob("$root/{config,modules/*/config}/install/$dependency.yml", GLOB_BRACE), "$type's bulk_edit form depends on $dependency, which no module ships.");
+    }
   }
 
   /**
