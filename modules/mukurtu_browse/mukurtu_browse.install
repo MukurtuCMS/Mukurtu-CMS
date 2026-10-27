@@ -38,7 +38,7 @@ function mukurtu_browse_update_40022() {
 }
 
 /**
- * Reindex search so SoundCloud and remote video show as Audio and Video in the Media type filter.
+ * Reindex search so SoundCloud and remote video count as Audio and Video.
  */
 function mukurtu_browse_update_40023() {
   foreach (Index::loadMultiple() as $index) {
