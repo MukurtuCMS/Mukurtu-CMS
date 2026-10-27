@@ -8,3 +8,18 @@
   grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
   column-gap: 1.5rem;
 }
+
+/* Scroll VBO's "Selected N items" list instead of growing the action bar. */
+.mukurtu-bulk-edit-selection {
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.mukurtu-bulk-edit-selection:focus-visible {
+  /* Transparent rather than none, so forced-colors mode paints it. */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 1px var(--gin-color-focus-border, var(--admin-color-focus-border, #fff)),
+    0 0 0 4px var(--gin-color-focus, var(--admin-color-focus, #26a769));
+}
