@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for the mukurtu_protocol module.
  */
 
+use Drupal\Core\Cache\Cache;
 use Drupal\og\Og;
 use Drupal\og\Entity\OgRole;
 
@@ -134,4 +135,76 @@ function mukurtu_protocol_install() {
  */
 function mukurtu_protocol_update_last_removed(): int {
   return 40045;
+}
+
+/**
+ * Set the page visibility of communities with an invalid value to Community only.
+ */
+function mukurtu_protocol_update_40201(): ?string {
+  // Older Mukurtu 3 migrations wrote "open" or "strict", which are protocol
+  // values. CommunityAccessControlHandler then hid those communities from
+  // everyone. Update every revision so a revert can't bring the value back.
+  $database = \Drupal::database();
+  $valid = ['public', 'community-only'];
+  $ids = $database->select('community_field_data', 'c')
+    ->fields('c', ['id'])
+    ->condition('field_access_mode', $valid, 'NOT IN')
+    ->distinct()
+    ->execute()
+    ->fetchCol();
+  foreach (['community_field_data', 'community_field_revision'] as $table) {
+    $database->update($table)
+      ->fields(['field_access_mode' => 'community-only'])
+      ->condition('field_access_mode', $valid, 'NOT IN')
+      ->execute();
+  }
+  if (!$ids) {
+    return NULL;
+  }
+
+  \Drupal::entityTypeManager()->getStorage('community')->resetCache($ids);
+  $tags = ['community_list'];
+  foreach ($ids as $id) {
+    $tags[] = 'community:' . $id;
+  }
+  Cache::invalidateTags($tags);
+
+  return (string) t('Set @count communities to Community only.', ['@count' => count($ids)]);
+}
+
+/**
+ * Delete memberships in communities and protocols that no longer exist.
+ */
+function mukurtu_protocol_update_40202(): ?string {
+  // Deleting a community or protocol used to leave its memberships behind.
+  $database = \Drupal::database();
+  $ids = [];
+  foreach (['community', 'protocol'] as $group_type) {
+    // og_membership.entity_id is a string, so compare in PHP rather than
+    // joining it to the integer group ID.
+    $existing = array_flip($database->select($group_type, 'g')
+      ->fields('g', ['id'])
+      ->execute()
+      ->fetchCol());
+    $memberships = $database->select('og_membership', 'm')
+      ->fields('m', ['id', 'entity_id'])
+      ->condition('entity_type', $group_type)
+      ->execute()
+      ->fetchAllKeyed();
+    foreach ($memberships as $membership_id => $group_id) {
+      if (!isset($existing[$group_id])) {
+        $ids[] = $membership_id;
+      }
+    }
+  }
+  if (!$ids) {
+    return NULL;
+  }
+
+  $storage = \Drupal::entityTypeManager()->getStorage('og_membership');
+  foreach (array_chunk($ids, 50) as $chunk) {
+    $storage->delete($storage->loadMultiple($chunk));
+  }
+
+  return (string) t('Deleted @count memberships.', ['@count' => count($ids)]);
 }

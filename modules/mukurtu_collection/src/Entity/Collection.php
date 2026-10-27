@@ -20,7 +20,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_child_collections'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Sub-Collections'))
-      ->setDescription(t('Large collections may benefit from more internal structure or organization. This is done using sub-collections and may reflect existing physical arrangement (eg: boxes, folders, subfolders), topical groupings, or any other arrangement that will help users navigate the collection. Sub-collections can be multiple levels deep.	<br />Select "Select Content" to choose from existing collections. Sub-collections can also be added using the "+ New Sub-collection" button when viewing the collection. Sub-collections will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
+      ->setDescription(t('Large collections may benefit from more internal structure or organization. This is done using sub-collections and may reflect existing physical arrangement (eg: boxes, folders, subfolders), topical groupings, or any other arrangement that will help users navigate the collection. Sub-collections can be multiple levels deep.	<br />Select "Select Content" to choose from existing collections. Sub-collections can also be added using the "+ New Sub-collection" button when viewing the collection. Sub-collections will be displayed in the order they are added. To change the order, drag them into place, or use the arrow buttons on each one.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
@@ -107,7 +107,7 @@ class Collection extends Node implements CollectionInterface, CulturalProtocolCo
 
     $definitions['field_items_in_collection'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Items in Collection'))
-      ->setDescription(t('The content found in the collection. Collections most commonly focus on digital heritage items, but content of any type can be included.	<br />Select "Select Content" to choose from existing site content. Content will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
+      ->setDescription(t('The content found in the collection. Collections most commonly focus on digital heritage items, but content of any type can be included.	<br />Select "Select Content" to choose from existing site content. Content will be displayed in the order they are added. To change the order, drag them into place, or use the arrow buttons on each one.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',

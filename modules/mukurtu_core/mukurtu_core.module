@@ -1637,6 +1637,24 @@ function mukurtu_core_library_info_alter(&$libraries, $extension) {
   if ($extension === 'leaflet' && isset($libraries['leaflet-drupal'])) {
     $libraries['leaflet-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-circle-display.js'] = [];
   }
+
+  // Keep an Entity Browser item fully opaque while it is dragged to reorder
+  // the list (#808), and add arrow buttons that reorder it without dragging
+  // (#2498). Both scripts must load after entity_browser.entity_reference.js,
+  // which creates the Sortable instances and the reorder function they use.
+  if ($extension === 'entity_browser') {
+    $path = '/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    if (isset($libraries['entity_reference'])) {
+      $libraries['entity_reference']['js'][$path . '/js/entity-browser-sortable.js'] = [];
+      $libraries['entity_reference']['js'][$path . '/js/entity-browser-reorder.js'] = [];
+      $libraries['entity_reference']['css']['component'][$path . '/css/entity-browser-reorder.css'] = [];
+      $libraries['entity_reference']['dependencies'][] = 'core/drupal.announce';
+      $libraries['entity_reference']['dependencies'][] = 'core/once';
+    }
+    if (isset($libraries['entity_list'])) {
+      $libraries['entity_list']['css']['component'][$path . '/css/entity-browser-sortable.css'] = [];
+    }
+  }
 }
 
 /**

@@ -107,7 +107,7 @@ class WordList extends Node implements WordListInterface, CulturalProtocolContro
 
     $definitions['field_words'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Words'))
-      ->setDescription(t('The words included in the word list.	<br />Use the "Select Content" button to choose from existing words. Words will be displayed in the order they are added, and can be manually arranged by dragging them into the desired order.'))
+      ->setDescription(t('The words included in the word list.	<br />Use the "Select Content" button to choose from existing words. Words will be displayed in the order they are added. To change the order, drag them into place, or use the arrow buttons on each one.'))
       ->setSettings([
         'target_type' => 'node',
         'handler' => 'default:node',
