@@ -307,6 +307,21 @@ class CollectionMembershipActionTest extends CollectionTestBase {
     $this->assertSame('The selected items will be removed from <em class="placeholder">Collection A</em>.', (string) $notice['target']['#value']);
     $this->assertSame("These items aren't in <em class=\"placeholder\">Collection A</em> and will be skipped:", (string) $notice['skipped']['#value']);
     $this->assertSame(['C'], $notice['skipped_items']['#items']);
+    // Skipped items are listed once, in the notice, not under "Items selected".
+    $this->assertSame(['A'], $form['list']['#items']);
+    $this->assertTrue($form['list']['#access']);
+  }
+
+  /**
+   * When every selected item would be skipped, VBO's list is hidden.
+   */
+  public function testRemoveConfirmAllSkipped(): void {
+    $c = $this->person('C');
+
+    $form = $this->confirmForm('mukurtu_remove_from_collection_action', [['k1', 'en', 'node', $c->id()]]);
+
+    $this->assertSame(['C'], $form['mukurtu_container_target']['skipped_items']['#items']);
+    $this->assertFalse($form['list']['#access']);
   }
 
   /**
@@ -322,6 +337,7 @@ class CollectionMembershipActionTest extends CollectionTestBase {
     ] as $form) {
       $this->assertArrayHasKey('target', $form['mukurtu_container_target']);
       $this->assertArrayNotHasKey('skipped', $form['mukurtu_container_target']);
+      $this->assertSame(['VBO list'], $form['list']['#items']);
     }
   }
 
@@ -336,7 +352,7 @@ class CollectionMembershipActionTest extends CollectionTestBase {
    * Runs the confirmation form alter with the given VBO data.
    */
   protected function confirmForm(string $action_id, array $list, bool $exclude_mode = FALSE): array {
-    $form = [];
+    $form = ['list' => ['#theme' => 'item_list', '#items' => ['VBO list']]];
     $form_state = new FormState();
     $form_state->set('views_bulk_operations', [
       'action_id' => $action_id,

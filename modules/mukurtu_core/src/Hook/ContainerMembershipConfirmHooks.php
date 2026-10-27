@@ -48,8 +48,19 @@ class ContainerMembershipConfirmHooks {
     /** @var \Drupal\mukurtu_core\Plugin\Action\ContainerMembershipActionBase $action */
     $action = $manager->createInstance($data['action_id'], $data['configuration'] ?? []);
     $notice = $action->removalNotice($items);
-    if ($notice) {
-      $form['mukurtu_container_target'] = $notice;
+    if (!$notice) {
+      return;
+    }
+    $form['mukurtu_container_target'] = $notice;
+
+    // List each item once: skipped items appear in the notice, so VBO's
+    // "Items selected" list keeps only the ones that will change.
+    $skip = array_flip($action->itemsToSkip($items));
+    if ($skip && isset($form['list'])) {
+      $remaining = array_filter($items, fn($item) => !isset($skip[$item->id()]));
+      $form['list']['#items'] = array_values(array_map(fn($item) => $item->label(), $remaining));
+      // Nothing left to change: the notice says it all.
+      $form['list']['#access'] = (bool) $remaining;
     }
   }
 

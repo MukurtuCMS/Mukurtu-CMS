@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\Core\Form\FormState;
+use Drupal\mukurtu_core\Hook\ContainerMembershipConfirmHooks;
 use Drupal\mukurtu_dictionary\Entity\WordList;
 use Drupal\mukurtu_dictionary\Entity\WordListInterface;
 use Drupal\user\Entity\User;
@@ -170,6 +171,32 @@ class WordListMembershipActionTest extends DictionaryTestBase {
     $form = $this->action('mukurtu_remove_from_word_list_action')->buildConfigurationForm(['actions' => ['submit' => []]], new FormState());
 
     $this->assertSame('There are no word lists you can remove words from.', (string) $form['container']['#markup']);
+  }
+
+  /**
+   * The remove confirmation names the word list and lists words not in it.
+   */
+  public function testRemoveConfirmNamesWordList(): void {
+    $a = $this->buildDictionaryWord('a');
+    $a->save();
+    $b = $this->buildDictionaryWord('b');
+    $b->save();
+    $this->action()->executeMultiple([$a]);
+
+    $form = ['list' => ['#theme' => 'item_list', '#items' => ['VBO list']]];
+    $form_state = new FormState();
+    $form_state->set('views_bulk_operations', [
+      'action_id' => 'mukurtu_remove_from_word_list_action',
+      'configuration' => ['container' => $this->list->id()],
+      'list' => [['k1', 'en', 'node', $a->id()], ['k2', 'en', 'node', $b->id()]],
+      'exclude_mode' => FALSE,
+    ]);
+    (new ContainerMembershipConfirmHooks())->confirmActionAlter($form, $form_state);
+
+    $notice = $form['mukurtu_container_target'];
+    $this->assertSame('The selected items will be removed from <em class="placeholder">List A</em>.', (string) $notice['target']['#value']);
+    $this->assertSame(['b'], $notice['skipped_items']['#items']);
+    $this->assertSame(['a'], $form['list']['#items']);
   }
 
 }

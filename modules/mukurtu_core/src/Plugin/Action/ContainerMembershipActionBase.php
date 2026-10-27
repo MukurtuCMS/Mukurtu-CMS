@@ -304,6 +304,39 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
   }
 
   /**
+   * Returns the chosen collection or word list, if it's this action's kind.
+   */
+  protected function target(): ?NodeInterface {
+    $id = $this->configuration['container'] ?? NULL;
+    $container = $id ? $this->entityTypeManager->getStorage('node')->load($id) : NULL;
+    return $container instanceof NodeInterface && $container->bundle() === $this->containerBundle() ? $container : NULL;
+  }
+
+  /**
+   * Returns the IDs of selected items a remove action will skip.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface[] $items
+   *   The selected items.
+   *
+   * @return int[]|string[]
+   *   IDs of items that aren't in the collection or word list.
+   */
+  public function itemsToSkip(array $items): array {
+    $container = $this->target();
+    if (!$this->removes() || !$container) {
+      return [];
+    }
+    $present = array_flip(array_column($container->get($this->itemsField())->getValue(), 'target_id'));
+    $skip = [];
+    foreach ($items as $item) {
+      if (!isset($present[$item->id()])) {
+        $skip[$item->id()] = $item->id();
+      }
+    }
+    return array_values($skip);
+  }
+
+  /**
    * Builds the confirmation step's notice for a remove action.
    *
    * Names the collection or word list, and lists selected items that aren't
@@ -317,9 +350,8 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
    *   A render array, or an empty array for add actions.
    */
   public function removalNotice(array $items): array {
-    $id = $this->configuration['container'] ?? NULL;
-    $container = $id ? $this->entityTypeManager->getStorage('node')->load($id) : NULL;
-    if (!$this->removes() || !$container || $container->bundle() !== $this->containerBundle()) {
+    $container = $this->target();
+    if (!$this->removes() || !$container) {
       return [];
     }
 
@@ -334,11 +366,11 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
       ],
     ];
 
-    $present = array_flip(array_column($container->get($this->itemsField())->getValue(), 'target_id'));
+    $skip = array_flip($this->itemsToSkip($items));
     $missing = [];
     foreach ($items as $item) {
       // Translation rows of one item are listed once.
-      if (!isset($present[$item->id()])) {
+      if (isset($skip[$item->id()])) {
         $missing[$item->id()] = $this->label($item);
       }
     }
