@@ -258,8 +258,10 @@ class BulkEditColumnsTest extends KernelTestBase {
 
     $this->assertNotContains('field_category_target_id', $removed('digital_heritage'));
     $this->assertContains('in_word_list', $removed('digital_heritage'));
+    $this->assertContains('field_dictionary_word_language_target_id', $removed('digital_heritage'));
     $this->assertContains('field_category_target_id', $removed('dictionary_word'));
     $this->assertNotContains('in_word_list', $removed('dictionary_word'));
+    $this->assertNotContains('field_dictionary_word_language_target_id', $removed('dictionary_word'));
   }
 
 }
