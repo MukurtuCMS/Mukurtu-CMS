@@ -23,3 +23,12 @@
     0 0 0 1px var(--gin-color-focus-border, var(--admin-color-focus-border, #fff)),
     0 0 0 4px var(--gin-color-focus, var(--admin-color-focus, #26a769));
 }
+
+/* Rows the editor can view but not edit: make the disabled checkbox look
+   unavailable in light and dark modes. Inactive controls don't need 3:1. */
+.mukurtu-bulk-edit-view-only.form-checkbox {
+  border-style: dashed;
+  background-color: transparent;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
