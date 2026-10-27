@@ -1,0 +1,62 @@
+/**
+ * @file
+ * Arrow buttons that reorder Entity Browser items without dragging (#2498).
+ *
+ * The buttons sit in the normal flow under each item, so they can't overlap
+ * the Remove and Edit buttons Gin positions in the item's top corner.
+ */
+
+.mukurtu-eb-move {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+/* 32px clears the 24px minimum target size (WCAG 2.5.8). The border is
+ * #767676, 4.54:1 on white, for the 3:1 a control's edge needs (1.4.11). */
+.mukurtu-eb-move__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 1px solid #767676;
+  border-radius: 50%;
+  background-color: var(--gin-bg-layer, Canvas);
+  color: var(--gin-color-text, CanvasText);
+  cursor: pointer;
+}
+
+.mukurtu-eb-move__button:hover:not(:disabled) {
+  background-color: var(--gin-bg-item-hover, Canvas);
+}
+
+/* Gin draws focus as a box-shadow, which forced colors removes, leaving no
+ * focus indicator at all (WCAG 2.4.7). Gin's ring stays in normal modes. The
+ * extra class outranks Gin's `:where(*) .page-wrapper :focus` reset, which
+ * loads later and sets outline: none. */
+@media (forced-colors: active) {
+  .entities-list .mukurtu-eb-move__button:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+/* Disabled controls are exempt from contrast minimums, and fading these makes
+ * it clear the item is already at that end of the list. */
+.mukurtu-eb-move__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The icons point along the line of items: toward its start and end in the
+ * grid, which runs right to left in RTL languages, and up and down in the
+ * list. */
+.entities-list:dir(rtl) .mukurtu-eb-move__button svg {
+  transform: scaleX(-1);
+}
+
+.entities-list.eb-view-list .mukurtu-eb-move__button svg {
+  transform: rotate(90deg);
+}

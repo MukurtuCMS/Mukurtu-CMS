@@ -590,6 +590,10 @@ function mukurtu_v4_preprocess_taxonomy_term__category(array &$variables): void 
  *
  * Reformats the comment timestamp to date-only (e.g. "30 May 2026") and
  * rebuilds the submitted string without the day-of-week or time.
+ *
+ * Credits the author by their Mukurtu display name (field_display_name). Core's
+ * getDisplayName() returns the account name, since nothing maps it to that
+ * field (#2165).
  */
 function mukurtu_v4_preprocess_comment(array &$variables): void {
   $comment = $variables['comment'];
@@ -598,13 +602,22 @@ function mukurtu_v4_preprocess_comment(array &$variables): void {
     'custom',
     'j F Y',
   );
-  $author_name = $comment->getOwner()->getDisplayName();
+  $owner = $comment->getOwner();
+  $author_name = $owner->hasField('field_display_name') && !$owner->get('field_display_name')->isEmpty()
+    ? $owner->get('field_display_name')->value
+    : $owner->getDisplayName();
   $variables['created'] = $date_only;
   $variables['author'] = $author_name;
-  $variables['submitted'] = t('Submitted by @username on @date', [
-    '@username' => $author_name,
-    '@date' => $date_only,
-  ]);
+  // A render array rather than a string so it can carry the author's cache
+  // tag: CommentViewBuilder doesn't add it, so a changed display name would
+  // otherwise stay stale in the render cache.
+  $variables['submitted'] = [
+    '#markup' => t('Submitted by @username on @date', [
+      '@username' => $author_name,
+      '@date' => $date_only,
+    ]),
+    '#cache' => ['tags' => $owner->getCacheTags()],
+  ];
   $variables['comment_aria_label'] = t('Comment by @author on @date', [
     '@author' => $author_name,
     '@date' => $date_only,

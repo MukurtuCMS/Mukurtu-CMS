@@ -42,7 +42,10 @@ process:
       source: roles
       map:
         'administrator member': community-community-community_manager
+        'language steward': community-community-community_manager
       default_value: community-community-member
+    -
+      plugin: array_unique
   state:
     -
       plugin: static_map
