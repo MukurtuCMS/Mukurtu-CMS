@@ -919,3 +919,47 @@ function mukurtu_update_40033(): string {
 
   return $messages ? ucfirst(implode('; ', $messages)) . '.' : 'Display style was already present; nothing to do.';
 }
+
+/**
+ * Add bulk actions to add items to, and remove them from, collections and word lists.
+ */
+function mukurtu_update_40034(): string {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return (string) t('The Manage content view is not installed on this site; nothing to change.');
+  }
+
+  // Merge into whatever actions the site already offers rather than replacing
+  // the list, so sites that removed or added actions keep their choices.
+  // Removing is harder to notice than adding, so those actions ask first.
+  $wanted = [
+    'mukurtu_add_to_collection_action' => [],
+    'mukurtu_add_to_word_list_action' => [],
+    'mukurtu_remove_from_collection_action' => ['add_confirmation' => TRUE],
+    'mukurtu_remove_from_word_list_action' => ['add_confirmation' => TRUE],
+  ];
+  $added = [];
+  $displays = $config->get('display') ?? [];
+  foreach ($displays as $display_id => $display) {
+    $path = "display.$display_id.display_options.fields.views_bulk_operations_bulk_form.selected_actions";
+    $actions = $config->get($path);
+    if (!is_array($actions)) {
+      continue;
+    }
+    $present = array_column($actions, 'action_id');
+    foreach ($wanted as $action_id => $preconfiguration) {
+      if (!in_array($action_id, $present, TRUE)) {
+        $actions[$actions ? max(array_keys($actions)) + 1 : 0] = ['action_id' => $action_id] + ($preconfiguration ? ['preconfiguration' => $preconfiguration] : []);
+        $added[$action_id] = TRUE;
+      }
+    }
+    $config->set($path, $actions);
+  }
+
+  if (!$added) {
+    return (string) t('The Manage content view already offers these actions, or has no bulk operations; nothing to change.');
+  }
+
+  $config->save();
+  return (string) t('Added bulk actions to add items to, and remove them from, collections and word lists on Manage content.');
+}
