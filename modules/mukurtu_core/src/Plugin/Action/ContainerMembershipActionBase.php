@@ -374,17 +374,24 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
         $missing[$item->id()] = $this->label($item);
       }
     }
-    if ($missing) {
+    if (!$missing) {
+      return $notice;
+    }
+    $none_removed = count($missing) === count(array_unique(array_map(fn($item) => $item->id(), $items)));
+    if ($none_removed) {
+      $notice['target']['#value'] = $this->t('None of the selected items are in %name, so nothing will be removed.', ['%name' => $name]);
+    }
+    else {
       $notice['skipped'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
         '#value' => $this->t("These items aren't in %name and will be skipped:", ['%name' => $name]),
       ];
-      $notice['skipped_items'] = [
-        '#theme' => 'item_list',
-        '#items' => array_values($missing),
-      ];
     }
+    $notice['skipped_items'] = [
+      '#theme' => 'item_list',
+      '#items' => array_values($missing),
+    ];
     return $notice;
   }
 

@@ -320,7 +320,10 @@ class CollectionMembershipActionTest extends CollectionTestBase {
 
     $form = $this->confirmForm('mukurtu_remove_from_collection_action', [['k1', 'en', 'node', $c->id()]]);
 
-    $this->assertSame(['C'], $form['mukurtu_container_target']['skipped_items']['#items']);
+    $notice = $form['mukurtu_container_target'];
+    $this->assertSame('None of the selected items are in <em class="placeholder">Collection A</em>, so nothing will be removed.', (string) $notice['target']['#value']);
+    $this->assertArrayNotHasKey('skipped', $notice);
+    $this->assertSame(['C'], $notice['skipped_items']['#items']);
     $this->assertFalse($form['list']['#access']);
   }
 
