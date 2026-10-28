@@ -17,6 +17,13 @@
   background-color: #f8f7f7;
 }
 
+/* The browser's default border is 2.83:1 over water tiles, below the 3:1
+ * that identifies the field (WCAG 1.4.11). #595959 is at least 4:1 over
+ * both water and land. */
+.leaflet-control-geocoder-container input {
+  border: 1px solid #595959;
+}
+
 /* The placeholder is the only visible label, so it needs full text contrast
  * (WCAG 1.4.3). The browser default is too light against #f8f7f7. */
 .leaflet-control-geocoder-container input::placeholder {
@@ -82,7 +89,8 @@
 /**
  * Geoman's only built-in focus affordance is a background-color change,
  * which isn't visible enough for WCAG 2.4.7/2.4.11. Add a visible outline
- * for the toolbar buttons, address search, popup close button, and markers.
+ * for the toolbar buttons, address search, locate button, popup close
+ * button, and markers.
  * The search input otherwise gets only Gin's semi-transparent box-shadow,
  * which is too faint over map tiles.
  */
@@ -97,6 +105,7 @@
  * shorthand and draw nothing, so fall back to the input's text colour. */
 .leaflet-buttons-control-button:focus-visible,
 .leaflet-control-geocoder-container input:focus-visible,
+.leaflet-control-locate a:focus-visible,
 .leaflet-pm-action:focus-visible,
 .leaflet-popup-close-button:focus-visible,
 .leaflet-marker-icon:focus-visible,
