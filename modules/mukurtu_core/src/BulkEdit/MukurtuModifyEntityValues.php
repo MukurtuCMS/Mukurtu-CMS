@@ -170,6 +170,12 @@ class MukurtuModifyEntityValues extends ModifyEntityValues {
     }
     $section['#attached']['library'][] = 'mukurtu_core/bulk_edit_columns';
 
+    // Protocol sync pre-fills media uploads with the protocols last chosen
+    // on a new item's form, which can be days old. With several items here,
+    // uploads start blank and the editor chooses.
+    \Drupal::service('tempstore.private')->get('mukurtu_protocol_sync')
+      ->delete('ps_' . \Drupal::currentUser()->id());
+
     // Each field gets its own "Change method" choice right below it. With
     // several fields open, identical titles leave no way to tell them apart.
     foreach (Element::children($section) as $key) {
