@@ -437,6 +437,22 @@
             input.title = Drupal.t('Search an Address on the Map');
           }
 
+          // Keep the search box clear of the zoom buttons on a narrow map
+          // (see the input rule in the CSS). The map can start hidden in a
+          // collapsed group, so measure whenever its size changes.
+          const map = container.closest('.leaflet-container');
+          const zoom = map && map.querySelector('.leaflet-control-zoom');
+          if (zoom && window.ResizeObserver) {
+            new ResizeObserver(function () {
+              const mapRect = map.getBoundingClientRect();
+              if (!mapRect.width) {
+                return;
+              }
+              const space = container.getBoundingClientRect().right - zoom.getBoundingClientRect().right - 10;
+              input.style.setProperty('--mukurtu-geocoder-input-limit', Math.max(space, 0) + 'px');
+            }).observe(map);
+          }
+
           // The contrib control names the input only with its title ("Search
           // an Address on the Map"), which doesn't contain the visible
           // placeholder text, so speech users can't target it by what they
@@ -557,8 +573,10 @@
   };
 
   // Set when the most recent geocoder request failed, so the "no results"
-  // announcement can say the search is unavailable instead.
+  // announcement can say the search is unavailable instead. Requests are
+  // numbered so a slow reply to an older search can't overwrite the newest.
   let mukurtuGeocoderFailed = false;
+  let mukurtuGeocoderRequest = 0;
 
   /**
    * Make the geocoder search's live region announcements translatable.
@@ -572,12 +590,17 @@
     const geocode = Drupal.Leaflet && Drupal.Leaflet.prototype.geocode;
     if (geocode && !geocode.mukurtuWrapped) {
       Drupal.Leaflet.prototype.geocode = function () {
+        const request = ++mukurtuGeocoderRequest;
         return geocode.apply(this, arguments)
           .done(function () {
-            mukurtuGeocoderFailed = false;
+            if (request === mukurtuGeocoderRequest) {
+              mukurtuGeocoderFailed = false;
+            }
           })
           .fail(function () {
-            mukurtuGeocoderFailed = true;
+            if (request === mukurtuGeocoderRequest) {
+              mukurtuGeocoderFailed = true;
+            }
           });
       };
       Drupal.Leaflet.prototype.geocode.mukurtuWrapped = true;

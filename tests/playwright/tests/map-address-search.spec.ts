@@ -172,4 +172,33 @@ test.describe('Map address search', () => {
     await expect(locate).toBeFocused();
     await expect(locate).toHaveCSS('outline-style', 'solid');
   });
+
+  test('Map address search: the draw toolbar keeps its focus ring under Gin', async ({ page }) => {
+    await openSearch(page);
+    // Gin's ":where(*) .page-wrapper *:focus { outline: none }" ties with an
+    // unscoped selector and loads later, so this went missing once already.
+    const marker = page.locator('.leaflet-pm-toolbar .leaflet-buttons-control-button').first();
+    await page.locator('.leaflet-control-locate a').first().focus();
+    await page.keyboard.press('Tab');
+    await expect(marker).toBeFocused();
+    await expect(marker).toHaveCSS('outline-style', 'solid');
+  });
+
+  test('Map address search: the search box leaves the zoom buttons uncovered at 320px', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    await openSearch(page);
+
+    for (const selector of ['.leaflet-control-zoom-in', '.leaflet-control-zoom-out']) {
+      const button = page.locator(selector).first();
+      // elementFromPoint only sees what's in the viewport.
+      await button.scrollIntoViewIfNeeded();
+      const hit = await button.evaluate((button) => {
+        const r = button.getBoundingClientRect();
+        // Every corner and the centre must be the button itself.
+        return [[r.left + 1, r.top + 1], [r.right - 1, r.top + 1], [r.left + 1, r.bottom - 1], [r.right - 1, r.bottom - 1], [r.left + r.width / 2, r.top + r.height / 2]]
+          .every(([x, y]) => button.contains(document.elementFromPoint(x, y)));
+      });
+      expect(hit, `nothing covers ${selector}`).toBe(true);
+    }
+  });
 });
