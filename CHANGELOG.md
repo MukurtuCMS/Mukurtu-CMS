@@ -7,10 +7,12 @@ themselves.
 
 ## 4.0.7
 
-A maintenance release that fixes the database update failure some multilingual
-sites hit when updating to 4.0.6. It also fixes several bugs and accessibility
-issues, and raises the minimum versions of Drupal core (11.4.10), Gin (5.0.16),
-and Leaflet (10.4.13) to the security-fixed releases that 4.0.6 recommended.
+A security and maintenance release. It requires CAPTCHA 2.0.11 or later, which
+fixes the security issue SA-CONTRIB-2026-281, and fixes the database update
+failure some multilingual sites hit when updating to 4.0.6. It also fixes
+several bugs and accessibility issues, and raises the minimum versions of Drupal
+core (11.4.10), Gin (5.0.16), and Leaflet (10.4.13) to the security-fixed
+releases that 4.0.6 recommended.
 
 If `drush updb` stopped at `mukurtu_core_update_40214` on 4.0.6, update to 4.0.7
 and run database updates again. If you skipped that update instead, run it
