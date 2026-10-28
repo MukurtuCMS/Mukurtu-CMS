@@ -5,6 +5,43 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## 4.0.7
+
+A security and maintenance release. It requires CAPTCHA 2.0.11 or later, which
+fixes the security issue SA-CONTRIB-2026-281, and fixes the database update
+failure some multilingual sites hit when updating to 4.0.6. It also fixes
+several bugs and accessibility issues, and raises the minimum versions of Drupal
+core (11.4.10), Gin (5.0.16), and Leaflet (10.4.13) to the security-fixed
+releases that 4.0.6 recommended.
+
+If `drush updb` stopped at `mukurtu_core_update_40214` on 4.0.6, update to 4.0.7
+and run database updates again. If you skipped that update instead, run it
+with:
+
+```
+drush php:eval '\Drupal::moduleHandler()->loadInclude("mukurtu_core", "install"); mukurtu_core_update_40214();'
+```
+
+New in this release: arrow buttons to reorder Entity Browser items without
+dragging, an explanation when a protocol or community can't be deleted, and an
+option for admins to dismiss the dashboard migration panel. Community managers
+can now delete communities, and comments show the author's display name.
+
+To update, back up your site, run `composer update`, and then run database
+updates (`drush updb`). This release includes 8 database updates. They:
+
+- Point the add content links at Drupal's standard /node/add pages.
+- Remove unused settings that fail configuration schema checks.
+- Remove two unused notification fields that an earlier update left partly
+  deleted. The status report lists them as needing to be uninstalled. Run cron
+  (`drush cron`) afterward to remove their database tables.
+- Set communities with an invalid page visibility to Community only, so they
+  are no longer hidden.
+- Map Mukurtu 3 community visibility to valid values, and give Mukurtu 3
+  language stewards the Community Manager role in their language communities.
+- Delete memberships left behind by deleted communities and protocols.
+- Mark the Mukurtu 3 migration setup task done on sites that no longer need it.
+
 ## 4.0.6
 
 A security and feature release. Update as soon as you can, and make sure the
