@@ -250,6 +250,10 @@ class BulkFieldEditTest extends KernelTestBase {
       ->setComponent('field_aliases', ['type' => 'string_textfield', 'weight' => 1])
       ->save();
 
+    // A protocol selection left from an earlier new item's media upload.
+    $sync = $this->container->get('tempstore.private')->get('mukurtu_protocol_sync');
+    $sync->set('ps_' . $this->editor->id(), ['protocols' => [1], 'sharing' => 'all']);
+
     $action = $this->action([]);
     $method = new \ReflectionMethod($action, 'getBundleForm');
     $form = $method->invoke($action, 'node', 'article', 'Article', [], new FormState(), 1);
@@ -262,6 +266,8 @@ class BulkFieldEditTest extends KernelTestBase {
     $this->assertSame('Change method for Aliases', (string) $section['field_aliases_change_method']['#title']);
     $this->assertSame('Change method for Related content', (string) $section['field_related_change_method']['#title']);
     $this->assertContains('mukurtu_core/bulk_edit_columns', $section['#attached']['library']);
+    // Media uploaded from the bulk form doesn't inherit that selection.
+    $this->assertNull($sync->get('ps_' . $this->editor->id()));
     $this->assertFalse($section['revision_information']['revision']['#access']);
     $this->assertTrue($section['revision_information']['revision']['#value']);
     $this->assertArrayNotHasKey('#states', $section['revision_information']['revision_log']);
