@@ -33,7 +33,7 @@ function mukurtu_bot_protection_install($is_syncing) {
   // the CAPTCHA points enabled above should show a challenge.
   \Drupal::configFactory()->getEditable('captcha.settings')
     ->set('default_challenge', 'altcha/ALTCHA')
-    ->set('enable_globally', FALSE)
+    ->set('enable_globally', 0)
     ->save();
 
   // Honeypot needs no external credentials either, so protect the same
@@ -77,6 +77,6 @@ function mukurtu_bot_protection_update_40002() {
   if (!$config->get('enable_globally')) {
     return NULL;
   }
-  $config->set('enable_globally', FALSE)->save();
+  $config->set('enable_globally', 0)->save();
   return t('Turned off "Add CAPTCHA challenges on all forms." CAPTCHA still protects the login, registration, and password reset forms.');
 }
