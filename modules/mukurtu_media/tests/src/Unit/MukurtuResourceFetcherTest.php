@@ -229,10 +229,10 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
       'minutes and seconds' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1m30s', $base . '&start=90'],
       'hours, minutes and seconds' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1h2m3s', $base . '&start=3723'],
       'fragment' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ#t=45', $base . '&start=45'],
-      'embed start and end' => ['https://www.youtube.com/embed/dQw4w9WgXcQ?start=30&end=45', $base . '&start=30&end=45'],
-      'end only' => ['https://www.youtube.com/embed/dQw4w9WgXcQ?end=45', $base . '&end=45'],
-      'start takes precedence over t' => ['https://www.youtube.com/embed/dQw4w9WgXcQ?t=10&start=30', $base . '&start=30'],
-      'end not after start is ignored' => ['https://www.youtube.com/embed/dQw4w9WgXcQ?start=45&end=30', $base . '&start=45'],
+      'start and end' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=30&end=45', $base . '&start=30&end=45'],
+      'end only' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&end=45', $base . '&end=45'],
+      'start takes precedence over t' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10&start=30', $base . '&start=30'],
+      'end not after start is ignored' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=45&end=30', $base . '&start=45'],
       'invalid value is ignored' => ['https://youtu.be/dQw4w9WgXcQ?t=abc', $base],
       'zero is ignored' => ['https://youtu.be/dQw4w9WgXcQ?t=0', $base],
     ];
@@ -309,7 +309,7 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
    * The Data API fallback also carries the segment onto the embed's src.
    */
   public function testFallbackAppliesSegment(): void {
-    $oembed_url = self::oembedUrl('https://www.youtube.com/oembed', 'https://www.youtube.com/embed/dQw4w9WgXcQ?start=30&end=45');
+    $oembed_url = self::oembedUrl('https://www.youtube.com/oembed', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=30&end=45');
     $inner = $this->createMock(ResourceFetcherInterface::class);
     $inner->method('fetchResource')->willThrowException(new ResourceException('Could not retrieve the oEmbed resource.', $oembed_url));
 
