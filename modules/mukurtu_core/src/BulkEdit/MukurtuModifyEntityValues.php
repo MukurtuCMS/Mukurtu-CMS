@@ -152,6 +152,24 @@ class MukurtuModifyEntityValues extends ModifyEntityValues {
       '#weight' => -60,
     ];
 
+    // VBE names each toggle after the first element it finds, which for a
+    // multi-value widget is "Field (value 1)". Use the field's own label, and
+    // sort and lay them out like the column picker.
+    $definitions = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle);
+    $section += ['_field_selector' => []];
+    $labels = [];
+    foreach (Element::children($section['_field_selector']) as $field) {
+      if (isset($definitions[$field])) {
+        $section['_field_selector'][$field]['#title'] = $definitions[$field]->getLabel();
+      }
+      $labels[$field] = (string) $section['_field_selector'][$field]['#title'];
+    }
+    uasort($labels, 'strnatcasecmp');
+    foreach (array_keys($labels) as $weight => $field) {
+      $section['_field_selector'][$field]['#weight'] = $weight;
+    }
+    $section['#attached']['library'][] = 'mukurtu_core/bulk_edit_columns';
+
     // Each field gets its own "Change method" choice right below it. With
     // several fields open, identical titles leave no way to tell them apart.
     foreach (Element::children($section) as $key) {
