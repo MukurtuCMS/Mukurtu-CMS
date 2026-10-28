@@ -22,8 +22,10 @@ use PHPUnit\Framework\Attributes\Group;
 use Psr\Log\LoggerInterface;
 
 /**
- * Tests the YouTube privacy rewrite and Data API fallback (issue #565), and
- * the segment start/end times (issue #557).
+ * Tests the oEmbed resource fetcher's YouTube and Vimeo handling.
+ *
+ * Covers the YouTube privacy rewrite and Data API fallback (issue #565), and
+ * segment start and end times (issue #557).
  *
  * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/565
  * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/557
@@ -222,17 +224,18 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
    */
   public static function youtubeSegmentProvider(): array {
     $base = 'feature=oembed&rel=0&modestbranding=1';
+    $watch = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
     return [
-      'no segment' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ', $base],
+      'no segment' => [$watch, $base],
       'short link, seconds' => ['https://youtu.be/dQw4w9WgXcQ?t=90', $base . '&start=90'],
       'seconds with suffix' => ['https://youtu.be/dQw4w9WgXcQ?si=abc&t=90s', $base . '&start=90'],
-      'minutes and seconds' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1m30s', $base . '&start=90'],
-      'hours, minutes and seconds' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1h2m3s', $base . '&start=3723'],
-      'fragment' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ#t=45', $base . '&start=45'],
-      'start and end' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=30&end=45', $base . '&start=30&end=45'],
-      'end only' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&end=45', $base . '&end=45'],
-      'start takes precedence over t' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10&start=30', $base . '&start=30'],
-      'end not after start is ignored' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=45&end=30', $base . '&start=45'],
+      'minutes and seconds' => [$watch . '&t=1m30s', $base . '&start=90'],
+      'hours, minutes and seconds' => [$watch . '&t=1h2m3s', $base . '&start=3723'],
+      'fragment' => [$watch . '#t=45', $base . '&start=45'],
+      'start and end' => [$watch . '&start=30&end=45', $base . '&start=30&end=45'],
+      'end only' => [$watch . '&end=45', $base . '&end=45'],
+      'start takes precedence over t' => [$watch . '&t=10&start=30', $base . '&start=30'],
+      'end not after start is ignored' => [$watch . '&start=45&end=30', $base . '&start=45'],
       'invalid value is ignored' => ['https://youtu.be/dQw4w9WgXcQ?t=abc', $base],
       'zero is ignored' => ['https://youtu.be/dQw4w9WgXcQ?t=0', $base],
     ];
