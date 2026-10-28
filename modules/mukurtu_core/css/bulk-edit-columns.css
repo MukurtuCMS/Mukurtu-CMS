@@ -1,12 +1,20 @@
 /**
- * The "Columns" panel above the bulk edit table.
+ * The bulk edit page: the "Columns" panel, the selection and the
+ * "Select fields to change" list in Modify field values.
  */
 
 /* Lay the checkboxes out in columns, wrapping to one on narrow screens. */
-.mukurtu-bulk-edit-columns .form-checkboxes {
+.mukurtu-bulk-edit-columns .form-checkboxes,
+.views-bulk-edit-form .vbe-selector-fieldset > .fieldset__wrapper {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
   column-gap: 1.5rem;
+}
+
+/* Views Bulk Edit floats each toggle with a right margin; the grid spaces
+   them instead. */
+.views-bulk-edit-form .vbe-selector-fieldset > .fieldset__wrapper > .js-form-type-checkbox {
+  margin-right: 0;
 }
 
 /* Scroll VBO's "Selected N items" list instead of growing the action bar. */

@@ -218,8 +218,23 @@ class BulkFieldEditTest extends KernelTestBase {
 
   /**
    * The form labels each change method and hides the revision checkbox.
+   *
+   * Field toggles use the field's own label, even for multi-value widgets
+   * that VBE would label "Field (value 1)", and are sorted by label.
    */
   public function testFormAdjustments(): void {
+    FieldStorageConfig::create([
+      'field_name' => 'field_aliases',
+      'entity_type' => 'node',
+      'type' => 'string',
+      'cardinality' => -1,
+    ])->save();
+    FieldConfig::create([
+      'field_name' => 'field_aliases',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'label' => 'Aliases',
+    ])->save();
     EntityFormMode::create(['id' => 'node.bulk_edit', 'label' => 'Bulk edit', 'targetEntityType' => 'node'])->save();
     $display = EntityFormDisplay::create([
       'targetEntityType' => 'node',
@@ -231,7 +246,8 @@ class BulkFieldEditTest extends KernelTestBase {
       $display->removeComponent($name);
     }
     $display
-      ->setComponent('field_related', ['type' => 'entity_reference_autocomplete'])
+      ->setComponent('field_related', ['type' => 'entity_reference_autocomplete', 'weight' => 0])
+      ->setComponent('field_aliases', ['type' => 'string_textfield', 'weight' => 1])
       ->save();
 
     $action = $this->action([]);
@@ -239,7 +255,13 @@ class BulkFieldEditTest extends KernelTestBase {
     $form = $method->invoke($action, 'node', 'article', 'Article', [], new FormState(), 1);
     $section = $form['node']['article'];
 
+    $toggles = $section['_field_selector'];
+    $this->assertSame('Aliases', (string) $toggles['field_aliases']['#title']);
+    $this->assertSame('Related content', (string) $toggles['field_related']['#title']);
+    $this->assertLessThan($toggles['field_related']['#weight'], $toggles['field_aliases']['#weight']);
+    $this->assertSame('Change method for Aliases', (string) $section['field_aliases_change_method']['#title']);
     $this->assertSame('Change method for Related content', (string) $section['field_related_change_method']['#title']);
+    $this->assertContains('mukurtu_core/bulk_edit_columns', $section['#attached']['library']);
     $this->assertFalse($section['revision_information']['revision']['#access']);
     $this->assertTrue($section['revision_information']['revision']['#value']);
     $this->assertArrayNotHasKey('#states', $section['revision_information']['revision_log']);
