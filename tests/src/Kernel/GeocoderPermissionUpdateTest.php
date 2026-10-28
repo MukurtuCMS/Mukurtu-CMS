@@ -10,7 +10,7 @@ use Drupal\user\Entity\Role;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40037().
+ * Tests mukurtu_update_40034().
  *
  * Leaflet only adds the address search to the map widget for users with
  * "access geocoder api endpoints", and no Mukurtu role shipped with it, so
@@ -37,7 +37,7 @@ class GeocoderPermissionUpdateTest extends KernelTestBase {
    * Logged-in users gain the permission and keep their existing ones.
    */
   public function testGrantsPermission(): void {
-    $message = mukurtu_update_40037();
+    $message = mukurtu_update_40034();
 
     $role = Role::load('authenticated');
     $this->assertTrue($role->hasPermission('access geocoder api endpoints'));
@@ -49,8 +49,8 @@ class GeocoderPermissionUpdateTest extends KernelTestBase {
    * Running twice is a no-op the second time.
    */
   public function testIsIdempotent(): void {
-    mukurtu_update_40037();
-    $message = mukurtu_update_40037();
+    mukurtu_update_40034();
+    $message = mukurtu_update_40034();
 
     $this->assertTrue(Role::load('authenticated')->hasPermission('access geocoder api endpoints'));
     $this->assertStringContainsString('nothing to change', $message);

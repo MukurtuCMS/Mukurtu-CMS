@@ -923,7 +923,7 @@ function mukurtu_update_40033(): string {
 /**
  * Let logged-in users search for addresses on map fields.
  */
-function mukurtu_update_40037(): string {
+function mukurtu_update_40034(): string {
   // Leaflet only adds the address search to the map widget for users with
   // this permission, and no Mukurtu role shipped with it, so only
   // administrators could search.
