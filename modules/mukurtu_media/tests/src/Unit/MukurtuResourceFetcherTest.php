@@ -263,6 +263,27 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
   }
 
   /**
+   * A start time YouTube already put on the src is not added a second time.
+   */
+  public function testYoutubeStartIsNotDuplicated(): void {
+    $original = Resource::video(
+      '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?start=30&feature=oembed"></iframe>',
+      640,
+      360,
+      $this->youtubeProvider(),
+    );
+
+    $fetcher = $this->createFetcherReturning($original);
+    $video_url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=30&end=45';
+    $result = $fetcher->fetchResource(self::oembedUrl('https://www.youtube.com/oembed', $video_url));
+
+    $this->assertSame(
+      '<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=30&feature=oembed&rel=0&modestbranding=1&end=45"></iframe>',
+      $result->getHtml()
+    );
+  }
+
+  /**
    * A Vimeo video URL's start time is carried onto the embed as #t=.
    */
   public function testVimeoStartTimeIsAppliedToEmbed(): void {

@@ -93,7 +93,8 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
    *   does not set cookies until the viewer interacts with the player.
    * - rel=0: suppresses related videos at the end of playback.
    * - modestbranding=1: removes the YouTube logo from the control bar.
-   * - start/end: the segment's start and end time in seconds, if any.
+   * - start/end: the segment's start and end time in seconds, if any and if
+   *   YouTube has not already set them.
    *
    * @param string $html
    *   The embed HTML returned by YouTube.
@@ -101,17 +102,16 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
    *   The segment to play, as returned by extractSegment().
    */
   protected function applyYoutubePrivacyParams(string $html, array $segment = ['start' => NULL, 'end' => NULL]): string {
-    $params = 'rel=0&modestbranding=1' . $this->buildYoutubeSegmentParams($segment);
     return preg_replace_callback(
       '/src="([^"]+)"/',
-      function (array $matches) use ($params): string {
+      function (array $matches) use ($segment): string {
         $src = str_replace(
           ['//www.youtube.com/embed', '//youtube.com/embed'],
           '//www.youtube-nocookie.com/embed',
           $matches[1]
         );
         $separator = str_contains($src, '?') ? '&' : '?';
-        return 'src="' . $src . $separator . $params . '"';
+        return 'src="' . $src . $separator . 'rel=0&modestbranding=1' . $this->buildYoutubeSegmentParams($segment, $src) . '"';
       },
       $html
     );
@@ -120,19 +120,23 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
   /**
    * Builds the YouTube embed query parameters for a segment.
    *
+   * YouTube's oEmbed HTML sometimes already includes a start time, so a
+   * parameter is left out if the src already has it.
+   *
    * @param array{start: ?int, end: ?int} $segment
    *   The segment to play, as returned by extractSegment().
+   * @param string $src
+   *   The iframe src the parameters will be added to.
    *
    * @return string
    *   The parameters, each prefixed with "&", or an empty string.
    */
-  protected function buildYoutubeSegmentParams(array $segment): string {
+  protected function buildYoutubeSegmentParams(array $segment, string $src = ''): string {
     $params = '';
-    if ($segment['start']) {
-      $params .= '&start=' . $segment['start'];
-    }
-    if ($segment['end']) {
-      $params .= '&end=' . $segment['end'];
+    foreach (['start', 'end'] as $name) {
+      if ($segment[$name] && !preg_match('/[?&](?:amp;)?' . $name . '=/', $src)) {
+        $params .= '&' . $name . '=' . $segment[$name];
+      }
     }
     return $params;
   }
