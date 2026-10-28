@@ -919,3 +919,19 @@ function mukurtu_update_40033(): string {
 
   return $messages ? ucfirst(implode('; ', $messages)) . '.' : 'Display style was already present; nothing to do.';
 }
+
+/**
+ * Let logged-in users search for addresses on map fields.
+ */
+function mukurtu_update_40037(): string {
+  // Leaflet only adds the address search to the map widget for users with
+  // this permission, and no Mukurtu role shipped with it, so only
+  // administrators could search.
+  $role = Role::load('authenticated');
+  if (!$role || $role->hasPermission('access geocoder api endpoints')) {
+    return (string) t('Logged-in users can already search for addresses on map fields; nothing to change.');
+  }
+
+  $role->grantPermission('access geocoder api endpoints')->save();
+  return (string) t('Logged-in users can now search for addresses on map fields.');
+}
