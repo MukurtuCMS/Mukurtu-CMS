@@ -11,9 +11,11 @@
   column-gap: 1.5rem;
 }
 
-/* Views Bulk Edit floats each toggle with a right margin; the grid spaces
-   them instead. */
+/* Views Bulk Edit floats each toggle with a right margin, and the admin
+   theme spaces them like separate form items. Space them like the column
+   picker's checkboxes instead. */
 .views-bulk-edit-form .vbe-selector-fieldset > .fieldset__wrapper > .js-form-type-checkbox {
+  margin-block: 0.5rem;
   margin-right: 0;
 }
 
