@@ -334,6 +334,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       ],
       'dashboard-content' => [
         'Manage Content',
+        'Bulk edit content',
         'Add collection',
         'Add dictionary word',
         'Add digital heritage item',
