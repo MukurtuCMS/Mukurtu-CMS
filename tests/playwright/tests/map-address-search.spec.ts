@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Route } from '@playwright/test';
 import { managerAccount } from '~helpers/a11y-credentials';
 import { MANAGER_STATE } from '~helpers/auth-state';
 
@@ -9,7 +9,9 @@ import { MANAGER_STATE } from '~helpers/auth-state';
  * no Mukurtu role used to ship with, so only administrators could search.
  * mukurtu_update_40034() grants it to authenticated users, and
  * modules/mukurtu_core's leaflet widget CSS/JS fixes the accessibility gaps
- * that only admins could reach before.
+ * that only admins could reach before. #2545 covers the rest: the combobox
+ * pattern, failed-lookup and translatable announcements, Down Arrow on the
+ * last result, the input border and the locate button's focus ring.
  *
  * Runs as the manage-adjacent account: a protocol steward with no site roles,
  * so it can open the Digital Heritage form without being an administrator.
@@ -26,8 +28,11 @@ test.describe('Map address search', () => {
     { formatted_address: 'Pullman, Michigan, United States', geometry: { location: { lat: 42.4767, lng: -86.0947 } } },
   ];
 
-  const openSearch = async (page: Page) => {
-    await page.route('**/geocoder/api/geocode?**', (route) => route.fulfill({ json: RESULTS }));
+  type Geocode = (route: Route) => Promise<void>;
+  const withResults = (results: object[]): Geocode => (route) => route.fulfill({ json: results });
+
+  const openSearch = async (page: Page, geocode: Geocode = withResults(RESULTS)) => {
+    await page.route('**/geocoder/api/geocode?**', (route) => geocode(route));
     await page.goto('/node/add/digital_heritage');
     expect(page.url(), 'still on the add form, not redirected to login').not.toContain('/user/login');
     // The map is in the Locations group: a tab on wide screens, an
@@ -88,5 +93,83 @@ test.describe('Map address search', () => {
 
     await page.keyboard.press('Enter');
     await expect(page.locator('#drupal-live-announce')).toContainText('Map moved to Pullman, Washington, United States.');
+  });
+
+  test('Map address search: the input and results follow the combobox pattern', async ({ page }) => {
+    const input = await openSearch(page);
+    await expect(input).toHaveAttribute('role', 'combobox');
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+
+    await input.click();
+    await input.pressSequentially('Pullman');
+    const listbox = page.locator(`#${await input.getAttribute('aria-controls')}`);
+    await expect(listbox).toHaveAttribute('role', 'listbox');
+    await expect(listbox.getByRole('option')).toHaveCount(2);
+    await expect(input).toHaveAttribute('aria-expanded', 'true');
+    // Cancelling jQuery UI's repeat of the highlighted result must not also
+    // swallow the result count.
+    await expect(page.locator('.ui-helper-hidden-accessible[role="status"]').filter({ hasText: '2 results are available, use up and down arrow keys to navigate.' })).toHaveCount(1);
+
+    // autoFocus highlights the first result; the input must point at it.
+    const first = listbox.getByRole('option').first();
+    await expect(first).toHaveAttribute('aria-selected', 'true');
+    await expect(input).toHaveAttribute('aria-activedescendant', (await first.getAttribute('id'))!);
+
+    await page.keyboard.press('ArrowDown');
+    const second = listbox.getByRole('option').nth(1);
+    await expect(second).toHaveAttribute('aria-selected', 'true');
+    await expect(first).toHaveAttribute('aria-selected', 'false');
+    await expect(input).toHaveAttribute('aria-activedescendant', (await second.getAttribute('id'))!);
+
+    await page.keyboard.press('Escape');
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(input).not.toHaveAttribute('aria-activedescendant');
+  });
+
+  test('Map address search: Down Arrow keeps a single result chosen', async ({ page }) => {
+    const input = await openSearch(page, withResults(RESULTS.slice(0, 1)));
+    await input.click();
+    await input.pressSequentially('Pullman');
+    const option = page.locator('.mukurtu-geocoder-autocomplete-menu [role="option"]');
+    await expect(option).toHaveCount(1);
+    await expect(page.locator('.ui-helper-hidden-accessible[role="status"]').filter({ hasText: '1 result is available, use up and down arrow keys to navigate.' })).toHaveCount(1);
+
+    await page.keyboard.press('ArrowDown');
+    await expect(option).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#drupal-live-announce')).toContainText('Map moved to Pullman, Washington, United States.');
+  });
+
+  test('Map address search: a failed lookup is not announced as no results', async ({ page }) => {
+    let fail = true;
+    const input = await openSearch(page, (route) => (fail ? route.fulfill({ status: 503, body: '' }) : route.fulfill({ json: [] })));
+    // jQuery UI's own live regions, which announce the outcome of a search.
+    // Every autocomplete field on the form has one, so match on the text.
+    const announced = (text: string) => page.locator('.ui-helper-hidden-accessible[role="status"]').filter({ hasText: text });
+
+    await input.click();
+    await input.pressSequentially('Pullman');
+    await expect(announced("Address search isn't available right now. Try again later, or add a marker on the map.")).toHaveCount(1);
+
+    // The next successful search with nothing found goes back to the usual
+    // message.
+    fail = false;
+    await input.fill('');
+    await input.pressSequentially('Nowhere at all');
+    await expect(announced('No search results.')).toHaveCount(1);
+    await expect(announced("Address search isn't available right now.")).toHaveCount(0);
+  });
+
+  test('Map address search: the input border and the locate button meet contrast and focus requirements', async ({ page }) => {
+    const input = await openSearch(page);
+    await expect(input).toHaveCSS('border-top-color', 'rgb(89, 89, 89)');
+
+    await page.locator('.leaflet-control-zoom-out').first().focus();
+    await page.keyboard.press('Tab');
+    await expect(input).toBeFocused();
+    await page.keyboard.press('Tab');
+    const locate = page.locator('.leaflet-control-locate a').first();
+    await expect(locate).toBeFocused();
+    await expect(locate).toHaveCSS('outline-style', 'solid');
   });
 });
