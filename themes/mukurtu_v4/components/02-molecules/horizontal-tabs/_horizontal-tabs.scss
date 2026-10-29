@@ -12,8 +12,10 @@
   }
 
   // Style reset hack to shield us from field group module and Gin's styling of
-  // horizontal tabs.
-  *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *)) {
+  // horizontal tabs. The panes keep the theme's styles. field_group only adds
+  // .horizontal-tabs-panes when it builds tabs, so below its breakpoint the
+  // panes are found by the data attribute the templates always print.
+  *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *, [data-horizontal-tabs-panes], [data-horizontal-tabs-panes] *)) {
     all: revert;
     box-sizing: border-box;
 
@@ -176,6 +178,50 @@
     .horizontal-tabs-pane {
       padding: 0;
       padding-block-start: var(--v-separation);
+    }
+  }
+
+  // Below field_group's tabs breakpoint (640px) the panes stay an accordion
+  // of details elements. Match the tabs: grey rows, and the open one in the
+  // selected tab's colours.
+  [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) {
+    > details {
+      border-block-end: 1px solid var(--cr-border);
+
+      &:last-of-type {
+        border-block-end: none;
+      }
+
+      > summary {
+        cursor: pointer;
+        padding-block: 0.6em;
+        padding-inline: 1em;
+        background-color: var(--cr-default-bg);
+        color: var(--horizontal-tab-link-text);
+        font-weight: 700;
+
+        &:focus-visible {
+          // Inset, as on the selected tab, so the ring stays visible on the
+          // dark open row.
+          outline: 4px solid var(--focus-color);
+          outline-offset: -4px;
+        }
+
+        .div-title,
+        .details-title {
+          display: inline;
+        }
+      }
+
+      &[open] {
+        padding-block-end: var(--v-separation);
+
+        > summary {
+          background-color: var(--brand-primary-dark);
+          color: var(--light-text-color);
+          margin-block-end: var(--v-separation);
+        }
+      }
     }
   }
 }

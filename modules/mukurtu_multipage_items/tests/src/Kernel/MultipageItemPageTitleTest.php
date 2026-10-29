@@ -145,6 +145,12 @@ class MultipageItemPageTitleTest extends MultipageItemTestBase {
     $this->assertStringNotContainsString('multipage-item__page-title', $html);
     preg_match_all('#<h2 class="community-record__title">(.*?)</h2>#', $html, $matches);
     $this->assertSame(['Page two', 'Page two, South record'], $matches[1]);
+
+    // Only the record being viewed starts open, so on narrow screens, where
+    // the tabs stay an accordion, it is the one showing (#2557).
+    preg_match_all('#<details[^>]* id="record-(\d+)"[^>]*>#', $html, $details);
+    $open = array_filter(array_combine($details[1], $details[0]), fn($tag) => preg_match('#\sopen[\s>]#', $tag));
+    $this->assertSame([(string) $page->id()], array_map('strval', array_keys($open)));
   }
 
 }
