@@ -1,0 +1,171 @@
+# Rendered by render-config.sh from MUKURTU_* environment variables.
+# Do not edit: changes are lost at the next start.
+#
+# Rules follow Drupal's recommended nginx configuration
+# (https://www.drupal.org/docs/getting-started/system-requirements/nginx),
+# tightened so that only index.php is ever executed.
+
+worker_processes @@MUKURTU_NGINX_WORKER_PROCESSES@@;
+pid @@MUKURTU_RUN_DIR@@/nginx.pid;
+# Errors and above only. At "warn" nginx logs every response it has to spill to a temporary
+# file (a big page to a slow client; that is fine, it frees the PHP worker) together
+# with the request URL, and for a one-time login link the URL contains the token. The
+# access log redacts those; an error log line cannot be.
+error_log stderr error;
+
+events {
+  worker_connections @@MUKURTU_NGINX_WORKER_CONNECTIONS@@;
+}
+
+http {
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+
+  # The runtime user cannot write to the default temp locations. Request bodies
+  # are buffered here before they are passed to PHP, so uploads are written to
+  # the upload temp area (MUKURTU_FILE_TEMP_PATH), which is sized for them. The
+  # run directory is small and may be a tmpfs.
+  # Large responses from PHP (exports, for example) spill to disk the same way.
+  client_body_temp_path @@MUKURTU_FILE_TEMP_PATH@@/nginx-body;
+  fastcgi_temp_path @@MUKURTU_FILE_TEMP_PATH@@/nginx-fastcgi;
+  proxy_temp_path @@MUKURTU_RUN_DIR@@/nginx-proxy;
+  uwsgi_temp_path @@MUKURTU_RUN_DIR@@/nginx-uwsgi;
+  scgi_temp_path @@MUKURTU_RUN_DIR@@/nginx-scgi;
+
+  server_tokens off;
+  sendfile on;
+  tcp_nopush on;
+  keepalive_timeout 30s;
+  client_max_body_size @@MUKURTU_UPLOAD_MAX@@;
+
+  gzip on;
+  gzip_vary on;
+  gzip_comp_level 5;
+  gzip_min_length 1024;
+  gzip_types text/plain text/css text/xml application/xml application/json
+             application/javascript application/rss+xml application/atom+xml
+             application/geo+json application/gpx+xml image/svg+xml;
+
+  open_file_cache max=2000 inactive=60s;
+  open_file_cache_valid 60s;
+  open_file_cache_min_uses 2;
+  open_file_cache_errors on;
+
+  # One-time login links (/user/reset/<uid>/<time>/<token>) are credentials until used.
+  # The URL and a Referer that contains one are logged with the token replaced.
+  map $request_uri $mukurtu_log_uri {
+    ~^/user/reset/ "/user/reset/[redacted]";
+    default $request_uri;
+  }
+  map $http_referer $mukurtu_log_referer {
+    ~^(?<before>.*/user/reset/) "${before}[redacted]";
+    default $http_referer;
+  }
+  log_format mukurtu '$remote_addr - $remote_user [$time_local] "$request_method $mukurtu_log_uri $server_protocol" '
+                     '$status $body_bytes_sent "$mukurtu_log_referer" "$http_user_agent"';
+
+  @@MUKURTU_NGINX_ACCESS_LOG_DIRECTIVE@@
+
+  upstream php_www { server unix:@@MUKURTU_RUN_DIR@@/www.sock; }
+  upstream php_files { server unix:@@MUKURTU_RUN_DIR@@/files.sock; }
+
+  server {
+    listen 8080 default_server;
+    server_name _;
+    root /var/www/html/web;
+    index index.php;
+
+    # HSTS and Content-Security-Policy belong to the TLS-terminating reverse proxy, which
+    # knows the site's real scheme and origins. These two are safe everywhere.
+    #
+    # add_header is inherited by a location only if that location has no add_header of
+    # its own, so the locations below cache with `expires` (a separate directive) and
+    # these headers apply to all of them.
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Health probe for the container: answered by php-fpm's ping handler, which
+    # does not bootstrap Drupal, so it is cheap and does not touch the database.
+    location = /healthz {
+      access_log off;
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_NAME /ping;
+      fastcgi_param SCRIPT_FILENAME /ping;
+      fastcgi_pass php_www;
+    }
+
+    # Dotfiles (except /.well-known), version-control metadata, and files that
+    # are source or configuration, never content.
+    location ~ /\.(?!well-known) {
+      return 404;
+    }
+    location ~* \.(engine|inc|install|make|module|profile|po|sh|.*sql|theme|twig|tpl(\.php)?|xtmpl|yml|lock|bak|orig|save|swp|swo)$ {
+      return 404;
+    }
+    location ~* ^/(composer\.(json|lock)|package(-lock)?\.json|yarn\.lock|web\.config)$ {
+      return 404;
+    }
+
+    # PHP is never executed from user-writable locations.
+    location ~* ^/sites/[^/]+/(files|private)/.*\.(php|phtml|phar|pl|py|cgi)(\.|$) {
+      return 404;
+    }
+
+    # Drupal front controller. The only PHP file that ever runs.
+    location = /index.php {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+      fastcgi_param SCRIPT_NAME /index.php;
+      fastcgi_param HTTP_PROXY "";
+      fastcgi_read_timeout @@MUKURTU_PHP_MAX_EXECUTION_TIME@@s;
+      # Drupal sends X-Content-Type-Options itself; nginx's add_header would repeat it.
+      fastcgi_hide_header X-Content-Type-Options;
+      fastcgi_pass php_www;
+    }
+
+    # Everything else that ends in .php (install.php, update.php, authorize.php,
+    # core test scripts, ...). Updates run through `drush updb` at start-up.
+    location ~* \.php(/|$) {
+      return 404;
+    }
+
+    # Private files: Drupal checks access, then streams the file through PHP.
+    # They go to their own pool so downloads cannot occupy page-request workers.
+    location ^~ /system/files/ {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+      fastcgi_param SCRIPT_NAME /index.php;
+      fastcgi_param HTTP_PROXY "";
+      fastcgi_buffering off;
+      fastcgi_read_timeout 3600s;
+      fastcgi_hide_header X-Content-Type-Options;
+      fastcgi_pass php_files;
+    }
+
+    # Aggregated CSS and JS have content-hashed names, so they can be cached for
+    # a year without risk.
+    location ~* ^/sites/[^/]+/files/(css|js)/ {
+      try_files $uri @rewrite;
+      expires 1y;
+    }
+
+    # Image styles are generated on first request, then served as static files.
+    location ~* ^/sites/[^/]+/files/styles/ {
+      try_files $uri @rewrite;
+      expires 30d;
+    }
+
+    location ~* \.(js|css|png|jpe?g|gif|ico|svg|webp|avif|woff2?|ttf|eot|map|mp3|mp4|webm|ogg|pdf)$ {
+      try_files $uri @rewrite;
+      expires 30d;
+    }
+
+    location / {
+      try_files $uri /index.php?$query_string;
+    }
+
+    location @rewrite {
+      rewrite ^ /index.php;
+    }
+  }
+}
