@@ -2,12 +2,10 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.taxonomy_term.language.field_characters
     - field.field.taxonomy_term.language.field_language_code
     - field.field.taxonomy_term.language.field_language_rtl
     - taxonomy.vocabulary.language
   module:
-    - mukurtu_core
     - path
     - text
 id: taxonomy_term.language.default
@@ -17,17 +15,11 @@ mode: default
 content:
   description:
     type: text_textarea
-    weight: 4
+    weight: 3
     region: content
     settings:
       rows: 5
       placeholder: ''
-    third_party_settings: {  }
-  field_characters:
-    type: mukurtu_character
-    weight: 3
-    region: content
-    settings: {  }
     third_party_settings: {  }
   field_language_code:
     type: string_textfield
@@ -46,7 +38,7 @@ content:
     third_party_settings: {  }
   langcode:
     type: language_select
-    weight: 5
+    weight: 4
     region: content
     settings:
       include_locked: true
@@ -61,13 +53,13 @@ content:
     third_party_settings: {  }
   path:
     type: path
-    weight: 6
+    weight: 5
     region: content
     settings: {  }
     third_party_settings: {  }
   status:
     type: boolean_checkbox
-    weight: 7
+    weight: 6
     region: content
     settings:
       display_label: true

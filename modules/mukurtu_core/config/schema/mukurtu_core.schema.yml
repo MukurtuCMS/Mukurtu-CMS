@@ -728,26 +728,26 @@ mukurtu_core.character_palette:
     enabled:
       type: boolean
       label: 'Show the character palette'
-
-field.storage_settings.mukurtu_character:
-  type: mapping
-  label: 'Palette character storage settings'
-
-field.field_settings.mukurtu_character:
-  type: mapping
-  label: 'Palette character settings'
-
-field.value.mukurtu_character:
-  type: mapping
-  label: 'Default value'
-  mapping:
-    character:
-      type: string
-      label: 'Character'
-    name:
-      type: label
-      label: 'Name'
-
-field.widget.settings.mukurtu_character:
-  type: mapping
-  label: 'Character and name widget settings'
+    groups:
+      type: sequence
+      label: 'Character groups'
+      sequence:
+        type: mapping
+        label: 'Character group'
+        mapping:
+          label:
+            type: label
+            label: 'Group name'
+          characters:
+            type: sequence
+            label: 'Characters'
+            sequence:
+              type: mapping
+              label: 'Character'
+              mapping:
+                character:
+                  type: string
+                  label: 'Character'
+                name:
+                  type: label
+                  label: 'Name'

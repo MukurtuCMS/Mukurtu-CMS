@@ -1,0 +1,5 @@
+mukurtu_core.character_palette:
+  title: 'Character palette'
+  base_route_name: mukurtu_core.character_palette_settings
+  names:
+    - mukurtu_core.character_palette
