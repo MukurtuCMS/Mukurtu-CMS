@@ -75,3 +75,11 @@ mukurtu_collection.collection_organization_subcollection_autocomplete:
         type: entity:node
   requirements:
     _custom_access: '\Drupal\mukurtu_collection\Controller\CollectionOrganizationController::access'
+
+mukurtu_collection.collection_order:
+  path: '/admin/config/mukurtu/collection-order'
+  defaults:
+    _form: '\Drupal\mukurtu_collection\Form\CollectionOrderForm'
+    _title: 'Collection order'
+  requirements:
+    _permission: 'administer collection order'

@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the mukurtu_solr module.
+ */
+
 /**
  * Implements hook_update_last_removed().
  *
@@ -13,4 +19,18 @@
  */
 function mukurtu_solr_update_last_removed(): int {
   return 40005;
+}
+
+/**
+ * Adds manual ordering to the Solr Collections page.
+ *
+ * Indexes a display weight for each collection in the default Solr index and
+ * sorts the Solr Collections page on it, after search relevance. Collections
+ * are queued for reindexing so the weight is filled in.
+ */
+function mukurtu_solr_update_40006() {
+  \Drupal::moduleHandler()->loadInclude('mukurtu_collection', 'install');
+  mukurtu_collection_add_display_weight_to_index('mukurtu_default_solr_index');
+  mukurtu_collection_add_display_weight_sort('mukurtu_browse_collections_solr', 'search_api_index_mukurtu_default_solr_index', 'node_title');
+  \Drupal::service('mukurtu_collection.collection_order')->reindex();
 }

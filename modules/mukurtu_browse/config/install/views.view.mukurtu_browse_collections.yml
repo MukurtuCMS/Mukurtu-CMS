@@ -132,6 +132,19 @@ display:
         options: {  }
       empty: {  }
       sorts:
+        collection_display_weight:
+          id: collection_display_weight
+          table: search_api_index_mukurtu_collection_index
+          field: collection_display_weight
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: ''
+            field_identifier: ''
+          exposed: false
         title:
           id: title
           table: search_api_index_mukurtu_collection_index
