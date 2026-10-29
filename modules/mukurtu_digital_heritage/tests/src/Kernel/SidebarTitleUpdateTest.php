@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_digital_heritage\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Entity\Entity\EntityViewMode;
 use Drupal\Core\Serialization\Yaml;
 
 /**
@@ -58,6 +59,9 @@ class SidebarTitleUpdateTest extends DigitalHeritageTestBase {
   protected function setUp(): void {
     parent::setUp();
     \Drupal::moduleHandler()->loadInclude('mukurtu_digital_heritage', 'install');
+    if (!EntityViewMode::load('node.full')) {
+      EntityViewMode::create(['id' => 'node.full', 'targetEntityType' => 'node', 'label' => 'Full content'])->save();
+    }
   }
 
   /**
@@ -93,7 +97,7 @@ class SidebarTitleUpdateTest extends DigitalHeritageTestBase {
   /**
    * Loads the full display fresh from storage.
    */
-  protected function loadFullDisplay(): EntityViewDisplay {
+  protected function loadFullDisplay(): ?EntityViewDisplay {
     \Drupal::entityTypeManager()->getStorage('entity_view_display')->resetCache();
     return EntityViewDisplay::load('node.digital_heritage.full');
   }

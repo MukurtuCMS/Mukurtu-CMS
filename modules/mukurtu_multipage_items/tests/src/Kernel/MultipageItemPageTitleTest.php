@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_multipage_items\Kernel;
 
-use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Render\Element;
 use Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController;
 
@@ -47,15 +46,13 @@ class MultipageItemPageTitleTest extends MultipageItemTestBase {
     // The title is text, so markup in it is escaped rather than rendered.
     $this->assertPageHeading($build['#current_page'], 'Second &lt;b&gt;page&lt;/b&gt;', (int) $second->id());
 
-    // Read the command unrendered; getCommands() would render the node.
-    $response = $controller->getSelectedPageAjax($first);
-    $commands = (new \ReflectionProperty($response, 'commands'))->getValue($response);
+    // The response renders its commands as they are added.
+    $commands = $controller->getSelectedPageAjax($first)->getCommands();
     $this->assertCount(1, $commands);
-    $command = $commands[0];
-    $this->assertInstanceOf(ReplaceCommand::class, $command);
-    $this->assertSame('#mukurtu-multipage-item-selected-page', (new \ReflectionProperty($command, 'selector'))->getValue($command));
-    $content = (new \ReflectionProperty($command, 'content'))->getValue($command);
-    $this->assertPageHeading($content['mukurtu_multipage_item_selected_page'], 'First page', (int) $first->id());
+    $this->assertSame('replaceWith', $commands[0]['method']);
+    $this->assertSame('#mukurtu-multipage-item-selected-page', $commands[0]['selector']);
+    $html = (string) $commands[0]['data'];
+    $this->assertMatchesRegularExpression('#^<div id="mukurtu-multipage-item-selected-page">\s*<h2 class="multipage-item__page-title" data-mukurtu-page-title="">First page</h2>#', $html);
   }
 
 }
