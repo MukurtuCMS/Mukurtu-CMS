@@ -187,4 +187,27 @@ class MukurtuMigrateImportBatchFinishedTest extends KernelTestBase {
     $this->assertFalse(\Drupal::state()->get('mukurtu_migrate.migration_succeeded', FALSE));
   }
 
+  /**
+   * The saved source database credentials are deleted, even after a failed
+   * run, since the credential step saves them again before every run.
+   */
+  public function testSourceCredentialsDeleted(): void {
+    $state = \Drupal::state();
+    $state->set('migrate_drupal_7', ['key' => 'upgrade', 'database' => ['password' => 'secret']]);
+    $state->set('migrate.fallback_state_key', 'migrate_drupal_7');
+
+    $results = [
+      'successes' => 0,
+      'failures' => 1,
+      'row_created_or_updated' => 0,
+      'row_failures' => 1,
+      'row_ignored' => 0,
+    ];
+
+    MukurtuMigrateImportBatch::finished(FALSE, $results, [], '1');
+
+    $this->assertNull($state->get('migrate_drupal_7'));
+    $this->assertNull($state->get('migrate.fallback_state_key'));
+  }
+
 }
