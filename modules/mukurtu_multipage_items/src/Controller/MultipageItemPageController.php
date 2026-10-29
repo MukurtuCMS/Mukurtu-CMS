@@ -346,7 +346,10 @@ class MultipageItemPageController extends ControllerBase {
 
   public function addNewPageTitle($node_type, $page_node) {
     $mpi = $this->multipageItemManager->getMultipageEntity($page_node);
-    return $this->t("Adding new %type page to %title", ['%type' => $node_type->label(), '%title' => $this->entityRepository->getTranslationFromContext($mpi)->getTitle()]);
+    return $this->t("Adding new %type page to %title", [
+      '%type' => $node_type->label(),
+      '%title' => $this->entityRepository->getTranslationFromContext($mpi)->getTitle(),
+    ]);
   }
 
   public function addNewPage() {
