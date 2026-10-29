@@ -8,7 +8,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests that rebuilding migration definitions doesn't check the source database.
+ * Tests that migration definition rebuilds skip the source database check.
  *
  * @see \Drupal\mukurtu_migrate\Hook\MigrationPluginsAlterHooks
  * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2551
@@ -22,8 +22,10 @@ class MigrationPluginsAlterHooksTest extends KernelTestBase {
   protected static $modules = [
     'system',
     'user',
+    'node',
     'migrate',
     'migrate_drupal',
+    'search_api',
     'mukurtu_migrate',
   ];
 

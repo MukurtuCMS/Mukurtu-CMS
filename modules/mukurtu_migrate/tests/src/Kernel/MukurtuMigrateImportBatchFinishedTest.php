@@ -188,8 +188,9 @@ class MukurtuMigrateImportBatchFinishedTest extends KernelTestBase {
   }
 
   /**
-   * The saved source database credentials are deleted, even after a failed
-   * run, since the credential step saves them again before every run.
+   * The saved source database credentials are deleted, even after a failure.
+   *
+   * The credential step saves them again before every run.
    */
   public function testSourceCredentialsDeleted(): void {
     $state = \Drupal::state();

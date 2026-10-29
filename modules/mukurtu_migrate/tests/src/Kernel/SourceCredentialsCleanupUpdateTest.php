@@ -23,6 +23,7 @@ class SourceCredentialsCleanupUpdateTest extends KernelTestBase {
     'user',
     'migrate',
     'migrate_drupal',
+    'search_api',
     'mukurtu_migrate',
   ];
 
