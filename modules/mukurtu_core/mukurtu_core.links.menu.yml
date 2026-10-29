@@ -164,3 +164,10 @@ mukurtu_core.visitors_settings:
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   weight: 9
+mukurtu_core.character_palette_settings:
+  title: 'Character palette'
+  description: 'Turn on a palette for typing the characters listed on Language terms.'
+  route_name: mukurtu_core.character_palette_settings
+  parent: mukurtu_dashboard
+  menu_name: dashboard-site-settings
+  weight: 10

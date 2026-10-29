@@ -82,6 +82,7 @@ permissions:
   - 'administer local contexts legacy projects'
   - 'administer message subscribe'
   - 'administer mukurtu access denied page'
+  - 'administer mukurtu character palette'
   - 'administer mukurtu_import_strategy'
   - 'administer mukurtu_media configuration'
   - 'administer mukurtu media download settings'

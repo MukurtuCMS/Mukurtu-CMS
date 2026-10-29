@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - mukurtu_core
+    - taxonomy
+id: taxonomy_term.field_characters
+field_name: field_characters
+entity_type: taxonomy_term
+type: mukurtu_character
+settings: {  }
+module: mukurtu_core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
