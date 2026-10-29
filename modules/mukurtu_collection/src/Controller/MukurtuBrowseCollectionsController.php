@@ -118,7 +118,7 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
     }
 
     // Check if the user has permission to create collections.
-    if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collections', $account)) {
+    if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection', $account)) {
       return AccessResult::allowed();
     }
     // User cannot access the route if the collections browse view result is
