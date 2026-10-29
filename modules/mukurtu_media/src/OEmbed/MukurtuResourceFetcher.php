@@ -37,8 +37,10 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
    * Pauses a Vimeo player when playback reaches its data-mukurtu-end time.
    *
    * Uses the Vimeo player's postMessage API, so nothing extra is loaded from
-   * Vimeo. It pauses once each time playback crosses the end time, so a
-   * viewer can still press play to continue past it.
+   * Vimeo. The handshake mirrors Vimeo's player SDK (@vimeo/player): send
+   * object messages, and ping the player, since its ready event may fire
+   * before this script listens. It pauses once each time playback crosses
+   * the end time, so a viewer can still press play to continue past it.
    *
    * Core serves oEmbed HTML in its own iframe page, which has no placeholder
    * for Drupal JavaScript libraries, so this is added inline.
@@ -55,8 +57,9 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
   var origin = 'https://player.vimeo.com';
   var end = parseInt(frame.getAttribute('data-mukurtu-end'), 10);
   var armed = true;
+  var listening = false;
   function post(message) {
-    frame.contentWindow.postMessage(JSON.stringify(message), origin);
+    frame.contentWindow.postMessage(message, origin);
   }
   window.addEventListener('message', function (event) {
     if (event.origin !== origin || event.source !== frame.contentWindow) {
@@ -74,7 +77,8 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
     if (!data) {
       return;
     }
-    if (data.event === 'ready') {
+    if ((data.event === 'ready' || data.method === 'ping') && !listening) {
+      listening = true;
       post({method: 'addEventListener', value: 'timeupdate'});
     }
     else if (data.event === 'timeupdate' && data.data) {
@@ -86,6 +90,10 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
         post({method: 'pause'});
       }
     }
+  });
+  post({method: 'ping'});
+  frame.addEventListener('load', function () {
+    post({method: 'ping'});
   });
 })();
 </script>
