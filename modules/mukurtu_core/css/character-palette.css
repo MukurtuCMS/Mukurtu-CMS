@@ -6,26 +6,66 @@
  * around it (currentColor) rather than either theme's variables.
  */
 
+/* A field and its button, side by side. */
+.mukurtu-character-palette__field {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.mukurtu-character-palette__field > input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mukurtu-character-palette__field > textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mukurtu-character-palette__field:has(> textarea) {
+  align-items: flex-start;
+}
+
 .mukurtu-character-palette__toggle,
 .mukurtu-character-palette__character {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  padding: 0.25rem 0.75rem;
   border: 1px solid currentColor;
   border-radius: 0.25rem;
   background: transparent;
   color: inherit;
   font: inherit;
-  line-height: 1.2;
+  line-height: 1;
   cursor: pointer;
 }
 
+/* Square and small, but above the 24 by 24 pixel minimum (WCAG 2.5.8). */
 .mukurtu-character-palette__toggle {
-  margin-block-start: 0.5rem;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 1.125rem;
 }
 
 .mukurtu-character-palette__toggle[aria-expanded="true"] {
   border-width: 2px;
+}
+
+/* In a rich text editor's top corner, clear of the toolbar's buttons. */
+.ck-editor > .mukurtu-character-palette__toggle {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.ck-editor:has(> .mukurtu-character-palette__toggle) .ck-editor__top .ck-toolbar {
+  padding-inline-end: 2.75rem;
 }
 
 .mukurtu-character-palette__toggle:focus-visible,
@@ -61,5 +101,8 @@
 }
 
 .mukurtu-character-palette__character {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.75rem;
   font-size: 1.25rem;
 }

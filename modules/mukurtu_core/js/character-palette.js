@@ -2,8 +2,8 @@
  * @file
  * The character palette (#2560).
  *
- * Adds a "Characters" button after every input marked with
- * data-mukurtu-character-palette. The button opens a panel of the characters
+ * Adds a small "Characters" button (an accented letter) beside every input
+ * marked with data-mukurtu-character-palette. The button opens a panel of the characters
  * site managers listed on the Character palette settings page, and each
  * character button inserts its character where the cursor was.
  *
@@ -74,6 +74,55 @@
   }
 
   /**
+   * Puts the button beside the field and the panel under it.
+   */
+  function place(input, toggle, panel) {
+    // The theme's header search marks its form: the button goes inside the
+    // search bar, before the submit button, and the panel under the form.
+    const searchForm = input.closest('[data-mukurtu-character-palette-anchor]');
+    if (searchForm) {
+      const submit = searchForm.querySelector('[type="submit"]');
+      if (submit) {
+        submit.before(toggle);
+      }
+      else {
+        searchForm.append(toggle);
+      }
+      searchForm.after(panel);
+      return;
+    }
+
+    // A rich text editor is created after behaviors run, and destroyed and
+    // recreated when the text format changes. The button goes in the
+    // editor's top corner while there is one, and beside the textarea while
+    // there isn't.
+    if (hasEditorFormat(input)) {
+      const item = input.closest('.js-form-item') || input.parentElement;
+      item.after(panel);
+      const follow = function () {
+        const editor = input.parentElement.querySelector('.ck-editor');
+        if (editor) {
+          if (toggle.parentElement !== editor) {
+            editor.append(toggle);
+          }
+        }
+        else if (toggle.previousElementSibling !== input) {
+          input.after(toggle);
+        }
+      };
+      follow();
+      new MutationObserver(follow).observe(input.parentElement, {childList: true});
+      return;
+    }
+
+    const field = document.createElement('span');
+    field.className = 'mukurtu-character-palette__field';
+    input.before(field);
+    field.append(input, toggle);
+    field.after(panel);
+  }
+
+  /**
    * Builds the button and panel for one input.
    */
   function attach(input, groups) {
@@ -86,10 +135,14 @@
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'mukurtu-character-palette__toggle';
-    toggle.textContent = Drupal.t('Characters');
-    if (fieldLabel) {
-      toggle.setAttribute('aria-label', plain(Drupal.t('Characters for @field', {'@field': fieldLabel})));
-    }
+    // A letter with marks above and below reads as "special letters" in any
+    // language. It is decoration; the button's name says what it does.
+    const icon = document.createElement('span');
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '\u00C1\u0331';
+    toggle.appendChild(icon);
+    toggle.title = Drupal.t('Characters');
+    toggle.setAttribute('aria-label', fieldLabel ? plain(Drupal.t('Characters for @field', {'@field': fieldLabel})) : Drupal.t('Characters'));
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-controls', panelId);
 
@@ -131,6 +184,7 @@
         groupIndex = Number(select.value);
         write(LANGUAGE_KEY, groups[groupIndex].label);
         renderCharacters();
+        resized();
       });
       wrapper.appendChild(label);
       wrapper.appendChild(select);
@@ -212,9 +266,16 @@
       Drupal.announce(Drupal.t('Inserted @character.', {'@character': item.name || item.character}));
     }
 
+    // Tells whatever holds the palette that it changed size, such as a map
+    // popup that has to move to stay in view.
+    function resized() {
+      toggle.dispatchEvent(new CustomEvent('mukurtu-character-palette-resize', {bubbles: true}));
+    }
+
     function setOpen(open) {
       panel.hidden = !open;
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      resized();
       if (fieldKey) {
         const openFields = read(OPEN_KEY, []).filter(function (key) {
           return key !== fieldKey;
@@ -232,7 +293,10 @@
 
     function closeOnEscape(event) {
       if (event.key === 'Escape' && !panel.hidden) {
+        // Escape belongs to the palette here, not to whatever holds it, such
+        // as a map popup that would close too.
         event.preventDefault();
+        event.stopPropagation();
         setOpen(false);
         focusField();
       }
@@ -241,12 +305,7 @@
     toggle.addEventListener('keydown', closeOnEscape);
 
     renderCharacters();
-    // Under a rich text editor rather than between the hidden textarea and
-    // the editor, whichever of the two attached first.
-    const anchor = input.closest('[data-mukurtu-character-palette-anchor]')
-      || (hasEditorFormat(input) && input.closest('.js-form-item'))
-      || input;
-    anchor.after(toggle, panel);
+    place(input, toggle, panel);
 
     if (fieldKey && read(OPEN_KEY, []).indexOf(fieldKey) !== -1) {
       panel.hidden = false;
