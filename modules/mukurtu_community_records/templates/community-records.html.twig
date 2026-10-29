@@ -14,6 +14,11 @@
         </summary>
         <div class="tab-content-wrapper">
           <div class="tab-content-wrapper__content">
+            {% if show_titles and record.title %}
+              <div class="community-record__title-wrapper">
+                <h2 class="community-record__title">{{ record.title }}</h2>
+              </div>
+            {% endif %}
             {{ record.content }}
           </div>
         </div>

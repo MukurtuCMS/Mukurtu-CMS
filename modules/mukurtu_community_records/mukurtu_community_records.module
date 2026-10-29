@@ -26,6 +26,7 @@ function mukurtu_community_records_theme($existing, $type, $theme, $path) {
       'variables' => [
         'active' => NULL,
         'records' => NULL,
+        'show_titles' => FALSE,
       ],
     ],
   ];

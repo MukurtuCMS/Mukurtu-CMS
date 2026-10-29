@@ -293,11 +293,12 @@ class MultipageItemPageController extends ControllerBase {
   }
 
   /**
-   * Builds the selected page: its title as a heading, then the page itself.
+   * Builds the selected page with its title as a heading.
    *
    * The page H1 names the multipage item, so this heading is what tells
-   * readers which page they are on. The initial view and the AJAX page
-   * switch both use it so the markup matches.
+   * readers which page they are on. A page with community records shows each
+   * record's title at the top of its own tab instead. The initial view and
+   * the AJAX page switch both use this so the markup matches.
    *
    * @param \Drupal\node\NodeInterface $page
    *   The page node.
@@ -306,6 +307,12 @@ class MultipageItemPageController extends ControllerBase {
    *   A render array.
    */
   protected function buildSelectedPage(NodeInterface $page): array {
+    $page_build = $this->entityTypeManager()->getViewBuilder('node')->view($page, 'full');
+    if (($page_build['template']['#theme'] ?? NULL) === 'community_records') {
+      $page_build['template']['#show_titles'] = TRUE;
+      return ['page' => $page_build];
+    }
+
     return [
       'title' => [
         '#type' => 'container',
@@ -318,11 +325,10 @@ class MultipageItemPageController extends ControllerBase {
           '#value' => Html::escape($this->entityRepository->getTranslationFromContext($page)->getTitle()),
           '#attributes' => [
             'class' => ['multipage-item__page-title'],
-            'data-mukurtu-page-title' => '',
           ],
         ],
       ],
-      'page' => $this->entityTypeManager()->getViewBuilder('node')->view($page, 'full'),
+      'page' => $page_build,
     ];
   }
 
