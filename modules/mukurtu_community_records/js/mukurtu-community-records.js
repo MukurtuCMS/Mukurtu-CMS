@@ -29,6 +29,17 @@
         const activePane = element.querySelector('[data-initial-cr=true]');
         this.toggleCrTask(activePane.dataset.isCr === 'true');
       });
+
+      // Below field_group's tabs breakpoint the records stay an accordion of
+      // details elements, so treat opening one like selecting its tab. In tab
+      // mode field_group opens every details itself; skip those.
+      once('mukurtu-community-record-accordion', '.community-records details[data-nid]', context).forEach((details) => {
+        details.addEventListener('toggle', () => {
+          if (details.open && !details.closest('.horizontal-tabs-panes')) {
+            this.handlePaneChange(details);
+          }
+        });
+      });
     },
 
     /**
