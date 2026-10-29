@@ -7,6 +7,7 @@
 
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\migrate\Plugin\migrate\id_map\Sql;
+use Drupal\mukurtu_migrate\Batch\MukurtuMigrateImportBatch;
 
 /**
  * Implements hook_update_last_removed().
@@ -329,4 +330,17 @@ function mukurtu_migrate_update_40208(): ?string {
   return (string) t('Gave the Community Manager role to @count Mukurtu 3 language stewards in their migrated language communities, so they can manage the community and its protocol.', [
     '@count' => $count,
   ]);
+}
+
+/**
+ * Remove the saved Mukurtu 3 database credentials.
+ */
+function mukurtu_migrate_update_40209(): ?string {
+  // The credential step saved the source database credentials, including the
+  // password, to state, and nothing removed them after the migration.
+  if (!MukurtuMigrateImportBatch::deleteSourceCredentials()) {
+    return NULL;
+  }
+
+  return (string) t('Removed the saved Mukurtu CMS v3 database credentials, which were no longer needed after the migration.');
 }
