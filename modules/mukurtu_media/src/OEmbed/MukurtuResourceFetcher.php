@@ -106,9 +106,10 @@ JS;
    * Uses the postMessage protocol of YouTube's IFrame Player API, which the
    * embed enables with enablejsapi=1, so nothing extra is loaded from
    * YouTube. Like YouTube's own iframe_api script, it sends "listening"
-   * until the player answers, then reads currentTime from the player's
-   * infoDelivery messages. It pauses once each time playback crosses the end
-   * time, so a viewer can still press play to continue past it.
+   * until the player answers (starting again when the player's iframe
+   * finishes loading, in case that is slow), then reads currentTime from the
+   * player's infoDelivery messages. It pauses once each time playback crosses
+   * the end time, so a viewer can still press play to continue past it.
    *
    * Core serves oEmbed HTML in its own iframe page, which has no placeholder
    * for Drupal JavaScript libraries, so this is added inline.
@@ -158,14 +159,20 @@ JS;
       }
     }
   });
-  var tries = 0;
-  var timer = setInterval(function () {
-    if (answered || ++tries > 40) {
-      clearInterval(timer);
-      return;
-    }
-    post({event: 'listening'});
-  }, 250);
+  var timer;
+  function listen() {
+    var tries = 0;
+    clearInterval(timer);
+    timer = setInterval(function () {
+      if (answered || ++tries > 40) {
+        clearInterval(timer);
+        return;
+      }
+      post({event: 'listening'});
+    }, 250);
+  }
+  listen();
+  frame.addEventListener('load', listen);
 })();
 </script>
 JS;
