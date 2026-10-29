@@ -4,5 +4,6 @@ multipage-view-nav:
     js/multipage-nav.js: {}
   dependencies:
     - core/drupal.ajax
+    - core/drupal.announce
     - core/once
     - mukurtu_core/splide
