@@ -170,6 +170,7 @@
       wrapper.className = 'mukurtu-character-palette__language';
       const label = document.createElement('label');
       label.htmlFor = selectId;
+      label.className = 'mukurtu-character-palette__label';
       label.textContent = Drupal.t('Language');
       const select = document.createElement('select');
       select.id = selectId;

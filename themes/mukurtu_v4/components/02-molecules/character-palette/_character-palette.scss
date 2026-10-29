@@ -1,0 +1,68 @@
+// The character palette (mukurtu_core, #2560, #2561) on public pages.
+//
+// The module's CSS takes its colors from the surrounding text so it works in
+// Gin as well. Here the sidebars set that text white on a light background,
+// and the global button styles fill it red on hover, so the theme gives it
+// fixed colors instead: the header search's grey button everywhere, and a
+// white panel with dark text. White on #767676 is 4.54:1.
+
+.mukurtu-character-palette__toggle {
+  align-self: stretch;
+  min-block-size: 2.75rem;
+  block-size: auto;
+  inline-size: 2.75rem;
+  padding: 0;
+  border: 1.5px solid var(--color-text-neutral-medium, #767676);
+  border-radius: 4px;
+  background: var(--color-text-neutral-medium, #767676);
+  color: var(--color-white);
+
+  &:hover,
+  &[aria-expanded="true"] {
+    border-color: var(--brand-text-color);
+    background: var(--brand-text-color);
+    color: var(--color-white);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-secondary-dark);
+    outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    border-color: buttontext;
+  }
+}
+
+.mukurtu-character-palette {
+  border: 1.5px solid var(--color-text-neutral-medium, #767676);
+  border-radius: 4px;
+  background: var(--color-white);
+  color: var(--brand-text-color);
+}
+
+.mukurtu-character-palette__label {
+  font-weight: var(--text-bold);
+}
+
+.mukurtu-character-palette__character {
+  border: 1.5px solid var(--color-text-neutral-medium, #767676);
+  border-radius: 4px;
+  background: var(--color-white);
+  color: var(--brand-text-color);
+
+  &:hover {
+    border-color: var(--brand-text-color);
+    background: var(--brand-text-color);
+    color: var(--color-white);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-secondary-dark);
+    outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    border-color: buttontext;
+  }
+}
