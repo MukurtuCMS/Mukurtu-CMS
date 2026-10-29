@@ -76,16 +76,41 @@ class CollectionOrderForm extends ConfigFormBase {
   }
 
   /**
-   * Gets top-level collection labels in their current display order.
+   * Splits top-level collections by whether the current user can view them.
+   *
+   * @return array
+   *   A two-item list: the viewable collections, keyed by node ID, and a map
+   *   of the other collections' node IDs.
+   */
+  protected function getRootCollectionsByAccess(): array {
+    $viewable = [];
+    $hidden = [];
+    foreach ($this->hierarchyService->getRootCollections() as $nid => $collection) {
+      if ($collection->access('view')) {
+        $viewable[(int) $nid] = $collection;
+      }
+      else {
+        $hidden[(int) $nid] = TRUE;
+      }
+    }
+    return [$viewable, $hidden];
+  }
+
+  /**
+   * Gets viewable top-level collection labels in their current order.
+   *
+   * Collections the current user can't view are left out, so the form never
+   * shows their titles. submitForm() keeps their saved positions.
    *
    * @return string[]
    *   Labels in the current language, keyed by node ID. Collections in the
    *   saved order come first, in that order. The rest follow by label.
    */
   protected function getOrderedCollections(): array {
+    [$viewable] = $this->getRootCollectionsByAccess();
     $labels = [];
-    foreach ($this->hierarchyService->getRootCollections() as $nid => $collection) {
-      $labels[(int) $nid] = (string) $this->entityRepository->getTranslationFromContext($collection)->label();
+    foreach ($viewable as $nid => $collection) {
+      $labels[$nid] = (string) $this->entityRepository->getTranslationFromContext($collection)->label();
     }
 
     $placed = [];
@@ -98,6 +123,34 @@ class CollectionOrderForm extends ConfigFormBase {
     $this->sortByLocale($unplaced);
 
     return $placed + $unplaced;
+  }
+
+  /**
+   * Merges the submitted order into the saved one.
+   *
+   * Collections the user couldn't see keep their saved positions. The
+   * submitted collections fill the other positions in their new order, and
+   * any left over go at the end. IDs that are no longer top-level
+   * collections are dropped.
+   *
+   * @param int[] $submitted
+   *   The node IDs of the rows on the form, in their new order.
+   *
+   * @return int[]
+   *   The order to save.
+   */
+  protected function mergeOrder(array $submitted): array {
+    [$viewable, $hidden] = $this->getRootCollectionsByAccess();
+    $order = [];
+    foreach ($this->collectionOrder->getOrder() as $nid) {
+      if (isset($hidden[$nid])) {
+        $order[] = $nid;
+      }
+      elseif (isset($viewable[$nid]) && $submitted) {
+        $order[] = array_shift($submitted);
+      }
+    }
+    return array_merge($order, $submitted);
   }
 
   /**
@@ -202,7 +255,7 @@ class CollectionOrderForm extends ConfigFormBase {
 
     $this->collectionOrder->save(
       $form_state->getValue('sort_mode'),
-      array_column($rows, 2),
+      $this->mergeOrder(array_column($rows, 2)),
     );
 
     parent::submitForm($form, $form_state);

@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_collection\CollectionOrder;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_collection\Form\CollectionOrderForm;
+use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -147,6 +148,65 @@ class CollectionOrderFormTest extends CollectionTestBase {
     $order = $this->container->get('mukurtu_collection.collection_order');
     $this->assertSame($this->ids(['Delta', 'Bravo', 'Charlie', 'alpha']), $order->getOrder());
     $this->assertSame(CollectionOrder::MODE_CUSTOM, $order->getSortMode());
+  }
+
+  /**
+   * Collections the user can't view are left off the form but keep their place.
+   */
+  public function testHiddenCollectionsKeepTheirPlace(): void {
+    // Under a strict protocol the manager below isn't a member of, so they
+    // can't view it.
+    $strict = Protocol::create([
+      'name' => 'Strict Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $strict->save();
+    $hidden = $this->buildCollection('Secret title');
+    $hidden->setProtocols([$strict]);
+    $hidden->save();
+
+    // The base class's user is uid 1, which bypasses access checks.
+    $manager = $this->createUser(['access content', 'administer collection order']);
+    $this->setCurrentUser($manager);
+    $this->assertFalse($hidden->access('view', $manager));
+    $this->assertTrue($this->collections['Delta']->access('view', $manager));
+
+    $this->config(CollectionOrder::CONFIG_NAME)
+      ->set('order', [
+        (int) $this->collections['Delta']->id(),
+        (int) $hidden->id(),
+        (int) $this->collections['Charlie']->id(),
+      ])
+      ->save();
+
+    $form = $this->container->get('form_builder')->getForm(CollectionOrderForm::class);
+    $this->assertSame($this->ids(['Delta', 'Charlie', 'alpha', 'Bravo']), $this->rowIds($form));
+    $this->assertStringNotContainsString('Secret title', (string) $this->container->get('renderer')->renderInIsolation($form));
+
+    $values = [
+      'sort_mode' => CollectionOrder::MODE_CUSTOM,
+      'collections' => [],
+      'op' => 'Save configuration',
+    ];
+    foreach (['Charlie' => 0, 'Delta' => 1, 'alpha' => 2, 'Bravo' => 3] as $title => $weight) {
+      $values['collections'][$this->collections[$title]->id()] = ['weight' => $weight];
+    }
+    $form_state = (new FormState())->setValues($values);
+    $this->container->get('form_builder')->submitForm(CollectionOrderForm::class, $form_state);
+    $this->assertSame([], $form_state->getErrors());
+
+    // The hidden collection stays second; the others fill in around it.
+    $this->assertSame(
+      [
+        (int) $this->collections['Charlie']->id(),
+        (int) $hidden->id(),
+        (int) $this->collections['Delta']->id(),
+        (int) $this->collections['alpha']->id(),
+        (int) $this->collections['Bravo']->id(),
+      ],
+      $this->container->get('mukurtu_collection.collection_order')->getOrder(),
+    );
   }
 
   /**
