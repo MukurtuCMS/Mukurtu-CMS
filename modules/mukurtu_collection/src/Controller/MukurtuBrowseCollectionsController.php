@@ -2,12 +2,12 @@
 
 namespace Drupal\mukurtu_collection\Controller;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -134,4 +134,5 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
       ->addCacheableDependency($cacheability)
       ->addCacheableDependency($create_access);
   }
+
 }
