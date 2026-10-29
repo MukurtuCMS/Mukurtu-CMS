@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_collection\Controller\MukurtuBrowseCollectionsController;
 use Drupal\Tests\mukurtu_collection\Kernel\CollectionTestBase;
@@ -51,6 +52,15 @@ class CollectionBrowsePageAccessTest extends CollectionTestBase {
                 'entity_field' => 'type',
                 'value' => ['collection' => 'collection'],
               ],
+              'status' => [
+                'id' => 'status',
+                'table' => 'node_field_data',
+                'field' => 'status',
+                'plugin_id' => 'boolean',
+                'entity_type' => 'node',
+                'entity_field' => 'status',
+                'value' => '1',
+              ],
             ],
             // Leave node access out of it; this tests the controller's own
             // check, not which collections a user can see.
@@ -97,6 +107,32 @@ class CollectionBrowsePageAccessTest extends CollectionTestBase {
     $this->protocol->addMember($steward, ['protocol_steward']);
 
     $this->assertTrue($this->canAccessAs($steward));
+  }
+
+  /**
+   * A cached 403 is cleared when a collection becomes visible.
+   *
+   * Anonymous visitors get the 403 from the page cache, which only expires
+   * through cache tags. Creating a collection clears all cached 403s, but
+   * publishing an existing one doesn't, so the access result has to carry
+   * the view's tags.
+   */
+  public function testDeniedResultIsInvalidatedByPublishing(): void {
+    $draft = $this->buildCollection('Draft collection');
+    $draft->setUnpublished()->save();
+
+    $result = $this->container->get('access_manager')
+      ->checkNamedRoute('mukurtu_collection.collection_browse_page', [], $this->createUser(['access content']), TRUE);
+    $this->assertTrue($result->isForbidden());
+    $this->assertContains('user', $result->getCacheContexts());
+
+    $cache = $this->container->get('cache.default');
+    $cache->set('collections_403', TRUE, CacheBackendInterface::CACHE_PERMANENT, $result->getCacheTags());
+    $this->assertNotFalse($cache->get('collections_403'));
+
+    $draft->setPublished()->save();
+    $this->assertFalse($cache->get('collections_403'));
+    $this->assertTrue($this->canAccess(['access content']));
   }
 
   /**

@@ -7,6 +7,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -106,23 +107,31 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
    */
   public function access(AccountInterface $account) {
     // Check if the collections browse view is empty.
-    $view = Views::getView($this->getViewName());
+    $view_name = $this->getViewName();
+    $view = Views::getView($view_name);
     if (!$view) {
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()->addCacheTags(["config:views.view.$view_name"]);
     }
 
     $view->setDisplay('default');
     $view->execute();
+
+    // Which collections a user can see depends on their protocols. The
+    // view's tags are invalidated when collections are saved or indexed, so a
+    // cached 403 doesn't outlast the first collection someone can see.
+    $cacheability = (new CacheableMetadata())
+      ->addCacheContexts(['user'])
+      ->addCacheTags($view->getCacheTags());
+
     if (!empty($view->result)) {
-      return AccessResult::allowed();
+      return AccessResult::allowed()->addCacheableDependency($cacheability);
     }
 
-    // Check if the user has permission to create collections.
-    if ($this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection', $account)) {
-      return AccessResult::allowed();
-    }
-    // User cannot access the route if the collections browse view result is
-    // empty and if they lack permission to create collections.
-    return AccessResult::forbidden();
+    // Users who can create collections get the page even when it's empty.
+    $create_access = $this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection', $account, [], TRUE);
+    $result = $create_access->isAllowed() ? AccessResult::allowed() : AccessResult::forbidden();
+    return $result
+      ->addCacheableDependency($cacheability)
+      ->addCacheableDependency($create_access);
   }
 }
