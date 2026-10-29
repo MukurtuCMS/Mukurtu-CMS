@@ -49,6 +49,40 @@
       // a search / replace on known patterns.
       this.updateTaskLinks(paneNid);
       this.toggleCrTask(isCr);
+      this.updateTitle(element);
+    },
+
+    /**
+     * Show the active record's title in the heading that names it.
+     *
+     * Inside a multipage item that is the current page heading, since the
+     * page H1 names the multipage item. Otherwise it is the page H1, along
+     * with the matching part of the document title.
+     *
+     * @param {HTMLElement} element
+     *   The active pane.
+     */
+    updateTitle: function(element) {
+      const title = element.dataset.title;
+      if (!title) {
+        return;
+      }
+
+      const multipage = element.closest('.multipage-items');
+      const h1 = document.querySelector('.page__title h1');
+      // A node H1 wraps the title in its field markup; keep that wrapper.
+      const heading = multipage
+        ? multipage.querySelector('[data-mukurtu-page-title]')
+        : h1?.querySelector('.field--name-title') ?? h1;
+      if (!heading) {
+        return;
+      }
+
+      const previous = heading.textContent.trim();
+      heading.textContent = title;
+      if (!multipage && previous && document.title.startsWith(previous)) {
+        document.title = title + document.title.slice(previous.length);
+      }
     },
 
     /**
