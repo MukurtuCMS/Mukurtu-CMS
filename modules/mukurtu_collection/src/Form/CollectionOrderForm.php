@@ -137,7 +137,7 @@ class CollectionOrderForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['collections'] = [
+    $table = [
       '#type' => 'table',
       '#header' => [
         $this->t('Collection'),
@@ -151,23 +151,18 @@ class CollectionOrderForm extends ConfigFormBase {
           'group' => 'collection-order-weight',
         ],
       ],
-      '#states' => [
-        'visible' => [
-          ':input[name="sort_mode"]' => ['value' => CollectionOrder::MODE_CUSTOM],
-        ],
-      ],
     ];
 
     $collections = $this->getOrderedCollections();
     $delta = max(10, count($collections));
     $weight = 0;
     foreach ($collections as $nid => $label) {
-      $form['collections'][$nid]['#attributes']['class'][] = 'draggable';
-      $form['collections'][$nid]['#weight'] = $weight;
-      $form['collections'][$nid]['label'] = [
+      $table[$nid]['#attributes']['class'][] = 'draggable';
+      $table[$nid]['#weight'] = $weight;
+      $table[$nid]['label'] = [
         '#plain_text' => $label,
       ];
-      $form['collections'][$nid]['weight'] = [
+      $table[$nid]['weight'] = [
         '#type' => 'weight',
         '#title' => $this->t('Weight for @title', ['@title' => $label]),
         '#title_display' => 'invisible',
@@ -177,6 +172,18 @@ class CollectionOrderForm extends ConfigFormBase {
       ];
       $weight++;
     }
+
+    // #states can't hide a bare table, so it goes in a container. The
+    // container also holds the "Show row weights" toggle tabledrag adds.
+    $form['custom_order'] = [
+      '#type' => 'container',
+      '#states' => [
+        'visible' => [
+          ':input[name="sort_mode"]' => ['value' => CollectionOrder::MODE_CUSTOM],
+        ],
+      ],
+      'collections' => $table,
+    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -189,9 +196,10 @@ class CollectionOrderForm extends ConfigFormBase {
     // with equal weights keep the order they were shown in.
     $values = $form_state->getValue('collections') ?: [];
     $rows = [];
-    foreach (Element::children($form['collections']) as $nid) {
+    $table = $form['custom_order']['collections'];
+    foreach (Element::children($table) as $nid) {
       if (isset($values[$nid]['weight'])) {
-        $rows[] = [(int) $values[$nid]['weight'], (int) $form['collections'][$nid]['#weight'], (int) $nid];
+        $rows[] = [(int) $values[$nid]['weight'], (int) $table[$nid]['#weight'], (int) $nid];
       }
     }
     sort($rows);

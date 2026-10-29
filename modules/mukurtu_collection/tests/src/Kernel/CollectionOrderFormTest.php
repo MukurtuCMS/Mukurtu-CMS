@@ -91,7 +91,7 @@ class CollectionOrderFormTest extends CollectionTestBase {
    *   Node IDs, in row order.
    */
   protected function rowIds(array $form): array {
-    $rows = array_filter($form['collections'], fn ($key): bool => is_int($key), ARRAY_FILTER_USE_KEY);
+    $rows = array_filter($form['custom_order']['collections'], fn ($key): bool => is_int($key), ARRAY_FILTER_USE_KEY);
     uasort($rows, fn (array $a, array $b): int => $a['#weight'] <=> $b['#weight']);
     return array_keys($rows);
   }
@@ -107,8 +107,14 @@ class CollectionOrderFormTest extends CollectionTestBase {
       $this->rowIds($form),
     );
     $this->assertSame(CollectionOrder::MODE_CUSTOM, $form['sort_mode']['#default_value']);
+    // The table is in a container because #states can't hide a bare table.
+    $this->assertSame('container', $form['custom_order']['#type']);
+    $this->assertSame(
+      ['visible' => [':input[name="sort_mode"]' => ['value' => CollectionOrder::MODE_CUSTOM]]],
+      $form['custom_order']['#states'],
+    );
 
-    $delta = $form['collections'][$this->collections['Delta']->id()];
+    $delta = $form['custom_order']['collections'][$this->collections['Delta']->id()];
     $this->assertSame('Delta', $delta['label']['#plain_text']);
     $this->assertSame(0, $delta['weight']['#default_value']);
     $this->assertSame('Weight for Delta', (string) $delta['weight']['#title']);
