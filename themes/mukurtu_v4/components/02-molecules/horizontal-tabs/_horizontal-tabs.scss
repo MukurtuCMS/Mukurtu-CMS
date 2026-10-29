@@ -34,8 +34,11 @@
     position: absolute !important;
     overflow: hidden;
     clip: rect(1px, 1px, 1px, 1px);
-    inline-size: 1px;
-    block-size: 1px;
+
+    // ul.horizontal-tabs-list sets a full width, which would otherwise win
+    // and widen the page by the list's 1px offset.
+    inline-size: 1px !important;
+    block-size: 1px !important;
     word-wrap: normal;
   }
 

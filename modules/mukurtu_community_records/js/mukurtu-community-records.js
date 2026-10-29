@@ -35,8 +35,14 @@
       // mode field_group opens every details itself; skip those.
       once('mukurtu-community-record-accordion', '.community-records details[data-nid]', context).forEach((details) => {
         details.addEventListener('toggle', () => {
-          if (details.open && !details.closest('.horizontal-tabs-panes')) {
-            this.handlePaneChange(details);
+          if (details.closest('.horizontal-tabs-panes')) {
+            return;
+          }
+          // Several sections can be open. When one closes, follow a record
+          // that is still showing, if any.
+          const showing = details.open ? details : details.parentElement.querySelector(':scope > details[data-nid][open]');
+          if (showing) {
+            this.handlePaneChange(showing);
           }
         });
       });

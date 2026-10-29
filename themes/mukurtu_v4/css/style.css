@@ -2341,8 +2341,8 @@ label.form-required::after,
   position: absolute !important;
   overflow: hidden;
   clip: rect(1px, 1px, 1px, 1px);
-  inline-size: 1px;
-  block-size: 1px;
+  inline-size: 1px !important;
+  block-size: 1px !important;
   word-wrap: normal;
 }
 :is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list {
