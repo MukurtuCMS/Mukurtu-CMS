@@ -210,6 +210,107 @@ class CollectionOrderFormTest extends CollectionTestBase {
   }
 
   /**
+   * Resetting rebuilds the table alphabetically without saving.
+   */
+  public function testResetRebuildsAlphabetically(): void {
+    $form_builder = $this->container->get('form_builder');
+    $values = [
+      'sort_mode' => CollectionOrder::MODE_CUSTOM,
+      'collections' => [],
+      'op' => 'Reset to alphabetical',
+    ];
+    foreach (['Delta' => 0, 'Charlie' => 1, 'alpha' => 2, 'Bravo' => 3] as $title => $weight) {
+      $values['collections'][$this->collections[$title]->id()] = ['weight' => $weight];
+    }
+    $form_state = (new FormState())->setValues($values);
+    $form_builder->submitForm(CollectionOrderForm::class, $form_state);
+    $this->assertSame([], $form_state->getErrors());
+    $this->assertTrue($form_state->isRebuilding());
+
+    // Nothing is saved.
+    $order = $this->container->get('mukurtu_collection.collection_order');
+    $this->assertSame(CollectionOrder::MODE_CUSTOM, $order->getSortMode());
+    $this->assertSame(
+      [
+        (int) $this->collections['Delta']->id(),
+        static::MISSING_ID,
+        (int) $this->child->id(),
+        (int) $this->collections['Charlie']->id(),
+      ],
+      $order->getOrder(),
+    );
+    $messages = $this->container->get('messenger')->messagesByType('status');
+    $this->assertSame('The table is now in alphabetical order. Save the configuration to keep it.', (string) end($messages));
+
+    // Programmed submits don't rebuild, so rebuild here as a browser POST
+    // would. Rebuilding caches the form, which core refuses on GET.
+    $form_state->setRequestMethod('POST');
+    $form = $form_builder->rebuildForm('mukurtu_collection_order_form', $form_state);
+    $this->assertSame($this->ids(['alpha', 'Bravo', 'Charlie', 'Delta']), $this->rowIds($form));
+    $this->assertSame(0, $form['custom_order']['collections'][$this->collections['alpha']->id()]['weight']['#default_value']);
+  }
+
+  /**
+   * Saving after a reset keeps hidden collections in place.
+   */
+  public function testResetThenSaveKeepsHiddenCollections(): void {
+    $strict = Protocol::create([
+      'name' => 'Strict Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $strict->save();
+    $hidden = $this->buildCollection('Secret title');
+    $hidden->setProtocols([$strict]);
+    $hidden->save();
+
+    $manager = $this->createUser(['access content', 'administer collection order']);
+    $this->setCurrentUser($manager);
+
+    $this->config(CollectionOrder::CONFIG_NAME)
+      ->set('order', [
+        (int) $this->collections['Delta']->id(),
+        (int) $hidden->id(),
+        (int) $this->collections['Charlie']->id(),
+      ])
+      ->save();
+
+    $form_builder = $this->container->get('form_builder');
+    $form_state = (new FormState())->setValues([
+      'sort_mode' => CollectionOrder::MODE_CUSTOM,
+      'op' => 'Reset to alphabetical',
+    ]);
+    $form_builder->submitForm(CollectionOrderForm::class, $form_state);
+    $form_state->setRequestMethod('POST');
+    $form = $form_builder->rebuildForm('mukurtu_collection_order_form', $form_state);
+    $this->assertSame($this->ids(['alpha', 'Bravo', 'Charlie', 'Delta']), $this->rowIds($form));
+
+    // Save the rows as the rebuilt form shows them.
+    $values = [
+      'sort_mode' => CollectionOrder::MODE_CUSTOM,
+      'collections' => [],
+      'op' => 'Save configuration',
+    ];
+    foreach ($this->rowIds($form) as $weight => $nid) {
+      $values['collections'][$nid] = ['weight' => $weight];
+    }
+    $form_state = (new FormState())->setValues($values);
+    $form_builder->submitForm(CollectionOrderForm::class, $form_state);
+    $this->assertSame([], $form_state->getErrors());
+
+    $this->assertSame(
+      [
+        (int) $this->collections['alpha']->id(),
+        (int) $hidden->id(),
+        (int) $this->collections['Bravo']->id(),
+        (int) $this->collections['Charlie']->id(),
+        (int) $this->collections['Delta']->id(),
+      ],
+      $this->container->get('mukurtu_collection.collection_order')->getOrder(),
+    );
+  }
+
+  /**
    * Weights follow the sort mode and the saved order.
    */
   public function testWeights(): void {

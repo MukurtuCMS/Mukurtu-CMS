@@ -102,11 +102,14 @@ class CollectionOrderForm extends ConfigFormBase {
    * Collections the current user can't view are left out, so the form never
    * shows their titles. submitForm() keeps their saved positions.
    *
+   * @param bool $alphabetical
+   *   TRUE to ignore the saved order and sort every collection by label.
+   *
    * @return string[]
    *   Labels in the current language, keyed by node ID. Collections in the
    *   saved order come first, in that order. The rest follow by label.
    */
-  protected function getOrderedCollections(): array {
+  protected function getOrderedCollections(bool $alphabetical = FALSE): array {
     [$viewable] = $this->getRootCollectionsByAccess();
     $labels = [];
     foreach ($viewable as $nid => $collection) {
@@ -114,7 +117,7 @@ class CollectionOrderForm extends ConfigFormBase {
     }
 
     $placed = [];
-    foreach ($this->collectionOrder->getOrder() as $nid) {
+    foreach ($alphabetical ? [] : $this->collectionOrder->getOrder() as $nid) {
       if (isset($labels[$nid])) {
         $placed[$nid] = $labels[$nid];
       }
@@ -202,7 +205,7 @@ class CollectionOrderForm extends ConfigFormBase {
       ],
     ];
 
-    $collections = $this->getOrderedCollections();
+    $collections = $this->getOrderedCollections((bool) $form_state->get('reset_alphabetical'));
     $delta = max(10, count($collections));
     $weight = 0;
     foreach ($collections as $nid => $label) {
@@ -232,9 +235,32 @@ class CollectionOrderForm extends ConfigFormBase {
         ],
       ],
       'collections' => $table,
+      'reset' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Reset to alphabetical'),
+        '#submit' => ['::resetToAlphabetical'],
+        '#limit_validation_errors' => [],
+      ],
     ];
 
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * Rebuilds the table in alphabetical order without saving it.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function resetToAlphabetical(array &$form, FormStateInterface $form_state): void {
+    // The posted weights would otherwise override the rebuilt rows' defaults.
+    $input = $form_state->getUserInput();
+    unset($input['collections']);
+    $form_state->setUserInput($input);
+    $form_state->set('reset_alphabetical', TRUE)->setRebuild();
+    $this->messenger()->addStatus($this->t('The table is now in alphabetical order. Save the configuration to keep it.'));
   }
 
   /**
