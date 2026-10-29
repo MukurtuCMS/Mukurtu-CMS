@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_core\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\FocusFirstCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
@@ -108,7 +109,10 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
 
     $element = [
       '#type' => 'fieldset',
-      '#title' => $legend,
+      // A fieldset renders its title as #markup, which keeps harmless tags, so
+      // a name typed with angle brackets would not show as typed. The labels
+      // below get $legend through t()'s @ placeholders, which escape it.
+      '#title' => $is_new ? $legend : Html::escape($label),
       '#prefix' => '<div id="' . $wrapper_id . '">',
       '#suffix' => '</div>',
     ];

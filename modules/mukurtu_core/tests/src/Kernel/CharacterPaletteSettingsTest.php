@@ -196,6 +196,13 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
 
     $this->assertSame(3, $this->countRows($rebuilt['groups'][0]), 'The pressed group gets another empty row.');
     $this->assertSame(1, $this->countRows($rebuilt['groups'][1]), 'Other groups are unchanged.');
+
+    $this->config(CharacterPaletteSettingsForm::SETTINGS)->set('groups', [
+      ['label' => '<em>Tlingit</em>', 'characters' => []],
+    ])->save();
+    $tagged_state = new FormState();
+    $tagged = $form_builder->buildForm($form_object, $tagged_state);
+    $this->assertSame('&lt;em&gt;Tlingit&lt;/em&gt;', (string) $tagged['groups'][0]['#title'], 'The legend shows a name exactly as typed.');
   }
 
   /**
