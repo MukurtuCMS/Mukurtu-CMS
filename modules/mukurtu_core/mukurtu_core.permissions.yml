@@ -9,4 +9,4 @@ administer mukurtu person role settings:
   title: 'Administer person role settings'
 administer mukurtu character palette:
   title: 'Administer character palette'
-  description: 'Turn the character palette on or off for the whole site.'
+  description: 'Turn the character palette on or off and choose its characters.'

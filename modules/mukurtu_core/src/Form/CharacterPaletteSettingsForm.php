@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_core\Form;
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\FocusFirstCommand;
+use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -14,9 +17,9 @@ use Drupal\Core\Form\FormStateInterface;
  * one per language, rather than on Language terms, so deleting a term never
  * takes a community's character list with it.
  *
- * Adding rows and groups needs no JavaScript: every group shows a few empty
- * rows and there is always one empty group at the end. Saving drops whatever
- * was left empty.
+ * Every group ends with one empty row and an "Add new row" button, and there
+ * is always one empty group at the end for adding a new one. Saving drops
+ * whatever was left empty.
  */
 class CharacterPaletteSettingsForm extends ConfigFormBase {
 
@@ -28,9 +31,9 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
   const SETTINGS = 'mukurtu_core.character_palette';
 
   /**
-   * Empty rows offered under each group's characters.
+   * Empty rows a group starts with, before any are added.
    */
-  const EMPTY_ROWS = 5;
+  const EMPTY_ROWS = 1;
 
   /**
    * Longest character entry, in characters.
@@ -79,7 +82,8 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
     // One empty group at the end is how a new group gets added.
     $groups[] = ['label' => '', 'characters' => []];
     foreach (array_values($groups) as $index => $group) {
-      $form['groups'][$index] = $this->buildGroup($group, $index === count($groups) - 1);
+      $empty_rows = $form_state->get(['empty_rows', $index]) ?? static::EMPTY_ROWS;
+      $form['groups'][$index] = $this->buildGroup($group, $index, $empty_rows, $index === count($groups) - 1);
     }
 
     return parent::buildForm($form, $form_state);
@@ -90,16 +94,23 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
    *
    * @param array $group
    *   The group as stored: a label and a list of characters.
+   * @param int $index
+   *   The group's position on the form.
+   * @param int $empty_rows
+   *   How many empty rows to show after the group's characters.
    * @param bool $is_new
    *   Whether this is the empty group for adding a new one.
    */
-  protected function buildGroup(array $group, bool $is_new): array {
+  protected function buildGroup(array $group, int $index, int $empty_rows, bool $is_new): array {
     $label = (string) ($group['label'] ?? '');
     $legend = $is_new ? $this->t('New group') : $label;
+    $wrapper_id = static::groupWrapperId($index);
 
     $element = [
       '#type' => 'fieldset',
       '#title' => $legend,
+      '#prefix' => '<div id="' . $wrapper_id . '">',
+      '#suffix' => '</div>',
     ];
     $element['label'] = [
       '#type' => 'textfield',
@@ -114,7 +125,7 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
       '#header' => [$this->t('Character'), $this->t('Name')],
     ];
     $rows = array_values($group['characters'] ?? []);
-    $rows = array_merge($rows, array_fill(0, static::EMPTY_ROWS, ['character' => '', 'name' => '']));
+    $rows = array_merge($rows, array_fill(0, $empty_rows, ['character' => '', 'name' => '']));
     foreach ($rows as $delta => $row) {
       // The column headings label the boxes visually. Screen readers get the
       // row number and the group, since every row repeats the same two
@@ -137,10 +148,25 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
         '#size' => 30,
       ];
     }
+    $element['add_row'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add new row'),
+      // Every group has this button, so screen readers also hear which group
+      // it adds to. The visible words start the name (WCAG 2.5.3).
+      '#attributes' => ['aria-label' => $this->t('Add new row to @group', ['@group' => $legend])],
+      '#name' => 'add_row_' . $index,
+      '#group_index' => $index,
+      '#submit' => ['::addRow'],
+      '#limit_validation_errors' => [],
+      '#ajax' => [
+        'callback' => '::addRowAjax',
+        'wrapper' => $wrapper_id,
+      ],
+    ];
     $element['help'] = [
       '#type' => 'html_tag',
       '#tag' => 'p',
-      '#value' => $this->t('Empty rows are ignored. Save to add more rows.'),
+      '#value' => $this->t('Empty rows are ignored.'),
       '#attributes' => ['class' => ['description']],
     ];
 
@@ -152,6 +178,40 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
     }
 
     return $element;
+  }
+
+  /**
+   * The id of the element wrapping a group, for AJAX to replace.
+   */
+  protected static function groupWrapperId(int $index): string {
+    return 'mukurtu-character-group-' . $index;
+  }
+
+  /**
+   * Submit handler for "Add new row": one more empty row for that group.
+   *
+   * Works without JavaScript too, as a full-page rebuild.
+   */
+  public function addRow(array &$form, FormStateInterface $form_state): void {
+    $index = $form_state->getTriggeringElement()['#group_index'];
+    $empty_rows = $form_state->get(['empty_rows', $index]) ?? static::EMPTY_ROWS;
+    $form_state->set(['empty_rows', $index], $empty_rows + 1);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * AJAX callback for "Add new row".
+   *
+   * Replaces the group and moves focus to the new row's Character box, so
+   * keyboard and screen reader users land where they're about to type.
+   */
+  public function addRowAjax(array &$form, FormStateInterface $form_state): AjaxResponse {
+    $index = $form_state->getTriggeringElement()['#group_index'];
+    $selector = '#' . static::groupWrapperId($index);
+    $response = new AjaxResponse();
+    $response->addCommand(new ReplaceCommand($selector, $form['groups'][$index]));
+    $response->addCommand(new FocusFirstCommand($selector . ' tbody tr:last-child'));
+    return $response;
   }
 
   /**

@@ -60,22 +60,35 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
   /**
    * Submits the settings form with the given values.
    *
+   * @param array $values
+   *   The submitted values.
+   * @param array $empty_rows
+   *   Empty rows per group index, as if "Add new row" had been pressed.
+   *
    * @return \Drupal\Core\Form\FormState
    *   The submitted form state, for checking errors.
    */
-  protected function submit(array $values): FormState {
+  protected function submit(array $values, array $empty_rows = []): FormState {
     // A programmed submission counts any value for a checkbox, even 0, as
     // checked, so unchecked boxes are left out of $values.
     $form_state = (new FormState())->setValues($values + ['op' => 'Save configuration']);
+    $form_state->set('empty_rows', $empty_rows);
     $this->container->get('form_builder')->submitForm(CharacterPaletteSettingsForm::class, $form_state);
     return $form_state;
   }
 
   /**
-   * Builds the rows of a submitted group, padded with empty ones.
+   * Builds the rows of a submitted group, ending with one empty row.
    */
   protected function rows(array $rows): array {
-    return array_merge($rows, array_fill(0, CharacterPaletteSettingsForm::EMPTY_ROWS, ['character' => '', 'name' => '']));
+    return array_merge($rows, [['character' => '', 'name' => '']]);
+  }
+
+  /**
+   * Counts the rows in a built group's table.
+   */
+  protected function countRows(array $group): int {
+    return count(array_filter(array_keys($group['characters']), 'is_int'));
   }
 
   /**
@@ -101,7 +114,7 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
     $form_state = $this->submit([
       'enabled' => 1,
       'groups' => [['label' => 'Test', 'characters' => $this->rows($characters)]],
-    ]);
+    ], [0 => 4]);
 
     $this->assertSame([], $form_state->getErrors());
     $config = $this->config(CharacterPaletteSettingsForm::SETTINGS);
@@ -123,10 +136,8 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
             ['character' => 'ḵ', 'name' => ' k underbar '],
           ]),
         ],
-        // The empty new group.
-        ['label' => '', 'characters' => $this->rows([])],
       ],
-    ]);
+    ], [0 => 4]);
 
     $this->assertSame([
       [
@@ -158,6 +169,33 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
     ]);
 
     $this->assertSame(['Kept', 'New'], array_column($this->config(CharacterPaletteSettingsForm::SETTINGS)->get('groups'), 'label'));
+  }
+
+  /**
+   * Tests that "Add new row" adds an empty row to its own group only.
+   */
+  public function testAddNewRow(): void {
+    $this->config(CharacterPaletteSettingsForm::SETTINGS)->set('groups', [
+      ['label' => 'Tlingit', 'characters' => [['character' => 'ł', 'name' => '']]],
+    ])->save();
+    $form_builder = $this->container->get('form_builder');
+    $form_object = $this->container->get('class_resolver')->getInstanceFromDefinition(CharacterPaletteSettingsForm::class);
+    $form_state = (new FormState())->setFormObject($form_object);
+    $form = $form_builder->buildForm($form_object, $form_state);
+
+    $this->assertSame(2, $this->countRows($form['groups'][0]), 'A group ends with one empty row.');
+    $this->assertSame(1, $this->countRows($form['groups'][1]), 'The new group starts with one empty row.');
+    $button = $form['groups'][0]['add_row'];
+    $this->assertSame('Add new row to Tlingit', (string) $button['#attributes']['aria-label']);
+    $this->assertSame([], $button['#limit_validation_errors'], 'Adding a row never trips validation.');
+
+    $form_state->setTriggeringElement($button);
+    $form_object->addRow($form, $form_state);
+    $this->assertTrue($form_state->isRebuilding());
+    $rebuilt = $form_builder->retrieveForm($form_object->getFormId(), $form_state);
+
+    $this->assertSame(3, $this->countRows($rebuilt['groups'][0]), 'The pressed group gets another empty row.');
+    $this->assertSame(1, $this->countRows($rebuilt['groups'][1]), 'Other groups are unchanged.');
   }
 
   /**
