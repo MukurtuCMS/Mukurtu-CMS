@@ -103,7 +103,7 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
    */
   protected function buildGroup(array $group, int $index, int $empty_rows, bool $is_new): array {
     $label = (string) ($group['label'] ?? '');
-    $legend = $is_new ? $this->t('New group') : $label;
+    $legend = $is_new ? $this->t('New language') : $label;
     $wrapper_id = static::groupWrapperId($index);
 
     $element = [
@@ -114,15 +114,25 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
     ];
     $element['label'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Group name'),
-      '#description' => $this->t("Shown in the palette's group menu, for example a language name."),
+      '#title' => $this->t('Language name'),
+      '#description' => $this->t("Shown in the palette's language menu."),
       '#default_value' => $label,
       '#maxlength' => static::NAME_MAX_LENGTH,
     ];
 
+    // Before the table and tied to it, so screen readers hear it on the way
+    // in rather than after the Add new row button.
+    $help_id = $wrapper_id . '-help';
+    $element['help'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $this->t('Empty rows are ignored.'),
+      '#attributes' => ['class' => ['description'], 'id' => $help_id],
+    ];
     $element['characters'] = [
       '#type' => 'table',
       '#header' => [$this->t('Character'), $this->t('Name')],
+      '#attributes' => ['aria-describedby' => $help_id],
     ];
     $rows = array_values($group['characters'] ?? []);
     $rows = array_merge($rows, array_fill(0, $empty_rows, ['character' => '', 'name' => '']));
@@ -163,17 +173,11 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
         'wrapper' => $wrapper_id,
       ],
     ];
-    $element['help'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'p',
-      '#value' => $this->t('Empty rows are ignored.'),
-      '#attributes' => ['class' => ['description']],
-    ];
 
     if (!$is_new) {
       $element['delete'] = [
         '#type' => 'checkbox',
-        '#title' => $this->t('Delete this group'),
+        '#title' => $this->t('Delete this language'),
       ];
     }
 
@@ -220,15 +224,13 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
 
-    // A group with characters needs a name for the palette's menu. Core's own
-    // required-field message, so it is already translated.
+    // A group with characters needs a name for the palette's menu.
     foreach ($form_state->getValue('groups') ?? [] as $index => $group) {
       if (!empty($group['delete']) || trim((string) $group['label']) !== '') {
         continue;
       }
       if (static::cleanCharacters($group['characters'] ?? []) !== []) {
-        $element = $form['groups'][$index]['label'];
-        $form_state->setError($element, $this->t('@name field is required.', ['@name' => $element['#title']]));
+        $form_state->setError($form['groups'][$index]['label'], $this->t('Language name is required. Enter the language name.'));
       }
     }
   }

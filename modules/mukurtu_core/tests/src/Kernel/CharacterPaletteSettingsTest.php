@@ -207,7 +207,7 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
       'groups' => [['label' => '  ', 'characters' => $this->rows([['character' => 'ł', 'name' => '']])]],
     ]);
 
-    $this->assertArrayHasKey('groups][0][label', $form_state->getErrors());
+    $this->assertSame('Language name is required. Enter the language name.', (string) ($form_state->getErrors()['groups][0][label'] ?? ''));
     $this->assertSame([], $this->config(CharacterPaletteSettingsForm::SETTINGS)->get('groups'), 'Nothing is saved.');
   }
 
