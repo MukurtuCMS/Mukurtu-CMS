@@ -220,8 +220,9 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
   /**
    * Data provider for testYoutubeSegmentIsAppliedToEmbed().
    *
-   * @return array<string, array{string, string}>
-   *   The video URL, and the expected iframe src query string.
+   * @return array<string, array{0: string, 1: string, 2?: int}>
+   *   The video URL, the expected iframe src query string, and the expected
+   *   end time, if any.
    */
   public static function youtubeSegmentProvider(): array {
     $base = 'feature=oembed&rel=0&modestbranding=1';
@@ -233,9 +234,9 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
       'minutes and seconds' => [$watch . '&t=1m30s', $base . '&start=90'],
       'hours, minutes and seconds' => [$watch . '&t=1h2m3s', $base . '&start=3723'],
       'fragment' => [$watch . '#t=45', $base . '&start=45'],
-      'start and end' => [$watch . '&start=30&end=45', $base . '&start=30&end=45'],
-      'end only' => [$watch . '&end=45', $base . '&end=45'],
-      'end in fragment' => [$watch . '#t=30&end=45', $base . '&start=30&end=45'],
+      'start and end' => [$watch . '&start=30&end=45', $base . '&start=30&enablejsapi=1', 45],
+      'end only' => [$watch . '&end=45', $base . '&enablejsapi=1', 45],
+      'end in fragment' => [$watch . '#t=30&end=45', $base . '&start=30&enablejsapi=1', 45],
       'start takes precedence over t' => [$watch . '&t=10&start=30', $base . '&start=30'],
       'end not after start is ignored' => [$watch . '&start=45&end=30', $base . '&start=45'],
       'invalid value is ignored' => ['https://youtu.be/dQw4w9WgXcQ?t=abc', $base],
@@ -244,10 +245,13 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
   }
 
   /**
-   * A YouTube video URL's segment is carried onto the embed's src.
+   * A YouTube video URL's segment is carried onto the embed.
+   *
+   * The start time goes on the src. An end time adds the pause script
+   * rather than end=, which would jump to YouTube's end screen.
    */
   #[DataProvider('youtubeSegmentProvider')]
-  public function testYoutubeSegmentIsAppliedToEmbed(string $video_url, string $expected_query): void {
+  public function testYoutubeSegmentIsAppliedToEmbed(string $video_url, string $expected_query, ?int $expected_end = NULL): void {
     $original = Resource::video(
       '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?feature=oembed"></iframe>',
       640,
@@ -256,12 +260,17 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
     );
 
     $fetcher = $this->createFetcherReturning($original);
-    $result = $fetcher->fetchResource(self::oembedUrl('https://www.youtube.com/oembed', $video_url));
+    $html = $fetcher->fetchResource(self::oembedUrl('https://www.youtube.com/oembed', $video_url))->getHtml();
 
-    $this->assertSame(
-      '<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?' . $expected_query . '"></iframe>',
-      $result->getHtml()
-    );
+    $end_attribute = $expected_end ? ' data-mukurtu-end="' . $expected_end . '"' : '';
+    $iframe = '<iframe' . $end_attribute . ' src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?' . $expected_query . '"></iframe>';
+    if (!$expected_end) {
+      $this->assertSame($iframe, $html);
+      return;
+    }
+    $this->assertStringStartsWith($iframe . '<script>', $html);
+    $this->assertStringContainsString("func: 'pauseVideo'", $html);
+    $this->assertStringEndsWith('</script>', $html);
   }
 
   /**
@@ -279,8 +288,8 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
     $video_url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=30&end=45';
     $result = $fetcher->fetchResource(self::oembedUrl('https://www.youtube.com/oembed', $video_url));
 
-    $this->assertSame(
-      '<iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=30&feature=oembed&rel=0&modestbranding=1&end=45"></iframe>',
+    $this->assertStringStartsWith(
+      '<iframe data-mukurtu-end="45" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=30&feature=oembed&rel=0&modestbranding=1&enablejsapi=1"></iframe><script>',
       $result->getHtml()
     );
   }
@@ -382,7 +391,9 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
     $fetcher = $this->createFetcher($inner, $httpClient, $keyRepository, configuredKeyId: 'yt_key');
     $result = $fetcher->fetchResource($oembed_url);
 
-    $this->assertStringContainsString('www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1&start=30&end=45"', $result->getHtml());
+    $this->assertStringContainsString('<iframe data-mukurtu-end="45" ', $result->getHtml());
+    $this->assertStringContainsString('www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1&start=30&enablejsapi=1"', $result->getHtml());
+    $this->assertStringContainsString("func: 'pauseVideo'", $result->getHtml());
   }
 
 }
