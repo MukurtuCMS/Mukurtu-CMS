@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 
+use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_collection\Controller\MukurtuBrowseCollectionsController;
 use Drupal\Tests\mukurtu_collection\Kernel\CollectionTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
@@ -63,10 +64,16 @@ class CollectionBrowsePageAccessTest extends CollectionTestBase {
   }
 
   /**
-   * Checks whether an account can reach the Collections page.
+   * Checks whether a new user with these permissions can reach the page.
    */
   protected function canAccess(array $permissions): bool {
-    $account = $this->createUser($permissions);
+    return $this->canAccessAs($this->createUser($permissions));
+  }
+
+  /**
+   * Checks whether an account can reach the Collections page.
+   */
+  protected function canAccessAs(AccountInterface $account): bool {
     return $this->container->get('access_manager')
       ->checkNamedRoute('mukurtu_collection.collection_browse_page', [], $account);
   }
@@ -77,6 +84,19 @@ class CollectionBrowsePageAccessTest extends CollectionTestBase {
   public function testEmptyPage(): void {
     $this->assertTrue($this->canAccess(['access content', 'create collection content']));
     $this->assertFalse($this->canAccess(['access content']));
+  }
+
+  /**
+   * A protocol steward can create collections, so gets the empty page.
+   *
+   * This is how most Mukurtu users get create access: through a protocol
+   * role, not a site-wide permission.
+   */
+  public function testEmptyPageForProtocolSteward(): void {
+    $steward = $this->createUser(['access content']);
+    $this->protocol->addMember($steward, ['protocol_steward']);
+
+    $this->assertTrue($this->canAccessAs($steward));
   }
 
   /**
