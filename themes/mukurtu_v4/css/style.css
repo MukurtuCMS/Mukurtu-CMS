@@ -5147,10 +5147,13 @@ body:not(.is-always-mobile-nav) {
   block-size: auto;
   inline-size: 2.75rem;
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
-  border-inline: 0;
   border-radius: 0;
-  background: var(--color-white);
-  color: var(--brand-text-color);
+  background: var(--color-text-neutral-medium, #767676);
+  color: var(--color-white);
+}
+.header-search__form .mukurtu-character-palette__toggle:hover, .header-search__form .mukurtu-character-palette__toggle[aria-expanded=true] {
+  border-color: var(--brand-text-color);
+  background: var(--brand-text-color);
 }
 .header-search__form .mukurtu-character-palette__toggle:focus-visible {
   outline: 2px solid var(--brand-secondary-dark);

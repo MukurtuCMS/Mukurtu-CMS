@@ -187,10 +187,18 @@ body:not(.is-always-mobile-nav) {
   block-size: auto;
   inline-size: 2.75rem;
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
-  border-inline: 0;
   border-radius: 0;
-  background: var(--color-white);
-  color: var(--brand-text-color);
+  // Filled, so it reads as a button rather than as text in the box. White
+  // on #767676 is 4.54:1. Neutral rather than the brand color, so it doesn't
+  // compete with the search button beside it.
+  background: var(--color-text-neutral-medium, #767676);
+  color: var(--color-white);
+
+  &:hover,
+  &[aria-expanded="true"] {
+    border-color: var(--brand-text-color);
+    background: var(--brand-text-color);
+  }
 
   &:focus-visible {
     outline: 2px solid var(--brand-secondary-dark);
