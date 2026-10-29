@@ -11,6 +11,12 @@
  * and a phone keyboard stays open. Keyboard insertion keeps focus on the
  * character button, so several characters can be inserted in a row; Escape
  * goes back to the field.
+ *
+ * A textarea with a rich text editor gets the button under the editor, and
+ * characters go in through CKEditor's model at the editor's own selection,
+ * so undo and the editor's change tracking work (#2561). If the text format
+ * is switched to one without an editor, the same button falls back to the
+ * textarea itself.
  */
 (function (Drupal, drupalSettings, once) {
 
@@ -46,6 +52,25 @@
     catch (e) {
       // Nothing to remember it in.
     }
+  }
+
+  /**
+   * Returns the CKEditor 5 instance managing a textarea, if there is one now.
+   *
+   * Looked up each time, because the editor is created after behaviors run
+   * and is destroyed and recreated when the text format changes.
+   */
+  function editorFor(input) {
+    const id = input.getAttribute('data-ckeditor5-id');
+    return id && Drupal.CKEditor5Instances ? Drupal.CKEditor5Instances.get(id) : null;
+  }
+
+  /**
+   * Whether a textarea can have a rich text editor: its text format select
+   * points at it.
+   */
+  function hasEditorFormat(input) {
+    return Boolean(input.id && document.querySelector('[data-editor-for="' + CSS.escape(input.id) + '"]'));
   }
 
   /**
@@ -127,7 +152,7 @@
         // A mouse or a finger would otherwise take focus from the field,
         // which loses the caret and closes a phone's keyboard.
         button.addEventListener('pointerdown', function (event) {
-          if (document.activeElement === input) {
+          if (fieldHasFocus()) {
             event.preventDefault();
           }
         });
@@ -136,6 +161,24 @@
         });
         list.appendChild(button);
       });
+    }
+
+    function fieldHasFocus() {
+      const editor = editorFor(input);
+      if (editor) {
+        return editor.ui.view.editable.element.contains(document.activeElement);
+      }
+      return document.activeElement === input;
+    }
+
+    function focusField() {
+      const editor = editorFor(input);
+      if (editor) {
+        editor.editing.view.focus();
+      }
+      else {
+        input.focus();
+      }
     }
 
     function remember() {
@@ -148,6 +191,15 @@
     });
 
     function insert(item) {
+      const editor = editorFor(input);
+      if (editor) {
+        // The editor keeps its own selection while focus is elsewhere.
+        editor.model.change(function (writer) {
+          editor.model.insertContent(writer.createText(item.character));
+        });
+        Drupal.announce(Drupal.t('Inserted @character.', {'@character': item.name || item.character}));
+        return;
+      }
       if (document.activeElement === input) {
         remember();
       }
@@ -182,14 +234,18 @@
       if (event.key === 'Escape' && !panel.hidden) {
         event.preventDefault();
         setOpen(false);
-        input.focus();
+        focusField();
       }
     }
     panel.addEventListener('keydown', closeOnEscape);
     toggle.addEventListener('keydown', closeOnEscape);
 
     renderCharacters();
-    const anchor = input.closest('[data-mukurtu-character-palette-anchor]') || input;
+    // Under a rich text editor rather than between the hidden textarea and
+    // the editor, whichever of the two attached first.
+    const anchor = input.closest('[data-mukurtu-character-palette-anchor]')
+      || (hasEditorFormat(input) && input.closest('.js-form-item'))
+      || input;
     anchor.after(toggle, panel);
 
     if (fieldKey && read(OPEN_KEY, []).indexOf(fieldKey) !== -1) {
@@ -211,14 +267,12 @@
         if (input.disabled || input.readOnly || input.type === 'hidden' || typeof input.setRangeText !== 'function') {
           return;
         }
-        // A rich text editor replaces its textarea, and widgets such as the
-        // map keep their data in one hidden on purpose. Typing into either
-        // would be lost. A field inside a closed section is hidden by its
-        // parent, not itself, and still gets the palette.
-        if (input.id && document.querySelector('[data-editor-for="' + CSS.escape(input.id) + '"]')) {
-          return;
-        }
-        if (window.getComputedStyle(input).display === 'none') {
+        // Widgets such as the map keep their data in a textarea hidden on
+        // purpose, and typing into it would be lost. A rich text editor hides
+        // its textarea too, but the palette writes to the editor instead. A
+        // field inside a closed section is hidden by its parent, not itself,
+        // and still gets the palette.
+        if (window.getComputedStyle(input).display === 'none' && !hasEditorFormat(input)) {
           return;
         }
         attach(input, groups);
