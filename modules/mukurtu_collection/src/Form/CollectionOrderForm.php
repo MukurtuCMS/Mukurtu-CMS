@@ -121,17 +121,13 @@ class CollectionOrderForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $form['helper'] = [
-      '#type' => 'item',
-      '#markup' => $this->t('Choose how top-level collections are ordered on the Collections page. Collections that are not in your custom order appear after it, sorted alphabetically.'),
-    ];
-
     $form['sort_mode'] = [
       '#type' => 'radios',
       '#title' => $this->t('Order'),
+      '#description' => $this->t('Choose how top-level collections are ordered on the Collections page. Collections that are not in your custom order appear after it, sorted alphabetically.'),
       '#options' => [
         CollectionOrder::MODE_ALPHABETICAL => $this->t('Alphabetical'),
-        CollectionOrder::MODE_CUSTOM => $this->t('Custom order (drag to reorder below)'),
+        CollectionOrder::MODE_CUSTOM => $this->t('Custom order'),
       ],
       '#default_value' => $this->collectionOrder->getSortMode(),
       '#required' => TRUE,
