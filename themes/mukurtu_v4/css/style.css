@@ -1174,6 +1174,36 @@ a:not(.primary-nav__menu-link) svg.tel path {
   }
 }
 
+.multipage-item__page-title-wrapper {
+  display: grid;
+  grid-template-columns: var(--grid-6col);
+  padding-inline: var(--layout-padding) var(--layout-padding);
+  -webkit-column-gap: var(--gutter);
+     -moz-column-gap: var(--gutter);
+          column-gap: var(--gutter);
+}
+@media (min-width: 60rem) {
+  .multipage-item__page-title-wrapper {
+    grid-template-columns: var(--grid-12col);
+  }
+}
+@media (min-width: 90rem) {
+  .multipage-item__page-title-wrapper {
+    grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
+  }
+}
+.multipage-item__page-title-wrapper .multipage-item__page-title {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .multipage-item__page-title-wrapper .multipage-item__page-title {
+    grid-column: 2/-2;
+  }
+}
+.multipage-item__page-title-wrapper .multipage-item__page-title {
+  margin-block: var(--v-space-2xs) var(--v-space-4xxs);
+}
+
 .multipage-carousel.splide:not(.is-overflow) .splide__list {
   -webkit-box-pack: center;
       -ms-flex-pack: center;

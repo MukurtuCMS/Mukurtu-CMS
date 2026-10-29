@@ -308,12 +308,18 @@ class MultipageItemPageController extends ControllerBase {
   protected function buildSelectedPage(NodeInterface $page): array {
     return [
       'title' => [
-        '#type' => 'html_tag',
-        '#tag' => 'h2',
-        '#value' => Html::escape($this->entityRepository->getTranslationFromContext($page)->getTitle()),
+        '#type' => 'container',
         '#attributes' => [
-          'class' => ['multipage-item__page-title'],
-          'data-mukurtu-page-title' => '',
+          'class' => ['multipage-item__page-title-wrapper'],
+        ],
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#value' => Html::escape($this->entityRepository->getTranslationFromContext($page)->getTitle()),
+          '#attributes' => [
+            'class' => ['multipage-item__page-title'],
+            'data-mukurtu-page-title' => '',
+          ],
         ],
       ],
       'page' => $this->entityTypeManager()->getViewBuilder('node')->view($page, 'full'),

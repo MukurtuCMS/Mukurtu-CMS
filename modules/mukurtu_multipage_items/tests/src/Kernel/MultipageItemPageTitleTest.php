@@ -20,10 +20,11 @@ class MultipageItemPageTitleTest extends MultipageItemTestBase {
    */
   protected function assertPageHeading(array $build, string $expected_value, int $nid): void {
     $this->assertSame(['title', 'page'], Element::children($build));
-    $this->assertSame('html_tag', $build['title']['#type']);
-    $this->assertSame('h2', $build['title']['#tag']);
-    $this->assertSame($expected_value, $build['title']['#value']);
-    $this->assertArrayHasKey('data-mukurtu-page-title', $build['title']['#attributes']);
+    $heading = $build['title']['heading'];
+    $this->assertSame('html_tag', $heading['#type']);
+    $this->assertSame('h2', $heading['#tag']);
+    $this->assertSame($expected_value, $heading['#value']);
+    $this->assertArrayHasKey('data-mukurtu-page-title', $heading['#attributes']);
     $this->assertSame($nid, (int) $build['page']['#node']->id());
   }
 
@@ -52,7 +53,7 @@ class MultipageItemPageTitleTest extends MultipageItemTestBase {
     $this->assertSame('replaceWith', $commands[0]['method']);
     $this->assertSame('#mukurtu-multipage-item-selected-page', $commands[0]['selector']);
     $html = (string) $commands[0]['data'];
-    $this->assertMatchesRegularExpression('#^<div id="mukurtu-multipage-item-selected-page">\s*<h2 class="multipage-item__page-title" data-mukurtu-page-title="">First page</h2>#', $html);
+    $this->assertMatchesRegularExpression('#^<div id="mukurtu-multipage-item-selected-page">\s*<div class="multipage-item__page-title-wrapper">\s*<h2 class="multipage-item__page-title" data-mukurtu-page-title="">First page</h2>#', $html);
   }
 
 }
