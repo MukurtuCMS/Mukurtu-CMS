@@ -101,11 +101,15 @@ class CharacterFieldTest extends KernelTestBase {
   public function testEmptyRowsAndNames(): void {
     $this->createField();
 
-    $term = Term::create(['vid' => 'language', 'name' => 'Test', 'field_characters' => [
-      ['character' => ' ł ', 'name' => '   '],
-      ['character' => '', 'name' => 'A name with nothing to insert'],
-      ['character' => '   ', 'name' => NULL],
-    ]]);
+    $term = Term::create([
+      'vid' => 'language',
+      'name' => 'Test',
+      'field_characters' => [
+        ['character' => ' ł ', 'name' => '   '],
+        ['character' => '', 'name' => 'A name with nothing to insert'],
+        ['character' => '   ', 'name' => NULL],
+      ],
+    ]);
     $term->save();
 
     $items = Term::load($term->id())->get('field_characters')->getValue();
@@ -120,9 +124,13 @@ class CharacterFieldTest extends KernelTestBase {
   public function testCharacterLengthLimit(): void {
     $this->createField();
 
-    $term = Term::create(['vid' => 'language', 'name' => 'Test', 'field_characters' => [
-      ['character' => str_repeat('a', 17)],
-    ]]);
+    $term = Term::create([
+      'vid' => 'language',
+      'name' => 'Test',
+      'field_characters' => [
+        ['character' => str_repeat('a', 17)],
+      ],
+    ]);
     $violations = $term->validate();
     $this->assertCount(1, $violations);
     $this->assertSame('field_characters.0.character', $violations[0]->getPropertyPath());

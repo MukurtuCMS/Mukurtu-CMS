@@ -109,9 +109,12 @@ class CharacterItem extends FieldItemBase {
     parent::preSave();
     // Only surrounding spaces are trimmed. Anything inside is part of the
     // character as the community writes it.
-    $this->character = trim((string) $this->character);
-    $name = trim((string) $this->name);
-    $this->name = $name === '' ? NULL : $name;
+    //
+    // get() and set() rather than magic properties: inside this class,
+    // $this->name is TypedData's own protected $name, not the field value.
+    $this->set('character', trim((string) $this->get('character')->getValue()));
+    $name = trim((string) $this->get('name')->getValue());
+    $this->set('name', $name === '' ? NULL : $name);
   }
 
 }
