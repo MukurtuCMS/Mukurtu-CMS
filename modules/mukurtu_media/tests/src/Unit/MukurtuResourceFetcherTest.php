@@ -16,6 +16,8 @@ use Drupal\media\OEmbed\ResourceException;
 use Drupal\media\OEmbed\ResourceFetcherInterface;
 use Drupal\mukurtu_media\OEmbed\MukurtuResourceFetcher;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -36,7 +38,7 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
   /**
    * The oEmbed endpoint URL used by all tests, encoding a YouTube video URL.
    */
-  private const OEMBED_URL = 'https://www.youtube.com/oembed?url=' . 'https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ' . '&format=json';
+  private const OEMBED_URL = 'https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ&format=json';
 
   /**
    * Builds a decorator with the given collaborators, defaulting the rest.
@@ -139,8 +141,9 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
   }
 
   /**
-   * When the primary fetch fails and no API key is configured, the original
-   * exception propagates rather than a broken resource being fabricated.
+   * Without an API key, a failed primary fetch's exception propagates.
+   *
+   * This is rather than a broken resource being fabricated.
    */
   public function testExceptionPropagatesWhenNoApiKeyConfigured(): void {
     $inner = $this->createMock(ResourceFetcherInterface::class);
@@ -153,8 +156,9 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
   }
 
   /**
-   * When the primary fetch fails, a configured API key lets the fallback
-   * build an equivalent, working, privacy-enhanced resource instead.
+   * With an API key, a failed primary fetch falls back to the Data API.
+   *
+   * The fallback builds an equivalent, working, privacy-enhanced resource.
    */
   public function testFallbackBuildsNocookieResourceWhenPrimaryFetchFails(): void {
     $inner = $this->createMock(ResourceFetcherInterface::class);
@@ -192,8 +196,9 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
   }
 
   /**
-   * If the Data API fallback also fails, the original exception still
-   * propagates rather than silently returning a broken resource.
+   * If the Data API fallback also fails, the original exception propagates.
+   *
+   * This is rather than silently returning a broken resource.
    */
   public function testExceptionPropagatesWhenFallbackAlsoFails(): void {
     $inner = $this->createMock(ResourceFetcherInterface::class);
@@ -205,9 +210,9 @@ class MukurtuResourceFetcherTest extends UnitTestCase {
     $keyRepository->method('getKey')->with('yt_key')->willReturn($key);
 
     $httpClient = $this->createMock(ClientInterface::class);
-    $httpClient->method('request')->willThrowException(new \GuzzleHttp\Exception\ConnectException(
+    $httpClient->method('request')->willThrowException(new ConnectException(
       'Could not connect',
-      new \GuzzleHttp\Psr7\Request('GET', 'https://www.googleapis.com/youtube/v3/videos')
+      new Request('GET', 'https://www.googleapis.com/youtube/v3/videos')
     ));
 
     $fetcher = $this->createFetcher($inner, $httpClient, $keyRepository, configuredKeyId: 'yt_key');
