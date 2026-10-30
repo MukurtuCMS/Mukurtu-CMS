@@ -164,7 +164,7 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
           $thumbnail = $related->get('field_representative_media')->view([
             'type' => 'entity_reference_entity_view',
             'label' => 'hidden',
-            'settings' => ['view_mode' => 'teaser_featured'],
+            'settings' => ['view_mode' => 'carousel_thumbnail'],
           ]);
         }
         $preview['#items'][] = [

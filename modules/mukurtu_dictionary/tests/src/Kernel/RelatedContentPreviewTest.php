@@ -206,6 +206,8 @@ class RelatedContentPreviewTest extends DictionaryTestBase {
     $html = $this->renderPreview($build);
     $this->assertStringContainsString('<details', $html);
     $this->assertSame(5, substr_count($html, 'related-content-preview__item'));
+    // None of these words has media, so each tile gets the placeholder.
+    $this->assertSame(5, substr_count($html, 'related-content-preview__thumbnail--empty'));
     $this->assertStringContainsString('View all 6 related items', $html);
     $this->assertStringNotContainsString('restricted', $html);
   }

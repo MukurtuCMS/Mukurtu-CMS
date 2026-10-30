@@ -3,13 +3,15 @@
 .related-content-preview {
   padding-block: var(--v-space-4xxs);
   border-block-end: 1px solid var(--brand-light);
-  font-size: var(--font-size-s);
   line-height: var(--line-height-s);
 
+  // Sized like the sidebar's field labels. The link and titles keep the
+  // field values' size.
   &__summary {
     display: flex;
     align-items: center;
     gap: var(--v-space-5xs);
+    font-size: var(--font-size-s);
     font-weight: var(--text-bold);
     cursor: pointer;
     list-style: none;
@@ -72,6 +74,12 @@
       block-size: auto;
       aspect-ratio: 1;
       object-fit: cover;
+    }
+
+    // Items without media get the theme's no-thumbnail graphic.
+    &--empty {
+      aspect-ratio: 1;
+      background: url('../images/no-thumbnail-square.png') center / cover no-repeat;
     }
   }
 
