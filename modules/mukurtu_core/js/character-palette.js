@@ -322,7 +322,24 @@
       window.getSelection().addRange(range);
     }
 
+    // The Tagify module shows suggestions whenever a lookup comes back, and
+    // an insertion starts one, so they would open over the palette, or over
+    // the page after leaving it (WCAG 2.4.11). Suggestions only show while
+    // the field itself has focus.
+    function guardTagifyDropdown(tagify) {
+      if (tagify.__mukurtuPaletteGuard) {
+        return;
+      }
+      tagify.__mukurtuPaletteGuard = true;
+      tagify.on('dropdown:show', function () {
+        if (!fieldHasFocus()) {
+          tagify.dropdown.hide();
+        }
+      });
+    }
+
     function insertIntoTagify(tagify, item) {
+      guardTagifyDropdown(tagify);
       const box = tagify.DOM.input;
       if (document.activeElement === box) {
         rememberTagify();
@@ -336,6 +353,9 @@
         placeTagifyCaret(tagify);
       }
       box.dispatchEvent(new Event('input', {bubbles: true}));
+      if (!fieldHasFocus()) {
+        tagify.dropdown.hide();
+      }
       Drupal.announce(Drupal.t('Inserted @character.', {'@character': item.name || item.character}));
     }
 
@@ -410,13 +430,14 @@
       // the document runs before Tagify's own, so the setting can be held
       // off for a blur that only moves into the palette.
       let heldText = false;
-      let keepDropdownClosed = false;
       document.addEventListener('blur', function (event) {
         const tagify = tagifyFor(input);
         if (!tagify || event.target !== tagify.DOM.input || !inPalette(event.relatedTarget)) {
           return;
         }
         rememberTagify();
+        guardTagifyDropdown(tagify);
+        tagify.dropdown.hide();
         const setting = tagify.settings.addTagOnBlur;
         tagify.settings.addTagOnBlur = false;
         heldText = setting;
@@ -438,21 +459,6 @@
           tagify.addTags(text, true);
         }
         tagify.dropdown.hide();
-        // The Tagify module shows suggestions whenever a lookup comes back,
-        // focused or not, so one still on its way would reopen them over
-        // the page. Keep them closed until the field has focus again.
-        keepDropdownClosed = true;
-        if (!tagify.__mukurtuPaletteGuard) {
-          tagify.__mukurtuPaletteGuard = true;
-          tagify.on('dropdown:show', function () {
-            if (keepDropdownClosed && !fieldHasFocus()) {
-              tagify.dropdown.hide();
-            }
-          });
-          tagify.DOM.input.addEventListener('focus', function () {
-            keepDropdownClosed = false;
-          });
-        }
       };
       toggle.addEventListener('focusout', commitHeldText);
       panel.addEventListener('focusout', commitHeldText);
