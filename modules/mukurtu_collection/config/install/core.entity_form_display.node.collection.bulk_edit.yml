@@ -1,0 +1,214 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.node.bulk_edit
+    - entity_browser.browser.mukurtu_content_browser
+    - field.field.node.collection.comment
+    - field.field.node.collection.field_coverage
+    - node.type.collection
+  module:
+    - entity_browser
+    - media_library
+    - mukurtu_core
+    - mukurtu_local_contexts
+    - tagify
+    - text
+id: node.collection.bulk_edit
+targetEntityType: node
+bundle: collection
+mode: bulk_edit
+content:
+  field_collection_image:
+    type: media_library_widget
+    weight: -3
+    region: content
+    settings:
+      media_types: {  }
+    third_party_settings: {  }
+  field_coverage:
+    type: geofield_mukurtu
+    weight: 0
+    region: content
+    settings:
+      geometry_validation: false
+      map:
+        leaflet_map: 'OSM Mapnik'
+        height: 400
+        auto_center: 1
+        map_position:
+          force: false
+          center:
+            lat: 20.0
+            lon: 10.0
+          zoomControlPosition: topleft
+          zoom: 2
+          minZoom: 1
+          maxZoom: 18
+          zoomFiner: 0
+          singlePointZoom: 12
+        scroll_zoom_enabled: 1
+      input:
+        show: false
+        readonly: false
+      toolbar:
+        position: topright
+        marker: defaultMarker
+        drawPolyline: true
+        drawRectangle: true
+        drawPolygon: true
+        drawCircle: true
+        drawText: false
+        editMode: true
+        dragMode: true
+        cutPolygon: false
+        removalMode: true
+        rotateMode: false
+      reset_map:
+        control: false
+        options: '{"position":"topleft","title":"Reset View"}'
+      map_scale:
+        control: false
+        options: '{"position":"bottomright","maxWidth":100,"metric":true,"imperial":false,"updateWhenIdle":false}'
+      fullscreen:
+        control: false
+        options: '{"position":"topleft","pseudoFullscreen":false}'
+      path: '{"color":"#3388ff","opacity":"1.0","stroke":true,"weight":3,"fill":"depends","fillColor":"*","fillOpacity":"0.2","radius":"6"}'
+      feature_properties:
+        values: ''
+      locate:
+        control: true
+        options: '{"position":"topright","setView":"untilPanOrZoom","returnToPrevBounds":true,"strings":{"title":"Locate my position"}}'
+        automatic: true
+      geocoder:
+        control: true
+        settings:
+          popup: false
+          position: topright
+          input_size: 20
+          providers:
+            nominatim:
+              weight: 0
+              checked: true
+          min_terms: 4
+          delay: 800
+          zoom: 16
+          options: ''
+    third_party_settings: {  }
+  field_coverage_description:
+    type: text_textarea
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_description:
+    type: text_textarea
+    weight: -4
+    region: content
+    settings:
+      rows: 9
+      placeholder: ''
+    third_party_settings: {  }
+  field_keywords:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: -2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_local_contexts_labels_and_notices:
+    type: local_contexts_label_and_notice
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_local_contexts_projects:
+    type: local_contexts_project
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_location:
+    type: tagify_entity_reference_autocomplete_widget
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
+    third_party_settings: {  }
+  field_related_content:
+    type: entity_browser_entity_reference
+    weight: 9
+    region: content
+    settings:
+      entity_browser: mukurtu_content_browser
+      field_widget_display: rendered_entity
+      field_widget_edit: false
+      field_widget_remove: true
+      field_widget_replace: false
+      open: true
+      field_widget_display_settings:
+        view_mode: form_selection
+      selection_mode: selection_append
+    third_party_settings: {  }
+  field_source:
+    type: string_textfield
+    weight: -1
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_summary:
+    type: string_textfield
+    weight: -5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  comment: true
+  created: true
+  field_child_collections: true
+  field_collection_type: true
+  field_content_type: true
+  field_credit: true
+  field_cultural_protocols: true
+  field_items_in_collection: true
+  field_mukurtu_community: true
+  field_mukurtu_original_record: true
+  field_mukurtu_protocol_inherit: true
+  field_mukurtu_protocol_r_scope: true
+  field_mukurtu_protocol_read: true
+  field_mukurtu_protocol_w_scope: true
+  field_mukurtu_protocol_write: true
+  field_parent_collection: true
+  field_protocol_control: true
+  field_sequence_collection: true
+  langcode: true
+  moderation_state: true
+  name: true
+  og_audience: true
+  path: true
+  promote: true
+  status: true
+  sticky: true
+  title: true
+  uid: true
+  url_redirects: true

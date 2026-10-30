@@ -296,6 +296,7 @@ class FormHooks
             $desiredOrder = [
                 "authenticated",
                 "mukurtu_roundtrip_manager",
+                "mukurtu_bulk_editor",
                 "mukurtu_manager",
                 "administrator",
             ];
@@ -1238,9 +1239,11 @@ class FormHooks
             "user_add_role_action.administrator",
             "user_add_role_action.mukurtu_manager",
             "user_add_role_action.mukurtu_roundtrip_manager",
+            "user_add_role_action.mukurtu_bulk_editor",
             "user_remove_role_action.administrator",
             "user_remove_role_action.mukurtu_manager",
             "user_remove_role_action.mukurtu_roundtrip_manager",
+            "user_remove_role_action.mukurtu_bulk_editor",
             "pathauto_update_alias_user",
             "user_unblock_user_action",
         ];

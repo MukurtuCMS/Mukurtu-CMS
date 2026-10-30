@@ -2,21 +2,11 @@
 
 namespace Drupal\mukurtu_collection\Plugin\Action;
 
-use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionBase;
 use Drupal\Core\Action\Attribute\Action;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\views\ViewExecutable;
-use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\Core\Form\FormStateInterface;
+use Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController;
+use Drupal\mukurtu_core\Plugin\Action\ContainerMembershipActionBase;
 use Drupal\node\NodeInterface;
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Entity\RevisionableInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Exception;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 
 /**
  * VBO for adding content to collections.
@@ -24,166 +14,71 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 #[Action(
   id: 'mukurtu_add_to_collection_action',
   label: new TranslatableMarkup('Add to Collection'),
-  type: '',
+  type: 'node',
 )]
-class MukurtuAddToCollectionAction extends ViewsBulkOperationsActionBase implements ContainerFactoryPluginInterface, PluginFormInterface {
-
-  use StringTranslationTrait;
+class MukurtuAddToCollectionAction extends ContainerMembershipActionBase {
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * {@inheritdoc}
    */
-  protected $entityTypeManager;
-
-  /**
-   * Constructs a \Drupal\Component\Plugin\PluginBase object.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->entityTypeManager = $entity_type_manager;
+  protected function containerBundle(): string {
+    return 'collection';
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager'),
-    );
-  }
-
-
-  /**
-   * {@inheritdoc}
-   */
-  public function execute($entity = NULL) {
-    if (!$entity) {
-      return;
-    }
-
-    // Get the collection.
-    $collectionId = $this->configuration['collection'];
-    $collection = $this->entityTypeManager->getStorage('node')->load($collectionId);
-
-    // Add the entity to the collection.
-    if ($collection && $collection->bundle() == 'collection' && $collection->access('update')) {
-      $items = $collection->get(MUKURTU_COLLECTION_FIELD_NAME_ITEMS)->getValue();
-      $items[] = ['target_id' => $entity->id()];
-      $collection->set(MUKURTU_COLLECTION_FIELD_NAME_ITEMS, $items);
-
-      // Add revision message if supported.
-      if ($collection instanceof RevisionableInterface) {
-        $collection->setRevisionLogMessage($this->t("Added @node to collection.", ['@node' => $entity->getTitle()]));
-      }
-
-      try {
-        // Validate the entity.
-        $violations = $collection->validate();
-        // Don't save if there are violations.
-        if ($violations->count() > 0) {
-          $this->messenger()->addError($violations[0]->getMessage());
-          return $this->t("Failed to add an item to the collection");
-        } else {
-          $collection->save();
-        }
-      } catch (Exception $e) {
-        return $this->t("Failed to add an item to the collection");
-      }
-    }
-
-    return $this->t('Item added to the collection.');
+  protected function itemsField(): string {
+    return MUKURTU_COLLECTION_FIELD_NAME_ITEMS;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
-    if ($object instanceof NodeInterface) {
-      // Access is simply view access.
-      return $object->access('view', $account, $return_as_object);
-    }
-
-    return $return_as_object ? AccessResult::forbidden() : FALSE;
+  protected function isEligibleItem(NodeInterface $node): bool {
+    return MukurtuAddItemToCollectionController::isValidCollectionItemBundle($node);
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function customAccess(AccountInterface $account, ViewExecutable $view): bool {
-    return TRUE;
+  protected function ineligibleReason(): TranslatableMarkup {
+    return $this->t("This type of content can't be added to a collection.");
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $collections = $this->getCollections();
-    if (!empty($collections)) {
-      foreach ($collections as $collection) {
-        $options[$collection->id()] = $collection->getTitle();
-      }
-
-      $form['collection'] = [
-        '#type' => 'select',
-        '#title' => $this->t('Select Collection'),
-        '#options' => $options,
-      ];
-    }
-
-    return $form;
-  }
-
-  /**
-   * Return a list of collections user can update.
-   */
-  protected function getCollections() {
-    $query = $this->entityTypeManager->getStorage('node')->getQuery()
-      ->condition('type', 'collection')
-      ->accessCheck(TRUE)
-      ->sort('changed', 'DESC');
-    $allCollections = $query->execute();
-
-    $collections = [];
-    if (!empty($allCollections)) {
-
-      $collections = $this->entityTypeManager->getStorage('node')->loadMultiple($allCollections);
-      foreach ($collections as $delta => $collection) {
-        // Remove collections the user cannot update.
-        if (!$collection->access('update')) {
-          unset($collections[$delta]);
-          continue;
-        }
-      }
-    }
-
-    return $collections;
+  protected function selectLabel(): TranslatableMarkup {
+    return $this->t('Select Collection');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
+  protected function noContainersMessage(): TranslatableMarkup {
+    return $this->t('There are no collections you can add items to.');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void {
-    $this->configuration['collection'] = $form_state->getValue('collection');
+  protected function doneMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Added to <a href=":url">@collection</a>', ['@collection' => $label, ':url' => $url]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function skippedMessage(string $label, string $url): TranslatableMarkup {
+    return $this->t('Already in <a href=":url">@collection</a>', ['@collection' => $label, ':url' => $url]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function failedMessage(string $label): TranslatableMarkup {
+    return $this->t("Couldn't add to @collection", ['@collection' => $label]);
   }
 
 }

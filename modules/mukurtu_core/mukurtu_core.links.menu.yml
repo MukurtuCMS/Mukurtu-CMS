@@ -24,7 +24,7 @@ mukurtu_core.manage_content:
   parent: mukurtu_dashboard
   menu_name: dashboard-content
   route_name: view.mukurtu_manage_all_content.mukurtu_manage_content
-  weight: 0
+  weight: -1
 mukurtu_core.settings_assorted:
   title: "Related content settings"
   parent: mukurtu_dashboard
@@ -164,3 +164,10 @@ mukurtu_core.visitors_settings:
   parent: mukurtu_dashboard
   menu_name: dashboard-site-settings
   weight: 9
+mukurtu_core.bulk_edit:
+  title: 'Bulk edit content'
+  description: 'Change many items of one content type at once.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-content
+  route_name: mukurtu_core.bulk_edit
+  weight: 0
