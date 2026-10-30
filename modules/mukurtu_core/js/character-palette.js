@@ -18,6 +18,13 @@
  * so undo and the editor's change tracking work (#2561). If the text format
  * is switched to one without an editor, the same button falls back to the
  * textarea itself.
+ *
+ * A Tagify field (keywords, locations, people) is typed in a contenteditable
+ * box Tagify puts in place of its input. Characters go into that box at the
+ * caret and Tagify is told through an input event, so its suggestions
+ * update. Tagify turns typed text into a tag when the box loses focus; that
+ * waits while focus is in the palette, and happens when focus moves on from
+ * the palette instead (#2561).
  */
 (function (Drupal, drupalSettings, once) {
 
@@ -64,6 +71,16 @@
   function editorFor(input) {
     const id = input.getAttribute('data-ckeditor5-id');
     return id && Drupal.CKEditor5Instances ? Drupal.CKEditor5Instances.get(id) : null;
+  }
+
+  /**
+   * Returns the Tagify instance managing an input, if there is one now.
+   *
+   * Tagify may set up after the palette does, so this is looked up each
+   * time too.
+   */
+  function tagifyFor(input) {
+    return input.classList.contains('tagify-widget') && input.__tagify ? input.__tagify : null;
   }
 
   /**
@@ -125,7 +142,14 @@
 
     const field = document.createElement('span');
     field.className = 'mukurtu-character-palette__field';
+    // Tagify puts its box directly before its input, and its CSS relies on
+    // the two staying side by side. If Tagify got there first, the box comes
+    // into the row too.
+    const tagifyBox = input.classList.contains('tagify-widget') && input.previousElementSibling;
     input.before(field);
+    if (tagifyBox && tagifyBox.classList.contains('tagify')) {
+      field.append(tagifyBox);
+    }
     field.append(input, toggle);
     field.after(panel);
     return [];
@@ -231,6 +255,10 @@
     }
 
     function fieldHasFocus() {
+      const tagify = tagifyFor(input);
+      if (tagify) {
+        return document.activeElement === tagify.DOM.input;
+      }
       const editor = editorFor(input);
       if (editor) {
         return editor.ui.view.editable.element.contains(document.activeElement);
@@ -239,6 +267,12 @@
     }
 
     function focusField() {
+      const tagify = tagifyFor(input);
+      if (tagify) {
+        tagify.DOM.input.focus();
+        placeTagifyCaret(tagify);
+        return;
+      }
       const editor = editorFor(input);
       if (editor) {
         editor.editing.view.focus();
@@ -257,7 +291,80 @@
       input.addEventListener(type, remember);
     });
 
+    // Where the caret was in a Tagify box, as character offsets into its
+    // text, kept while focus is in the palette.
+    let tagifySelection = null;
+
+    function rememberTagify() {
+      const tagify = tagifyFor(input);
+      const selection = window.getSelection();
+      if (!tagify || !selection.rangeCount || !tagify.DOM.input.contains(selection.anchorNode)) {
+        return;
+      }
+      const range = selection.getRangeAt(0);
+      const before = document.createRange();
+      before.selectNodeContents(tagify.DOM.input);
+      before.setEnd(range.startContainer, range.startOffset);
+      const start = before.toString().length;
+      tagifySelection = {start: start, end: start + range.toString().length};
+    }
+
+    function placeTagifyCaret(tagify) {
+      const text = tagify.DOM.input.firstChild;
+      if (!text || !tagifySelection) {
+        return;
+      }
+      const range = document.createRange();
+      const offset = Math.min(tagifySelection.end, text.length);
+      range.setStart(text, offset);
+      range.collapse(true);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    }
+
+    // The Tagify module shows suggestions whenever a lookup comes back, and
+    // an insertion starts one, so they would open over the palette, or over
+    // the page after leaving it (WCAG 2.4.11). Suggestions only show while
+    // the field itself has focus.
+    function guardTagifyDropdown(tagify) {
+      if (tagify.__mukurtuPaletteGuard) {
+        return;
+      }
+      tagify.__mukurtuPaletteGuard = true;
+      tagify.on('dropdown:show', function () {
+        if (!fieldHasFocus()) {
+          tagify.dropdown.hide();
+        }
+      });
+    }
+
+    function insertIntoTagify(tagify, item) {
+      guardTagifyDropdown(tagify);
+      const box = tagify.DOM.input;
+      if (document.activeElement === box) {
+        rememberTagify();
+      }
+      const text = box.textContent;
+      const start = tagifySelection ? Math.min(tagifySelection.start, text.length) : text.length;
+      const end = tagifySelection ? Math.min(tagifySelection.end, text.length) : text.length;
+      box.textContent = text.slice(0, start) + item.character + text.slice(end);
+      tagifySelection = {start: start + item.character.length, end: start + item.character.length};
+      if (document.activeElement === box) {
+        placeTagifyCaret(tagify);
+      }
+      box.dispatchEvent(new Event('input', {bubbles: true}));
+      if (!fieldHasFocus()) {
+        tagify.dropdown.hide();
+      }
+      Drupal.announce(Drupal.t('Inserted @character.', {'@character': item.name || item.character}));
+    }
+
     function insert(item) {
+      const tagify = tagifyFor(input);
+      if (tagify) {
+        insertIntoTagify(tagify, item);
+        return;
+      }
       const editor = editorFor(input);
       if (editor) {
         // The editor keeps its own selection while focus is elsewhere.
@@ -307,6 +414,55 @@
     toggle.addEventListener('click', function () {
       setOpen(panel.hidden);
     });
+    // As with the character buttons, a mouse or a finger opening the panel
+    // leaves focus, and the caret, in the field.
+    toggle.addEventListener('pointerdown', function (event) {
+      if (fieldHasFocus()) {
+        event.preventDefault();
+      }
+    });
+
+    if (input.classList.contains('tagify-widget')) {
+      const inPalette = function (element) {
+        return Boolean(element) && (toggle.contains(element) || panel.contains(element));
+      };
+      // Tagify turns typed text into a tag on blur. A capturing listener on
+      // the document runs before Tagify's own, so the setting can be held
+      // off for a blur that only moves into the palette.
+      let heldText = false;
+      document.addEventListener('blur', function (event) {
+        const tagify = tagifyFor(input);
+        if (!tagify || event.target !== tagify.DOM.input || !inPalette(event.relatedTarget)) {
+          return;
+        }
+        rememberTagify();
+        guardTagifyDropdown(tagify);
+        tagify.dropdown.hide();
+        const setting = tagify.settings.addTagOnBlur;
+        tagify.settings.addTagOnBlur = false;
+        heldText = setting;
+        window.setTimeout(function () {
+          tagify.settings.addTagOnBlur = setting;
+        });
+      }, true);
+      document.addEventListener('selectionchange', rememberTagify);
+      // Leaving the palette for anywhere but the field does what the blur
+      // would have done.
+      const commitHeldText = function (event) {
+        const tagify = tagifyFor(input);
+        if (!heldText || !tagify || inPalette(event.relatedTarget) || tagify.DOM.scope.contains(event.relatedTarget)) {
+          return;
+        }
+        heldText = false;
+        const text = tagify.DOM.input.textContent.trim();
+        if (text && tagify.settings.addTagOn.includes('blur')) {
+          tagify.addTags(text, true);
+        }
+        tagify.dropdown.hide();
+      };
+      toggle.addEventListener('focusout', commitHeldText);
+      panel.addEventListener('focusout', commitHeldText);
+    }
 
     function closeOnEscape(event) {
       if (event.key === 'Escape' && !panel.hidden) {

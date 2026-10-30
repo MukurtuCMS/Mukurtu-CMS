@@ -18,6 +18,13 @@
   min-width: 0;
 }
 
+/* The autocomplete input's negative end margin, which makes room for its
+ * throbber, would pull the button over the field. */
+.mukurtu-character-palette__field > .form-autocomplete {
+  margin-inline-end: 0;
+}
+
+.mukurtu-character-palette__field > .tagify,
 .mukurtu-character-palette__field > textarea {
   flex: 1 1 auto;
   min-width: 0;
@@ -68,6 +75,16 @@
 
 .ck-editor__top > .mukurtu-character-palette__toggle {
   margin: 0.25rem;
+}
+
+/* CKEditor's .ck-reset_all zeroes the size of anything in its top bar,
+ * which squeezed the button to 9 by 24 pixels (WCAG 2.5.8). */
+.ck.ck-editor__top > .mukurtu-character-palette__toggle.mukurtu-character-palette__toggle {
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid currentColor;
   background: Canvas;
   color: CanvasText;
 }

@@ -28,7 +28,17 @@ final class CharacterPalette {
   /**
    * Element types that get the palette.
    */
-  public const ELEMENT_TYPES = ['textfield', 'textarea', 'search'];
+  public const ELEMENT_TYPES = [
+    'textfield',
+    'textarea',
+    'search',
+    // Their own element types, so they don't inherit textfield's callback:
+    // core's entity autocomplete, and the Tagify fields used for keywords,
+    // locations and people (#2561). Types from a module that isn't installed
+    // are skipped by hook_element_info_alter().
+    'entity_autocomplete',
+    'entity_autocomplete_tagify',
+  ];
 
   /**
    * Returns the languages that have characters, as the script expects them.
