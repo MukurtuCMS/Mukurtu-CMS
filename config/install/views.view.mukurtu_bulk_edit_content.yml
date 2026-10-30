@@ -100,6 +100,12 @@ display:
               action_id: views_bulk_edit
               preconfiguration:
                 add_confirmation: true
+            -
+              action_id: mukurtu_add_protocol_action
+            -
+              action_id: mukurtu_remove_protocol_action
+            -
+              action_id: mukurtu_change_sharing_action
         title:
           id: title
           table: node_field_data
