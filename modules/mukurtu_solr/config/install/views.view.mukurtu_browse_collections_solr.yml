@@ -145,6 +145,19 @@ display:
             label: 'Search Relevance'
             field_identifier: search_api_relevance
           exposed: true
+        collection_display_weight:
+          id: collection_display_weight
+          table: search_api_index_mukurtu_default_solr_index
+          field: collection_display_weight
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: search_api
+          order: ASC
+          expose:
+            label: ''
+            field_identifier: ''
+          exposed: false
         node_title:
           id: node_title
           table: search_api_index_mukurtu_default_solr_index

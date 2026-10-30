@@ -29,3 +29,7 @@ delete all personal collection revisions:
   title: 'Delete all revisions'
   description: 'Role requires permission to <em>view Personal collection revisions</em> and <em>delete rights</em> for personal collection entities in question or <em>administer personal collection entities</em>.'
 
+
+administer collection order:
+  title: 'Administer collection order'
+  description: 'Set the display order of collections on the Collections page.'

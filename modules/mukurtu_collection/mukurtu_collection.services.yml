@@ -44,3 +44,10 @@ services:
     class: Drupal\mukurtu_collection\EventSubscriber\RepresentativeMediaComputationSubscriber
     tags:
       - { name: event_subscriber }
+
+  mukurtu_collection.collection_order:
+    class: Drupal\mukurtu_collection\CollectionOrder
+    arguments:
+      - '@config.factory'
+      - '@entity_type.manager'
+  Drupal\mukurtu_collection\CollectionOrder: '@mukurtu_collection.collection_order'
