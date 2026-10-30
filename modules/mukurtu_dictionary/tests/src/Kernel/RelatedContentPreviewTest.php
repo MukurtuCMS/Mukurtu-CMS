@@ -6,6 +6,8 @@ namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormState;
+use Drupal\file\Entity\File;
+use Drupal\image\Entity\ImageStyle;
 use Drupal\mukurtu_core\Form\MukurtuSettingsForm;
 use Drupal\mukurtu_core\Hook\RelatedContentPreviewHooks;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
@@ -21,6 +23,14 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_dictionary')]
 class RelatedContentPreviewTest extends DictionaryTestBase {
+
+  /**
+   * {@inheritdoc}
+   *
+   * Adds the schema for the default thumbnail settings, and the modules
+   * mukurtu_media's services need.
+   */
+  protected static $modules = ['flag', 'key', 'media_entity_soundcloud', 'mukurtu_media'];
 
   /**
    * The word whose page is being built.
@@ -210,6 +220,32 @@ class RelatedContentPreviewTest extends DictionaryTestBase {
     $this->assertSame(5, substr_count($html, 'related-content-preview__thumbnail--empty'));
     $this->assertStringContainsString('View all 6 related items', $html);
     $this->assertStringNotContainsString('restricted', $html);
+  }
+
+  /**
+   * Items without media show the site's default thumbnail, if one is set.
+   */
+  public function testNoMediaDefaultThumbnail(): void {
+    $this->installEntitySchema('file');
+    $this->setMode(RelatedContentPreviewHooks::MODE_THUMBNAILS);
+    $word = $this->createWordRelatedTo([$this->visible[0]]);
+
+    // Without a default, the placeholder is left for the theme to draw.
+    $html = $this->renderPreview($this->alteredBuild($word));
+    $this->assertMatchesRegularExpression('#--empty" aria-hidden="true">\s*</div>#', $html);
+
+    // The profile ships this style; the test installs no profile config.
+    ImageStyle::create(['name' => 'carousel_thumbnail', 'label' => 'Carousel thumbnail'])->save();
+    file_put_contents('public://no-media.png', 'png');
+    $file = File::create(['uri' => 'public://no-media.png', 'status' => 1]);
+    $file->save();
+    $this->config('mukurtu_thumbnail.settings')->set('no_media', [(int) $file->id()])->save();
+
+    $build = $this->alteredBuild($word);
+    $this->assertContains('config:mukurtu_thumbnail.settings', $build['#cache']['tags']);
+    $html = $this->renderPreview($build);
+    $this->assertStringContainsString('no-media.png', $html);
+    $this->assertStringContainsString('alt=""', $html);
   }
 
   /**

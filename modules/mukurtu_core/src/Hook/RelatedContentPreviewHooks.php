@@ -11,9 +11,11 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ProceduralCall;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
+use Drupal\Core\Render\Element;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -79,6 +81,7 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
   public function __construct(
     protected ConfigFactoryInterface $configFactory,
     protected EntityRepositoryInterface $entityRepository,
+    protected EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -88,6 +91,7 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
     return new static(
       $container->get('config.factory'),
       $container->get('entity.repository'),
+      $container->get('entity_type.manager'),
     );
   }
 
@@ -156,6 +160,7 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
       '#items' => [],
     ];
     if ($mode === self::MODE_THUMBNAILS) {
+      $preview['#placeholder'] = $this->noMediaPlaceholder($cacheability);
       foreach (array_slice($items, 0, self::THUMBNAIL_LIMIT) as $related) {
         $url = $related->toUrl()->toString(TRUE);
         $cacheability->addCacheableDependency($related)->addCacheableDependency($url);
@@ -166,6 +171,12 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
             'label' => 'hidden',
             'settings' => ['view_mode' => 'carousel_thumbnail'],
           ]);
+          // Media the viewer can't see renders nothing. Show the placeholder
+          // instead, but keep the access cacheability.
+          if (!Element::children($thumbnail)) {
+            $cacheability->addCacheableDependency(CacheableMetadata::createFromRenderArray($thumbnail));
+            $thumbnail = [];
+          }
         }
         $preview['#items'][] = [
           'title' => $related->label(),
@@ -183,6 +194,30 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
     $build['field_all_related_content']['#attributes']['id'] = static::targetId($entity);
     $build['field_all_related_content']['#attributes']['tabindex'] = '-1';
     $cacheability->applyTo($build);
+  }
+
+  /**
+   * Builds the site's default thumbnail for items without media.
+   *
+   * Returns an empty array when none is set, and the theme's own graphic
+   * shows instead.
+   */
+  protected function noMediaPlaceholder(CacheableMetadata $cacheability): array {
+    $config = $this->configFactory->get('mukurtu_thumbnail.settings');
+    $cacheability->addCacheableDependency($config);
+    $fid = $config->get('no_media')[0] ?? NULL;
+    $file = $fid ? $this->entityTypeManager->getStorage('file')->load($fid) : NULL;
+    if (!$file) {
+      return [];
+    }
+    $cacheability->addCacheableDependency($file);
+    // Decorative: the item's title link sits right below it.
+    return [
+      '#theme' => 'image_style',
+      '#style_name' => 'carousel_thumbnail',
+      '#uri' => $file->getFileUri(),
+      '#alt' => '',
+    ];
   }
 
   /**

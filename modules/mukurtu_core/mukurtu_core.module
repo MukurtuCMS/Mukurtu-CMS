@@ -47,7 +47,7 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
     ],
     'mukurtu_related_content_preview' => [
       'template' => 'mukurtu-related-content-preview',
-      'variables' => ['mode' => NULL, 'count' => 0, 'target' => NULL, 'items' => []],
+      'variables' => ['mode' => NULL, 'count' => 0, 'target' => NULL, 'items' => [], 'placeholder' => []],
     ],
     'mukurtu_not_yet_translated_indicator' => [
       'variables' => ['language_name' => NULL, 'langcode' => NULL, 'direction' => NULL],
