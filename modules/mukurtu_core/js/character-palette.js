@@ -75,6 +75,11 @@
 
   /**
    * Puts the button beside the field and the panel under it.
+   *
+   * @return {Element[]}
+   *   For a panel that floats over the page, the elements that count as
+   *   inside it: the field's form and the panel. Empty for a panel in the
+   *   page's own layout.
    */
   function place(input, toggle, panel) {
     // The theme's header search marks its form: the button goes inside the
@@ -89,21 +94,23 @@
         searchForm.append(toggle);
       }
       searchForm.after(panel);
-      return;
+      return [searchForm, panel];
     }
 
     // A rich text editor is created after behaviors run, and destroyed and
     // recreated when the text format changes. The button goes in the
-    // editor's top corner while there is one, and beside the textarea while
-    // there isn't.
+    // editor's top bar, beside its toolbar, while there is one, and beside
+    // the textarea while there isn't. Beside the toolbar rather than over
+    // it, so the toolbar measures the room actually left when it decides
+    // which buttons to fold into its "Show more items" menu.
     if (hasEditorFormat(input)) {
       const item = input.closest('.js-form-item') || input.parentElement;
       item.after(panel);
       const follow = function () {
-        const editor = input.parentElement.querySelector('.ck-editor');
-        if (editor) {
-          if (toggle.parentElement !== editor) {
-            editor.append(toggle);
+        const top = input.parentElement.querySelector('.ck-editor .ck-editor__top');
+        if (top) {
+          if (toggle.parentElement !== top) {
+            top.append(toggle);
           }
         }
         else if (toggle.previousElementSibling !== input) {
@@ -112,7 +119,7 @@
       };
       follow();
       new MutationObserver(follow).observe(input.parentElement, {childList: true});
-      return;
+      return [];
     }
 
     const field = document.createElement('span');
@@ -120,6 +127,7 @@
     input.before(field);
     field.append(input, toggle);
     field.after(panel);
+    return [];
   }
 
   /**
@@ -273,11 +281,15 @@
       toggle.dispatchEvent(new CustomEvent('mukurtu-character-palette-resize', {bubbles: true}));
     }
 
+    // Set once placed: what counts as inside a floating panel.
+    let floatingIn = [];
+
     function setOpen(open) {
       panel.hidden = !open;
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       resized();
-      if (fieldKey) {
+      // A floating panel covers the page, so it never reopens by itself.
+      if (fieldKey && !floatingIn.length) {
         const openFields = read(OPEN_KEY, []).filter(function (key) {
           return key !== fieldKey;
         });
@@ -306,9 +318,23 @@
     toggle.addEventListener('keydown', closeOnEscape);
 
     renderCharacters();
-    place(input, toggle, panel);
+    floatingIn = place(input, toggle, panel);
 
-    if (fieldKey && read(OPEN_KEY, []).indexOf(fieldKey) !== -1) {
+    if (floatingIn.length) {
+      // A floating panel covers whatever is under it, so it closes when
+      // focus or a click moves anywhere else (WCAG 2.4.11).
+      const closeIfOutside = function (event) {
+        const inside = floatingIn.some(function (element) {
+          return element.contains(event.target);
+        });
+        if (!panel.hidden && !inside) {
+          setOpen(false);
+        }
+      };
+      document.addEventListener('focusin', closeIfOutside);
+      document.addEventListener('pointerdown', closeIfOutside);
+    }
+    else if (fieldKey && read(OPEN_KEY, []).indexOf(fieldKey) !== -1) {
       panel.hidden = false;
       toggle.setAttribute('aria-expanded', 'true');
     }

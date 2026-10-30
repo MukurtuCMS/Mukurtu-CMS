@@ -1394,7 +1394,7 @@ a:not(.primary-nav__menu-link) svg.tel path {
   background: var(--color-text-neutral-medium, #767676);
   color: var(--color-white);
 }
-.mukurtu-character-palette__toggle:hover, .mukurtu-character-palette__toggle[aria-expanded=true] {
+.mukurtu-character-palette__toggle:hover, .mukurtu-character-palette__toggle:focus, .mukurtu-character-palette__toggle[aria-expanded=true] {
   border-color: var(--brand-text-color);
   background: var(--brand-text-color);
   color: var(--color-white);
@@ -1407,6 +1407,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
   .mukurtu-character-palette__toggle {
     border-color: buttontext;
   }
+}
+
+.mukurtu-character-palette select {
+  min-block-size: 1.5rem;
 }
 
 .mukurtu-character-palette {

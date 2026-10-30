@@ -179,6 +179,16 @@
 
       // Mukurtu Location Description pop-up.
       map.on('popupopen', function (event) {
+        // A popup is 300px wide at most by default, wider than the map on a
+        // narrow screen, where the map clips it (WCAG 1.4.10). Fit it to the
+        // map first, allowing for the popup's own padding, which maxWidth
+        // doesn't include. update() rebuilds the content, so this comes
+        // before anything below touches it.
+        const fitWidth = Math.max(150, map.getSize().x - 60);
+        if (event.popup.options.maxWidth > fitWidth) {
+          event.popup.options.maxWidth = fitWidth;
+          event.popup.update();
+        }
         // Create the GeoJSON feature if it doesn't exist.
         if (!event.popup._source.feature) {
           event.popup._source.feature = event.popup._source.toGeoJSON();

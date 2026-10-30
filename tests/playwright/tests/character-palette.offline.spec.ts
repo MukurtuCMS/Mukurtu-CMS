@@ -66,8 +66,17 @@ const EDITOR = `
     }]]);
   </script>`;
 
-function fixture(groups: typeof GROUPS): string {
+// The theme's header search: a form marked as the palette's anchor, so the
+// panel floats over the page instead of sitting in the layout.
+const HEADER = `
+  <form data-mukurtu-character-palette-anchor role="search" aria-label="Search">
+    <input name="search_api_fulltext" type="search" aria-label="Search" data-mukurtu-character-palette="Search">
+    <button type="submit">Go</button>
+  </form>`;
+
+function fixture(groups: typeof GROUPS, header = false): string {
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Character palette fixture</title></head><body>
+  ${header ? HEADER : ''}
   <label for="term">Term</label>
   <input id="term" name="term" type="text" data-mukurtu-character-palette="Term">
   <label for="hidden-data">Map data</label>
@@ -85,8 +94,9 @@ async function termPanel(page: Page) {
   return page.locator('#' + id);
 }
 
-async function load(page: Page, groups = GROUPS): Promise<void> {
-  await page.route(`${ORIGIN}/**`, (route) => route.fulfill({ contentType: 'text/html; charset=utf-8', body: fixture(groups) }));
+async function load(page: Page, groups = GROUPS, header = false): Promise<void> {
+  await page.unrouteAll();
+  await page.route(`${ORIGIN}/**`, (route) => route.fulfill({ contentType: 'text/html; charset=utf-8', body: fixture(groups, header) }));
   await page.goto(`${ORIGIN}/`);
   await page.addStyleTag({ path: path.join(MODULE_DIR, 'css/character-palette.css') });
   await page.addScriptTag({ path: path.join(MODULE_DIR, 'js/character-palette.js') });
@@ -121,7 +131,7 @@ test.describe('Character palette', () => {
   test('sits in a rich text editor and inserts through it (#2561)', async ({ page }) => {
     await load(page);
     const toggle = page.getByRole('button', { name: 'Characters for Definition' });
-    await expect(page.locator('.ck-editor > .mukurtu-character-palette__toggle')).toHaveCount(1);
+    await expect(page.locator('.ck-editor__top > .mukurtu-character-palette__toggle')).toHaveCount(1);
 
     // A mouse click leaves focus, and the editor's own selection, in the editor.
     await page.locator('.ck-editor__editable').focus();
@@ -216,6 +226,33 @@ test.describe('Character palette', () => {
     await load(page, [GROUPS[0]]);
     await page.getByRole('button', { name: 'Characters for Term' }).click();
     await expect((await termPanel(page)).getByLabel('Language')).toHaveCount(0);
+  });
+
+  test('a panel over the page closes when focus or a click leaves it, and never reopens by itself', async ({ page }) => {
+    await load(page, GROUPS, true);
+    const toggle = page.getByRole('button', { name: 'Characters for Search' });
+    const search = page.locator('input[name="search_api_fulltext"]');
+    await expect(toggle.locator('xpath=..')).toHaveAttribute('role', 'search');
+
+    // Inserting keeps it open; focus moving on to the next field closes it.
+    await toggle.click();
+    const panel = page.locator('#' + await toggle.getAttribute('aria-controls'));
+    await panel.getByRole('button', { name: 'k underbar' }).click();
+    await expect(search).toHaveValue('ḵ');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await page.locator('#term').focus();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await toggle.click();
+    await page.mouse.click(5, 5);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    // Left open, it still starts closed on the next page, and doesn't open
+    // another field with the same name.
+    await toggle.click();
+    await load(page, GROUPS, true);
+    await expect(page.getByRole('button', { name: 'Characters for Search' })).toHaveAttribute('aria-expanded', 'false');
+    expect(await page.evaluate(() => localStorage.getItem('mukurtu.characterPalette.open') ?? '')).not.toContain('search_api_fulltext');
   });
 
   test('buttons are at least 24 by 24 pixels', async ({ page }) => {

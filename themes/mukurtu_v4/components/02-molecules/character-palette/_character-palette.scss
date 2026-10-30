@@ -18,6 +18,7 @@
   color: var(--color-white);
 
   &:hover,
+  &:focus,
   &[aria-expanded="true"] {
     border-color: var(--brand-text-color);
     background: var(--brand-text-color);
@@ -32,6 +33,11 @@
   @media (forced-colors: active) {
     border-color: buttontext;
   }
+}
+
+// At least 24px tall (WCAG 2.5.8); the browser default is about 19px.
+.mukurtu-character-palette select {
+  min-block-size: 1.5rem;
 }
 
 .mukurtu-character-palette {
