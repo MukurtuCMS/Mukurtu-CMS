@@ -105,9 +105,38 @@
       // Move the location-description input's onblur handler to a
       // delegated listener (CSP-friendlier than an inline attribute, and
       // avoids re-attaching it for every marker).
-      $(map.getContainer()).on('focusout', '.mukurtu-leaflet-description-field', function () {
+      $(map.getContainer()).on('focusout', '.mukurtu-leaflet-description-field', function (event) {
+        // Moving to something else in the same popup, such as the character
+        // palette's buttons (#2561), isn't leaving it.
+        const popup = this.closest('.leaflet-popup');
+        if (popup && event.relatedTarget && popup.contains(event.relatedTarget)) {
+          return;
+        }
         const popupId = $(this).attr('id').replace('location-popup-', '');
         Drupal.mukurtuSetLocationDescription(containerId, popupId);
+      });
+      // Leaflet places a popup when it opens. When the character palette
+      // (#2561) opens inside one, the popup grows upward past the top of the
+      // map, so move it and pan the map to keep it all in view. setLatLng()
+      // does both without rebuilding the popup's content.
+      $(map.getContainer()).on('mukurtu-character-palette-resize', '.leaflet-popup', function () {
+        const input = this.querySelector('.mukurtu-leaflet-description-field');
+        const layer = input && Drupal.Leaflet[containerId].lMap._layers[input.id.replace('location-popup-', '')];
+        const popup = layer && layer.getPopup();
+        if (popup && popup.isOpen()) {
+          popup.setLatLng(popup.getLatLng());
+        }
+      });
+
+      // The character palette (#2561) types into the field while focus is on
+      // its own buttons, and the popup may be closed without focus ever
+      // coming back, so keep the description current as it changes. Without
+      // closing the popup, which the focusout handler above does.
+      $(map.getContainer()).on('input', '.mukurtu-leaflet-description-field', function () {
+        const layer = Drupal.Leaflet[containerId].lMap._layers[$(this).attr('id').replace('location-popup-', '')];
+        if (layer && layer.feature) {
+          layer.feature.properties['location_description'] = this.value;
+        }
       });
 
       /* Mukurtu accessibility additions end. */
@@ -150,6 +179,16 @@
 
       // Mukurtu Location Description pop-up.
       map.on('popupopen', function (event) {
+        // A popup is 300px wide at most by default, wider than the map on a
+        // narrow screen, where the map clips it (WCAG 1.4.10). Fit it to the
+        // map first, allowing for the popup's own padding, which maxWidth
+        // doesn't include. update() rebuilds the content, so this comes
+        // before anything below touches it.
+        const fitWidth = Math.max(150, map.getSize().x - 60);
+        if (event.popup.options.maxWidth > fitWidth) {
+          event.popup.options.maxWidth = fitWidth;
+          event.popup.update();
+        }
         // Create the GeoJSON feature if it doesn't exist.
         if (!event.popup._source.feature) {
           event.popup._source.feature = event.popup._source.toGeoJSON();
@@ -158,6 +197,14 @@
         const locationDescription = event.popup._source.feature.properties['location_description'] ?? '';
         const $input = $('#location-popup-' + event.popup._source._leaflet_id);
         $input.val(locationDescription);
+        // The popup's markup is rebuilt each time it opens, so the character
+        // palette (#2561) attaches to the new input here, before focus moves
+        // into it: the palette wraps the input, and moving a focused element
+        // drops its focus.
+        if (Drupal.behaviors.mukurtuCharacterPalette) {
+          $input.attr('data-mukurtu-character-palette', Drupal.t('Map point description'));
+          Drupal.behaviors.mukurtuCharacterPalette.attach(event.popup._contentNode);
+        }
         // Move focus into the popup for keyboard users - Leaflet opens it
         // without moving focus off the marker.
         $input.trigger('focus');

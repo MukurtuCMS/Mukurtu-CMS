@@ -159,3 +159,16 @@ visitors-country-map:
     - core/jquery
     - core/drupal
     - leaflet/leaflet-drupal
+
+character_palette:
+  version: 1.x
+  css:
+    component:
+      css/character-palette.css: {}
+  js:
+    js/character-palette.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/drupal.announce
+    - core/once

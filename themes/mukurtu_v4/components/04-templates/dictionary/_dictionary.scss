@@ -113,7 +113,7 @@
     }
 
     h2,
-    label:not(.search-collapse-toggle__item) {
+    label:not(.search-collapse-toggle__item, .mukurtu-character-palette__label) {
       display: block;
       background-color: var(--brand-primary-dark);
       color: var(--light-text-color);

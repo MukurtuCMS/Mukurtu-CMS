@@ -172,3 +172,40 @@ body:not(.is-always-mobile-nav) {
     fill: buttontext;
   }
 }
+
+/* The character palette's button (mukurtu_core, #2560) sits inside the bar,
+ * between the input and the search button, so it takes the input's border
+ * and fills the bar's height. The input gives up the button's width, so the
+ * bar stays the size the nav was laid out for; 44px more was enough to tip
+ * a 1280px header into the mobile menu. */
+.header-search__form:has(> .mukurtu-character-palette__toggle) .header-search__input {
+  flex-basis: calc(200px - 2.75rem);
+}
+
+.header-search__form .mukurtu-character-palette__toggle {
+  align-self: stretch;
+  block-size: auto;
+  inline-size: 2.75rem;
+  // Square, so it joins the input and the search button. Its colors come
+  // from 02-molecules/character-palette.
+  border-radius: 0;
+}
+
+/* The palette's panel drops down over the page instead of joining the
+ * header's rows. In the desktop nav bar it would otherwise be one more flex
+ * item, widening the bar until the header falls back to the mobile menu. */
+.header-search:has(> .mukurtu-character-palette) {
+  position: relative;
+}
+
+.header-search > .mukurtu-character-palette {
+  position: absolute;
+  z-index: 10;
+  inset-block-start: 100%;
+  inset-inline-end: 0;
+  inline-size: max-content;
+  max-inline-size: min(20rem, calc(100vw - 2rem));
+  margin-block-start: var(--v-space-5xs);
+  background: var(--color-white);
+  color: var(--brand-text-color);
+}

@@ -1,0 +1,130 @@
+/**
+ * @file
+ * The character palette (#2560).
+ *
+ * Works in Gin and Mukurtu v4, light and dark, so colors come from the text
+ * around it (currentColor) rather than either theme's variables.
+ */
+
+/* A field and its button, side by side. */
+.mukurtu-character-palette__field {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.mukurtu-character-palette__field > input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mukurtu-character-palette__field > textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mukurtu-character-palette__field:has(> textarea) {
+  align-items: flex-start;
+}
+
+.mukurtu-character-palette__toggle,
+.mukurtu-character-palette__character {
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Square and small, but above the 24 by 24 pixel minimum (WCAG 2.5.8). */
+.mukurtu-character-palette__toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 1.125rem;
+}
+
+.mukurtu-character-palette__toggle[aria-expanded="true"] {
+  border-width: 2px;
+}
+
+/* In a rich text editor's top bar, beside its toolbar rather than over it,
+ * so the toolbar folds its buttons into "Show more items" around it. */
+.ck-editor__top:has(> .mukurtu-character-palette__toggle) {
+  display: flex;
+  align-items: flex-start;
+}
+
+.ck-editor__top:has(> .mukurtu-character-palette__toggle) > .ck-sticky-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ck-editor__top > .mukurtu-character-palette__toggle {
+  margin: 0.25rem;
+  background: Canvas;
+  color: CanvasText;
+}
+
+.mukurtu-character-palette__toggle:focus-visible,
+.mukurtu-character-palette__character:focus-visible,
+.mukurtu-character-palette select:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Gin's focus ring is a box-shadow, which forced colors removes, so the
+ * palette draws its own there. html raises the specificity over Gin's
+ * .page-wrapper :focus. */
+@media (forced-colors: active) {
+  html .mukurtu-character-palette__toggle:focus-visible,
+  html .mukurtu-character-palette__character:focus-visible,
+  html .mukurtu-character-palette select:focus-visible {
+    outline: 3px solid CanvasText;
+    outline-offset: 2px;
+  }
+}
+
+/* Never wider than what holds it, such as a map point's popup. */
+.mukurtu-character-palette,
+.mukurtu-character-palette__field {
+  max-width: 100%;
+}
+
+.mukurtu-character-palette {
+  margin-block: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+}
+
+.mukurtu-character-palette[hidden] {
+  display: none;
+}
+
+.mukurtu-character-palette__language {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-block-end: 0.75rem;
+}
+
+.mukurtu-character-palette__characters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mukurtu-character-palette__character {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 1.25rem;
+}

@@ -198,7 +198,8 @@
         .js-form-type-textfield {
           background-color: var(--brand-light-accent);
 
-          label {
+          // Its own label only, not the character palette's inside it.
+          > label {
             display: block;
             background-color: var(--brand-primary-dark);
             color: var(--light-text-color);
