@@ -167,8 +167,10 @@
   z-index: 1000;
   inset-block-end: 8.5rem;
   inset-inline-end: 1rem;
-  max-inline-size: min(22rem, calc(100vw - 2rem));
-  max-block-size: calc(100vh - 10rem);
+  /* A long list scrolls inside the panel rather than climbing over the
+   * page's sticky header and Save button. */
+  max-inline-size: min(34rem, calc(100vw - 2rem));
+  max-block-size: min(24rem, calc(100vh - 12rem));
   overflow-y: auto;
   margin: 0;
   background: Canvas;
@@ -181,4 +183,12 @@
   gap: 0.25rem;
   align-items: center;
   margin-inline-start: auto;
+}
+
+/* On a phone the panel would cover most of the screen, often including the
+ * field being typed in, so it stays shorter and scrolls. */
+@media (max-width: 40em) {
+  .mukurtu-character-palette--floating {
+    max-block-size: min(16rem, 40vh);
+  }
 }
