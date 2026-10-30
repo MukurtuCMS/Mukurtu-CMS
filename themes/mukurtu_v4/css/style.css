@@ -6436,29 +6436,26 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   content: "−"/"";
 }
 .related-content-preview__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(6rem, 50% - var(--v-space-4xxs)), 1fr));
+  gap: var(--v-space-4xxs);
   margin: 0;
   padding: 0;
+  -webkit-padding-before: var(--v-space-4xxs);
+          padding-block-start: var(--v-space-4xxs);
   list-style: none;
 }
 .related-content-preview__item {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  gap: var(--v-space-4xxs);
-  padding-block: var(--v-space-5xs);
-}
-.related-content-preview__item:first-child {
-  -webkit-padding-before: var(--v-space-4xxs);
-          padding-block-start: var(--v-space-4xxs);
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: var(--v-space-5xs);
 }
 .related-content-preview__thumbnail {
-  -webkit-box-flex: 0;
-      -ms-flex: 0 0 4rem;
-          flex: 0 0 4rem;
-  inline-size: 4rem;
   overflow: hidden;
 }
 .related-content-preview__thumbnail img {

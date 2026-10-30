@@ -45,26 +45,25 @@
     content: '\2212' / '';
   }
 
+  // Two columns of tiles, or one when the sidebar is too narrow for two
+  // 6rem tiles. The max() keeps a wide sidebar from fitting a third.
   &__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(max(6rem, calc(50% - var(--v-space-4xxs))), 1fr));
+    gap: var(--v-space-4xxs);
     margin: 0;
     padding: 0;
+    padding-block-start: var(--v-space-4xxs);
     list-style: none;
   }
 
   &__item {
     display: flex;
-    align-items: center;
-    gap: var(--v-space-4xxs);
-    padding-block: var(--v-space-5xs);
-
-    &:first-child {
-      padding-block-start: var(--v-space-4xxs);
-    }
+    flex-direction: column;
+    gap: var(--v-space-5xs);
   }
 
   &__thumbnail {
-    flex: 0 0 4rem;
-    inline-size: 4rem;
     overflow: hidden;
 
     img {
