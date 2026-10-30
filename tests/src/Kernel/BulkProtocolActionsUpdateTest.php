@@ -8,7 +8,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40038().
+ * Tests mukurtu_update_40039().
  *
  * Existing sites get the cultural protocol actions on the bulk edit page.
  */
@@ -68,7 +68,7 @@ class BulkProtocolActionsUpdateTest extends KernelTestBase {
       ['action_id' => 'mukurtu_remove_protocol_action', 'preconfiguration' => ['label_override' => 'Site label']],
     ]);
 
-    $this->assertSame('Added the cultural protocol actions to the bulk edit page.', mukurtu_update_40038());
+    $this->assertSame('Added the cultural protocol actions to the bulk edit page.', mukurtu_update_40039());
     $this->assertSame([
       'views_bulk_edit',
       'mukurtu_remove_protocol_action',
@@ -78,14 +78,14 @@ class BulkProtocolActionsUpdateTest extends KernelTestBase {
     $actions = \Drupal::config('views.view.mukurtu_bulk_edit_content')->get(static::PATH);
     $this->assertSame(['label_override' => 'Site label'], $actions[1]['preconfiguration']);
 
-    $this->assertStringContainsString('nothing to change', mukurtu_update_40038());
+    $this->assertStringContainsString('nothing to change', mukurtu_update_40039());
   }
 
   /**
    * A site without the bulk edit page is left alone.
    */
   public function testNoPage(): void {
-    $this->assertSame("There's no bulk edit page; nothing to change.", mukurtu_update_40038());
+    $this->assertSame("There's no bulk edit page; nothing to change.", mukurtu_update_40039());
     $this->assertTrue(\Drupal::config('views.view.mukurtu_bulk_edit_content')->isNew());
   }
 
