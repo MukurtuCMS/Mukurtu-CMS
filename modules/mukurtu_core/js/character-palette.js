@@ -3,17 +3,18 @@
  * The character palette (#2560).
  *
  * Adds a small "Characters" button (an accented letter) beside every input
- * marked with data-mukurtu-character-palette. The button opens a panel of the characters
- * site managers listed on the Character palette settings page, and each
- * character button inserts its character where the cursor was.
+ * marked with data-mukurtu-character-palette. The button opens a panel of
+ * the characters site managers listed on the Character palette settings
+ * page, and each character button inserts its character where the cursor
+ * was.
  *
  * Mouse and touch insertion keep focus in the field, so the caret stays put
  * and a phone keyboard stays open. Keyboard insertion keeps focus on the
  * character button, so several characters can be inserted in a row; Escape
  * goes back to the field.
  *
- * A textarea with a rich text editor gets the button under the editor, and
- * characters go in through CKEditor's model at the editor's own selection,
+ * A textarea with a rich text editor gets the button in the editor's top
+ * bar, and characters go in through CKEditor's model at the editor's own selection,
  * so undo and the editor's change tracking work (#2561). If the text format
  * is switched to one without an editor, the same button falls back to the
  * textarea itself.
@@ -136,7 +137,10 @@
   function attach(input, groups) {
     counter += 1;
     const panelId = 'mukurtu-character-palette-' + counter;
-    const fieldKey = input.name || input.id || '';
+    // Open panels are remembered by field name. A field with no name, such
+    // as a map point's description, whose id changes on every page load,
+    // isn't remembered at all, so the stored list can't grow without end.
+    const fieldKey = input.name || '';
     const fieldLabel = input.getAttribute('data-mukurtu-character-palette');
     let selection = {start: input.value.length, end: input.value.length};
 
