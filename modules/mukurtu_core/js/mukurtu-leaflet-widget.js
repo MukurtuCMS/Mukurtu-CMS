@@ -426,6 +426,33 @@
         if (input) {
           L.DomEvent.disableScrollPropagation(input);
 
+          // The contrib control passes its default placeholder and title to
+          // Drupal.t() through variables, so string extraction never finds
+          // them and they can't be translated. When the defaults are in use,
+          // set them again through literal Drupal.t() calls.
+          if (input.placeholder === 'Search Address') {
+            input.placeholder = Drupal.t('Search Address');
+          }
+          if (input.title === 'Search an Address on the Map') {
+            input.title = Drupal.t('Search an Address on the Map');
+          }
+
+          // Keep the search box clear of the zoom buttons on a narrow map
+          // (see the input rule in the CSS). The map can start hidden in a
+          // collapsed group, so measure whenever its size changes.
+          const map = container.closest('.leaflet-container');
+          const zoom = map && map.querySelector('.leaflet-control-zoom');
+          if (zoom && window.ResizeObserver) {
+            new ResizeObserver(function () {
+              const mapRect = map.getBoundingClientRect();
+              if (!mapRect.width) {
+                return;
+              }
+              const space = container.getBoundingClientRect().right - zoom.getBoundingClientRect().right - 10;
+              input.style.setProperty('--mukurtu-geocoder-input-limit', Math.max(space, 0) + 'px');
+            }).observe(map);
+          }
+
           // The contrib control names the input only with its title ("Search
           // an Address on the Map"), which doesn't contain the visible
           // placeholder text, so speech users can't target it by what they
@@ -459,6 +486,22 @@
                 autocomplete.menu.element[0].style.setProperty('--mukurtu-geocoder-menu-limit', 'calc(' + map.clientWidth + 'px - 2em)');
               }
             });
+
+            Drupal.mukurtuGeocoderCombobox(input, autocomplete);
+            Drupal.mukurtuGeocoderMessages(autocomplete);
+
+            // jQuery UI treats Down Arrow on the last result as "back to what
+            // I typed": it clears the highlight and restores the search text.
+            // With a single result that leaves nothing for Enter to choose.
+            // Stay on the last result instead. Up Arrow from the first result
+            // still returns to the input, as the combobox pattern expects.
+            const move = autocomplete._move;
+            autocomplete._move = function (direction, event) {
+              if (/^next/.test(direction) && this.menu.active && this.menu.isLastItem() && this.menu.element.is(':visible')) {
+                return;
+              }
+              return move.apply(this, arguments);
+            };
           }
 
           // Choosing a result only moves the map; the contrib control
@@ -472,6 +515,108 @@
         }
       });
     }
+  };
+
+  /**
+   * Give the geocoder search the ARIA combobox pattern.
+   *
+   * jQuery UI autocomplete adds no roles or states: the input isn't exposed
+   * as a combobox, the results list has no role, and the highlighted result
+   * is only announced through jQuery UI's own live region. Mark them up as a
+   * combobox and listbox, and point aria-activedescendant at the highlighted
+   * result so screen readers announce it themselves.
+   */
+  Drupal.mukurtuGeocoderCombobox = function (input, autocomplete) {
+    const $menu = autocomplete.menu.element;
+    const menuId = input.id + '--results';
+    $menu.attr({id: menuId, role: 'listbox'});
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-expanded', 'false');
+    input.setAttribute('aria-controls', menuId);
+
+    // jQuery UI rebuilds the list for every search. With autoFocus it also
+    // highlights the first result before firing "open", so both handlers
+    // below make sure the new results are tagged.
+    const tagOptions = function () {
+      $menu.children('li:not([role])').each(function () {
+        this.setAttribute('role', 'option');
+        this.setAttribute('aria-selected', 'false');
+        this.id = menuId + '-' + $(this).index();
+      });
+    };
+
+    $(input).on('autocompleteopen', function () {
+      tagOptions();
+      input.setAttribute('aria-expanded', 'true');
+    });
+    $(input).on('autocompleteclose', function () {
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+    });
+
+    // Bound after jQuery UI's own menufocus/menublur handlers, so these run
+    // after them in the same dispatch.
+    $menu.on('menufocus', function (event, ui) {
+      tagOptions();
+      $menu.children('[aria-selected="true"]').attr('aria-selected', 'false');
+      ui.item.attr('aria-selected', 'true');
+      input.setAttribute('aria-activedescendant', ui.item.attr('id'));
+      // jQuery UI has just queued the same result text for its live region.
+      // aria-activedescendant already announces it, so cancel the repeat.
+      clearTimeout(autocomplete.liveRegionTimer);
+    });
+    $menu.on('menublur', function () {
+      $menu.children('[aria-selected="true"]').attr('aria-selected', 'false');
+      input.removeAttribute('aria-activedescendant');
+    });
+  };
+
+  // Set when the most recent geocoder request failed, so the "no results"
+  // announcement can say the search is unavailable instead. Requests are
+  // numbered so a slow reply to an older search can't overwrite the newest.
+  let mukurtuGeocoderFailed = false;
+  let mukurtuGeocoderRequest = 0;
+
+  /**
+   * Make the geocoder search's live region announcements translatable.
+   *
+   * jQuery UI's result count and "no results" messages are hardcoded in
+   * English. The contrib control also turns a failed request into an empty
+   * result list, so people heard "No search results." when the search
+   * service was down or rate-limiting us, and couldn't tell the difference.
+   */
+  Drupal.mukurtuGeocoderMessages = function (autocomplete) {
+    const geocode = Drupal.Leaflet && Drupal.Leaflet.prototype.geocode;
+    if (geocode && !geocode.mukurtuWrapped) {
+      Drupal.Leaflet.prototype.geocode = function () {
+        const request = ++mukurtuGeocoderRequest;
+        return geocode.apply(this, arguments)
+          .done(function () {
+            if (request === mukurtuGeocoderRequest) {
+              mukurtuGeocoderFailed = false;
+            }
+          })
+          .fail(function () {
+            if (request === mukurtuGeocoderRequest) {
+              mukurtuGeocoderFailed = true;
+            }
+          });
+      };
+      Drupal.Leaflet.prototype.geocode.mukurtuWrapped = true;
+    }
+
+    autocomplete.option('messages', {
+      // A getter, because jQuery UI reads this each time a search returns.
+      get noResults() {
+        return mukurtuGeocoderFailed ?
+          Drupal.t("Address search isn't available right now. Try again later, or add a marker on the map.") :
+          Drupal.t('No search results.');
+      },
+      results: function (amount) {
+        return Drupal.formatPlural(amount, '1 result is available, use up and down arrow keys to navigate.', '@count results are available, use up and down arrow keys to navigate.');
+      }
+    });
   };
 
 })(jQuery, Drupal, once);
