@@ -112,6 +112,11 @@
         if (popup && event.relatedTarget && popup.contains(event.relatedTarget)) {
           return;
         }
+        // The floating character palette (#502 experiment) sits outside the
+        // popup, but moving to it isn't leaving the field either.
+        if (event.relatedTarget && event.relatedTarget.closest('.mukurtu-character-palette, .mukurtu-character-palette__toggle')) {
+          return;
+        }
         const popupId = $(this).attr('id').replace('location-popup-', '');
         Drupal.mukurtuSetLocationDescription(containerId, popupId);
       });

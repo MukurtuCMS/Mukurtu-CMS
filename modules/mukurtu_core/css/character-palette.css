@@ -145,3 +145,40 @@
   padding: 0.25rem 0.75rem;
   font-size: 1.25rem;
 }
+
+/* Floating version (#502 experiment): one button in a corner of the page,
+ * above the cookie settings button, and its panel above it. */
+.mukurtu-character-palette__toggle--floating {
+  position: fixed;
+  z-index: 1000;
+  inset-block-end: 5rem;
+  inset-inline-end: 1rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: Canvas;
+  color: CanvasText;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+
+.mukurtu-character-palette--floating {
+  position: fixed;
+  z-index: 1000;
+  inset-block-end: 8.5rem;
+  inset-inline-end: 1rem;
+  max-inline-size: min(22rem, calc(100vw - 2rem));
+  max-block-size: calc(100vh - 10rem);
+  overflow-y: auto;
+  margin: 0;
+  background: Canvas;
+  color: CanvasText;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+
+.mukurtu-character-palette__pin {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  margin-inline-start: auto;
+}
