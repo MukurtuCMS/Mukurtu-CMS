@@ -145,3 +145,50 @@
   padding: 0.25rem 0.75rem;
   font-size: 1.25rem;
 }
+
+/* Floating version (#502 experiment): one button in a corner of the page,
+ * above the cookie settings button, and its panel above it. */
+.mukurtu-character-palette__toggle--floating {
+  position: fixed;
+  z-index: 1000;
+  inset-block-end: 5rem;
+  inset-inline-end: 1rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: Canvas;
+  color: CanvasText;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+
+.mukurtu-character-palette--floating {
+  position: fixed;
+  z-index: 1000;
+  inset-block-end: 8.5rem;
+  inset-inline-end: 1rem;
+  /* A long list scrolls inside the panel rather than climbing over the
+   * page's sticky header and Save button. */
+  max-inline-size: min(34rem, calc(100vw - 2rem));
+  max-block-size: min(24rem, calc(100vh - 12rem));
+  overflow-y: auto;
+  margin: 0;
+  background: Canvas;
+  color: CanvasText;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+
+.mukurtu-character-palette__pin {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+/* On a phone the panel would cover most of the screen, often including the
+ * field being typed in, so it stays shorter and scrolls. */
+@media (max-width: 40em) {
+  .mukurtu-character-palette--floating {
+    max-block-size: min(16rem, 40vh);
+  }
+}

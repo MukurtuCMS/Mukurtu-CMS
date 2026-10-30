@@ -1,37 +1,34 @@
 /**
  * @file
- * The character palette (#2560).
+ * The character palette, floating version (#502 experiment).
  *
- * Adds a small "Characters" button (an accented letter) beside every input
- * marked with data-mukurtu-character-palette. The button opens a panel of
+ * One Á̱ button sits in a corner of the page. It opens a floating panel of
  * the characters site managers listed on the Character palette settings
- * page, and each character button inserts its character where the cursor
- * was.
+ * page, and each character goes into whichever marked field had focus last:
+ * a text field, a rich text editor or a Tagify box. Ctrl+Shift+Space jumps
+ * from a field to the panel, and Escape goes back with the caret where it
+ * was. "Keep open" leaves the panel up while people type.
  *
  * Mouse and touch insertion keep focus in the field, so the caret stays put
- * and a phone keyboard stays open. Keyboard insertion keeps focus on the
- * character button, so several characters can be inserted in a row; Escape
- * goes back to the field.
+ * and a phone keyboard stays open.
  *
- * A textarea with a rich text editor gets the button in the editor's top
- * bar, and characters go in through CKEditor's model at the editor's own selection,
- * so undo and the editor's change tracking work (#2561). If the text format
- * is switched to one without an editor, the same button falls back to the
- * textarea itself.
- *
- * A Tagify field (keywords, locations, people) is typed in a contenteditable
- * box Tagify puts in place of its input. Characters go into that box at the
- * caret and Tagify is told through an input event, so its suggestions
- * update. Tagify turns typed text into a tag when the box loses focus; that
- * waits while focus is in the palette, and happens when focus moves on from
- * the palette instead (#2561).
+ * Fields are marked server side with data-mukurtu-character-palette (see
+ * CharacterPalette.php). Each marked field gets a target here that knows how
+ * to insert into it:
+ * - A plain input or textarea: at the remembered selection, then an input
+ *   event so other scripts see the change.
+ * - A rich text editor: through CKEditor's model at its own selection, so
+ *   undo works.
+ * - A Tagify box: into its contenteditable box at the caret, then an input
+ *   event so its suggestions update. Tagify turns typed text into a tag on
+ *   blur; that waits while focus is in the palette, and happens when focus
+ *   moves on from the palette instead.
  */
 (function (Drupal, drupalSettings, once) {
 
-  const OPEN_KEY = 'mukurtu.characterPalette.open';
+  const PIN_KEY = 'mukurtu.characterPalette.pinned';
   const LANGUAGE_KEY = 'mukurtu.characterPalette.language';
-
-  let counter = 0;
+  const SHORTCUT = 'Ctrl+Shift+Space';
 
   /**
    * Drupal.t() escapes @ placeholders for HTML. Text set through
@@ -75,9 +72,6 @@
 
   /**
    * Returns the Tagify instance managing an input, if there is one now.
-   *
-   * Tagify may set up after the palette does, so this is looked up each
-   * time too.
    */
   function tagifyFor(input) {
     return input.classList.contains('tagify-widget') && input.__tagify ? input.__tagify : null;
@@ -91,100 +85,224 @@
     return Boolean(input.id && document.querySelector('[data-editor-for="' + CSS.escape(input.id) + '"]'));
   }
 
+  function announceInsert(item) {
+    Drupal.announce(Drupal.t('Inserted @character.', {'@character': item.name || item.character}));
+  }
+
+  // The page's one palette, built on first use.
+  let palette = null;
+  // Every marked field, and the one that had focus last.
+  const targets = [];
+  let current = null;
+
   /**
-   * Puts the button beside the field and the panel under it.
-   *
-   * @return {Element[]}
-   *   For a panel that floats over the page, the elements that count as
-   *   inside it: the field's form and the panel. Empty for a panel in the
-   *   page's own layout.
+   * Whether an element is part of the palette.
    */
-  function place(input, toggle, panel) {
-    // The theme's header search marks its form: the button goes inside the
-    // search bar, before the submit button, and the panel under the form.
-    const searchForm = input.closest('[data-mukurtu-character-palette-anchor]');
-    if (searchForm) {
-      const submit = searchForm.querySelector('[type="submit"]');
-      if (submit) {
-        submit.before(toggle);
-      }
-      else {
-        searchForm.append(toggle);
-      }
-      searchForm.after(panel);
-      return [searchForm, panel];
-    }
-
-    // A rich text editor is created after behaviors run, and destroyed and
-    // recreated when the text format changes. The button goes in the
-    // editor's top bar, beside its toolbar, while there is one, and beside
-    // the textarea while there isn't. Beside the toolbar rather than over
-    // it, so the toolbar measures the room actually left when it decides
-    // which buttons to fold into its "Show more items" menu.
-    if (hasEditorFormat(input)) {
-      const item = input.closest('.js-form-item') || input.parentElement;
-      item.after(panel);
-      const follow = function () {
-        const top = input.parentElement.querySelector('.ck-editor .ck-editor__top');
-        if (top) {
-          if (toggle.parentElement !== top) {
-            top.append(toggle);
-          }
-        }
-        else if (toggle.previousElementSibling !== input) {
-          input.after(toggle);
-        }
-      };
-      follow();
-      new MutationObserver(follow).observe(input.parentElement, {childList: true});
-      return [];
-    }
-
-    const field = document.createElement('span');
-    field.className = 'mukurtu-character-palette__field';
-    // Tagify puts its box directly before its input, and its CSS relies on
-    // the two staying side by side. If Tagify got there first, the box comes
-    // into the row too.
-    const tagifyBox = input.classList.contains('tagify-widget') && input.previousElementSibling;
-    input.before(field);
-    if (tagifyBox && tagifyBox.classList.contains('tagify')) {
-      field.append(tagifyBox);
-    }
-    field.append(input, toggle);
-    field.after(panel);
-    return [];
+  function inPalette(element) {
+    return Boolean(palette && element && (palette.button.contains(element) || palette.panel.contains(element)));
   }
 
   /**
-   * Builds the button and panel for one input.
+   * Makes the target for one marked field.
    */
-  function attach(input, groups) {
-    counter += 1;
-    const panelId = 'mukurtu-character-palette-' + counter;
-    // Open panels are remembered by field name. A field with no name, such
-    // as a map point's description, whose id changes on every page load,
-    // isn't remembered at all, so the stored list can't grow without end.
-    const fieldKey = input.name || '';
-    const fieldLabel = input.getAttribute('data-mukurtu-character-palette');
+  function makeTarget(input) {
     let selection = {start: input.value.length, end: input.value.length};
+    // Where the caret was in a Tagify box, as offsets into its text.
+    let tagifySelection = null;
 
-    const toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.className = 'mukurtu-character-palette__toggle';
+    function rememberInput() {
+      if (typeof input.selectionStart === 'number') {
+        selection = {start: input.selectionStart, end: input.selectionEnd};
+      }
+    }
+    ['select', 'keyup', 'mouseup', 'input', 'blur'].forEach(function (type) {
+      input.addEventListener(type, rememberInput);
+    });
+
+    function rememberTagify() {
+      const tagify = tagifyFor(input);
+      const range = window.getSelection().rangeCount ? window.getSelection().getRangeAt(0) : null;
+      if (!tagify || !range || !tagify.DOM.input.contains(range.startContainer)) {
+        return;
+      }
+      const before = document.createRange();
+      before.selectNodeContents(tagify.DOM.input);
+      before.setEnd(range.startContainer, range.startOffset);
+      const start = before.toString().length;
+      tagifySelection = {start: start, end: start + range.toString().length};
+    }
+
+    function placeTagifyCaret(tagify) {
+      const text = tagify.DOM.input.firstChild;
+      if (!text || !tagifySelection) {
+        return;
+      }
+      const range = document.createRange();
+      range.setStart(text, Math.min(tagifySelection.end, text.length));
+      range.collapse(true);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    }
+
+    const target = {
+      input: input,
+
+      contains(element) {
+        const tagify = tagifyFor(input);
+        if (tagify) {
+          return tagify.DOM.scope.contains(element);
+        }
+        const editor = editorFor(input);
+        if (editor) {
+          return editor.ui.view.editable.element.contains(element);
+        }
+        return element === input;
+      },
+
+      hasFocus() {
+        return target.contains(document.activeElement);
+      },
+
+      focus() {
+        const tagify = tagifyFor(input);
+        const editor = editorFor(input);
+        if (tagify) {
+          tagify.DOM.input.focus();
+          placeTagifyCaret(tagify);
+        }
+        else if (editor) {
+          editor.editing.view.focus();
+        }
+        else {
+          input.focus();
+          input.setSelectionRange(selection.start, selection.end);
+        }
+      },
+
+      insert(item) {
+        const tagify = tagifyFor(input);
+        const editor = editorFor(input);
+        if (tagify) {
+          guardTagifyDropdown(tagify);
+          const box = tagify.DOM.input;
+          if (document.activeElement === box) {
+            rememberTagify();
+          }
+          const text = box.textContent;
+          const start = tagifySelection ? Math.min(tagifySelection.start, text.length) : text.length;
+          const end = tagifySelection ? Math.min(tagifySelection.end, text.length) : text.length;
+          box.textContent = text.slice(0, start) + item.character + text.slice(end);
+          tagifySelection = {start: start + item.character.length, end: start + item.character.length};
+          if (document.activeElement === box) {
+            placeTagifyCaret(tagify);
+          }
+          box.dispatchEvent(new Event('input', {bubbles: true}));
+          if (!target.hasFocus()) {
+            tagify.dropdown.hide();
+          }
+        }
+        else if (editor) {
+          // The editor keeps its own selection while focus is elsewhere.
+          editor.model.change(function (writer) {
+            editor.model.insertContent(writer.createText(item.character));
+          });
+        }
+        else {
+          if (document.activeElement === input) {
+            rememberInput();
+          }
+          const length = input.value.length;
+          input.setRangeText(item.character, Math.min(selection.start, length), Math.min(selection.end, length), 'end');
+          selection = {start: input.selectionStart, end: input.selectionEnd};
+          input.dispatchEvent(new Event('input', {bubbles: true}));
+        }
+        announceInsert(item);
+      },
+    };
+
+    // The Tagify module shows suggestions whenever a lookup comes back, and
+    // an insertion starts one, so they would open over the page while focus
+    // is in the palette (WCAG 2.4.11). Suggestions only show while the field
+    // itself has focus.
+    function guardTagifyDropdown(tagify) {
+      if (tagify.__mukurtuPaletteGuard) {
+        return;
+      }
+      tagify.__mukurtuPaletteGuard = true;
+      tagify.on('dropdown:show', function () {
+        if (!target.hasFocus()) {
+          tagify.dropdown.hide();
+        }
+      });
+    }
+
+    if (input.classList.contains('tagify-widget')) {
+      // Tagify turns typed text into a tag on blur. A capturing listener on
+      // the document runs before Tagify's own, so the setting can be held
+      // off for a blur that only moves into the palette.
+      document.addEventListener('blur', function (event) {
+        const tagify = tagifyFor(input);
+        if (!tagify || event.target !== tagify.DOM.input || !inPalette(event.relatedTarget)) {
+          return;
+        }
+        rememberTagify();
+        guardTagifyDropdown(tagify);
+        tagify.dropdown.hide();
+        const setting = tagify.settings.addTagOnBlur;
+        tagify.settings.addTagOnBlur = false;
+        target.heldText = setting;
+        window.setTimeout(function () {
+          tagify.settings.addTagOnBlur = setting;
+        });
+      }, true);
+      document.addEventListener('selectionchange', rememberTagify);
+
+      // Leaving the palette for anywhere but the field does what the blur
+      // would have done.
+      target.commitHeldText = function (to) {
+        const tagify = tagifyFor(input);
+        if (!target.heldText || !tagify || inPalette(to) || tagify.DOM.scope.contains(to)) {
+          return;
+        }
+        target.heldText = false;
+        const text = tagify.DOM.input.textContent.trim();
+        if (text && tagify.settings.addTagOn.includes('blur')) {
+          tagify.addTags(text, true);
+        }
+        tagify.dropdown.hide();
+      };
+    }
+
+    return target;
+  }
+
+  /**
+   * Builds the page's palette: the corner button and its panel.
+   */
+  function buildPalette(groups) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'mukurtu-character-palette__toggle mukurtu-character-palette__toggle--floating';
     // A letter with marks above and below reads as "special letters" in any
     // language. It is decoration; the button's name says what it does.
     const icon = document.createElement('span');
     icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = '\u00C1\u0331';
-    toggle.appendChild(icon);
-    toggle.title = Drupal.t('Characters');
-    toggle.setAttribute('aria-label', fieldLabel ? plain(Drupal.t('Characters for @field', {'@field': fieldLabel})) : Drupal.t('Characters'));
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-controls', panelId);
+    icon.textContent = 'Á̱';
+    button.appendChild(icon);
+    button.setAttribute('aria-label', Drupal.t('Character palette'));
+    button.title = plain(Drupal.t('Character palette (@shortcut)', {'@shortcut': SHORTCUT}));
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', 'mukurtu-character-palette');
+
+    const description = document.createElement('span');
+    description.id = 'mukurtu-character-palette-description';
+    description.className = 'visually-hidden';
+    description.textContent = plain(Drupal.t('Inserts characters into the field you were last typing in. Shortcut: @shortcut.', {'@shortcut': SHORTCUT}));
+    button.setAttribute('aria-describedby', description.id);
 
     const panel = document.createElement('div');
-    panel.id = panelId;
-    panel.className = 'mukurtu-character-palette';
+    panel.id = 'mukurtu-character-palette';
+    panel.className = 'mukurtu-character-palette mukurtu-character-palette--floating';
     panel.setAttribute('role', 'group');
     panel.setAttribute('aria-label', Drupal.t('Character palette'));
     panel.hidden = true;
@@ -200,16 +318,15 @@
       }
     });
 
+    const header = document.createElement('div');
+    header.className = 'mukurtu-character-palette__language';
     if (groups.length > 1) {
-      const selectId = panelId + '-language';
-      const wrapper = document.createElement('div');
-      wrapper.className = 'mukurtu-character-palette__language';
       const label = document.createElement('label');
-      label.htmlFor = selectId;
+      label.htmlFor = 'mukurtu-character-palette-language';
       label.className = 'mukurtu-character-palette__label';
       label.textContent = Drupal.t('Language');
       const select = document.createElement('select');
-      select.id = selectId;
+      select.id = 'mukurtu-character-palette-language';
       groups.forEach(function (group, index) {
         const option = document.createElement('option');
         option.value = String(index);
@@ -221,287 +338,160 @@
         groupIndex = Number(select.value);
         write(LANGUAGE_KEY, groups[groupIndex].label);
         renderCharacters();
-        resized();
       });
-      wrapper.appendChild(label);
-      wrapper.appendChild(select);
-      panel.appendChild(wrapper);
+      header.append(label, select);
     }
-    panel.appendChild(list);
+
+    // "Keep open" leaves the panel up while focus moves between fields.
+    const pin = document.createElement('input');
+    pin.type = 'checkbox';
+    pin.id = 'mukurtu-character-palette-pin';
+    pin.checked = Boolean(read(PIN_KEY, false));
+    const pinLabel = document.createElement('label');
+    pinLabel.htmlFor = pin.id;
+    pinLabel.className = 'mukurtu-character-palette__pin';
+    pinLabel.prepend(pin);
+    pinLabel.append(' ', Drupal.t('Keep open'));
+    pin.addEventListener('change', function () {
+      write(PIN_KEY, pin.checked);
+    });
+    header.append(pinLabel);
+
+    panel.append(header, list);
 
     function renderCharacters() {
       list.textContent = '';
       groups[groupIndex].characters.forEach(function (item) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'mukurtu-character-palette__character';
-        button.textContent = item.character;
+        const character = document.createElement('button');
+        character.type = 'button';
+        character.className = 'mukurtu-character-palette__character';
+        character.textContent = item.character;
         if (item.name) {
-          button.setAttribute('aria-label', item.name);
-          button.title = item.name;
+          character.setAttribute('aria-label', item.name);
+          character.title = item.name;
         }
-        // A mouse or a finger would otherwise take focus from the field,
-        // which loses the caret and closes a phone's keyboard.
-        button.addEventListener('pointerdown', function (event) {
-          if (fieldHasFocus()) {
-            event.preventDefault();
+        character.addEventListener('click', function () {
+          if (!current || !current.input.isConnected) {
+            Drupal.announce(Drupal.t('Choose a field to type in first.'));
+            return;
           }
+          current.insert(item);
         });
-        button.addEventListener('click', function () {
-          insert(item);
-        });
-        list.appendChild(button);
+        list.appendChild(character);
       });
     }
+    renderCharacters();
 
-    function fieldHasFocus() {
-      const tagify = tagifyFor(input);
-      if (tagify) {
-        return document.activeElement === tagify.DOM.input;
+    // A mouse or a finger would otherwise take focus from the field, which
+    // loses the caret and closes a phone's keyboard.
+    [button, panel].forEach(function (element) {
+      element.addEventListener('pointerdown', function (event) {
+        if (current && current.hasFocus() && event.target.closest('button')) {
+          event.preventDefault();
+        }
+      });
+    });
+
+    function open(moveFocus) {
+      panel.hidden = false;
+      button.setAttribute('aria-expanded', 'true');
+      if (moveFocus) {
+        const first = panel.querySelector('.mukurtu-character-palette__character');
+        (first || panel.querySelector('select, input')).focus();
       }
-      const editor = editorFor(input);
-      if (editor) {
-        return editor.ui.view.editable.element.contains(document.activeElement);
-      }
-      return document.activeElement === input;
     }
 
-    function focusField() {
-      const tagify = tagifyFor(input);
-      if (tagify) {
-        tagify.DOM.input.focus();
-        placeTagifyCaret(tagify);
-        return;
-      }
-      const editor = editorFor(input);
-      if (editor) {
-        editor.editing.view.focus();
+    function close() {
+      panel.hidden = true;
+      button.setAttribute('aria-expanded', 'false');
+    }
+
+    button.addEventListener('click', function () {
+      if (panel.hidden) {
+        open(false);
       }
       else {
-        input.focus();
-      }
-    }
-
-    function remember() {
-      if (typeof input.selectionStart === 'number') {
-        selection = {start: input.selectionStart, end: input.selectionEnd};
-      }
-    }
-    ['select', 'keyup', 'mouseup', 'input', 'blur'].forEach(function (type) {
-      input.addEventListener(type, remember);
-    });
-
-    // Where the caret was in a Tagify box, as character offsets into its
-    // text, kept while focus is in the palette.
-    let tagifySelection = null;
-
-    function rememberTagify() {
-      const tagify = tagifyFor(input);
-      const selection = window.getSelection();
-      if (!tagify || !selection.rangeCount || !tagify.DOM.input.contains(selection.anchorNode)) {
-        return;
-      }
-      const range = selection.getRangeAt(0);
-      const before = document.createRange();
-      before.selectNodeContents(tagify.DOM.input);
-      before.setEnd(range.startContainer, range.startOffset);
-      const start = before.toString().length;
-      tagifySelection = {start: start, end: start + range.toString().length};
-    }
-
-    function placeTagifyCaret(tagify) {
-      const text = tagify.DOM.input.firstChild;
-      if (!text || !tagifySelection) {
-        return;
-      }
-      const range = document.createRange();
-      const offset = Math.min(tagifySelection.end, text.length);
-      range.setStart(text, offset);
-      range.collapse(true);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
-    }
-
-    // The Tagify module shows suggestions whenever a lookup comes back, and
-    // an insertion starts one, so they would open over the palette, or over
-    // the page after leaving it (WCAG 2.4.11). Suggestions only show while
-    // the field itself has focus.
-    function guardTagifyDropdown(tagify) {
-      if (tagify.__mukurtuPaletteGuard) {
-        return;
-      }
-      tagify.__mukurtuPaletteGuard = true;
-      tagify.on('dropdown:show', function () {
-        if (!fieldHasFocus()) {
-          tagify.dropdown.hide();
-        }
-      });
-    }
-
-    function insertIntoTagify(tagify, item) {
-      guardTagifyDropdown(tagify);
-      const box = tagify.DOM.input;
-      if (document.activeElement === box) {
-        rememberTagify();
-      }
-      const text = box.textContent;
-      const start = tagifySelection ? Math.min(tagifySelection.start, text.length) : text.length;
-      const end = tagifySelection ? Math.min(tagifySelection.end, text.length) : text.length;
-      box.textContent = text.slice(0, start) + item.character + text.slice(end);
-      tagifySelection = {start: start + item.character.length, end: start + item.character.length};
-      if (document.activeElement === box) {
-        placeTagifyCaret(tagify);
-      }
-      box.dispatchEvent(new Event('input', {bubbles: true}));
-      if (!fieldHasFocus()) {
-        tagify.dropdown.hide();
-      }
-      Drupal.announce(Drupal.t('Inserted @character.', {'@character': item.name || item.character}));
-    }
-
-    function insert(item) {
-      const tagify = tagifyFor(input);
-      if (tagify) {
-        insertIntoTagify(tagify, item);
-        return;
-      }
-      const editor = editorFor(input);
-      if (editor) {
-        // The editor keeps its own selection while focus is elsewhere.
-        editor.model.change(function (writer) {
-          editor.model.insertContent(writer.createText(item.character));
-        });
-        Drupal.announce(Drupal.t('Inserted @character.', {'@character': item.name || item.character}));
-        return;
-      }
-      if (document.activeElement === input) {
-        remember();
-      }
-      const length = input.value.length;
-      const start = Math.min(selection.start, length);
-      const end = Math.min(selection.end, length);
-      input.setRangeText(item.character, start, end, 'end');
-      selection = {start: input.selectionStart, end: input.selectionEnd};
-      input.dispatchEvent(new Event('input', {bubbles: true}));
-      Drupal.announce(Drupal.t('Inserted @character.', {'@character': item.name || item.character}));
-    }
-
-    // Tells whatever holds the palette that it changed size, such as a map
-    // popup that has to move to stay in view.
-    function resized() {
-      toggle.dispatchEvent(new CustomEvent('mukurtu-character-palette-resize', {bubbles: true}));
-    }
-
-    // Set once placed: what counts as inside a floating panel.
-    let floatingIn = [];
-
-    function setOpen(open) {
-      panel.hidden = !open;
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      resized();
-      // A floating panel covers the page, so it never reopens by itself.
-      if (fieldKey && !floatingIn.length) {
-        const openFields = read(OPEN_KEY, []).filter(function (key) {
-          return key !== fieldKey;
-        });
-        if (open) {
-          openFields.push(fieldKey);
-        }
-        write(OPEN_KEY, openFields);
-      }
-    }
-
-    toggle.addEventListener('click', function () {
-      setOpen(panel.hidden);
-    });
-    // As with the character buttons, a mouse or a finger opening the panel
-    // leaves focus, and the caret, in the field.
-    toggle.addEventListener('pointerdown', function (event) {
-      if (fieldHasFocus()) {
-        event.preventDefault();
+        close();
       }
     });
 
-    if (input.classList.contains('tagify-widget')) {
-      const inPalette = function (element) {
-        return Boolean(element) && (toggle.contains(element) || panel.contains(element));
-      };
-      // Tagify turns typed text into a tag on blur. A capturing listener on
-      // the document runs before Tagify's own, so the setting can be held
-      // off for a blur that only moves into the palette.
-      let heldText = false;
-      document.addEventListener('blur', function (event) {
-        const tagify = tagifyFor(input);
-        if (!tagify || event.target !== tagify.DOM.input || !inPalette(event.relatedTarget)) {
+    // Escape goes back to the field, closing the panel unless it's kept
+    // open. It belongs to the palette here, not to whatever holds the field,
+    // such as a map popup that would close too.
+    [button, panel].forEach(function (element) {
+      element.addEventListener('keydown', function (event) {
+        if (event.key !== 'Escape') {
           return;
         }
-        rememberTagify();
-        guardTagifyDropdown(tagify);
-        tagify.dropdown.hide();
-        const setting = tagify.settings.addTagOnBlur;
-        tagify.settings.addTagOnBlur = false;
-        heldText = setting;
-        window.setTimeout(function () {
-          tagify.settings.addTagOnBlur = setting;
-        });
-      }, true);
-      document.addEventListener('selectionchange', rememberTagify);
-      // Leaving the palette for anywhere but the field does what the blur
-      // would have done.
-      const commitHeldText = function (event) {
-        const tagify = tagifyFor(input);
-        if (!heldText || !tagify || inPalette(event.relatedTarget) || tagify.DOM.scope.contains(event.relatedTarget)) {
-          return;
-        }
-        heldText = false;
-        const text = tagify.DOM.input.textContent.trim();
-        if (text && tagify.settings.addTagOn.includes('blur')) {
-          tagify.addTags(text, true);
-        }
-        tagify.dropdown.hide();
-      };
-      toggle.addEventListener('focusout', commitHeldText);
-      panel.addEventListener('focusout', commitHeldText);
-    }
-
-    function closeOnEscape(event) {
-      if (event.key === 'Escape' && !panel.hidden) {
-        // Escape belongs to the palette here, not to whatever holds it, such
-        // as a map popup that would close too.
         event.preventDefault();
         event.stopPropagation();
-        setOpen(false);
-        focusField();
-      }
-    }
-    panel.addEventListener('keydown', closeOnEscape);
-    toggle.addEventListener('keydown', closeOnEscape);
-
-    renderCharacters();
-    floatingIn = place(input, toggle, panel);
-
-    if (floatingIn.length) {
-      // A floating panel covers whatever is under it, so it closes when
-      // focus or a click moves anywhere else (WCAG 2.4.11).
-      const closeIfOutside = function (event) {
-        const inside = floatingIn.some(function (element) {
-          return element.contains(event.target);
-        });
-        if (!panel.hidden && !inside) {
-          setOpen(false);
+        if (!pin.checked) {
+          close();
         }
-      };
-      document.addEventListener('focusin', closeIfOutside);
-      document.addEventListener('pointerdown', closeIfOutside);
-    }
-    else if (fieldKey && read(OPEN_KEY, []).indexOf(fieldKey) !== -1) {
-      panel.hidden = false;
-      toggle.setAttribute('aria-expanded', 'true');
-    }
+        if (current && current.input.isConnected) {
+          current.focus();
+        }
+      });
+    });
+
+    // Focus and clicks outside the palette close it unless it's kept open,
+    // because it floats over the page (WCAG 2.4.11).
+    document.addEventListener('pointerdown', function (event) {
+      if (!panel.hidden && !pin.checked && !inPalette(event.target) && !(current && current.contains(event.target))) {
+        close();
+      }
+    });
+    [button, panel].forEach(function (element) {
+      element.addEventListener('focusout', function (event) {
+        targets.forEach(function (target) {
+          if (target.commitHeldText) {
+            target.commitHeldText(event.relatedTarget);
+          }
+        });
+        if (!panel.hidden && !pin.checked && event.relatedTarget && !inPalette(event.relatedTarget)
+          && !(current && current.contains(event.relatedTarget))) {
+          close();
+        }
+      });
+    });
+
+    document.body.append(button, description, panel);
+    return {button: button, panel: panel, open: open, close: close};
   }
 
+  // The field people were last typing in is where characters go.
+  document.addEventListener('focusin', function (event) {
+    if (inPalette(event.target)) {
+      return;
+    }
+    for (let i = targets.length - 1; i >= 0; i--) {
+      if (!targets[i].input.isConnected) {
+        targets.splice(i, 1);
+      }
+      else if (targets[i].contains(event.target)) {
+        current = targets[i];
+        return;
+      }
+    }
+  });
+
+  // Ctrl+Shift+Space: from a field to the palette, and back again.
+  document.addEventListener('keydown', function (event) {
+    if (!palette || event.code !== 'Space' || !event.ctrlKey || !event.shiftKey || event.altKey || event.metaKey) {
+      return;
+    }
+    event.preventDefault();
+    if (inPalette(document.activeElement)) {
+      if (current && current.input.isConnected) {
+        current.focus();
+      }
+      return;
+    }
+    palette.open(true);
+  });
+
   /**
-   * Attaches the palette to marked inputs.
+   * Registers marked fields and builds the palette.
    */
   Drupal.behaviors.mukurtuCharacterPalette = {
     attach(context) {
@@ -509,19 +499,24 @@
       if (!groups.length) {
         return;
       }
+      if (!palette) {
+        palette = buildPalette(groups);
+      }
       once('mukurtu-character-palette', '[data-mukurtu-character-palette]', context).forEach(function (input) {
         if (input.disabled || input.readOnly || input.type === 'hidden' || typeof input.setRangeText !== 'function') {
           return;
         }
         // Widgets such as the map keep their data in a textarea hidden on
         // purpose, and typing into it would be lost. A rich text editor hides
-        // its textarea too, but the palette writes to the editor instead. A
-        // field inside a closed section is hidden by its parent, not itself,
-        // and still gets the palette.
+        // its textarea too, but the palette writes to the editor instead.
         if (window.getComputedStyle(input).display === 'none' && !hasEditorFormat(input)) {
           return;
         }
-        attach(input, groups);
+        const target = makeTarget(input);
+        targets.push(target);
+        if (target.hasFocus()) {
+          current = target;
+        }
       });
     },
   };
