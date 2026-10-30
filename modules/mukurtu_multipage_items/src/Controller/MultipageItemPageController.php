@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_multipage_items\Controller;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -10,6 +11,7 @@ use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -54,6 +56,13 @@ class MultipageItemPageController extends ControllerBase {
   protected $multipageItemManager;
 
   /**
+   * The entity repository.
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+  protected $entityRepository;
+
+  /**
    * The controller constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -62,12 +71,17 @@ class MultipageItemPageController extends ControllerBase {
    *   The current user.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\mukurtu_multipage_items\MultipageItemManager $multipage_item_manager
+   *   The multipage item manager.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *   The entity repository.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user, ConfigFactoryInterface $config_factory, MultipageItemManager $multipage_item_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user, ConfigFactoryInterface $config_factory, MultipageItemManager $multipage_item_manager, EntityRepositoryInterface $entity_repository) {
     $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $current_user;
     $this->configFactory = $config_factory;
     $this->multipageItemManager = $multipage_item_manager;
+    $this->entityRepository = $entity_repository;
   }
 
   /**
@@ -79,6 +93,7 @@ class MultipageItemPageController extends ControllerBase {
       $container->get('current_user'),
       $container->get('config.factory'),
       $container->get('mukurtu_multipage_items.multipage_item_manager'),
+      $container->get('entity.repository'),
     );
   }
 
@@ -176,15 +191,12 @@ class MultipageItemPageController extends ControllerBase {
     $multipageitem = $this->multipageItemManager->getMultipageEntity($page);
     $response = new AjaxResponse();
     if ($multipageitem && $multipageitem->hasPage($page) && $page->access('view')) {
-      $view_builder = $this->entityTypeManager()->getViewBuilder('node');
       $content['mukurtu_multipage_item_selected_page'] = [
         '#type' => 'container',
         '#attributes' => [
           'id' => 'mukurtu-multipage-item-selected-page',
         ],
-      ];
-
-      $content['mukurtu_multipage_item_selected_page']['teaser'] = $view_builder->view($page, 'full');
+      ] + $this->buildSelectedPage($page);
       $response->addCommand(new ReplaceCommand('#mukurtu-multipage-item-selected-page', $content));
     }
     return $response;
@@ -271,12 +283,52 @@ class MultipageItemPageController extends ControllerBase {
       '#pages' => array_map(fn($p) => $view_builder->view($p, 'multipage_browse'), $pages),
       '#page_nav_attributes' => NULL,
       '#table_of_contents' => $toc,
-      '#current_page' => $view_builder->view($current_page, 'full'),
+      '#current_page' => $this->buildSelectedPage($current_page),
       '#attached' => [
         'library' => [
           'mukurtu_multipage_items/multipage-view-nav',
         ],
       ],
+    ];
+  }
+
+  /**
+   * Builds the selected page with its title as a heading.
+   *
+   * The page H1 names the multipage item, so this heading is what tells
+   * readers which page they are on. A page with community records shows each
+   * record's title at the top of its own tab instead. The initial view and
+   * the AJAX page switch both use this so the markup matches.
+   *
+   * @param \Drupal\node\NodeInterface $page
+   *   The page node.
+   *
+   * @return array
+   *   A render array.
+   */
+  protected function buildSelectedPage(NodeInterface $page): array {
+    $page_build = $this->entityTypeManager()->getViewBuilder('node')->view($page, 'full');
+    if (($page_build['template']['#theme'] ?? NULL) === 'community_records') {
+      $page_build['template']['#show_titles'] = TRUE;
+      return ['page' => $page_build];
+    }
+
+    return [
+      'title' => [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => ['multipage-item__page-title-wrapper'],
+        ],
+        'heading' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#value' => Html::escape($this->entityRepository->getTranslationFromContext($page)->getTitle()),
+          '#attributes' => [
+            'class' => ['multipage-item__page-title'],
+          ],
+        ],
+      ],
+      'page' => $page_build,
     ];
   }
 

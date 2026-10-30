@@ -33,6 +33,20 @@
   }
 }
 
+// Title of the page currently shown in a multipage item, or of each
+// community record tab on that page.
+.multipage-item__page-title-wrapper,
+.community-record__title-wrapper {
+  @include layout.layout--full-width-grid;
+
+  .multipage-item__page-title,
+  .community-record__title {
+    @include layout.layout--full-width-grid-item;
+
+    margin-block: var(--v-space-2xs) var(--v-space-4xxs);
+  }
+}
+
 .multipage-carousel {
   &.splide:not(.is-overflow) .splide__list {
     justify-content: center;

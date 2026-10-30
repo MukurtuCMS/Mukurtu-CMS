@@ -14,3 +14,21 @@
 function mukurtu_digital_heritage_update_last_removed(): int {
   return 40009;
 }
+
+/**
+ * Remove the title from the digital heritage sidebar, since it repeats the page title (#598).
+ */
+function mukurtu_digital_heritage_update_40010(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201().
+  // Only the shipped placement is removed. A site that moved Title out of
+  // the sidebar group chose to show it somewhere, so it is left alone.
+  /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface|null $display */
+  $display = \Drupal::entityTypeManager()->getStorage('entity_view_display')->load('node.digital_heritage.full');
+  $group = $display?->getThirdPartySetting('field_group', 'group_sidebar_mukurtu_fields');
+  if (!$group || !in_array('field_title', $group['children'] ?? [], TRUE)) {
+    return;
+  }
+  $group['children'] = array_values(array_diff($group['children'], ['field_title']));
+  $display->setThirdPartySetting('field_group', 'group_sidebar_mukurtu_fields', $group);
+  $display->removeComponent('field_title')->save();
+}
