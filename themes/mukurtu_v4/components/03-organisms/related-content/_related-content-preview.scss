@@ -1,0 +1,94 @@
+// Related content preview in an item's sidebar. See
+// mukurtu_core/templates/mukurtu-related-content-preview.html.twig.
+.related-content-preview {
+  padding-block: var(--v-space-4xxs);
+  border-block-end: 1px solid var(--brand-light);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-s);
+
+  &__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-5xs);
+    font-weight: var(--text-bold);
+    cursor: pointer;
+    list-style: none;
+
+    &::marker {
+      content: '';
+    }
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    // Plus/minus collapse indicator, matching the browse page facets.
+    // <details> already exposes the expanded/collapsed state, so the "/ ''"
+    // alt text keeps screen readers from announcing "plus".
+    &::after {
+      content: '+';
+      content: '+' / '';
+      margin-inline-start: auto;
+      flex-shrink: 0;
+      font-size: 1.25em;
+      line-height: 1;
+    }
+
+    &:focus-visible {
+      outline: var(--focus-color) solid 2px;
+      outline-offset: 2px;
+    }
+  }
+
+  &__details[open] > &__summary::after {
+    content: '\2212';
+    content: '\2212' / '';
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-4xxs);
+    padding-block: var(--v-space-5xs);
+
+    &:first-child {
+      padding-block-start: var(--v-space-4xxs);
+    }
+  }
+
+  &__thumbnail {
+    flex: 0 0 4rem;
+    inline-size: 4rem;
+    overflow: hidden;
+
+    img {
+      display: block;
+      inline-size: 100%;
+      block-size: auto;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+  }
+
+  &__title {
+    overflow-wrap: anywhere;
+  }
+
+  &__all {
+    display: inline-block;
+    margin-block-start: var(--v-space-5xs);
+  }
+}
+
+// The sidebar gives every .field padding and a border, which would also
+// frame the media field inside each thumbnail.
+.full-node__sidebar .sidebar-section .related-content-preview__thumbnail .field {
+  padding-block: 0;
+  border-block-end: 0;
+}

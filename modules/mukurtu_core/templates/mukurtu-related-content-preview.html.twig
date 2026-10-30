@@ -1,0 +1,47 @@
+{#
+/**
+ * @file
+ * Default theme implementation for the related content preview in an item's
+ * sidebar.
+ *
+ * Available variables:
+ * - mode: 'jump_link' for a link to the related content section, or
+ *   'thumbnails' for a collapsible list of items.
+ * - count: How many related items the viewer can see.
+ * - target: The id of the related content section on the page.
+ * - items: Thumbnails mode only. Up to 5 items, each with:
+ *   - title: The item's title in the current language.
+ *   - url: The item's URL.
+ *   - thumbnail: The item's rendered representative media, if any. It sits
+ *     beside the link, not in it, because a content warning on the media is
+ *     a control of its own.
+ *
+ * @see \Drupal\mukurtu_core\Hook\RelatedContentPreviewHooks
+ * @ingroup themeable
+ */
+#}
+{% set count_label %}
+  {% trans %}1 related item{% plural count %}{{ count }} related items{% endtrans %}
+{% endset %}
+<div class="related-content-preview">
+  {% if mode == 'thumbnails' %}
+    <details class="related-content-preview__details">
+      <summary class="related-content-preview__summary">{{ count_label }}</summary>
+      <ul class="related-content-preview__list">
+        {% for item in items %}
+          <li class="related-content-preview__item">
+            {% if item.thumbnail %}
+              <div class="related-content-preview__thumbnail">{{ item.thumbnail }}</div>
+            {% endif %}
+            <a href="{{ item.url }}" class="related-content-preview__title">{{ item.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if count > items|length %}
+        <a href="#{{ target }}" class="related-content-preview__all">{% trans %}View all {{ count }} related items{% endtrans %}</a>
+      {% endif %}
+    </details>
+  {% else %}
+    <a href="#{{ target }}" class="related-content-preview__jump">{{ count_label }}</a>
+  {% endif %}
+</div>
