@@ -720,3 +720,34 @@ mukurtu_core.consent_popup_text:
         decline_url_text:
           type: string
           label: 'Decline link text'
+
+mukurtu_core.character_palette:
+  type: config_object
+  label: 'Character palette settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Show the character palette'
+    groups:
+      type: sequence
+      label: 'Character groups'
+      sequence:
+        type: mapping
+        label: 'Character group'
+        mapping:
+          label:
+            type: label
+            label: 'Group name'
+          characters:
+            type: sequence
+            label: 'Characters'
+            sequence:
+              type: mapping
+              label: 'Character'
+              mapping:
+                character:
+                  type: string
+                  label: 'Character'
+                name:
+                  type: label
+                  label: 'Name'
