@@ -36,17 +36,31 @@ class ThumbnailSettingsForm extends ConfigFormBase
   {
     $config = $this->config('mukurtu_thumbnail.settings');
     $mediaBundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
+    $fields = [];
     foreach($mediaBundleInfo as $key => $value) {
       if (in_array($key, $this->excludedMediaBundles)) {
         continue;
       }
+      $fields[$key] = [
+        'title' => $this->t("{$value['label']} default thumbnail"),
+        'description' => $this->t("Manage default thumbnail for {$value['label']} media items."),
+        'preview_alt' => $this->t('@label default thumbnail preview', ['@label' => $value['label']]),
+      ];
+    }
+    $fields['no_media'] = [
+      'title' => $this->t('No media default thumbnail'),
+      'description' => $this->t("Used for items that have no media, such as in the related content preview in an item's sidebar. If empty, the theme's default graphic is used."),
+      'preview_alt' => $this->t('No media default thumbnail preview'),
+    ];
+
+    foreach ($fields as $key => $field) {
       $configKey = $this->getConfigKey($key);
       $fids = $config->get($configKey) ?? [];
       $fid = reset($fids) ?: NULL;
       $form["default_thumbnail"][$key] = [
         '#type' => 'managed_file',
-        '#title' => $this->t("{$value['label']} default thumbnail"),
-        '#description' => $this->t("Manage default thumbnail for {$value['label']} media items."),
+        '#title' => $field['title'],
+        '#description' => $field['description'],
         '#upload_location' => 'public://thumbnail-settings',
         '#upload_validators' => [
           'FileExtension' => ['extensions' => 'png gif jpg jpeg'],
@@ -65,7 +79,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
           '#theme' => 'image_style',
           '#style_name' => 'thumbnail',
           '#uri' => $file->getFileUri(),
-          '#alt' => $this->t('@label default thumbnail preview', ['@label' => $value['label']]),
+          '#alt' => $field['preview_alt'],
           '#weight' => -20,
         ];
       }
@@ -80,7 +94,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
   {
     $config = $this->config('mukurtu_thumbnail.settings');
     $mediaBundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
-    foreach ($mediaBundleInfo as $key => $value) {
+    foreach ([...array_keys($mediaBundleInfo), 'no_media'] as $key) {
       $formFile = $form_state->getValue($key);
       if (isset($formFile[0]) && !empty($formFile[0])) {
         $file = File::load($formFile[0]);
