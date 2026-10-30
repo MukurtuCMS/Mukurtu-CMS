@@ -11,12 +11,14 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\user\UserDataInterface;
 
 /**
- * Decides which columns the bulk edit page offers and shows.
+ * Decides which columns a bulk edit page offers and shows.
  *
- * The page lists one content type at a time. Besides the title, it offers
- * a few columns every type has (language, protocols, sharing, community,
- * status, updated) plus the fields of the type's "bulk_edit" form mode, in
- * alphabetical order, so the table shows what bulk editing can change.
+ * There's a page for content and one for media; each service instance
+ * serves one of them. A page lists one type at a time. Besides the title,
+ * it offers a few columns every type has (language, protocols, sharing,
+ * community, status, updated) plus the fields of the type's "bulk_edit" form
+ * mode, in alphabetical order, so the table shows what bulk editing can
+ * change.
  * Before a type has that form mode, the fields of its regular edit form
  * stand in. Each editor's choice is saved per type in user data.
  */
@@ -30,6 +32,11 @@ class BulkEditColumns {
   public const VIEW_ID = 'mukurtu_bulk_edit_content';
 
   /**
+   * The view that renders the bulk edit media page.
+   */
+  public const MEDIA_VIEW_ID = 'mukurtu_bulk_edit_media';
+
+  /**
    * Content types with a bulk edit page, in tab order.
    */
   public const TYPES = ['digital_heritage', 'dictionary_word', 'word_list', 'collection', 'person', 'place'];
@@ -37,7 +44,7 @@ class BulkEditColumns {
   /**
    * Columns that aren't fields of the type, shown under "Item details".
    */
-  public const ITEM_COLUMNS = ['langcode', 'protocols', 'sharing', 'community', 'moderation_state', 'changed'];
+  public const ITEM_COLUMNS = ['langcode', 'protocols', 'sharing', 'community', 'moderation_state', 'status', 'changed'];
 
   /**
    * Fields offered when a type has no form display at all.
@@ -47,18 +54,20 @@ class BulkEditColumns {
   /**
    * Columns shown until an editor chooses their own.
    */
-  protected const DEFAULT_COLUMNS = ['langcode', 'protocols', 'sharing', 'moderation_state', 'changed'];
+  protected const DEFAULT_COLUMNS = ['langcode', 'protocols', 'sharing', 'moderation_state', 'status', 'changed'];
 
   /**
    * Fields that have their own column or aren't shown as one.
    */
   protected const NOT_FIELD_COLUMNS = [
     'title',
+    'name',
     'langcode',
     'field_cultural_protocols',
     'moderation_state',
     'changed',
     'revision_log',
+    'revision_log_message',
     // Settings rather than content, or duplicated by Status.
     'path',
     'promote',
@@ -66,21 +75,62 @@ class BulkEditColumns {
     'status',
   ];
 
+  /**
+   * Constructs the service for one bulk edit page.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
+   *   The entity field manager.
+   * @param \Drupal\user\UserDataInterface $userData
+   *   Where each editor's column choice is saved.
+   * @param string $entityTypeId
+   *   The entity type the page lists.
+   * @param string $viewId
+   *   The view that renders the page.
+   * @param string[] $typeIds
+   *   The bundles with a page, in tab order.
+   */
   public function __construct(
     protected readonly EntityTypeManagerInterface $entityTypeManager,
     protected readonly EntityFieldManagerInterface $entityFieldManager,
     protected readonly UserDataInterface $userData,
+    protected readonly string $entityTypeId = 'node',
+    protected readonly string $viewId = self::VIEW_ID,
+    protected readonly array $typeIds = self::TYPES,
   ) {}
 
   /**
-   * Returns the content types with a bulk edit page, keyed by ID.
+   * Returns the entity type the page lists.
+   */
+  public function entityTypeId(): string {
+    return $this->entityTypeId;
+  }
+
+  /**
+   * Returns the ID of the view that renders the page.
+   */
+  public function viewId(): string {
+    return $this->viewId;
+  }
+
+  /**
+   * Returns the route of the page for one type, which takes it as arg_0.
+   */
+  public function route(): string {
+    return "view.{$this->viewId}.page";
+  }
+
+  /**
+   * Returns the types with a bulk edit page, keyed by ID.
    *
-   * @return \Drupal\node\NodeTypeInterface[]
-   *   Existing types from TYPES, in tab order.
+   * @return \Drupal\Core\Config\Entity\ConfigEntityInterface[]
+   *   Existing bundles, in tab order.
    */
   public function types(): array {
-    $types = $this->entityTypeManager->getStorage('node_type')->loadMultiple(self::TYPES);
-    return array_replace(array_intersect_key(array_flip(self::TYPES), $types), $types);
+    $bundle_type = $this->entityTypeManager->getDefinition($this->entityTypeId)->getBundleEntityType();
+    $types = $this->entityTypeManager->getStorage($bundle_type)->loadMultiple($this->typeIds);
+    return array_replace(array_intersect_key(array_flip($this->typeIds), $types), $types);
   }
 
   /**
@@ -90,7 +140,7 @@ class BulkEditColumns {
    *   Column labels.
    */
   public function available(string $type): array {
-    $definitions = $this->entityFieldManager->getFieldDefinitions('node', $type);
+    $definitions = $this->entityFieldManager->getFieldDefinitions($this->entityTypeId, $type);
 
     $columns = ['langcode' => $this->t('Translation language')];
     if (isset($definitions['field_cultural_protocols'])) {
@@ -111,6 +161,10 @@ class BulkEditColumns {
 
     if (isset($definitions['moderation_state'])) {
       $columns['moderation_state'] = $this->t('Status');
+    }
+    // Media has no moderation states; it's published or not.
+    elseif ($this->entityTypeId === 'media' && isset($definitions['status'])) {
+      $columns['status'] = $this->t('Status');
     }
     $columns['changed'] = $this->t('Updated');
 
@@ -148,7 +202,7 @@ class BulkEditColumns {
   protected function fieldNames(string $type): array {
     $storage = $this->entityTypeManager->getStorage('entity_form_display');
     foreach (['bulk_edit', 'default'] as $mode) {
-      $display = $storage->load("node.$type.$mode");
+      $display = $storage->load("{$this->entityTypeId}.$type.$mode");
       if ($display && $display->status()) {
         $components = $display->getComponents();
         uasort($components, fn($a, $b) => ($a['weight'] ?? 0) <=> ($b['weight'] ?? 0));
@@ -162,7 +216,8 @@ class BulkEditColumns {
    * Returns the user data key for a type's column choice.
    */
   protected function key(string $type): string {
-    return "bulk_edit_columns.$type";
+    // Content keys predate the media page.
+    return $this->entityTypeId === 'node' ? "bulk_edit_columns.$type" : "bulk_edit_columns.{$this->entityTypeId}.$type";
   }
 
 }

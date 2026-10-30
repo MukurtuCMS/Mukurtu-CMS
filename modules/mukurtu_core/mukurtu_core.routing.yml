@@ -231,3 +231,13 @@ mukurtu_core.bulk_edit:
     _permission: 'use mukurtu bulk edit'
   options:
     _admin_route: TRUE
+
+mukurtu_core.bulk_edit_media:
+  path: '/admin/content/bulk-media'
+  defaults:
+    _controller: '\Drupal\mukurtu_core\Controller\BulkEditController::redirectToFirstMediaType'
+    _title: 'Bulk edit media'
+  requirements:
+    _permission: 'use mukurtu bulk edit'
+  options:
+    _admin_route: TRUE

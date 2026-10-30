@@ -20,13 +20,24 @@ class BulkEditColumnsForm extends FormBase {
 
   public function __construct(
     protected readonly BulkEditColumns $columns,
+    protected readonly BulkEditColumns $mediaColumns,
   ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): static {
-    return new static($container->get('mukurtu_core.bulk_edit_columns'));
+    return new static(
+      $container->get('mukurtu_core.bulk_edit_columns'),
+      $container->get('mukurtu_core.bulk_edit_media_columns'),
+    );
+  }
+
+  /**
+   * Returns the columns service of the content or media page.
+   */
+  protected function columnsFor(string $entity_type_id): BulkEditColumns {
+    return $entity_type_id === 'media' ? $this->mediaColumns : $this->columns;
   }
 
   /**
@@ -39,9 +50,10 @@ class BulkEditColumnsForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?string $type = NULL) {
-    $available = array_map('strval', $this->columns->available($type));
-    $selected = $this->columns->selected($type, $this->currentUser());
+  public function buildForm(array $form, FormStateInterface $form_state, ?string $type = NULL, string $entity_type_id = 'node') {
+    $columns = $this->columnsFor($entity_type_id);
+    $available = array_map('strval', $columns->available($type));
+    $selected = $columns->selected($type, $this->currentUser());
     $item = array_intersect_key($available, array_flip(BulkEditColumns::ITEM_COLUMNS));
     $fields = array_diff_key($available, $item);
 
@@ -87,13 +99,13 @@ class BulkEditColumnsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $type = $form_state->getBuildInfo()['args'][0];
+    [$type, $entity_type_id] = $form_state->getBuildInfo()['args'] + [NULL, 'node'];
     $chosen = array_merge(
       array_keys(array_filter((array) $form_state->getValue('item', []))),
       array_keys(array_filter((array) $form_state->getValue('fields', []))),
     );
     // With no redirect set, the form returns to this page, filters included.
-    $this->columns->save($type, $this->currentUser(), $chosen);
+    $this->columnsFor($entity_type_id)->save($type, $this->currentUser(), $chosen);
     $this->messenger()->addStatus($this->t('Columns updated.'));
   }
 
