@@ -9,7 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40037().
+ * Tests mukurtu_update_40038().
  *
  * Existing sites get Views Bulk Edit, the bulk_edit form mode and the
  * "Modify field values" action on the bulk edit page.
@@ -78,7 +78,7 @@ class BulkFieldEditUpdateTest extends KernelTestBase {
   public function testSetsUpFieldEditing(): void {
     $this->writeView([['action_id' => 'mukurtu_add_to_collection_action']]);
 
-    $message = mukurtu_update_40037();
+    $message = mukurtu_update_40038();
 
     $this->assertTrue(\Drupal::moduleHandler()->moduleExists('views_bulk_edit'));
     $this->assertNotNull(EntityFormMode::load('node.bulk_edit'));
@@ -88,7 +88,7 @@ class BulkFieldEditUpdateTest extends KernelTestBase {
     ], \Drupal::config('views.view.mukurtu_bulk_edit_content')->get(static::PATH));
     $this->assertStringContainsString('Enabled Views Bulk Edit.', $message);
 
-    $this->assertStringContainsString('nothing to change', mukurtu_update_40037());
+    $this->assertStringContainsString('nothing to change', mukurtu_update_40038());
   }
 
   /**
@@ -97,7 +97,7 @@ class BulkFieldEditUpdateTest extends KernelTestBase {
   public function testKeepsExistingAction(): void {
     $this->writeView([['action_id' => 'views_bulk_edit']]);
 
-    mukurtu_update_40037();
+    mukurtu_update_40038();
 
     $this->assertSame([['action_id' => 'views_bulk_edit']], \Drupal::config('views.view.mukurtu_bulk_edit_content')->get(static::PATH));
   }

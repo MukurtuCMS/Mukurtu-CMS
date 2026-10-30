@@ -9,7 +9,7 @@ use Drupal\views\Entity\View;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40036().
+ * Tests mukurtu_update_40037().
  *
  * Existing sites get the bulk edit page's view from the shipped config.
  */
@@ -43,7 +43,7 @@ class BulkEditPageUpdateTest extends KernelTestBase {
   public function testInstallsViewOnce(): void {
     $this->assertNull(View::load('mukurtu_bulk_edit_content'));
 
-    $this->assertStringContainsString('Added', mukurtu_update_40036());
+    $this->assertStringContainsString('Added', mukurtu_update_40037());
 
     $view = View::load('mukurtu_bulk_edit_content');
     $this->assertNotNull($view);
@@ -51,7 +51,7 @@ class BulkEditPageUpdateTest extends KernelTestBase {
     $this->assertSame('use mukurtu bulk edit', $view->getDisplay('default')['display_options']['access']['options']['perm']);
 
     $view->set('label', 'Site label')->save();
-    $this->assertStringContainsString('nothing to change', mukurtu_update_40036());
+    $this->assertStringContainsString('nothing to change', mukurtu_update_40037());
     $this->assertSame('Site label', View::load('mukurtu_bulk_edit_content')->label());
   }
 

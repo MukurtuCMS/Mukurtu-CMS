@@ -927,9 +927,25 @@ function mukurtu_update_40033(): string {
 }
 
 /**
- * Add bulk actions to add items to, and remove them from, collections and word lists.
+ * Let logged-in users search for addresses on map fields.
  */
 function mukurtu_update_40034(): string {
+  // Leaflet only adds the address search to the map widget for users with
+  // this permission, and no Mukurtu role shipped with it, so only
+  // administrators could search.
+  $role = Role::load('authenticated');
+  if (!$role || $role->hasPermission('access geocoder api endpoints')) {
+    return (string) t('Logged-in users can already search for addresses on map fields; nothing to change.');
+  }
+
+  $role->grantPermission('access geocoder api endpoints')->save();
+  return (string) t('Logged-in users can now search for addresses on map fields.');
+}
+
+/**
+ * Add bulk actions to add items to, and remove them from, collections and word lists.
+ */
+function mukurtu_update_40035(): string {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
   if ($config->isNew()) {
     return (string) t('The Manage content view is not installed on this site; nothing to change.');
@@ -973,7 +989,7 @@ function mukurtu_update_40034(): string {
 /**
  * Add the Bulk Editor role and let Mukurtu Managers use bulk editing.
  */
-function mukurtu_update_40035(): string {
+function mukurtu_update_40036(): string {
   $messages = [];
 
   if (!Role::load('mukurtu_bulk_editor')) {
@@ -996,7 +1012,7 @@ function mukurtu_update_40035(): string {
 /**
  * Add the bulk edit page, one tab per content type.
  */
-function mukurtu_update_40036(): string {
+function mukurtu_update_40037(): string {
   $storage = \Drupal::entityTypeManager()->getStorage('view');
   if ($storage->load('mukurtu_bulk_edit_content')) {
     return (string) t('The bulk edit page is already installed; nothing to change.');
@@ -1012,7 +1028,7 @@ function mukurtu_update_40036(): string {
 /**
  * Turn on bulk field editing for the bulk edit page.
  */
-function mukurtu_update_40037(): string {
+function mukurtu_update_40038(): string {
   $messages = [];
 
   if (!\Drupal::moduleHandler()->moduleExists('views_bulk_edit')) {
@@ -1068,7 +1084,7 @@ function mukurtu_update_40037(): string {
 /**
  * Add the cultural protocol actions to the bulk edit page.
  */
-function mukurtu_update_40038(): string {
+function mukurtu_update_40039(): string {
   $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_bulk_edit_content');
   $path = 'display.default.display_options.fields.views_bulk_operations_bulk_form.selected_actions';
   $actions = $config->get($path);
