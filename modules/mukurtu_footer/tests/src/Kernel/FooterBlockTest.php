@@ -44,7 +44,7 @@ class FooterBlockTest extends KernelTestBase {
     $this->installEntitySchema('file');
     $this->installSchema('system', 'sequences');
     $this->installSchema('file', 'file_usage');
-    $this->installConfig(['field', 'filter', 'user', 'mukurtu_footer']);
+    $this->installConfig(['system', 'field', 'filter', 'user', 'mukurtu_footer']);
   }
 
   /**
