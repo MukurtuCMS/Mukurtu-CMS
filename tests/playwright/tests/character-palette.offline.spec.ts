@@ -74,7 +74,41 @@ const HEADER = `
     <button type="submit">Go</button>
   </form>`;
 
-function fixture(groups: typeof GROUPS, header = false): string {
+// A stand-in for a Tagify field: its contenteditable box directly before the
+// original input, an instance on the input, and Tagify's habit of turning
+// typed text into a tag when the box loses focus.
+const TAGIFY = `
+  <span class="tagify" id="kw-scope"><span class="tagify__input" contenteditable="true" tabindex="0" role="textbox" aria-label="Keywords" style="display:inline-block;min-width:10em;min-height:1.5em"></span></span>
+  <input id="kw" name="field_keywords" class="tagify-widget" tabindex="-1" style="position:absolute;left:-9999px" data-mukurtu-character-palette="Keywords">
+  <script>
+    (function () {
+      const input = document.getElementById('kw');
+      const scope = document.getElementById('kw-scope');
+      const box = scope.querySelector('.tagify__input');
+      window.tagged = [];
+      window.tagifyInputs = 0;
+      const tagify = {
+        DOM: {input: box, scope: scope},
+        settings: {addTagOnBlur: true, addTagOn: ['blur', 'enter']},
+        addTags(text) { window.tagged.push(text); box.textContent = ''; },
+        dropdown: {hide() {}},
+        on() {},
+      };
+      box.addEventListener('blur', () => {
+        const text = box.textContent.trim();
+        if (text && tagify.settings.addTagOnBlur) { tagify.addTags(text); }
+      });
+      box.addEventListener('input', () => { window.tagifyInputs += 1; });
+      input.__tagify = tagify;
+    })();
+  </script>`;
+
+interface FixtureOptions {
+  header?: boolean;
+  tagify?: boolean;
+}
+
+function fixture(groups: typeof GROUPS, { header = false, tagify = false }: FixtureOptions = {}): string {
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Character palette fixture</title></head><body>
   ${header ? HEADER : ''}
   <label for="term">Term</label>
@@ -84,6 +118,7 @@ function fixture(groups: typeof GROUPS, header = false): string {
   <div id="announce" aria-live="polite"></div>
   <script>${STUBS}</script>
   ${EDITOR}
+  ${tagify ? TAGIFY : ''}
   <script>window.drupalSettings = {mukurtuCharacterPalette: {groups: ${JSON.stringify(groups)}}};</script>
 </body></html>`;
 }
@@ -94,9 +129,9 @@ async function termPanel(page: Page) {
   return page.locator('#' + id);
 }
 
-async function load(page: Page, groups = GROUPS, header = false): Promise<void> {
+async function load(page: Page, groups = GROUPS, options: FixtureOptions = {}): Promise<void> {
   await page.unrouteAll();
-  await page.route(`${ORIGIN}/**`, (route) => route.fulfill({ contentType: 'text/html; charset=utf-8', body: fixture(groups, header) }));
+  await page.route(`${ORIGIN}/**`, (route) => route.fulfill({ contentType: 'text/html; charset=utf-8', body: fixture(groups, options) }));
   await page.goto(`${ORIGIN}/`);
   await page.addStyleTag({ path: path.join(MODULE_DIR, 'css/character-palette.css') });
   await page.addScriptTag({ path: path.join(MODULE_DIR, 'js/character-palette.js') });
@@ -229,7 +264,7 @@ test.describe('Character palette', () => {
   });
 
   test('a panel over the page closes when focus or a click leaves it, and never reopens by itself', async ({ page }) => {
-    await load(page, GROUPS, true);
+    await load(page, GROUPS, { header: true });
     const toggle = page.getByRole('button', { name: 'Characters for Search' });
     const search = page.locator('input[name="search_api_fulltext"]');
     await expect(toggle.locator('xpath=..')).toHaveAttribute('role', 'search');
@@ -250,9 +285,54 @@ test.describe('Character palette', () => {
     // Left open, it still starts closed on the next page, and doesn't open
     // another field with the same name.
     await toggle.click();
-    await load(page, GROUPS, true);
+    await load(page, GROUPS, { header: true });
     await expect(page.getByRole('button', { name: 'Characters for Search' })).toHaveAttribute('aria-expanded', 'false');
     expect(await page.evaluate(() => localStorage.getItem('mukurtu.characterPalette.open') ?? '')).not.toContain('search_api_fulltext');
+  });
+
+  test('sits beside a Tagify box and types into it (#2561)', async ({ page }) => {
+    await load(page, GROUPS, { tagify: true });
+    const box = page.locator('#kw-scope .tagify__input');
+    const toggle = page.getByRole('button', { name: 'Characters for Keywords' });
+    expect(await toggle.evaluate((t) => t.parentElement.contains(document.getElementById('kw-scope')))).toBe(true);
+
+    // Half a word, caret in the middle, then over to the palette by keyboard.
+    await box.click();
+    await page.keyboard.type('ab');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('Tab');
+    await expect(toggle).toBeFocused();
+    expect(await page.evaluate(() => (window as any).tagged)).toEqual([]);
+
+    await page.keyboard.press('Enter');
+    const panel = page.locator('#' + await toggle.getAttribute('aria-controls'));
+    await panel.getByRole('button', { name: 'k underbar' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(box).toHaveText('aḵb');
+    expect(await page.evaluate(() => (window as any).tagifyInputs)).toBeGreaterThan(0);
+    expect(await page.evaluate(() => (window as any).tagged)).toEqual([]);
+
+    // Escape goes back to the box, still not a tag.
+    await page.keyboard.press('Escape');
+    await expect(box).toBeFocused();
+    expect(await page.evaluate(() => (window as any).tagged)).toEqual([]);
+  });
+
+  test('a Tagify word becomes a tag when focus leaves the palette for elsewhere', async ({ page }) => {
+    await load(page, GROUPS, { tagify: true });
+    const box = page.locator('#kw-scope .tagify__input');
+    const toggle = page.getByRole('button', { name: 'Characters for Keywords' });
+    await box.click();
+    await page.keyboard.type('cc');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+    const panel = page.locator('#' + await toggle.getAttribute('aria-controls'));
+    await panel.getByRole('button', { name: 'k underbar' }).focus();
+    await page.keyboard.press('Enter');
+    expect(await page.evaluate(() => (window as any).tagged)).toEqual([]);
+
+    await page.locator('#term').focus();
+    expect(await page.evaluate(() => (window as any).tagged)).toEqual(['ccḵ']);
   });
 
   test('buttons are at least 24 by 24 pixels', async ({ page }) => {
