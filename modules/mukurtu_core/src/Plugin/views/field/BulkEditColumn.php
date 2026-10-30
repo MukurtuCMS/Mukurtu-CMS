@@ -121,23 +121,24 @@ class BulkEditColumn extends FieldPluginBase {
 
   /**
    * Shows a synced value as one that can't be changed here.
+   *
+   * The protocols cell shows why; the other greyed cells say it to screen
+   * readers too, and to anyone who has hidden the protocols column.
    */
-  protected function synced(string $value, bool $with_note): array {
-    $build = [
+  protected function synced(string $value, bool $show_note): array {
+    $note_classes = $show_note ? ['mukurtu-bulk-edit-synced__note'] : ['visually-hidden'];
+    return [
       '#type' => 'html_tag',
       '#tag' => 'span',
       '#attributes' => ['class' => ['mukurtu-bulk-edit-synced']],
-      'value' => ['#plain_text' => $value],
-    ];
-    if ($with_note) {
-      $build['note'] = [
+      'value' => ['#plain_text' => $value . ' '],
+      'note' => [
         '#type' => 'html_tag',
         '#tag' => 'span',
-        '#attributes' => ['class' => ['mukurtu-bulk-edit-synced__note']],
+        '#attributes' => ['class' => $note_classes],
         '#value' => $this->t('Synced from its parent item'),
-      ];
-    }
-    return $build;
+      ],
+    ];
   }
 
   /**
