@@ -12,7 +12,7 @@ use Drupal\views\Entity\View;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40039().
+ * Tests mukurtu_update_40040().
  *
  * Existing sites get the media bulk_edit form mode, a bulk_edit form for
  * each media type they have, and the bulk edit media page's view.
@@ -81,7 +81,7 @@ class BulkEditMediaPageUpdateTest extends KernelTestBase {
     ])->save();
     $this->assertNull(View::load('mukurtu_bulk_edit_media'));
 
-    $this->assertSame('Added the bulk edit media page.', mukurtu_update_40039());
+    $this->assertSame('Added the bulk edit media page.', mukurtu_update_40040());
 
     $this->assertNotNull(EntityFormMode::load('media.bulk_edit'));
     $this->assertNotNull(EntityFormDisplay::load('media.image.bulk_edit'));
@@ -92,7 +92,7 @@ class BulkEditMediaPageUpdateTest extends KernelTestBase {
     $this->assertSame('use mukurtu bulk edit', $view->getDisplay('default')['display_options']['access']['options']['perm']);
 
     $view->set('label', 'Site label')->save();
-    $this->assertSame('The bulk edit media page is already installed; nothing to change.', mukurtu_update_40039());
+    $this->assertSame('The bulk edit media page is already installed; nothing to change.', mukurtu_update_40040());
     $this->assertSame('Site label', View::load('mukurtu_bulk_edit_media')->label());
   }
 

@@ -1111,7 +1111,7 @@ function mukurtu_update_40039(): string {
 /**
  * Add the bulk edit media page.
  */
-function mukurtu_update_40039(): string {
+function mukurtu_update_40040(): string {
   $changed = FALSE;
   $entity_type_manager = \Drupal::entityTypeManager();
 
