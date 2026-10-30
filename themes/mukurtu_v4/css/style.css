@@ -6713,9 +6713,38 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   padding-inline: var(--v-space-4xxs);
   padding-block: var(--v-space-5xs);
   cursor: pointer;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-5xs);
+  list-style: none;
 }
 .browse__main-content .browse-container .browse-facets details.form-item summary::marker {
   content: "";
+}
+.browse__main-content .browse-container .browse-facets details.form-item summary::-webkit-details-marker {
+  display: none;
+}
+.browse__main-content .browse-container .browse-facets details.form-item summary::after {
+  content: "+";
+  content: "+"/"";
+  -webkit-margin-start: auto;
+          margin-inline-start: auto;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  font-size: 1.25em;
+  line-height: 1;
+}
+.browse__main-content .browse-container .browse-facets details.form-item summary:focus-visible {
+  outline: 3px solid var(--brand-primary-dark);
+  outline-offset: 2px;
+}
+.browse__main-content .browse-container .browse-facets details.form-item[open] > summary::after {
+  content: "−";
+  content: "−"/"";
 }
 .browse__main-content .browse-container .browse-facets details.form-item ul {
   padding-block: 0 var(--v-space-4xxs);
