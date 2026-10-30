@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_protocol\Kernel;
 
 use Drupal\Core\Form\FormState;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_protocol\Hook\BulkProtocolConfirmHooks;
@@ -318,6 +320,33 @@ class BulkProtocolActionsTest extends ProtocolAwareEntityTestBase {
     $storage = $this->container->get('entity_type.manager')->getStorage('node');
     $storage->resetCache([$node->id()]);
     return $storage->load($node->id());
+  }
+
+  /**
+   * Media that takes its protocols from a parent item is skipped.
+   *
+   * Protocol sync would overwrite the change the next time the parent is
+   * saved. Any item with the sync flag is treated the same way.
+   */
+  public function testSkipsSyncedItems(): void {
+    FieldStorageConfig::create(['field_name' => 'field_sync_protocols', 'entity_type' => 'node', 'type' => 'boolean'])->save();
+    FieldConfig::create([
+      'field_name' => 'field_sync_protocols',
+      'entity_type' => 'node',
+      'bundle' => 'protocol_aware_content',
+    ])->save();
+    $node = $this->item(['A'], 'all');
+    $node->set('field_sync_protocols', TRUE);
+    $this->setCurrentUser($this->currentUser);
+    $node->save();
+    $this->setCurrentUser($this->editor);
+
+    $configuration = ['protocol' => (int) $this->p['C']->id()];
+    $this->assertSame([], $this->notices('mukurtu_add_protocol_action', $configuration, $node));
+    $result = $this->action('mukurtu_add_protocol_action', $configuration)->execute($this->reload($node));
+
+    $this->assertSame(['message' => 'A all: Synced from its parent item', 'type' => 'warning'], $result);
+    $this->assertSame([['A'], 'all'], $this->state($node));
   }
 
 }

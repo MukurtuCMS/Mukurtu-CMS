@@ -1107,3 +1107,44 @@ function mukurtu_update_40039(): string {
   $config->set($path, $actions)->save();
   return (string) t('Added the cultural protocol actions to the bulk edit page.');
 }
+
+/**
+ * Add the bulk edit media page.
+ */
+function mukurtu_update_40040(): string {
+  $changed = FALSE;
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  // The form mode, then each media type's bulk_edit form. Sites that already
+  // have one keep theirs.
+  if (\Drupal::moduleHandler()->moduleExists('mukurtu_media')) {
+    $source = new FileStorage(\Drupal::service('extension.list.module')->getPath('mukurtu_media') . '/config/install');
+    $modes = $entity_type_manager->getStorage('entity_form_mode');
+    if (!$modes->load('media.bulk_edit')) {
+      $modes->create($source->read('core.entity_form_mode.media.bulk_edit'))->save();
+      $changed = TRUE;
+    }
+    $displays = $entity_type_manager->getStorage('entity_form_display');
+    $media_types = $entity_type_manager->getStorage('media_type');
+    foreach (['audio', 'document', 'external_embed', 'image', 'remote_video', 'soundcloud', 'video'] as $type) {
+      if (!$media_types->load($type) || $displays->load("media.$type.bulk_edit")) {
+        continue;
+      }
+      $displays->create($source->read("core.entity_form_display.media.$type.bulk_edit"))->save();
+      $changed = TRUE;
+    }
+  }
+
+  // Import the shipped view rather than rebuilding it here, so the update
+  // and a fresh install can't drift apart.
+  $views = $entity_type_manager->getStorage('view');
+  if (!$views->load('mukurtu_bulk_edit_media')) {
+    $source = new FileStorage(\Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install');
+    $views->create($source->read('views.view.mukurtu_bulk_edit_media'))->save();
+    $changed = TRUE;
+  }
+
+  return $changed
+    ? (string) t('Added the bulk edit media page.')
+    : (string) t('The bulk edit media page is already installed; nothing to change.');
+}

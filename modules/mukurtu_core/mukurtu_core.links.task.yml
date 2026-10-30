@@ -19,3 +19,13 @@ mukurtu_core.bulk_edit:
 mukurtu_core.bulk_edit_type:
   class: \Drupal\Core\Menu\LocalTaskDefault
   deriver: \Drupal\mukurtu_core\Plugin\Derivative\BulkEditTypeTasks
+
+mukurtu_core.bulk_edit_media:
+  title: 'Bulk edit media'
+  route_name: mukurtu_core.bulk_edit_media
+  base_route: system.admin_content
+  weight: 21
+
+mukurtu_core.bulk_edit_media_type:
+  class: \Drupal\Core\Menu\LocalTaskDefault
+  deriver: \Drupal\mukurtu_core\Plugin\Derivative\BulkEditMediaTypeTasks

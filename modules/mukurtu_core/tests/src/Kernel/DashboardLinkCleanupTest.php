@@ -344,6 +344,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       ],
       'dashboard-media' => [
         'Manage Media',
+        'Bulk edit media',
         'Add Media',
         'Manage media tags',
         'Media download settings',

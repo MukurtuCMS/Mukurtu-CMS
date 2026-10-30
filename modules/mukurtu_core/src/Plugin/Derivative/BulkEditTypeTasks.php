@@ -29,7 +29,7 @@ class BulkEditTypeTasks extends DeriverBase implements ContainerDeriverInterface
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    $route = 'view.' . BulkEditColumns::VIEW_ID . '.page';
+    $route = $this->columns->route();
     $weight = 0;
     foreach ($this->columns->types() as $id => $type) {
       $this->derivatives[$id] = [
