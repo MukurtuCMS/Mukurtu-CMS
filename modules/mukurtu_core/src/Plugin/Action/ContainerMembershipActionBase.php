@@ -304,6 +304,98 @@ abstract class ContainerMembershipActionBase extends ViewsBulkOperationsActionBa
   }
 
   /**
+   * Returns the chosen collection or word list, if it's this action's kind.
+   */
+  protected function target(): ?NodeInterface {
+    $id = $this->configuration['container'] ?? NULL;
+    $container = $id ? $this->entityTypeManager->getStorage('node')->load($id) : NULL;
+    return $container instanceof NodeInterface && $container->bundle() === $this->containerBundle() ? $container : NULL;
+  }
+
+  /**
+   * Returns the IDs of selected items a remove action will skip.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface[] $items
+   *   The selected items.
+   *
+   * @return int[]|string[]
+   *   IDs of items that aren't in the collection or word list.
+   */
+  public function itemsToSkip(array $items): array {
+    $container = $this->target();
+    if (!$this->removes() || !$container) {
+      return [];
+    }
+    $present = array_flip(array_column($container->get($this->itemsField())->getValue(), 'target_id'));
+    $skip = [];
+    foreach ($items as $item) {
+      if (!isset($present[$item->id()])) {
+        $skip[$item->id()] = $item->id();
+      }
+    }
+    return array_values($skip);
+  }
+
+  /**
+   * Builds the confirmation step's notice for a remove action.
+   *
+   * Names the collection or word list, and lists selected items that aren't
+   * in it and will be skipped.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface[] $items
+   *   The selected items. Empty when every result is selected, since VBO then
+   *   has no list of them.
+   *
+   * @return array
+   *   A render array, or an empty array for add actions.
+   */
+  public function removalNotice(array $items): array {
+    $container = $this->target();
+    if (!$this->removes() || !$container) {
+      return [];
+    }
+
+    $name = $this->label($container);
+    $notice = [
+      '#type' => 'container',
+      '#weight' => -10,
+      'target' => [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('The selected items will be removed from %name.', ['%name' => $name]),
+      ],
+    ];
+
+    $skip = array_flip($this->itemsToSkip($items));
+    $missing = [];
+    foreach ($items as $item) {
+      // Translation rows of one item are listed once.
+      if (isset($skip[$item->id()])) {
+        $missing[$item->id()] = $this->label($item);
+      }
+    }
+    if (!$missing) {
+      return $notice;
+    }
+    $none_removed = count($missing) === count(array_unique(array_map(fn($item) => $item->id(), $items)));
+    if ($none_removed) {
+      $notice['target']['#value'] = $this->t('None of the selected items are in %name, so nothing will be removed.', ['%name' => $name]);
+    }
+    else {
+      $notice['skipped'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t("These items aren't in %name and will be skipped:", ['%name' => $name]),
+      ];
+    }
+    $notice['skipped_items'] = [
+      '#theme' => 'item_list',
+      '#items' => array_values($missing),
+    ];
+    return $notice;
+  }
+
+  /**
    * Returns the entity's label in the current content language.
    */
   protected function label(EntityInterface $entity): string {
