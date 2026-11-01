@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_protocol\Hook;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Url;
+use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\og\Entity\OgMembership;
+use Drupal\og\OgAccess;
 use Drupal\og\OgMembershipInterface;
 use Drupal\user\UserInterface;
 
@@ -151,6 +154,25 @@ class MukurtuProtocolHooks {
       $actions['og_membership_delete_action'] = (string) t('Remove user(s) from protocol');
       $actions['og_membership_block_action'] = (string) t('Block user(s) in protocol');
       $actions['og_membership_unblock_action'] = (string) t('Unblock user(s) in protocol');
+    }
+  }
+
+  /**
+   * Implements hook_og_user_access_alter().
+   *
+   * Lets users with 'delete community entities' pass OG's 'delete group'
+   * check for communities, so they don't also need 'administer organic
+   * groups'. CommunityAccessControlHandler still blocks deleting a community
+   * that has protocols or sub-communities.
+   */
+  #[Hook('og_user_access_alter')]
+  public function ogUserAccessAlter(array &$permissions, CacheableMetadata $cacheable_metadata, array $context): void {
+    if ($context['permission'] !== OgAccess::DELETE_GROUP_PERMISSION || !$context['group'] instanceof CommunityInterface) {
+      return;
+    }
+    $cacheable_metadata->addCacheContexts(['user.permissions']);
+    if ($context['user']->hasPermission('delete community entities')) {
+      $permissions[] = OgAccess::DELETE_GROUP_PERMISSION;
     }
   }
 

@@ -28,3 +28,32 @@ test('Browse tests - decorative card links are not keyboard-focusable', async ({
   const untabbableAriaHiddenLinks = page.locator('a[aria-hidden="true"]:not([tabindex="-1"])');
   await expect(untabbableAriaHiddenLinks).toHaveCount(0);
 });
+
+/**
+ * Regression test for issue #1569: the theme hides the native <details>
+ * marker on sidebar facet headers, so each <summary> carries a plus/minus
+ * glyph instead (themes/mukurtu_v4/components/04-templates/browse-pages/
+ * _browse.scss). It must show "+" when collapsed and "−" when expanded.
+ */
+test('Browse tests - facet headers show a collapse indicator', async ({ page }) => {
+  await gotoReady(page, '/browse');
+  const details = page.locator('.browse-facets details.form-item').first();
+  const summary = details.locator('> summary');
+  await expect(summary).toBeVisible();
+
+  const indicator = () => summary.evaluate((el) => getComputedStyle(el, '::after').content);
+  const isOpen = () => details.evaluate((el) => (el as HTMLDetailsElement).open);
+
+  // Facets are configured open_by_default.
+  expect(await isOpen()).toBe(true);
+  expect(await indicator()).toContain('−');
+
+  await summary.click();
+  expect(await isOpen()).toBe(false);
+  expect(await indicator()).toContain('+');
+
+  await summary.focus();
+  await page.keyboard.press('Enter');
+  expect(await isOpen()).toBe(true);
+  expect(await indicator()).toContain('−');
+});

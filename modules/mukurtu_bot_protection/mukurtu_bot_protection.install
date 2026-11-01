@@ -29,9 +29,11 @@ function mukurtu_bot_protection_install($is_syncing) {
   // backend, rather than relying on it merely happening to match captcha
   // module's own shipped default. reCAPTCHA and Turnstile require an admin
   // to supply external credentials, so they must never be active out of
-  // the box.
+  // the box. Likewise assert that CAPTCHA is not added to every form; only
+  // the CAPTCHA points enabled above should show a challenge.
   \Drupal::configFactory()->getEditable('captcha.settings')
     ->set('default_challenge', 'altcha/ALTCHA')
+    ->set('enable_globally', 0)
     ->save();
 
   // Honeypot needs no external credentials either, so protect the same
@@ -65,4 +67,16 @@ function mukurtu_bot_protection_install($is_syncing) {
  */
 function mukurtu_bot_protection_update_last_removed(): int {
   return 40001;
+}
+
+/**
+ * Turn off CAPTCHA challenges on all forms.
+ */
+function mukurtu_bot_protection_update_40002() {
+  $config = \Drupal::configFactory()->getEditable('captcha.settings');
+  if (!$config->get('enable_globally')) {
+    return NULL;
+  }
+  $config->set('enable_globally', 0)->save();
+  return t('Turned off "Add CAPTCHA challenges on all forms." CAPTCHA still protects the login, registration, and password reset forms.');
 }

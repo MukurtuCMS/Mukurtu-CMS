@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @file
+ * Install, update and uninstall functions for the Mukurtu Browse module.
+ */
+
+use Drupal\search_api\Entity\Index;
+
+/**
  * Implements hook_install().
  */
 function mukurtu_browse_install() {
@@ -28,4 +35,21 @@ function mukurtu_browse_update_last_removed(): int {
  */
 function mukurtu_browse_update_40022() {
   mukurtu_search_enable_ignore_character_processor('mukurtu_default_content_index');
+}
+
+/**
+ * Reindex search so SoundCloud and remote video count as Audio and Video.
+ */
+function mukurtu_browse_update_40023() {
+  foreach (Index::loadMultiple() as $index) {
+    if (!$index->status()) {
+      continue;
+    }
+    foreach ($index->getFields() as $field) {
+      if ($field->getDatasourceId() === 'entity:node' && $field->getPropertyPath() === 'field_media_assets:entity:bundle') {
+        $index->reindex();
+        break;
+      }
+    }
+  }
 }

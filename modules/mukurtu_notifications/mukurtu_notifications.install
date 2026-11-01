@@ -414,3 +414,23 @@ function mukurtu_notifications_update_40058(): void {
     $field->setDefaultValue([['value' => 'none']])->save();
   }
 }
+
+/**
+ * Remove two unused notification fields that an earlier update left partly deleted.
+ */
+function mukurtu_notifications_update_40059(): void {
+  // mukurtu_notifications_update_40050 (removed in 4.0.1) deleted the
+  // field.storage.message.field_community and .field_collection config
+  // directly, which skips the field storage delete. Sites that ran it still
+  // record both as installed, so the status report lists them as needing to
+  // be uninstalled, and their tables remain. Uninstalling the recorded
+  // definitions clears both; cron then drops the tables. Nothing reads their
+  // data: the notification types that wrote it went with 40050.
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  foreach (['field_community', 'field_collection'] as $field_name) {
+    $definition = $update_manager->getFieldStorageDefinition($field_name, 'message');
+    if ($definition && !\Drupal\field\Entity\FieldStorageConfig::loadByName('message', $field_name)) {
+      $update_manager->uninstallFieldStorageDefinition($definition);
+    }
+  }
+}

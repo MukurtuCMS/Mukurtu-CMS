@@ -23,7 +23,7 @@
         "drupal/altcha": "^1.2",
         "drupal/better_exposed_filters": "^7.1.1",
         "drupal/blazy": "^3.0",
-        "drupal/captcha": "^2.0",
+        "drupal/captcha": "^2.0.11",
         "drupal/charts": "^5.2",
         "drupal/config_translation_po": "^1.0",
         "drupal/consent_popup": "^1.0",
