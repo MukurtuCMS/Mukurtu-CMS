@@ -704,6 +704,12 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       return;
     }
 
+    // mukurtu_media provides the constraint, and this module does not
+    // depend on it.
+    if (!\Drupal::service('validation.constraint')->hasDefinition('ImageAltRequired')) {
+      return;
+    }
+
     // Get the field definition and add the constraint.
     $field_definition = $entity->getFieldDefinition('field_media_image');
     if (method_exists($field_definition, 'addPropertyConstraints')) {
