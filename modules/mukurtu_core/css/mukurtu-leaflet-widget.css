@@ -17,6 +17,13 @@
   background-color: #f8f7f7;
 }
 
+/* The placeholder is the only visible label, so it needs full text contrast
+ * (WCAG 1.4.3). The browser default is too light against #f8f7f7. */
+.leaflet-control-geocoder-container input::placeholder {
+  color: #595959;
+  opacity: 1;
+}
+
 /* Leaflet's own Control.addTo() adds the "leaflet-control" class to this
  * container (z-index: 800, and position: relative - which makes it a
  * stacking context of its own). The JS re-parents the address results
@@ -48,32 +55,52 @@
  * a long result list can now be clipped by the map's overflow: hidden with
  * no way to scroll down to the rest, including whichever item is currently
  * arrow-key-highlighted. max-height + overflow-y keeps it reachable.
+ *
+ * The width caps can't use the viewport either: on a narrow screen the map
+ * is narrower than the window, so a viewport-sized dropdown overflows the
+ * map's left edge and gets clipped (WCAG 1.4.10). The JS sets
+ * --mukurtu-geocoder-menu-limit to the map's own width each time it opens.
  */
 .mukurtu-geocoder-autocomplete-menu {
   box-sizing: border-box;
-  min-width: min(22em, calc(100vw - 2em));
-  max-width: min(34em, calc(100vw - 2em));
+  min-width: min(22em, var(--mukurtu-geocoder-menu-limit, calc(100vw - 2em)));
+  max-width: min(34em, var(--mukurtu-geocoder-menu-limit, calc(100vw - 2em)));
   max-height: 14em;
   overflow-y: auto;
   left: auto !important;
   right: 0.5em;
 }
 
+/* Gin marks the arrow-key-highlighted result only with a text colour change
+ * and a faint background tint, which is too subtle (WCAG 1.4.11) and
+ * disappears entirely in forced colors mode. An outline survives both. */
+.mukurtu-geocoder-autocomplete-menu .ui-menu-item-wrapper.ui-state-active {
+  outline: 2px solid #191919;
+  outline-offset: -2px;
+}
+
 /**
  * Geoman's only built-in focus affordance is a background-color change,
  * which isn't visible enough for WCAG 2.4.7/2.4.11. Add a visible outline
- * for the toolbar buttons, popup close button, and markers.
+ * for the toolbar buttons, address search, popup close button, and markers.
+ * The search input otherwise gets only Gin's semi-transparent box-shadow,
+ * which is too faint over map tiles.
  */
 /* Hard-coded rather than var(--focus-color): that token is currentcolor
  * theme-wide (see mukurtu_v4 _colors.scss and #2199), which is only safe
  * where the element's text colour is known to contrast with what's behind
  * it. These sit on map tiles of unknown colour, so they take the same
- * fixed treatment the theme uses elsewhere over uploaded imagery. */
+ * fixed treatment the theme uses elsewhere over uploaded imagery.
+ *
+ * --brand-primary-dark only exists under mukurtu_v4. Node edit forms use
+ * Gin, where an undefined var() would invalidate the whole outline
+ * shorthand and draw nothing, so fall back to the input's text colour. */
 .leaflet-buttons-control-button:focus-visible,
+.leaflet-control-geocoder-container input:focus-visible,
 .leaflet-pm-action:focus-visible,
 .leaflet-popup-close-button:focus-visible,
 .leaflet-marker-icon:focus-visible,
 .leaflet-container:focus-visible {
-  outline: var(--brand-primary-dark) solid 2px;
+  outline: var(--brand-primary-dark, #191919) solid 2px;
   outline-offset: 2px;
 }

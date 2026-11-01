@@ -426,6 +426,15 @@
         if (input) {
           L.DomEvent.disableScrollPropagation(input);
 
+          // The contrib control names the input only with its title ("Search
+          // an Address on the Map"), which doesn't contain the visible
+          // placeholder text, so speech users can't target it by what they
+          // see (WCAG 2.5.3). Reuse the placeholder so the two stay in step,
+          // translations included.
+          if (input.placeholder && !input.hasAttribute('aria-label')) {
+            input.setAttribute('aria-label', input.placeholder);
+          }
+
           // Tag this input's own autocomplete dropdown so it can be widened
           // in CSS without affecting the many other jQuery UI autocomplete
           // fields (Place type, Location, etc.) sharing the same widget.
@@ -440,7 +449,26 @@
             // Re-parent it into this control so it stays inside the map's
             // own (overflow: hidden) container.
             $input.autocomplete('option', 'appendTo', container);
+
+            // Cap the dropdown at the map's width rather than the window's,
+            // so it can't overflow the map's left edge on a narrow screen
+            // (see .mukurtu-geocoder-autocomplete-menu in the CSS).
+            $input.on('autocompleteopen', function () {
+              const map = container.closest('.leaflet-container');
+              if (map) {
+                autocomplete.menu.element[0].style.setProperty('--mukurtu-geocoder-menu-limit', 'calc(' + map.clientWidth + 'px - 2em)');
+              }
+            });
           }
+
+          // Choosing a result only moves the map; the contrib control
+          // doesn't place a marker, so nothing visible happens to the field.
+          // Tell screen reader users the map moved and what's still needed.
+          $input.on('autocompleteselect', function (event, ui) {
+            if (ui.item && ui.item.value) {
+              Drupal.announce(Drupal.t('Map moved to @address. Add a marker to save this location.', {'@address': ui.item.value}));
+            }
+          });
         }
       });
     }

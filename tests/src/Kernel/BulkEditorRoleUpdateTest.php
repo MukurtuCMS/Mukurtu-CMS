@@ -9,7 +9,7 @@ use Drupal\user\Entity\Role;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40035().
+ * Tests mukurtu_update_40036().
  *
  * Existing sites get the Bulk Editor role, and Mukurtu Managers get the
  * "Use bulk editing" permission.
@@ -53,7 +53,7 @@ class BulkEditorRoleUpdateTest extends KernelTestBase {
    * The role is created from the shipped config and managers gain access.
    */
   public function testAddsRoleAndManagerPermission(): void {
-    $message = mukurtu_update_40035();
+    $message = mukurtu_update_40036();
 
     $role = Role::load('mukurtu_bulk_editor');
     $this->assertNotNull($role);
@@ -71,7 +71,7 @@ class BulkEditorRoleUpdateTest extends KernelTestBase {
   public function testKeepsExistingRole(): void {
     Role::create(['id' => 'mukurtu_bulk_editor', 'label' => 'Site label'])->grantPermission('access content')->save();
 
-    mukurtu_update_40035();
+    mukurtu_update_40036();
 
     $role = Role::load('mukurtu_bulk_editor');
     $this->assertSame('Site label', $role->label());
@@ -82,8 +82,8 @@ class BulkEditorRoleUpdateTest extends KernelTestBase {
    * Running twice is a no-op the second time.
    */
   public function testIsIdempotent(): void {
-    mukurtu_update_40035();
-    $message = mukurtu_update_40035();
+    mukurtu_update_40036();
+    $message = mukurtu_update_40036();
 
     $this->assertStringContainsString('nothing to change', $message);
   }

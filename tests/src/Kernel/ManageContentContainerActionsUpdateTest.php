@@ -9,7 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40034().
+ * Tests mukurtu_update_40035().
  *
  * The hook adds bulk actions to add items to, and remove them from,
  * collections and word lists on the Manage content view of existing sites,
@@ -74,7 +74,7 @@ class ManageContentContainerActionsUpdateTest extends KernelTestBase {
       50 => ['action_id' => 'site_custom_action', 'preconfiguration' => ['label_override' => 'Custom']],
     ]);
 
-    $message = mukurtu_update_40034();
+    $message = mukurtu_update_40035();
 
     $this->assertSame([
       4 => ['action_id' => 'mukurtu_export_add_to_list_action'],
@@ -96,7 +96,7 @@ class ManageContentContainerActionsUpdateTest extends KernelTestBase {
       4 => ['action_id' => 'mukurtu_add_to_collection_action'],
     ]);
 
-    mukurtu_update_40034();
+    mukurtu_update_40035();
 
     $this->assertSame([
       4 => ['action_id' => 'mukurtu_add_to_collection_action'],
@@ -112,9 +112,9 @@ class ManageContentContainerActionsUpdateTest extends KernelTestBase {
   public function testIsIdempotent(): void {
     $this->writeView([4 => ['action_id' => 'mukurtu_export_add_to_list_action']]);
 
-    mukurtu_update_40034();
+    mukurtu_update_40035();
     $before = $this->storedActions();
-    $message = mukurtu_update_40034();
+    $message = mukurtu_update_40035();
 
     $this->assertSame($before, $this->storedActions());
     $this->assertStringContainsString('nothing to change', $message);
@@ -124,7 +124,7 @@ class ManageContentContainerActionsUpdateTest extends KernelTestBase {
    * A site without the view is left alone.
    */
   public function testMissingView(): void {
-    $this->assertStringContainsString('not installed', mukurtu_update_40034());
+    $this->assertStringContainsString('not installed', mukurtu_update_40035());
     $this->assertTrue(\Drupal::config('views.view.mukurtu_manage_all_content')->isNew());
   }
 
@@ -143,7 +143,7 @@ class ManageContentContainerActionsUpdateTest extends KernelTestBase {
     }
 
     $this->writeView([]);
-    mukurtu_update_40034();
+    mukurtu_update_40035();
     foreach ($this->storedActions() as $action) {
       $this->assertArrayHasKey($action['action_id'], $shipped);
       $this->assertSame($shipped[$action['action_id']], $action['preconfiguration'] ?? []);
