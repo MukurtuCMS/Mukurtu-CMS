@@ -198,10 +198,18 @@
     // content, so stop the page's copy of the media when the lightbox opens
     // and stop a slide's media when the viewer moves on from it. Closing
     // needs nothing: GLightbox removes the whole lightbox from the DOM.
+    //
+    // Only media assets are stopped on open, never other iframes on the page
+    // (a form embedded in a body field would lose what was typed into it).
+    // Inactive carousel slides are skipped too: the carousel already stopped
+    // them, and reloading their embeds again would only add requests.
     lightbox.on('open', () => {
       lightboxOpen = true;
       injectLightboxLabels();
-      Drupal.mukurtuStopMedia(document.body, document.querySelector('.glightbox-container'));
+      document.querySelectorAll('.media-asset--content').forEach((content) => {
+        if (content.closest('.glightbox-container, .splide__slide:not(.is-active)')) return;
+        Drupal.mukurtuStopMedia(content);
+      });
     });
 
     lightbox.on('slide_before_change', ({ prev }) => {

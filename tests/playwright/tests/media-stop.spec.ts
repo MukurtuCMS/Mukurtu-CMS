@@ -92,8 +92,12 @@ async function loadDrupalShim(page) {
   await page.addScriptTag({ path: path.join(THEME_DIR, 'js/media-stop.js') });
 }
 
+// An iframe on the page that isn't a media asset, such as a form embedded in
+// a body field. Opening the lightbox must not reload it.
+const OTHER_IFRAME = `<iframe data-test="other" width="320" height="180" title="Other" src="${IFRAME_SRC}"></iframe>`;
+
 async function setUpLightboxFixture(page) {
-  await page.setContent(`<!DOCTYPE html><html><head><title>Media stop lightbox fixture</title>${INSTRUMENT_MEDIA}</head><body>${mediaAssetHtml('a')}${mediaAssetHtml('b')}</body></html>`);
+  await page.setContent(`<!DOCTYPE html><html><head><title>Media stop lightbox fixture</title>${INSTRUMENT_MEDIA}</head><body>${mediaAssetHtml('a')}${mediaAssetHtml('b')}${OTHER_IFRAME}</body></html>`);
   await page.addStyleTag({ path: path.join(THEME_DIR, 'libraries/glightbox/glightbox.min.css') });
   await loadDrupalShim(page);
   await page.addScriptTag({ path: path.join(THEME_DIR, 'libraries/glightbox/glightbox.min.js') });
@@ -103,8 +107,9 @@ async function setUpLightboxFixture(page) {
   // media-asset-glightbox.js; wait past that before clicking.
   await page.evaluate(() => (window as any).Drupal.behaviors.mediaAssetGLightbox.attach(document));
   await page.waitForTimeout(250);
-  // Each asset's visible page copy and hidden source copy has loaded once.
-  await expect.poll(() => page.evaluate(() => (window as any).loads.length)).toBe(4);
+  // Each asset's visible page copy and hidden source copy, and the other
+  // iframe, has loaded once.
+  await expect.poll(() => page.evaluate(() => (window as any).loads.length)).toBe(5);
 }
 
 test.describe('Stopping media when leaving a slide', () => {
@@ -128,6 +133,7 @@ test.describe('Stopping media when leaving a slide', () => {
     expect(loads.filter((l) => l === 'lightbox:a')).toHaveLength(1);
     // The hidden source copies never play, so they aren't reloaded.
     expect(loads.filter((l) => l.startsWith('hidden:'))).toHaveLength(2);
+    expect(loads.filter((l) => l === 'page:other')).toHaveLength(1);
   });
 
   test('Moving to the next lightbox slide stops the previous slide', async ({ page }) => {
