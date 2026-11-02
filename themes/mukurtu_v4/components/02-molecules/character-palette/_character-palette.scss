@@ -1,19 +1,13 @@
 // The character palette (mukurtu_core, #2560, #2561) on public pages.
 //
-// The module's CSS takes its colors from the surrounding text so it works in
-// Gin as well. Here the sidebars set that text white on a light background,
-// and the global button styles fill it red on hover, so the theme gives it
-// fixed colors instead: the header search's grey button everywhere, and a
-// white panel with dark text. White on #767676 is 4.54:1.
+// The module's CSS uses system colors so it works in Gin as well. The theme's
+// global button styles would fill the corner button red on hover, so it gets
+// the theme's colors here instead: a grey button, and a white panel with dark
+// text. White on #767676 is 4.54:1. Size, shape and position come from the
+// module.
 
 .mukurtu-character-palette__toggle {
-  align-self: stretch;
-  min-block-size: 2.75rem;
-  block-size: auto;
-  inline-size: 2.75rem;
-  padding: 0;
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
-  border-radius: 4px;
   background: var(--color-text-neutral-medium, #767676);
   color: var(--color-white);
 
@@ -42,7 +36,6 @@
 
 .mukurtu-character-palette {
   border: 1.5px solid var(--color-text-neutral-medium, #767676);
-  border-radius: 4px;
   background: var(--color-white);
   color: var(--brand-text-color);
 }
