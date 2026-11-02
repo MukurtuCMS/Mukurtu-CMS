@@ -1,8 +1,9 @@
 @use "../../../external/include-media";
 
 // consent_popup gives the box a fixed width; it's sized to its text here
-// instead, so it needs a gutter to keep the backdrop showing on every side
-// of a narrow screen. Its parent .block-consent-popup is the full-viewport
+// instead, capped at a readable line length (40rem, about 75 characters),
+// with a gutter to keep the backdrop showing on every side of a narrow
+// screen. Its parent .block-consent-popup is the full-viewport
 // flex backdrop, so 100% is the viewport. The module's min-height and the
 // body's overflow: hidden would otherwise clip a tall box (short landscape
 // screens, large text) with no way to scroll to its buttons (WCAG 1.4.10).
@@ -10,10 +11,14 @@
 // and left of the box where scrolling can't reach it; "safe" falls back to
 // the start edge once the content no longer fits. At large text sizes a
 // single word of the heading can be wider than a phone, so let words break.
+// The box is white wherever the block is placed, so set the text color
+// rather than inherit a region's, such as the footer's light gray (#ccc,
+// 1.6:1 on white, failing WCAG 1.4.3).
 #javali-popup {
   --consent-popup-gutter: var(--v-space-4xxs);
   inline-size: auto !important;
-  max-inline-size: min(1000px, calc(100% - 2 * var(--consent-popup-gutter))) !important;
+  max-inline-size: min(40rem, calc(100% - 2 * var(--consent-popup-gutter))) !important;
+  color: var(--text-color);
   min-block-size: min(20rem, calc(100% - 2 * var(--consent-popup-gutter)));
   max-block-size: calc(100% - 2 * var(--consent-popup-gutter));
   overflow-y: auto;

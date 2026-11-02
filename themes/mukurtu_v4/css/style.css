@@ -1385,7 +1385,8 @@ a:not(.primary-nav__menu-link) svg.tel path {
 #javali-popup {
   --consent-popup-gutter: var(--v-space-4xxs);
   inline-size: auto !important;
-  max-inline-size: min(1000px, 100% - 2 * var(--consent-popup-gutter)) !important;
+  max-inline-size: min(40rem, 100% - 2 * var(--consent-popup-gutter)) !important;
+  color: var(--text-color);
   min-block-size: min(20rem, 100% - 2 * var(--consent-popup-gutter));
   max-block-size: calc(100% - 2 * var(--consent-popup-gutter));
   overflow-y: auto;

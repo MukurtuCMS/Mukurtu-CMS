@@ -53,8 +53,8 @@ const POPUP = `
   </div>
 `;
 
-function html(): string {
-  return `<!DOCTYPE html><html><head><title>Consent popup fixture</title><style>${MODULE_CSS}</style><style>${THEME_CSS}</style></head><body class="consent-popup-opened">${POPUP}</body></html>`;
+function html(body: string = POPUP): string {
+  return `<!DOCTYPE html><html><head><title>Consent popup fixture</title><style>${MODULE_CSS}</style><style>${THEME_CSS}</style></head><body class="consent-popup-opened">${body}</body></html>`;
 }
 
 for (const width of [320, 412, 768, 1024, 1440]) {
@@ -66,12 +66,21 @@ for (const width of [320, 412, 768, 1024, 1440]) {
     const box = (await page.locator('#javali-popup').boundingBox())!;
     expect(box.x, 'gap on the left').toBeGreaterThanOrEqual(gutter - 1);
     expect(box.x + box.width, 'gap on the right').toBeLessThanOrEqual(width - gutter + 1);
-    expect(box.width, 'no wider than its cap').toBeLessThanOrEqual(1000);
+    // 40rem keeps lines to a readable length on wide screens.
+    expect(box.width, 'no wider than its cap').toBeLessThanOrEqual(640);
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow, 'no horizontal scroll').toBeLessThanOrEqual(1);
   });
 }
+
+test('Consent popup text stays dark when the block is in the footer', async ({ page }) => {
+  // The footer region sets light gray text for its dark background, which
+  // the popup's white box would otherwise inherit.
+  await page.setContent(html(`<footer role="contentinfo" class="footer">${POPUP}</footer>`));
+  const color = await page.locator('#javali-popup .consent-text').evaluate((el) => getComputedStyle(el).color);
+  expect(color).toBe('rgb(70, 70, 70)');
+});
 
 test('Consent popup scrolls to its buttons on a short screen at 200% text', async ({ page }) => {
   // The browser's default font size stands in for the phone's text size
