@@ -194,9 +194,18 @@
       container.querySelector('.gclose')?.setAttribute('aria-label', 'Close');
     }
 
+    // GLightbox only pauses its own players, and our slides are inline
+    // content, so stop the page's copy of the media when the lightbox opens
+    // and stop a slide's media when the viewer moves on from it. Closing
+    // needs nothing: GLightbox removes the whole lightbox from the DOM.
     lightbox.on('open', () => {
       lightboxOpen = true;
       injectLightboxLabels();
+      Drupal.mukurtuStopMedia(document.body, document.querySelector('.glightbox-container'));
+    });
+
+    lightbox.on('slide_before_change', ({ prev }) => {
+      Drupal.mukurtuStopMedia(prev.slideNode);
     });
 
     lightbox.on('slide_changed', injectLightboxLabels);

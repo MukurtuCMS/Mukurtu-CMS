@@ -13,6 +13,13 @@ media-carousel:
     - core/once
     - core/jquery
     - mukurtu_core/splide
+    - mukurtu_v4/media-stop
+
+media-stop:
+  js:
+    js/media-stop.js: {}
+  dependencies:
+    - core/drupal
 
 featured-content-carousel:
   js:
@@ -82,6 +89,7 @@ media-glightbox:
     - core/drupal
     - core/once
     - mukurtu_v4/glightbox
+    - mukurtu_v4/media-stop
 
 dictionary-word-tabs:
   js:
