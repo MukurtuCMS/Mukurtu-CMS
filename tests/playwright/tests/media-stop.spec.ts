@@ -205,7 +205,9 @@ test.describe('Stopping media when leaving a slide', () => {
     await page.waitForTimeout(500);
 
     const pauses: string[] = await page.evaluate(() => (window as any).pauses);
-    expect(pauses).toEqual(['page:a']);
+    // The hidden source copy is paused too, since a hidden native player
+    // can still play sound; its iframe isn't reloaded.
+    expect(pauses).toEqual(['page:a', 'hidden:a']);
     const loads: string[] = await page.evaluate(() => (window as any).loads);
     expect(loads).toEqual(['page:a']);
   });
