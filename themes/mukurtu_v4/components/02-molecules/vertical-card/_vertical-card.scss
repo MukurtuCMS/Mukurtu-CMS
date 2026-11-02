@@ -1,3 +1,5 @@
+@use "../../00-base/mixins/mixins";
+
 // As seen in Grid Browse display.
 
 .vertical-card {
@@ -20,6 +22,13 @@
   }
 
   &__media {
+    // A dictionary word's recording, with a play button over its image
+    // (#2571). Same 4:3 box as the related content cards.
+    .media--teaser-featured.media--audio {
+      aspect-ratio: 4 / 3;
+      @include mixins.audio-thumbnail-player;
+    }
+
     .media--remote_video,
     .media--soundcloud {
       width: 100%;

@@ -187,7 +187,7 @@ class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
   public function testMediaAssetsAreIgnored(): void {
     $card = $this->cardMedia($this->createWord(['field_media_assets' => $this->image]));
     $this->assertSame('image', $card['#theme']);
-    $this->assertStringEndsWith('/images/no-thumbnail-square.png', $card['#uri']);
+    $this->assertStringEndsWith('/images/no-thumbnail.png', $card['#uri']);
   }
 
   /**
@@ -211,6 +211,64 @@ class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
     $placeholder = ['#theme' => 'image', '#uri' => 'public://placeholder.png', '#alt' => 'No media available'];
     $card = $this->cardMedia($this->createWord([]), ['field_recording' => [$placeholder]]);
     $this->assertSame('public://placeholder.png', $card['#uri']);
+  }
+
+  /**
+   * Cards in related and featured content and on the browse pages pick it.
+   */
+  public function testPreprocessSetsCardMedia(): void {
+    $word = $this->createWord(['field_recording' => $this->recording]);
+    foreach (['featured', 'browse', 'grid_browse', 'map_browse'] as $view_mode) {
+      $variables = ['node' => $word, 'view_mode' => $view_mode, 'content' => []];
+      mukurtu_v4_preprocess_node($variables);
+      $this->assertSame($this->recording->id(), $variables['card_media']['#media']->id(), $view_mode);
+      // A player isn't wrapped in the card's link.
+      $this->assertSame('audio', $variables['card_media_bundle'], $view_mode);
+    }
+
+    // The word's own page and the Dictionary list keep their own layouts.
+    foreach (['full', 'teaser'] as $view_mode) {
+      $variables = ['node' => $word, 'view_mode' => $view_mode, 'content' => []];
+      mukurtu_v4_preprocess_node($variables);
+      $this->assertArrayNotHasKey('card_media', $variables, $view_mode);
+    }
+
+    // A static image is linked like any other browse image.
+    $variables = ['node' => $this->createWord([]), 'view_mode' => 'browse', 'content' => []];
+    mukurtu_v4_preprocess_node($variables);
+    $this->assertSame('image', $variables['card_media_bundle']);
+  }
+
+  /**
+   * The browse cards print the word's pick, not its media assets.
+   */
+  public function testBrowseTemplatesUseCardMedia(): void {
+    // The templates include a partial by the theme's @mukurtu_v4 namespace,
+    // which only exists for an installed theme.
+    $theme_path = $this->container->get('extension.list.theme')->getPath('mukurtu_v4');
+    $loader = $this->container->get('twig.loader.filesystem');
+    $loader->addPath($this->root . '/' . $theme_path . '/templates', 'mukurtu_v4');
+    $loader->addPath($this->root . '/' . $theme_path, 'mukurtu_v4');
+    $context = [
+      'content_attributes' => new Attribute(),
+      'title_attributes' => new Attribute(),
+      'label' => 'aloha',
+      'url' => '/dictionary-word/aloha',
+      'content' => [
+        'field_representative_media' => [self::marker('ASSET')],
+        'field_recording' => [self::marker('RECORDING')],
+      ],
+      'card_media' => self::marker('CARD'),
+      'card_media_bundle' => 'image',
+    ];
+    foreach (['browse', 'grid-browse', 'map-browse'] as $view_mode) {
+      $html = $this->renderTemplate("content/node--dictionary-word--$view_mode.html.twig", $context);
+      $this->assertStringContainsString('CARD.png', $html, $view_mode);
+      $this->assertStringNotContainsString('ASSET.png', $html, $view_mode);
+      $this->assertStringNotContainsString('RECORDING.png', $html, $view_mode);
+      // A static image links to the word.
+      $this->assertMatchesRegularExpression('#<a href="/dictionary-word/aloha" aria-hidden="true" tabindex="-1">\s*<img[^>]*CARD\.png#', $html, $view_mode);
+    }
   }
 
   /**

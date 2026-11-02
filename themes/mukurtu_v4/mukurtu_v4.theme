@@ -78,8 +78,14 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
   }
 
-  if (($variables['view_mode'] ?? '') === 'featured' && $node->bundle() === 'dictionary_word' && $node->hasField('field_thumbnail')) {
+  // Cards for dictionary words, in related and featured content and on the
+  // browse pages, pick their own media (#2571).
+  $card_view_modes = ['featured', 'browse', 'grid_browse', 'map_browse'];
+  if (in_array($variables['view_mode'] ?? '', $card_view_modes) && $node->bundle() === 'dictionary_word' && $node->hasField('field_thumbnail')) {
     $variables['card_media'] = _mukurtu_v4_dictionary_word_card_media($node, $variables['content']);
+    // Browse cards link a static image to the word; a player stays clickable.
+    // See _card-media.html.twig.
+    $variables['card_media_bundle'] = isset($variables['card_media']['#media']) ? $variables['card_media']['#media']->bundle() : 'image';
   }
 
   // A dictionary word's card, in the Featured Content grid and carousel,
@@ -119,10 +125,10 @@ function mukurtu_v4_preprocess_node(&$variables) {
  * button. The word's media assets are not used.
  *
  * @param \Drupal\node\NodeInterface $word
- *   The dictionary word, in the featured view mode.
+ *   The dictionary word, on a card: the featured or a browse view mode.
  * @param array $content
- *   The word's rendered fields. field_recording holds the recording, or the
- *   site's placeholder image when the word has none.
+ *   The word's rendered fields. When the word has no recording the viewer
+ *   can hear, field_recording may hold the site's placeholder image.
  *
  * @return array
  *   A render array for the card's media area.
@@ -140,8 +146,19 @@ function _mukurtu_v4_dictionary_word_card_media($word, array $content): array {
     }
   }
 
-  $recording = $content['field_recording'][0] ?? NULL;
-  if (isset($recording['#media'])) {
+  // Rendered here rather than taken from $content: browse displays show the
+  // recording as a plain player, but every card uses the play button over
+  // an image. The formatter skips a recording the viewer can't hear.
+  $recording = $word->get('field_recording')->view([
+    'type' => 'entity_reference_entity_view',
+    'settings' => ['view_mode' => 'teaser_featured'],
+  ]);
+  $cacheability->addCacheableDependency(CacheableMetadata::createFromRenderArray($recording));
+  $recording = $recording[0] ?? NULL;
+  // With no recording, the field may hold the site's placeholder image.
+  $placeholder = $content['field_recording'][0] ?? NULL;
+
+  if ($recording) {
     $card = $recording;
     if ($thumbnail) {
       // See mukurtu_v4_preprocess_media__audio__teaser_featured(). The same
@@ -154,14 +171,14 @@ function _mukurtu_v4_dictionary_word_card_media($word, array $content): array {
   elseif ($thumbnail) {
     $card = $thumbnail;
   }
-  elseif ($recording) {
+  elseif ($placeholder && !isset($placeholder['#media'])) {
     // The site's "No Media Placeholder Image", added by mukurtu_media.
-    $card = $recording;
+    $card = $placeholder;
   }
   else {
     $card = [
       '#theme' => 'image',
-      '#uri' => \Drupal::service('extension.list.theme')->getPath('mukurtu_v4') . '/images/no-thumbnail-square.png',
+      '#uri' => \Drupal::service('extension.list.theme')->getPath('mukurtu_v4') . '/images/no-thumbnail.png',
       '#alt' => '',
     ];
   }
