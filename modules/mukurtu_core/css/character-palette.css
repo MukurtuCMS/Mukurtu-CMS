@@ -1,0 +1,121 @@
+/**
+ * @file
+ * The character palette (#2560, #2561).
+ *
+ * One button in a corner of the page and its floating panel. Works in Gin
+ * and Mukurtu v4, light and dark, so colors are system colors or come from
+ * the text around them; the Mukurtu v4 theme gives the palette its own
+ * colors in 02-molecules/character-palette.
+ */
+
+.mukurtu-character-palette__toggle,
+.mukurtu-character-palette__character {
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* One button in a corner of the page, above the cookie settings button.
+ * Round, and well above the 24 by 24 pixel minimum (WCAG 2.5.8). */
+.mukurtu-character-palette__toggle {
+  position: fixed;
+  z-index: 1000;
+  inset-block-end: 5rem;
+  inset-inline-end: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border-radius: 50%;
+  background: Canvas;
+  color: CanvasText;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+
+.mukurtu-character-palette__toggle[aria-expanded="true"] {
+  border-width: 2px;
+}
+
+.mukurtu-character-palette__toggle:focus-visible,
+.mukurtu-character-palette__character:focus-visible,
+.mukurtu-character-palette select:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Gin's focus ring is a box-shadow, which forced colors removes, so the
+ * palette draws its own there. html raises the specificity over Gin's
+ * .page-wrapper :focus. */
+@media (forced-colors: active) {
+  html .mukurtu-character-palette__toggle:focus-visible,
+  html .mukurtu-character-palette__character:focus-visible,
+  html .mukurtu-character-palette select:focus-visible {
+    outline: 3px solid CanvasText;
+    outline-offset: 2px;
+  }
+}
+
+/* The panel floats above the button. A long list scrolls inside it rather
+ * than climbing over the page's sticky header and Save button. */
+.mukurtu-character-palette {
+  position: fixed;
+  z-index: 1000;
+  inset-block-end: 8.5rem;
+  inset-inline-end: 1rem;
+  max-inline-size: min(34rem, calc(100vw - 2rem));
+  max-block-size: min(24rem, calc(100vh - 12rem));
+  overflow-y: auto;
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  background: Canvas;
+  color: CanvasText;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+
+.mukurtu-character-palette[hidden] {
+  display: none;
+}
+
+/* On a phone the panel would cover most of the screen, often including the
+ * field being typed in, so it stays shorter and scrolls. */
+@media (max-width: 40em) {
+  .mukurtu-character-palette {
+    max-block-size: min(16rem, 40vh);
+  }
+}
+
+.mukurtu-character-palette__language {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-block-end: 0.75rem;
+}
+
+.mukurtu-character-palette__pin {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.mukurtu-character-palette__characters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mukurtu-character-palette__character {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 1.25rem;
+}
