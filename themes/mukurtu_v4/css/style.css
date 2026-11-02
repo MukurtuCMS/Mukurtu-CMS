@@ -1415,6 +1415,8 @@ a:not(.primary-nav__menu-link) svg.tel path {
 
 .block-consent-popup {
   z-index: 1100;
+  height: 100vh;
+  height: 100dvh;
 }
 
 body.consent-popup-opened .klaro,

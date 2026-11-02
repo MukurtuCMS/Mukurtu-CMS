@@ -42,8 +42,14 @@
 // order rather than intent. Raise it above Klaro's range so the protocol
 // consent gate always takes precedence over the cookie banner when both
 // blocks are enabled on a site.
+//
+// The module's 100vh backdrop is taller than the visible screen on phones
+// while the browser toolbar shows, so a tall popup's buttons could sit
+// behind it. 100dvh tracks the visible height; 100vh stays as the fallback.
 .block-consent-popup {
   z-index: 1100;
+  height: 100vh;
+  height: 100dvh;
 }
 
 // Neither module hides the other from the accessibility tree while its own
