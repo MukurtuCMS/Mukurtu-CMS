@@ -53,7 +53,7 @@
             changed = null;
             // The popup usually sits in the footer, and the browser would
             // carry on tabbing from there. Start again from the top of the
-            // page, where the skip link is.
+            // page, as on a page that never showed the popup.
             document.body.tabIndex = -1;
             document.body.focus();
             document.body.removeAttribute('tabindex');
