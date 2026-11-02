@@ -147,6 +147,14 @@
     min-block-size: 0;
     overflow: hidden;
 
+    // A dictionary word's own thumbnail is a nested image media item, whose
+    // wrappers must fill the box too.
+    .media,
+    .field,
+    .field__item {
+      block-size: 100%;
+    }
+
     img {
       block-size: 100%;
       inline-size: 100%;

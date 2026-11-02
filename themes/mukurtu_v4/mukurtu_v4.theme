@@ -82,7 +82,7 @@ function mukurtu_v4_preprocess_node(&$variables) {
   // browse pages, pick their own media (#2571).
   $card_view_modes = ['featured', 'browse', 'grid_browse', 'map_browse'];
   if (in_array($variables['view_mode'] ?? '', $card_view_modes) && $node->bundle() === 'dictionary_word' && $node->hasField('field_thumbnail')) {
-    $variables['card_media'] = _mukurtu_v4_dictionary_word_card_media($node, $variables['content']);
+    $variables['card_media'] = _mukurtu_v4_dictionary_word_card_media($node);
     // Browse cards link a static image to the word; a player stays clickable.
     // See _card-media.html.twig.
     $variables['card_media_bundle'] = isset($variables['card_media']['#media']) ? $variables['card_media']['#media']->bundle() : 'image';
@@ -120,24 +120,24 @@ function mukurtu_v4_preprocess_node(&$variables) {
 /**
  * Picks the media for a dictionary word's card (#2571).
  *
- * The recording comes first, then the word's thumbnail, then a generic
- * graphic. A word with both shows its thumbnail behind the recording's play
- * button. The word's media assets are not used.
+ * The recording comes first, then the word's thumbnail, then the site's
+ * placeholder image, then a generic graphic. A word with both shows its
+ * thumbnail behind the recording's play button. The word's media assets are
+ * not used.
  *
  * @param \Drupal\node\NodeInterface $word
  *   The dictionary word, on a card: the featured or a browse view mode.
- * @param array $content
- *   The word's rendered fields. When the word has no recording the viewer
- *   can hear, field_recording may hold the site's placeholder image.
  *
  * @return array
  *   A render array for the card's media area.
  */
-function _mukurtu_v4_dictionary_word_card_media($word, array $content): array {
+function _mukurtu_v4_dictionary_word_card_media($word): array {
   $cacheability = new CacheableMetadata();
   $thumbnail_media = $word->get('field_thumbnail')->entity;
   $thumbnail = NULL;
   if ($thumbnail_media) {
+    // Its name and alt text in the current language.
+    $thumbnail_media = \Drupal::service('entity.repository')->getTranslationFromContext($thumbnail_media);
     $access = $thumbnail_media->access('view', NULL, TRUE);
     $cacheability->addCacheableDependency($access);
     if ($access->isAllowed()) {
@@ -155,8 +155,6 @@ function _mukurtu_v4_dictionary_word_card_media($word, array $content): array {
   ]);
   $cacheability->addCacheableDependency(CacheableMetadata::createFromRenderArray($recording));
   $recording = $recording[0] ?? NULL;
-  // With no recording, the field may hold the site's placeholder image.
-  $placeholder = $content['field_recording'][0] ?? NULL;
 
   if ($recording) {
     $card = $recording;
@@ -171,20 +169,56 @@ function _mukurtu_v4_dictionary_word_card_media($word, array $content): array {
   elseif ($thumbnail) {
     $card = $thumbnail;
   }
-  elseif ($placeholder && !isset($placeholder['#media'])) {
-    // The site's "No Media Placeholder Image", added by mukurtu_media.
-    $card = $placeholder;
-  }
   else {
-    $card = [
-      '#theme' => 'image',
-      '#uri' => \Drupal::service('extension.list.theme')->getPath('mukurtu_v4') . '/images/no-thumbnail.png',
-      '#alt' => '',
-    ];
+    // Media the viewer can't see gets the restricted placeholder, if set.
+    $restricted = !$word->get('field_recording')->isEmpty() || !$word->get('field_thumbnail')->isEmpty();
+    $card = _mukurtu_v4_card_placeholder($restricted, $cacheability);
   }
 
   $cacheability->merge(CacheableMetadata::createFromRenderArray($card))->applyTo($card);
   return $card;
+}
+
+/**
+ * Returns the site's placeholder for a card with no media to show.
+ *
+ * Follows mukurtu_media_entity_view_alter(): the "Restricted Media
+ * Placeholder Image" when the content has media the viewer can't see, else
+ * the "No Media Placeholder Image" (both at /admin/config/mukurtu/media-
+ * settings), else the theme's own graphic.
+ *
+ * @param bool $restricted
+ *   Whether the content has media the viewer can't see.
+ * @param \Drupal\Core\Cache\CacheableMetadata $cacheability
+ *   Collects the settings and file the result depends on.
+ *
+ * @return array
+ *   A render array for the placeholder image.
+ */
+function _mukurtu_v4_card_placeholder(bool $restricted, CacheableMetadata $cacheability): array {
+  $config = \Drupal::config('mukurtu_media.settings');
+  $cacheability->addCacheableDependency($config);
+  $keys = $restricted ? ['restricted_media_placeholder', 'no_media_placeholder'] : ['no_media_placeholder'];
+  foreach ($keys as $key) {
+    $fid = ($config->get($key) ?? [])[0] ?? NULL;
+    $file = $fid ? File::load($fid) : NULL;
+    if ($file) {
+      $cacheability->addCacheableDependency($file);
+      // The same alt text mukurtu_media gives these images.
+      return [
+        '#theme' => 'image',
+        '#uri' => $file->getFileUri(),
+        '#alt' => $key === 'restricted_media_placeholder'
+          ? t('Media not available due to protocol restrictions')
+          : t('No media available'),
+      ];
+    }
+  }
+  return [
+    '#theme' => 'image',
+    '#uri' => \Drupal::service('extension.list.theme')->getPath('mukurtu_v4') . '/images/no-thumbnail.png',
+    '#alt' => '',
+  ];
 }
 
 /**

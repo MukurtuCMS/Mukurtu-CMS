@@ -27,6 +27,14 @@
     .media--teaser-featured.media--audio {
       aspect-ratio: 4 / 3;
       @include mixins.audio-thumbnail-player;
+
+      // A stretched row would otherwise override the 4:3 box. The gap keeps
+      // the button, which fills the box, clear of the title link below it
+      // (WCAG 2.5.8).
+      & {
+        block-size: auto;
+        margin-block-end: var(--v-space-5xs);
+      }
     }
 
     .media--remote_video,

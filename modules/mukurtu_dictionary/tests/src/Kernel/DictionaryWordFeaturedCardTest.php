@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 use Drupal\Core\Template\Attribute;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
@@ -137,16 +138,10 @@ class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
   }
 
   /**
-   * Picks the card media the way the featured display would.
+   * Picks the card media for a word.
    */
-  private function cardMedia(DictionaryWord $word, array $content = []): array {
-    $content += [
-      'field_recording' => $word->get('field_recording')->view([
-        'type' => 'entity_reference_entity_view',
-        'settings' => ['view_mode' => 'teaser_featured'],
-      ]),
-    ];
-    return _mukurtu_v4_dictionary_word_card_media($word, $content);
+  private function cardMedia(DictionaryWord $word): array {
+    return _mukurtu_v4_dictionary_word_card_media($word);
   }
 
   /**
@@ -205,12 +200,38 @@ class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
   }
 
   /**
-   * The site's no-media placeholder beats the theme's graphic.
+   * Sets one of the site's placeholder images.
    */
-  public function testSitePlaceholder(): void {
-    $placeholder = ['#theme' => 'image', '#uri' => 'public://placeholder.png', '#alt' => 'No media available'];
-    $card = $this->cardMedia($this->createWord([]), ['field_recording' => [$placeholder]]);
-    $this->assertSame('public://placeholder.png', $card['#uri']);
+  private function setPlaceholder(string $key, string $uri): void {
+    $this->installEntitySchema('file');
+    file_put_contents($uri, 'png');
+    $file = File::create(['uri' => $uri, 'status' => 1]);
+    $file->save();
+    $this->config('mukurtu_media.settings')->set($key, [(int) $file->id()])->save();
+  }
+
+  /**
+   * The site's "No Media Placeholder Image" beats the theme's graphic.
+   */
+  public function testNoMediaPlaceholder(): void {
+    $this->setPlaceholder('no_media_placeholder', 'public://no-media.png');
+    $card = $this->cardMedia($this->createWord([]));
+    $this->assertSame('public://no-media.png', $card['#uri']);
+    $this->assertSame('No media available', (string) $card['#alt']);
+    $this->assertContains('config:mukurtu_media.settings', $card['#cache']['tags']);
+  }
+
+  /**
+   * Media the viewer can't see gets the restricted placeholder.
+   */
+  public function testRestrictedPlaceholder(): void {
+    $this->setPlaceholder('restricted_media_placeholder', 'public://restricted.png');
+    $card = $this->cardMedia($this->createWord(['field_thumbnail' => $this->restrictedImage]));
+    $this->assertSame('public://restricted.png', $card['#uri']);
+
+    // A word with no media at all doesn't get it.
+    $card = $this->cardMedia($this->createWord([]));
+    $this->assertStringEndsWith('/images/no-thumbnail.png', $card['#uri']);
   }
 
   /**
