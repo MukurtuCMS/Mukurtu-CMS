@@ -1,7 +1,34 @@
+@use "../../../external/include-media";
+
+// consent_popup gives the box a fixed width; it's sized to its text here
+// instead, so it needs a gutter to keep the backdrop showing on every side
+// of a narrow screen. Its parent .block-consent-popup is the full-viewport
+// flex backdrop, so 100% is the viewport. The module's min-height and the
+// body's overflow: hidden would otherwise clip a tall box (short landscape
+// screens, large text) with no way to scroll to its buttons (WCAG 1.4.10).
+// The module also centres the content, which pushes overflow past the top
+// and left of the box where scrolling can't reach it; "safe" falls back to
+// the start edge once the content no longer fits. At large text sizes a
+// single word of the heading can be wider than a phone, so let words break.
 #javali-popup {
+  --consent-popup-gutter: var(--v-space-4xxs);
   inline-size: auto !important;
-  max-inline-size: 1000px !important;
+  max-inline-size: min(1000px, calc(100% - 2 * var(--consent-popup-gutter))) !important;
+  min-block-size: min(20rem, calc(100% - 2 * var(--consent-popup-gutter)));
+  max-block-size: calc(100% - 2 * var(--consent-popup-gutter));
+  overflow-y: auto;
+  justify-content: center;
+  justify-content: safe center;
+  align-items: center;
+  align-items: safe center;
+  overflow-wrap: anywhere;
+  padding-inline: var(--v-space-4xs);
   border-radius: 5px;
+
+  @include include-media.media('>=md') {
+    --consent-popup-gutter: var(--v-space-2xs);
+    padding-inline: 3rem;
+  }
 }
 
 // The Klaro cookie consent banner/modal uses z-index values between 999 and

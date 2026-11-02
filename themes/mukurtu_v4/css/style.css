@@ -1383,9 +1383,33 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 
 #javali-popup {
+  --consent-popup-gutter: var(--v-space-4xxs);
   inline-size: auto !important;
-  max-inline-size: 1000px !important;
+  max-inline-size: min(1000px, 100% - 2 * var(--consent-popup-gutter)) !important;
+  min-block-size: min(20rem, 100% - 2 * var(--consent-popup-gutter));
+  max-block-size: calc(100% - 2 * var(--consent-popup-gutter));
+  overflow-y: auto;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-pack: safe center;
+      -ms-flex-pack: safe center;
+          justify-content: safe center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-align: safe center;
+      -ms-flex-align: safe center;
+          align-items: safe center;
+  overflow-wrap: anywhere;
+  padding-inline: var(--v-space-4xs);
   border-radius: 5px;
+}
+@media (min-width: 48rem) {
+  #javali-popup {
+    --consent-popup-gutter: var(--v-space-2xs);
+    padding-inline: 3rem;
+  }
 }
 
 .block-consent-popup {
