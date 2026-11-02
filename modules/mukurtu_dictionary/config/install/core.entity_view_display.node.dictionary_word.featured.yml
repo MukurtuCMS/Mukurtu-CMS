@@ -26,6 +26,15 @@ content:
     third_party_settings: {  }
     weight: 1
     region: content
+  field_representative_media:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: teaser_featured
+      link: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
   field_title:
     settings: {  }
     third_party_settings: {  }
@@ -57,7 +66,6 @@ hidden:
   field_pronunciation: true
   field_protocol_control: true
   field_related_content: true
-  field_representative_media: true
   field_sample_sentences: true
   field_sequence_collection: true
   field_source: true
