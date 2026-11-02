@@ -12,12 +12,13 @@
  * - items: Thumbnails mode only. Up to 5 items, each with:
  *   - title: The item's title in the current language.
  *   - url: The item's URL.
- *   - thumbnail: The item's rendered representative media, if any. It sits
- *     beside the link, not in it, because a content warning on the media is
- *     a control of its own.
- * - placeholder: Thumbnails mode only. The site's default thumbnail for
- *   items without media, if one is set. Without one, the placeholder is
- *   empty and the theme draws its own graphic.
+ *   - thumbnail: The item's rendered thumbnail, if the viewer can see one: a
+ *     dictionary word's Thumbnail, or other content's representative media.
+ *     It sits beside the link, not in it, because a content warning on the
+ *     media is a control of its own.
+ *   - placeholder: Without a thumbnail, the site's placeholder image, if one
+ *     is set. Otherwise the placeholder is empty and the theme draws its own
+ *     graphic.
  *
  * @see \Drupal\mukurtu_core\Hook\RelatedContentPreviewHooks
  * @ingroup themeable
@@ -36,7 +37,7 @@
             {% if item.thumbnail %}
               <div class="related-content-preview__thumbnail">{{ item.thumbnail }}</div>
             {% else %}
-              <div class="related-content-preview__thumbnail related-content-preview__thumbnail--empty" aria-hidden="true">{{ placeholder }}</div>
+              <div class="related-content-preview__thumbnail related-content-preview__thumbnail--empty" aria-hidden="true">{{ item.placeholder }}</div>
             {% endif %}
             <a href="{{ item.url }}" class="related-content-preview__title">{{ item.title }}</a>
           </li>

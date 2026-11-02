@@ -6,13 +6,18 @@ namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormState;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
+use Drupal\media\Entity\Media;
+use Drupal\media\Entity\MediaType;
 use Drupal\mukurtu_core\Form\MukurtuSettingsForm;
 use Drupal\mukurtu_core\Hook\RelatedContentPreviewHooks;
 use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
+use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -50,12 +55,17 @@ class RelatedContentPreviewTest extends DictionaryTestBase {
   protected DictionaryWord $restricted;
 
   /**
+   * A strict protocol the viewer is not a member of.
+   */
+  protected Protocol $strict;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
 
-    $strict = Protocol::create([
+    $this->strict = $strict = Protocol::create([
       'name' => 'Strict Protocol',
       'field_communities' => [$this->community->id()],
       'field_access_mode' => 'strict',
@@ -223,29 +233,99 @@ class RelatedContentPreviewTest extends DictionaryTestBase {
   }
 
   /**
-   * Items without media show the site's default thumbnail, if one is set.
+   * Sets one of the site's placeholder images.
    */
-  public function testNoMediaDefaultThumbnail(): void {
+  private function setPlaceholder(string $key, string $uri): void {
+    file_put_contents($uri, 'png');
+    $file = File::create(['uri' => $uri, 'status' => 1]);
+    $file->save();
+    $this->config('mukurtu_media.settings')->set($key, [(int) $file->id()])->save();
+  }
+
+  /**
+   * Items without media show the site's no-media placeholder, if one is set.
+   */
+  public function testNoMediaPlaceholder(): void {
     $this->installEntitySchema('file');
     $this->setMode(RelatedContentPreviewHooks::MODE_THUMBNAILS);
     $word = $this->createWordRelatedTo([$this->visible[0]]);
 
-    // Without a default, the placeholder is left for the theme to draw.
+    // Without one, the placeholder is left for the theme to draw.
     $html = $this->renderPreview($this->alteredBuild($word));
     $this->assertMatchesRegularExpression('#--empty" aria-hidden="true">\s*</div>#', $html);
 
     // The profile ships this style; the test installs no profile config.
     ImageStyle::create(['name' => 'carousel_thumbnail', 'label' => 'Carousel thumbnail'])->save();
-    file_put_contents('public://no-media.png', 'png');
-    $file = File::create(['uri' => 'public://no-media.png', 'status' => 1]);
-    $file->save();
-    $this->config('mukurtu_thumbnail.settings')->set('no_media', [(int) $file->id()])->save();
+    $this->setPlaceholder('no_media_placeholder', 'public://no-media.png');
 
     $build = $this->alteredBuild($word);
-    $this->assertContains('config:mukurtu_thumbnail.settings', $build['#cache']['tags']);
+    $this->assertContains('config:mukurtu_media.settings', $build['#cache']['tags']);
     $html = $this->renderPreview($build);
     $this->assertStringContainsString('no-media.png', $html);
     $this->assertStringContainsString('alt=""', $html);
+  }
+
+  /**
+   * Creates an image media item in the given protocol.
+   */
+  private function createImage(string $name, Protocol $protocol): Media {
+    $media = Media::create(['bundle' => 'image', 'name' => $name, 'uid' => $this->currentUser->id()]);
+    $media->setSharingSetting('any');
+    $media->setProtocols([$protocol]);
+    $media->save();
+    return $media;
+  }
+
+  /**
+   * A related word shows its own Thumbnail, never its media assets.
+   */
+  public function testDictionaryWordThumbnail(): void {
+    // Same media setup as MukurtuMediaTestBase: one shared file source field.
+    $this->installEntitySchema('file');
+    $this->installConfig(['media']);
+    FieldStorageConfig::create(['entity_type' => 'media', 'field_name' => 'field_media_test_source', 'type' => 'file'])->save();
+    $this->installEntitySchema('media');
+    MediaType::create([
+      'id' => 'image',
+      'label' => 'Image',
+      'source' => 'file',
+      'source_configuration' => ['source_field' => 'field_media_test_source'],
+    ])->save();
+    if (!FieldConfig::loadByName('media', 'image', 'field_media_test_source')) {
+      FieldConfig::create([
+        'field_storage' => FieldStorageConfig::loadByName('media', 'field_media_test_source'),
+        'bundle' => 'image',
+        'label' => 'Test Source',
+      ])->save();
+    }
+    $this->container->get('entity_field.manager')->clearCachedFieldDefinitions();
+    foreach (['media_tag', 'people'] as $vid) {
+      Vocabulary::create(['vid' => $vid, 'name' => $vid])->save();
+    }
+
+    // Created as the protocol steward, then viewed as the outsider.
+    $viewer = $this->container->get('current_user')->getAccount();
+    $this->container->get('current_user')->setAccount($this->currentUser);
+    $image = $this->createImage('Thumbnail', $this->protocol);
+    $hidden = $this->createImage('Hidden thumbnail', $this->strict);
+    $with_thumbnail = $this->buildDictionaryWord('with thumbnail');
+    $with_thumbnail->set('field_thumbnail', [$image->id()])->save();
+    $with_assets = $this->buildDictionaryWord('with assets');
+    $with_assets->set('field_media_assets', [$image->id()])->save();
+    $with_hidden = $this->buildDictionaryWord('with hidden thumbnail');
+    $with_hidden->set('field_thumbnail', [$hidden->id()])->save();
+    $this->container->get('current_user')->setAccount($viewer);
+
+    $this->setMode(RelatedContentPreviewHooks::MODE_THUMBNAILS);
+    $this->setPlaceholder('restricted_media_placeholder', 'public://restricted.png');
+    $build = $this->alteredBuild($this->createWordRelatedTo([$with_thumbnail, $with_assets, $with_hidden]));
+    [$thumbnail, $assets, $hidden_item] = $build['related_content_preview']['#items'];
+
+    $this->assertSame($image->id(), $thumbnail['thumbnail'][0]['#media']->id());
+    $this->assertSame([], $assets['thumbnail']);
+    $this->assertSame([], $assets['placeholder']);
+    $this->assertSame([], $hidden_item['thumbnail']);
+    $this->assertSame('public://restricted.png', $hidden_item['placeholder']['#uri']);
   }
 
   /**

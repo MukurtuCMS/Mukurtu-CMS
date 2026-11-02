@@ -16,8 +16,10 @@ use Drupal\Core\Extension\ProceduralCall;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Render\Element;
+use Drupal\mukurtu_core\Event\RepresentativeMediaComputationEvent;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Adds a related content preview to the sidebar of full item pages.
@@ -82,6 +84,7 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
     protected ConfigFactoryInterface $configFactory,
     protected EntityRepositoryInterface $entityRepository,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected EventDispatcherInterface $eventDispatcher,
   ) {}
 
   /**
@@ -92,6 +95,7 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
       $container->get('config.factory'),
       $container->get('entity.repository'),
       $container->get('entity_type.manager'),
+      $container->get('event_dispatcher'),
     );
   }
 
@@ -160,28 +164,15 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
       '#items' => [],
     ];
     if ($mode === self::MODE_THUMBNAILS) {
-      $preview['#placeholder'] = $this->noMediaPlaceholder($cacheability);
       foreach (array_slice($items, 0, self::THUMBNAIL_LIMIT) as $related) {
         $url = $related->toUrl()->toString(TRUE);
         $cacheability->addCacheableDependency($related)->addCacheableDependency($url);
-        $thumbnail = [];
-        if ($related->hasField('field_representative_media') && !$related->get('field_representative_media')->isEmpty()) {
-          $thumbnail = $related->get('field_representative_media')->view([
-            'type' => 'entity_reference_entity_view',
-            'label' => 'hidden',
-            'settings' => ['view_mode' => 'carousel_thumbnail'],
-          ]);
-          // Media the viewer can't see renders nothing. Show the placeholder
-          // instead, but keep the access cacheability.
-          if (!Element::children($thumbnail)) {
-            $cacheability->addCacheableDependency(CacheableMetadata::createFromRenderArray($thumbnail));
-            $thumbnail = [];
-          }
-        }
+        [$thumbnail, $hidden] = $this->thumbnail($related, $cacheability);
         $preview['#items'][] = [
           'title' => $related->label(),
           'url' => $url->getGeneratedUrl(),
           'thumbnail' => $thumbnail,
+          'placeholder' => $thumbnail ? [] : $this->placeholder($hidden, $cacheability),
         ];
       }
     }
@@ -197,27 +188,73 @@ class RelatedContentPreviewHooks implements ContainerInjectionInterface {
   }
 
   /**
-   * Builds the site's default thumbnail for items without media.
+   * Renders an item's thumbnail, if the viewer can see one.
    *
-   * Returns an empty array when none is set, and the theme's own graphic
-   * shows instead.
+   * A dictionary word uses its own Thumbnail field, never its recording or
+   * media assets. Anything else uses its representative media.
+   *
+   * @return array
+   *   The rendered thumbnail, or an empty array; then whether the item has
+   *   media the viewer can't see.
    */
-  protected function noMediaPlaceholder(CacheableMetadata $cacheability): array {
-    $config = $this->configFactory->get('mukurtu_thumbnail.settings');
-    $cacheability->addCacheableDependency($config);
-    $fid = $config->get('no_media')[0] ?? NULL;
-    $file = $fid ? $this->entityTypeManager->getStorage('file')->load($fid) : NULL;
-    if (!$file) {
-      return [];
+  protected function thumbnail(NodeInterface $related, CacheableMetadata $cacheability): array {
+    $field_name = $related->bundle() === 'dictionary_word' ? 'field_thumbnail' : 'field_representative_media';
+    if (!$related->hasField($field_name)) {
+      return [[], FALSE];
     }
-    $cacheability->addCacheableDependency($file);
-    // Decorative: the item's title link sits right below it.
-    return [
-      '#theme' => 'image_style',
-      '#style_name' => 'carousel_thumbnail',
-      '#uri' => $file->getFileUri(),
-      '#alt' => '',
-    ];
+    $thumbnail = $related->get($field_name)->view([
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => ['view_mode' => 'carousel_thumbnail'],
+    ]);
+    // Media the viewer can't see renders nothing, but its access result
+    // still decides what this viewer sees.
+    $cacheability->addCacheableDependency(CacheableMetadata::createFromRenderArray($thumbnail));
+    if (Element::children($thumbnail)) {
+      return [$thumbnail, FALSE];
+    }
+
+    if ($field_name === 'field_thumbnail') {
+      return [[], !$related->get('field_thumbnail')->isEmpty()];
+    }
+    // Representative media is empty when none of it is visible, so check the
+    // fields it is computed from, as mukurtu_media_entity_view_alter() does.
+    $event = $this->eventDispatcher->dispatch(new RepresentativeMediaComputationEvent($related), RepresentativeMediaComputationEvent::EVENT_NAME);
+    foreach ($event->getSourceFields() as $source) {
+      if ($related->hasField($source) && !$related->get($source)->isEmpty()) {
+        return [[], TRUE];
+      }
+    }
+    return [[], FALSE];
+  }
+
+  /**
+   * Builds the site's placeholder for an item with no thumbnail to show.
+   *
+   * Follows mukurtu_media_entity_view_alter(): the "Restricted Media
+   * Placeholder Image" for media the viewer can't see, else the "No Media
+   * Placeholder Image". With neither set, returns an empty array, and the
+   * theme draws its own graphic.
+   */
+  protected function placeholder(bool $hidden, CacheableMetadata $cacheability): array {
+    $config = $this->configFactory->get('mukurtu_media.settings');
+    $cacheability->addCacheableDependency($config);
+    $keys = $hidden ? ['restricted_media_placeholder', 'no_media_placeholder'] : ['no_media_placeholder'];
+    foreach ($keys as $key) {
+      $fid = ($config->get($key) ?? [])[0] ?? NULL;
+      $file = $fid ? $this->entityTypeManager->getStorage('file')->load($fid) : NULL;
+      if ($file) {
+        $cacheability->addCacheableDependency($file);
+        // Decorative: the item's title link sits right beside it.
+        return [
+          '#theme' => 'image_style',
+          '#style_name' => 'carousel_thumbnail',
+          '#uri' => $file->getFileUri(),
+          '#alt' => '',
+        ];
+      }
+    }
+    return [];
   }
 
   /**
