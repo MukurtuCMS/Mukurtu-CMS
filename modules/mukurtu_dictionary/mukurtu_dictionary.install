@@ -5,7 +5,6 @@
  * Install, update and uninstall functions for the mukurtu_dictionary module.
  */
 
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\user\Entity\Role;
 
 /**
@@ -96,26 +95,4 @@ function mukurtu_dictionary_update_40047() {
   }
   $role->grantPermission('administer dictionary glossary order');
   $role->save();
-}
-
-/**
- * Show dictionary word images on related content and featured content cards.
- */
-function mukurtu_dictionary_update_40048() {
-  // Leaves the display alone if a site has already placed the field.
-  $display = EntityViewDisplay::load('node.dictionary_word.featured');
-  if (!$display || $display->getComponent('field_representative_media')) {
-    return;
-  }
-  $display->setComponent('field_representative_media', [
-    'type' => 'entity_reference_entity_view',
-    'label' => 'hidden',
-    'settings' => [
-      'view_mode' => 'teaser_featured',
-      'link' => FALSE,
-    ],
-    'third_party_settings' => [],
-    'weight' => 2,
-    'region' => 'content',
-  ])->save();
 }

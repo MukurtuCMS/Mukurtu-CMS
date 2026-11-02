@@ -4,18 +4,26 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
-use Drupal\Core\Entity\Entity\EntityViewMode;
-use Drupal\Core\Serialization\Yaml;
 use Drupal\Core\Template\Attribute;
-use PHPUnit\Framework\Attributes\DataProvider;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\media\Entity\Media;
+use Drupal\media\Entity\MediaType;
+use Drupal\mukurtu_dictionary\Entity\DictionaryWord;
+use Drupal\mukurtu_protocol\Entity\Protocol;
+use Drupal\node\Entity\Node;
+use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests that dictionary word cards show the word's image (#2571).
+ * Tests the media on a dictionary word's card (#2571).
  *
- * Related content and featured content render items as cards in the
- * featured view mode, through node--featured.html.twig.
+ * Related content and featured content show items as cards in the featured
+ * view mode. A word's card shows its recording, then its thumbnail, then a
+ * generic graphic.
+ *
+ * @see _mukurtu_v4_dictionary_word_card_media()
  */
 #[Group('mukurtu_dictionary')]
 class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
@@ -23,135 +31,250 @@ class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
   /**
    * {@inheritdoc}
    *
-   * The card template uses twig_tweak's add_suggestion filter.
+   * The mukurtu_media module gives the audio and image media their bundle
+   * classes and fields, and its services need the other three. The card
+   * template uses twig_tweak's add_suggestion filter.
    */
-  protected static $modules = ['twig_tweak'];
-
-  /**
-   * The display settings the shipped config and the update hook both use.
-   */
-  private const COMPONENT = [
-    'type' => 'entity_reference_entity_view',
-    'label' => 'hidden',
-    'settings' => [
-      'view_mode' => 'teaser_featured',
-      'link' => FALSE,
-    ],
-    'third_party_settings' => [],
-    'weight' => 2,
-    'region' => 'content',
+  protected static $modules = [
+    'flag',
+    'key',
+    'media_entity_soundcloud',
+    'mukurtu_media',
+    'twig_tweak',
   ];
 
   /**
-   * Renders the card template with the given media fields shown.
+   * A recording the viewer can hear.
    */
-  private function renderCard(array $content): string {
+  protected Media $recording;
+
+  /**
+   * An image the viewer can see.
+   */
+  protected Media $image;
+
+  /**
+   * An image in a strict protocol the viewer is not a member of.
+   */
+  protected Media $restrictedImage;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    parent::setUp();
+
+    // Same media setup as MukurtuMediaTestBase: one shared file source field.
+    $this->installConfig(['media']);
+    FieldStorageConfig::create([
+      'entity_type' => 'media',
+      'field_name' => 'field_media_test_source',
+      'type' => 'file',
+    ])->save();
+    $this->installEntitySchema('media');
+    foreach (['audio', 'image'] as $bundle) {
+      MediaType::create([
+        'id' => $bundle,
+        'label' => ucfirst($bundle),
+        'source' => 'file',
+        'source_configuration' => ['source_field' => 'field_media_test_source'],
+      ])->save();
+      if (!FieldConfig::loadByName('media', $bundle, 'field_media_test_source')) {
+        FieldConfig::create([
+          'field_storage' => FieldStorageConfig::loadByName('media', 'field_media_test_source'),
+          'bundle' => $bundle,
+          'label' => 'Test Source',
+        ])->save();
+      }
+    }
+    $this->container->get('entity_field.manager')->clearCachedFieldDefinitions();
+    foreach (['media_tag', 'people'] as $vid) {
+      Vocabulary::create(['vid' => $vid, 'name' => $vid])->save();
+    }
+
+    $this->recording = $this->createMedia('audio', 'Recording');
+    $this->image = $this->createMedia('image', 'Thumbnail');
+
+    $strict = Protocol::create([
+      'name' => 'Strict Protocol',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $strict->save();
+    $strict->addMember($this->currentUser, ['protocol_steward']);
+    $this->restrictedImage = $this->createMedia('image', 'Restricted thumbnail', $strict);
+
+    // View cards as someone outside the strict protocol.
+    $viewer = User::create(['name' => 'viewer']);
+    $viewer->save();
+    $this->container->get('current_user')->setAccount($viewer);
+
     $theme_path = $this->container->get('extension.list.theme')->getPath('mukurtu_v4');
-    $template = file_get_contents($this->root . '/' . $theme_path . '/templates/content/node--featured.html.twig');
+    require_once $this->root . '/' . $theme_path . '/mukurtu_v4.theme';
+  }
+
+  /**
+   * Creates a media item in the given protocol, or the open one.
+   */
+  private function createMedia(string $bundle, string $name, ?Protocol $protocol = NULL): Media {
+    $media = Media::create(['bundle' => $bundle, 'name' => $name, 'uid' => $this->currentUser->id()]);
+    $media->setSharingSetting('any');
+    $media->setProtocols([$protocol ?? $this->protocol]);
+    $media->save();
+    return $media;
+  }
+
+  /**
+   * Creates a word with the given media fields.
+   */
+  private function createWord(array $values): DictionaryWord {
+    $word = $this->buildDictionaryWord('aloha');
+    foreach ($values as $field => $media) {
+      $word->set($field, [$media->id()]);
+    }
+    $word->save();
+    return Node::load($word->id());
+  }
+
+  /**
+   * Picks the card media the way the featured display would.
+   */
+  private function cardMedia(DictionaryWord $word, array $content = []): array {
+    $content += [
+      'field_recording' => $word->get('field_recording')->view([
+        'type' => 'entity_reference_entity_view',
+        'settings' => ['view_mode' => 'teaser_featured'],
+      ]),
+    ];
+    return _mukurtu_v4_dictionary_word_card_media($word, $content);
+  }
+
+  /**
+   * A word with both shows its thumbnail behind its recording.
+   */
+  public function testRecordingAndThumbnail(): void {
+    $card = $this->cardMedia($this->createWord([
+      'field_recording' => $this->recording,
+      'field_thumbnail' => $this->image,
+    ]));
+
+    $this->assertSame($this->recording->id(), $card['#media']->id());
+    $this->assertSame($this->image->id(), $card['#mukurtu_card_image']['#media']->id());
+    // The recording could belong to another word with another thumbnail.
+    $this->assertContains('card-image:' . $this->image->id(), $card['#cache']['keys']);
+  }
+
+  /**
+   * A recording alone keeps its own image.
+   */
+  public function testRecordingOnly(): void {
+    $card = $this->cardMedia($this->createWord(['field_recording' => $this->recording]));
+    $this->assertSame($this->recording->id(), $card['#media']->id());
+    $this->assertArrayNotHasKey('#mukurtu_card_image', $card);
+  }
+
+  /**
+   * A thumbnail alone is the card's image.
+   */
+  public function testThumbnailOnly(): void {
+    $card = $this->cardMedia($this->createWord(['field_thumbnail' => $this->image]));
+    $this->assertSame($this->image->id(), $card['#media']->id());
+  }
+
+  /**
+   * Media assets are not used: the card falls back to the generic graphic.
+   */
+  public function testMediaAssetsAreIgnored(): void {
+    $card = $this->cardMedia($this->createWord(['field_media_assets' => $this->image]));
+    $this->assertSame('image', $card['#theme']);
+    $this->assertStringEndsWith('/images/no-thumbnail-square.png', $card['#uri']);
+  }
+
+  /**
+   * A thumbnail the viewer can't see is skipped, and the card notes why.
+   */
+  public function testRestrictedThumbnail(): void {
+    $card = $this->cardMedia($this->createWord([
+      'field_recording' => $this->recording,
+      'field_thumbnail' => $this->restrictedImage,
+    ]));
+    $this->assertSame($this->recording->id(), $card['#media']->id());
+    $this->assertArrayNotHasKey('#mukurtu_card_image', $card);
+    // Access depends on protocol membership, so the card must vary by it.
+    $this->assertNotEmpty($card['#cache']['contexts']);
+  }
+
+  /**
+   * The site's no-media placeholder beats the theme's graphic.
+   */
+  public function testSitePlaceholder(): void {
+    $placeholder = ['#theme' => 'image', '#uri' => 'public://placeholder.png', '#alt' => 'No media available'];
+    $card = $this->cardMedia($this->createWord([]), ['field_recording' => [$placeholder]]);
+    $this->assertSame('public://placeholder.png', $card['#uri']);
+  }
+
+  /**
+   * Renders a theme template with the given variables.
+   */
+  private function renderTemplate(string $path, array $context): string {
+    $theme_path = $this->container->get('extension.list.theme')->getPath('mukurtu_v4');
     $build = [
       '#type' => 'inline_template',
-      '#template' => $template,
-      '#context' => [
-        'attributes' => new Attribute(),
-        'title_attributes' => new Attribute(),
-        'node' => ['type' => ['entity' => ['label' => 'Dictionary Word']]],
-        'label' => ['#theme' => 'image', '#uri' => 'public://label.png', '#alt' => 'aloha'],
-        'url' => '/dictionary-word/aloha',
-        // add_suggestion needs a themed element, so each field is an image
-        // named after its marker.
-        'content' => array_map(fn($marker) => [['#theme' => 'image', '#uri' => "public://$marker.png", '#alt' => '']], $content),
-      ],
+      '#template' => file_get_contents($this->root . '/' . $theme_path . '/templates/' . $path),
+      '#context' => $context + ['attributes' => new Attribute()],
     ];
     return (string) $this->container->get('renderer')->renderInIsolation($build);
   }
 
   /**
-   * The card picks one media field, in order of preference.
+   * A themed placeholder named after a marker; add_suggestion needs #theme.
    */
-  #[DataProvider('mediaProvider')]
-  public function testCardMedia(array $content, ?string $expected): void {
-    $media = $this->renderCard($content);
-    // Only the expected field reaches the card.
-    foreach ($content as $marker) {
-      $marker === $expected
-        ? $this->assertStringContainsString($marker, $media)
-        : $this->assertStringNotContainsString($marker, $media);
-    }
+  private static function marker(string $name): array {
+    return ['#theme' => 'image', '#uri' => "public://$name.png", '#alt' => ''];
   }
 
   /**
-   * Combinations of shown media fields, and which one the card should use.
+   * The card template uses the word's pick over the fields it would choose.
    */
-  public static function mediaProvider(): array {
-    return [
-      'image beats recording' => [
-        ['field_representative_media' => 'IMAGE', 'field_recording' => 'RECORDING'],
-        'IMAGE',
-      ],
-      'recording when there is no image' => [
-        ['field_recording' => 'RECORDING'],
-        'RECORDING',
-      ],
-      'custom thumbnail beats image' => [
-        ['field_thumbnail' => 'THUMBNAIL', 'field_representative_media' => 'IMAGE'],
-        'THUMBNAIL',
-      ],
-      'other bundles still fall back' => [
-        ['field_collection_image' => 'COLLECTION'],
-        'COLLECTION',
-      ],
+  public function testCardTemplateUsesCardMedia(): void {
+    $context = [
+      'title_attributes' => new Attribute(),
+      'node' => ['type' => ['entity' => ['label' => 'Dictionary Word']]],
+      'label' => self::marker('label'),
+      'url' => '/dictionary-word/aloha',
+      'content' => ['field_recording' => [self::marker('RECORDING')]],
     ];
+    $html = $this->renderTemplate('content/node--featured.html.twig', $context + ['card_media' => self::marker('CARD')]);
+    $this->assertStringContainsString('CARD.png', $html);
+    $this->assertStringNotContainsString('RECORDING.png', $html);
+
+    // Other cards are unchanged.
+    $html = $this->renderTemplate('content/node--featured.html.twig', $context);
+    $this->assertStringContainsString('RECORDING.png', $html);
   }
 
   /**
-   * The shipped featured display shows the word's representative media.
+   * The audio card shows the word's thumbnail in place of its own image.
    */
-  public function testShippedDisplay(): void {
-    $path = $this->container->get('extension.list.module')->getPath('mukurtu_dictionary');
-    $config = Yaml::decode(file_get_contents($path . '/config/install/core.entity_view_display.node.dictionary_word.featured.yml'));
-    $this->assertSame(self::COMPONENT, $config['content']['field_representative_media']);
-    $this->assertArrayNotHasKey('field_representative_media', $config['hidden']);
-  }
+  public function testAudioTemplateUsesCardImage(): void {
+    $context = [
+      'name' => 'Recording',
+      'bundle' => 'audio',
+      'audio_fallback_thumbnail_url' => '/audio.png',
+      'content' => ['field_thumbnail' => ['#items' => [1], self::marker('AUDIO_THUMBNAIL')]],
+    ];
+    foreach ([FALSE, TRUE] as $skip_player) {
+      $html = $this->renderTemplate('media/media--audio--teaser-featured.html.twig', $context + [
+        'skip_player' => $skip_player,
+        'card_image' => self::marker('WORD_THUMBNAIL'),
+      ]);
+      $this->assertStringContainsString('WORD_THUMBNAIL.png', $html);
+      $this->assertStringNotContainsString('AUDIO_THUMBNAIL.png', $html);
+    }
 
-  /**
-   * Creates the featured display without the representative media field.
-   */
-  private function createDisplay(): EntityViewDisplay {
-    EntityViewMode::create(['id' => 'node.featured', 'targetEntityType' => 'node', 'label' => 'Featured'])->save();
-    $display = EntityViewDisplay::create([
-      'targetEntityType' => 'node',
-      'bundle' => 'dictionary_word',
-      'mode' => 'featured',
-      'status' => TRUE,
-    ]);
-    $display->removeComponent('field_representative_media')->save();
-    return $display;
-  }
-
-  /**
-   * The update shows the field on existing sites.
-   */
-  public function testUpdateAddsField(): void {
-    $this->createDisplay();
-    $this->container->get('module_handler')->loadInclude('mukurtu_dictionary', 'install');
-    mukurtu_dictionary_update_40048();
-
-    $component = EntityViewDisplay::load('node.dictionary_word.featured')->getComponent('field_representative_media');
-    $this->assertSame(self::COMPONENT, $component);
-  }
-
-  /**
-   * The update leaves a site's own placement alone.
-   */
-  public function testUpdateKeepsCustomPlacement(): void {
-    $this->createDisplay()
-      ->setComponent('field_representative_media', ['weight' => 9] + self::COMPONENT)
-      ->save();
-    $this->container->get('module_handler')->loadInclude('mukurtu_dictionary', 'install');
-    mukurtu_dictionary_update_40048();
-
-    $component = EntityViewDisplay::load('node.dictionary_word.featured')->getComponent('field_representative_media');
-    $this->assertSame(9, $component['weight']);
+    // Without one, the recording keeps its own image.
+    $html = $this->renderTemplate('media/media--audio--teaser-featured.html.twig', $context + ['skip_player' => FALSE]);
+    $this->assertStringContainsString('AUDIO_THUMBNAIL.png', $html);
   }
 
 }

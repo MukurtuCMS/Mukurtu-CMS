@@ -4,6 +4,7 @@ require_once __DIR__ . '/includes/AudioHelper.php';
 require_once __DIR__ . '/includes/FileUrlHelper.php';
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
@@ -77,6 +78,10 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
   }
 
+  if (($variables['view_mode'] ?? '') === 'featured' && $node->bundle() === 'dictionary_word' && $node->hasField('field_thumbnail')) {
+    $variables['card_media'] = _mukurtu_v4_dictionary_word_card_media($node, $variables['content']);
+  }
+
   // A dictionary word's card, in the Featured Content grid and carousel,
   // shows its translations: the word alone says little to most visitors.
   // The node here is already the translation for the current page.
@@ -104,6 +109,65 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
   }
 
+}
+
+/**
+ * Picks the media for a dictionary word's card (#2571).
+ *
+ * The recording comes first, then the word's thumbnail, then a generic
+ * graphic. A word with both shows its thumbnail behind the recording's play
+ * button. The word's media assets are not used.
+ *
+ * @param \Drupal\node\NodeInterface $word
+ *   The dictionary word, in the featured view mode.
+ * @param array $content
+ *   The word's rendered fields. field_recording holds the recording, or the
+ *   site's placeholder image when the word has none.
+ *
+ * @return array
+ *   A render array for the card's media area.
+ */
+function _mukurtu_v4_dictionary_word_card_media($word, array $content): array {
+  $cacheability = new CacheableMetadata();
+  $thumbnail_media = $word->get('field_thumbnail')->entity;
+  $thumbnail = NULL;
+  if ($thumbnail_media) {
+    $access = $thumbnail_media->access('view', NULL, TRUE);
+    $cacheability->addCacheableDependency($access);
+    if ($access->isAllowed()) {
+      // Rendered as media, not a bare image, so content warnings still apply.
+      $thumbnail = \Drupal::entityTypeManager()->getViewBuilder('media')->view($thumbnail_media, 'teaser_featured');
+    }
+  }
+
+  $recording = $content['field_recording'][0] ?? NULL;
+  if (isset($recording['#media'])) {
+    $card = $recording;
+    if ($thumbnail) {
+      // See mukurtu_v4_preprocess_media__audio__teaser_featured(). The same
+      // recording can belong to more than one word, so the thumbnail is part
+      // of the cache key.
+      $card['#mukurtu_card_image'] = $thumbnail;
+      $card['#cache']['keys'][] = 'card-image:' . $thumbnail_media->id();
+    }
+  }
+  elseif ($thumbnail) {
+    $card = $thumbnail;
+  }
+  elseif ($recording) {
+    // The site's "No Media Placeholder Image", added by mukurtu_media.
+    $card = $recording;
+  }
+  else {
+    $card = [
+      '#theme' => 'image',
+      '#uri' => \Drupal::service('extension.list.theme')->getPath('mukurtu_v4') . '/images/no-thumbnail-square.png',
+      '#alt' => '',
+    ];
+  }
+
+  $cacheability->merge(CacheableMetadata::createFromRenderArray($card))->applyTo($card);
+  return $card;
 }
 
 /**
@@ -518,6 +582,9 @@ function mukurtu_v4_preprocess_media__audio__teaser_featured(array &$variables):
     'entity.protocol.canonical',
   ]);
   $variables['audio_fallback_thumbnail_url'] = MukurtuV4AudioHelper::fallbackThumbnailUrl($variables['media'], $variables);
+  // A dictionary word's card shows the word's own thumbnail behind its
+  // recording; see _mukurtu_v4_dictionary_word_card_media().
+  $variables['card_image'] = $variables['elements']['#mukurtu_card_image'] ?? NULL;
   // The rendered output differs by route, so bust the cache per route.
   $variables['#cache']['contexts'][] = 'route';
 }

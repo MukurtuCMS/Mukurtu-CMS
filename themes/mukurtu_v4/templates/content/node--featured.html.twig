@@ -69,15 +69,10 @@
  */
 #}
 
-{# A custom thumbnail wins, then the representative media, then the first
-   other media field the display shows (a dictionary word's recording, for
-   example, only when the word has no media assets). #}
-{% set media = null %}
+{% set media = content.field_representative_media.0 %}
 
     {% if content.field_thumbnail %}
      {% set media = content.field_thumbnail.0 %}
-    {% elseif content.field_representative_media.0 %}
-      {% set media = content.field_representative_media.0 %}
     {% elseif content.field_collection_image %}
       {% set media = content.field_collection_image.0 %}
     {% elseif content.field_media_assets %}
@@ -93,6 +88,11 @@
     {% elseif content.field_word_list_image %}
       {% set media = content.field_word_list_image.0 %}
     {% endif %}
+
+{# Dictionary words pick their own; see mukurtu_v4_preprocess_node(). #}
+{% if card_media %}
+  {% set media = card_media %}
+{% endif %}
 
 <article{{ attributes }}>
 
