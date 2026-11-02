@@ -116,3 +116,10 @@ messages:
     js/messages.js: {}
   dependencies:
     - core/drupal
+
+consent-popup:
+  js:
+    js/consent-popup.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
