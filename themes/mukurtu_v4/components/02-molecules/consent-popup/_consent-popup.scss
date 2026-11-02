@@ -3,19 +3,23 @@
 // consent_popup gives the box a fixed width; it's sized to its text here
 // instead, capped at a readable line length (40rem, about 75 characters),
 // with a gutter to keep the backdrop showing on every side of a narrow
-// screen. Its parent .block-consent-popup is the full-viewport
-// flex backdrop, so 100% is the viewport. The module's min-height and the
-// body's overflow: hidden would otherwise clip a tall box (short landscape
-// screens, large text) with no way to scroll to its buttons (WCAG 1.4.10).
-// The module also centres the content, which pushes overflow past the top
-// and left of the box where scrolling can't reach it; "safe" falls back to
-// the start edge once the content no longer fits. At large text sizes a
-// single word of the heading can be wider than a phone, so let words break.
+// screen. Its parent .block-consent-popup is the full-viewport flex
+// backdrop, so 100% is the viewport.
+//
+// The module's min-height and the body's overflow: hidden would otherwise
+// clip a tall box (short landscape screens, large text) with no way to
+// scroll to its buttons (WCAG 1.4.10). The module also centres the content,
+// which pushes overflow past the top and left of the box where scrolling
+// can't reach it; "safe" falls back to the start edge once the content no
+// longer fits. At large text sizes a single word of the heading can be
+// wider than a phone, so let words break.
+//
 // The box is white wherever the block is placed, so set the text color
 // rather than inherit a region's, such as the footer's light gray (#ccc,
 // 1.6:1 on white, failing WCAG 1.4.3).
 #javali-popup {
   --consent-popup-gutter: var(--v-space-4xxs);
+
   inline-size: auto !important;
   max-inline-size: min(40rem, calc(100% - 2 * var(--consent-popup-gutter))) !important;
   color: var(--text-color);
@@ -32,6 +36,7 @@
 
   @include include-media.media('>=md') {
     --consent-popup-gutter: var(--v-space-2xs);
+
     padding-inline: 3rem;
   }
 }
@@ -42,14 +47,14 @@
 // order rather than intent. Raise it above Klaro's range so the protocol
 // consent gate always takes precedence over the cookie banner when both
 // blocks are enabled on a site.
-//
-// The module's 100vh backdrop is taller than the visible screen on phones
-// while the browser toolbar shows, so a tall popup's buttons could sit
-// behind it. 100dvh tracks the visible height; 100vh stays as the fallback.
 .block-consent-popup {
   z-index: 1100;
-  height: 100vh;
-  height: 100dvh;
+
+  // The module's 100vh backdrop is taller than the visible screen on phones
+  // while the browser toolbar shows, so a tall popup's buttons could sit
+  // behind it. 100dvh tracks the visible height; 100vh is the fallback.
+  block-size: 100vh;
+  block-size: 100dvh;
 }
 
 // Neither module hides the other from the accessibility tree while its own
