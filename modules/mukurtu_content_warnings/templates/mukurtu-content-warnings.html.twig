@@ -3,11 +3,28 @@
  * @file
  * Default theme implementation for media content warnings.
  *
+ * The dismiss button is described by the warnings, so screen readers announce
+ * the warning text along with the button. The same media item can render more
+ * than once on a page (carousel slide, thumbnail, lightbox copy); every copy
+ * shares the id, and every copy holds the same warnings.
+ *
  * Available variables:
  * - media: The media entity.
  * - warnings: The warnings.
  */
 #}
-<div {{ attributes.addClass('mukurtu-content-warnings').setAttribute('data-mid', media.id).setAttribute('role', 'button').setAttribute('tabindex', 0).setAttribute('aria-label', 'Dismiss content warning') }}>
-  {{ warnings }}
+{% set warnings_id = 'mukurtu-content-warnings-' ~ media.id %}
+<div {{ attributes.addClass('mukurtu-content-warnings').setAttribute('data-mid', media.id) }}>
+  {% if warnings|length > 1 %}
+    <ul id="{{ warnings_id }}" class="mukurtu-content-warnings__list" role="list">
+      {% for warning in warnings %}
+        <li>{{ warning }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div id="{{ warnings_id }}" class="mukurtu-content-warnings__list">
+      {{ warnings }}
+    </div>
+  {% endif %}
+  <button type="button" class="mukurtu-content-warnings__dismiss" aria-describedby="{{ warnings_id }}">{{ 'Show media'|t }}</button>
 </div>

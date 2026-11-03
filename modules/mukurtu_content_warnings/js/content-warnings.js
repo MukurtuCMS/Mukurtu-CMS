@@ -18,16 +18,12 @@
         // Watch for iframes/objects inserted later by lazy loaders (e.g. Blazy).
         this.watchForNewEmbeds(element);
 
+        // A click anywhere on the overlay dismisses it. The dismiss button
+        // inside it gives keyboard and AT users the same action, since a
+        // native button fires click on Enter and Space.
         element.addEventListener('click', (event) => {
           event.preventDefault();
           this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
-        });
-
-        element.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
-          }
         });
       });
     },
@@ -67,6 +63,10 @@
         return;
       }
 
+      // The button is about to be hidden. If it has focus, move focus to the
+      // media it was covering so keyboard users don't land on the page body.
+      const hadFocus = element.contains(document.activeElement);
+
       const mid = element.dataset.mid;
       document.querySelectorAll(`.mukurtu-content-warnings[data-mid="${mid}"]`).forEach((contentWarnings) => {
         // Disconnect the mutation observer before restoring visibility.
@@ -80,6 +80,12 @@
         // Restore keyboard/AT access to the media behind the overlay.
         this.setMediaInert(contentWarnings, false);
       });
+
+      if (hadFocus) {
+        const candidates = element.closest('.media')?.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]:not([tabindex="-1"])') ?? [];
+        const media = [...candidates].find((el) => !element.contains(el));
+        media?.focus();
+      }
     },
 
     // Mark or unmark interactive elements inside .media as inert so keyboard
