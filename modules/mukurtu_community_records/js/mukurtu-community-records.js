@@ -29,6 +29,23 @@
         const activePane = element.querySelector('[data-initial-cr=true]');
         this.toggleCrTask(activePane.dataset.isCr === 'true');
       });
+
+      // Below field_group's tabs breakpoint the records stay an accordion of
+      // details elements, so treat opening one like selecting its tab. In tab
+      // mode field_group opens every details itself; skip those.
+      once('mukurtu-community-record-accordion', '.community-records details[data-nid]', context).forEach((details) => {
+        details.addEventListener('toggle', () => {
+          if (details.closest('.horizontal-tabs-panes')) {
+            return;
+          }
+          // Several sections can be open. When one closes, follow a record
+          // that is still showing, if any.
+          const showing = details.open ? details : details.parentElement.querySelector(':scope > details[data-nid][open]');
+          if (showing) {
+            this.handlePaneChange(showing);
+          }
+        });
+      });
     },
 
     /**
@@ -49,6 +66,36 @@
       // a search / replace on known patterns.
       this.updateTaskLinks(paneNid);
       this.toggleCrTask(isCr);
+      this.updateTitle(element);
+    },
+
+    /**
+     * Show the active record's title in the page H1 and document title.
+     *
+     * Inside a multipage item the H1 names the multipage item, and each
+     * record tab has its own title heading, so nothing changes there.
+     *
+     * @param {HTMLElement} element
+     *   The active pane.
+     */
+    updateTitle: function(element) {
+      const title = element.dataset.title;
+      if (!title || element.closest('.multipage-items')) {
+        return;
+      }
+
+      const h1 = document.querySelector('.page__title h1');
+      // A node H1 wraps the title in its field markup; keep that wrapper.
+      const heading = h1?.querySelector('.field--name-title') ?? h1;
+      if (!heading) {
+        return;
+      }
+
+      const previous = heading.textContent.trim();
+      heading.textContent = title;
+      if (previous && document.title.startsWith(previous)) {
+        document.title = title + document.title.slice(previous.length);
+      }
     },
 
     /**

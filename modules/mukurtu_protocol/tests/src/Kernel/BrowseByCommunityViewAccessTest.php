@@ -172,6 +172,33 @@ class BrowseByCommunityViewAccessTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * A member's cached list isn't shown to a non-member with the same roles.
+   */
+  public function testMemberListNotCachedForNonMember(): void {
+    $this->privateCommunity->addMember($this->viewer);
+    $expected = [(int) $this->publicCommunity->id(), (int) $this->privateCommunity->id()];
+    sort($expected);
+    $this->assertSame($expected, $this->listedIds());
+
+    $this->setCurrentUser($this->createUser());
+    $this->assertSame([(int) $this->publicCommunity->id()], $this->listedIds());
+  }
+
+  /**
+   * A non-member's cached list isn't shown to a member with the same roles.
+   */
+  public function testNonMemberListNotCachedForMember(): void {
+    $this->assertSame([(int) $this->publicCommunity->id()], $this->listedIds());
+
+    $member = $this->createUser();
+    $this->privateCommunity->addMember($member);
+    $this->setCurrentUser($member);
+    $expected = [(int) $this->publicCommunity->id(), (int) $this->privateCommunity->id()];
+    sort($expected);
+    $this->assertSame($expected, $this->listedIds());
+  }
+
+  /**
    * A blocked membership does not grant visibility.
    */
   public function testBlockedMemberSeesOnlyPublic(): void {
