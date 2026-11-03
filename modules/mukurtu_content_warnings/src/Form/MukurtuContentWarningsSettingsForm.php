@@ -55,6 +55,16 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     return $options;
   }
 
+  /**
+   * Tells admins what the overlay adds around each warning's text.
+   *
+   * Without this, admins repeat the overlay's own wording in every warning,
+   * and a media item with several warnings repeats it once per warning.
+   */
+  protected function overlayTextHelp(): string {
+    return (string) $this->t('The overlay already shows a "Media content warning" title and a "Show media" button, so describe only what the warning is about.');
+  }
+
   // Method to get all media tag taxonomy terms.
   protected function getTerms() {
     $query = \Drupal::entityQuery('taxonomy_term')
@@ -99,16 +109,16 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
 
     $form['people_warnings']['single_person_text'] = [
       '#title' => $this->t('Warning Text: Single Person'),
-      '#description' => $this->t('The text that will be displayed on the media overlay for a single deceased person. Use the replacement token "[name]" to insert the person\'s name in the message.'),
+      '#description' => $this->t('The text that will be displayed on the media overlay for a single deceased person. Use the replacement token "[name]" to insert the person\'s name in the message.') . ' ' . $this->overlayTextHelp(),
       '#type' => 'textfield',
-      '#default_value' => $config->get('people_warnings.warning_single') ?? $this->t('Warning: [name] is deceased. Click through to access content.'),
+      '#default_value' => $config->get('people_warnings.warning_single') ?? $this->t('[name] is deceased.'),
     ];
 
     $form['people_warnings']['multiple_people_text'] = [
       '#title' => $this->t('Warning Text: Multiple People'),
-      '#description' => $this->t('The text that will be displayed on the media overlay for multiple deceased people. Use the replacement token "[names]" to insert the names in the message.'),
+      '#description' => $this->t('The text that will be displayed on the media overlay for multiple deceased people. Use the replacement token "[names]" to insert the names in the message.') . ' ' . $this->overlayTextHelp(),
       '#type' => 'textfield',
-      '#default_value' => $config->get('people_warnings.warning_multiple') ?? $this->t('Warning: The following people are deceased. Click through to access content. [names]'),
+      '#default_value' => $config->get('people_warnings.warning_multiple') ?? $this->t('The following people are deceased: [names]'),
     ];
 
     $form['#tree'] = TRUE;
@@ -198,7 +208,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       $form['taxonomy_warnings'][$i]['text'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Warning Text'),
-        '#description' => $this->t('The text that will be displayed on the media overlay.'),
+        '#description' => $this->t('The text that will be displayed on the media overlay.') . ' ' . $this->overlayTextHelp(),
         '#default_value' => $text,
       ];
 

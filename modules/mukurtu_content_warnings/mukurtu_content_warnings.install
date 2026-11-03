@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for Mukurtu Content Warnings.
+ */
+
+/**
+ * Remove the click-through instruction from default deceased-person warning text.
+ */
+function mukurtu_content_warnings_update_40801() {
+  // Old default => new default, per setting. Text a site changed is kept, and
+  // so are translations, which are stored separately from this base config.
+  $defaults = [
+    'people_warnings.warning_single' => [
+      'Warning: [name] is deceased. Click through to access content.',
+      '[name] is deceased.',
+    ],
+    'people_warnings.warning_multiple' => [
+      'Warning: The following people are deceased. Click through to access content. [names]',
+      'The following people are deceased: [names]',
+    ],
+  ];
+  $config = \Drupal::configFactory()->getEditable('mukurtu_content_warnings.settings');
+  $changed = FALSE;
+  foreach ($defaults as $key => [$old, $new]) {
+    if ($config->get($key) === $old) {
+      $config->set($key, $new);
+      $changed = TRUE;
+    }
+  }
+  if (!$changed) {
+    return t('Kept the customized deceased-person warning text.');
+  }
+  $config->save();
+  return t('Updated the deceased-person warning text to the new default. The overlay\'s "Show media" button now gives the instruction.');
+}

@@ -3,10 +3,11 @@
  * @file
  * Default theme implementation for media content warnings.
  *
- * The dismiss button is described by the warnings, so screen readers announce
- * the warning text along with the button. The same media item can render more
- * than once on a page (carousel slide, thumbnail, lightbox copy); every copy
- * shares the id, and every copy holds the same warnings.
+ * The dismiss button is described by the title and the warnings, so screen
+ * readers announce the warning text along with the button. The same media
+ * item can render more than once on a page (carousel slide, thumbnail,
+ * lightbox copy); every copy shares the ids, and every copy holds the same
+ * warnings.
  *
  * Available variables:
  * - media: The media entity.
@@ -14,11 +15,18 @@
  */
 #}
 {% set warnings_id = 'mukurtu-content-warnings-' ~ media.id %}
+{% set title_id = warnings_id ~ '-title' %}
+{% set count = warnings|length %}
 {# tabindex -1: Chrome makes a scrolling box with no focusable children a Tab
    stop, and long warnings scroll. Where the button is out of the Tab order
    (an inactive carousel slide, a card link), the overlay must be too. #}
 <div {{ attributes.addClass('mukurtu-content-warnings').setAttribute('data-mid', media.id).setAttribute('tabindex', '-1') }}>
-  {% if warnings|length > 1 %}
+  {# Not a heading: a page can show many overlays, and headings for each would
+     crowd the page outline. #}
+  <p id="{{ title_id }}" class="mukurtu-content-warnings__title">
+    {% trans %}Media content warning{% plural count %}Media content warnings{% endtrans %}
+  </p>
+  {% if count > 1 %}
     <ul id="{{ warnings_id }}" class="mukurtu-content-warnings__list" role="list">
       {% for warning in warnings %}
         <li>{{ warning }}</li>
@@ -29,5 +37,5 @@
       {{ warnings }}
     </div>
   {% endif %}
-  <button type="button" class="mukurtu-content-warnings__dismiss" aria-describedby="{{ warnings_id }}">{{ 'Show media'|t }}</button>
+  <button type="button" class="mukurtu-content-warnings__dismiss" aria-describedby="{{ title_id }} {{ warnings_id }}">{{ 'Show media'|t }}</button>
 </div>
