@@ -1435,8 +1435,10 @@ a:not(.primary-nav__menu-link) svg.tel path {
   color: var(--color-white);
 }
 .mukurtu-character-palette__toggle:focus-visible {
-  outline: 2px solid var(--brand-secondary-dark);
+  outline: 2px solid var(--color-white);
   outline-offset: 2px;
+  -webkit-box-shadow: 0 0 0 6px var(--brand-text-color);
+          box-shadow: 0 0 0 6px var(--brand-text-color);
 }
 @media (forced-colors: active) {
   .mukurtu-character-palette__toggle {

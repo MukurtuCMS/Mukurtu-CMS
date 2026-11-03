@@ -102,6 +102,8 @@ function fixture(groups: typeof GROUPS): string {
   <input id="source" name="source" type="text" data-mukurtu-character-palette="Source">
   <label for="plain">Not marked</label>
   <input id="plain" name="plain" type="text">
+  <label for="under">Under the panel</label>
+  <input id="under" name="under" type="text" style="position:fixed;right:3rem;bottom:10rem" data-mukurtu-character-palette>
   ${EDITOR}
   ${TAGIFY}
   <script>window.drupalSettings = {mukurtuCharacterPalette: {groups: ${JSON.stringify(groups)}}};</script>
@@ -125,7 +127,9 @@ test.describe('Character palette', () => {
     await load(page);
     await expect(page.locator('.mukurtu-character-palette__toggle')).toHaveCount(1);
     await expect(corner(page)).toHaveAttribute('title', 'Character palette (Ctrl+Shift+Space)');
-    await expect(corner(page)).toHaveAccessibleDescription('Inserts characters into the field you were last typing in. Shortcut: Ctrl+Shift+Space.');
+    await expect(corner(page)).toHaveAccessibleDescription('Inserts characters into the field you were last typing in. Shortcut: Ctrl+Shift+Space. Press Escape to go back to the field.');
+    // Read only as the button's description, not on its own.
+    await expect(page.locator('#mukurtu-character-palette-description')).toBeHidden();
     await expect(corner(page)).toHaveAttribute('aria-expanded', 'false');
     await expect(corner(page)).toHaveCSS('position', 'fixed');
   });
@@ -152,12 +156,45 @@ test.describe('Character palette', () => {
     await expect(panel(page)).toBeHidden();
   });
 
-  test('the shortcut goes back to the field from the palette too', async ({ page }) => {
+  test('the shortcut goes back to the field from the palette too, closing it', async ({ page }) => {
     await load(page);
     await page.locator('#term').focus();
     await page.keyboard.press('Control+Shift+Space');
     await page.keyboard.press('Control+Shift+Space');
     await expect(page.locator('#term')).toBeFocused();
+    await expect(panel(page)).toBeHidden();
+  });
+
+  test('Escape in the field closes a panel opened with the mouse', async ({ page }) => {
+    await load(page);
+    await page.locator('#term').focus();
+    await corner(page).click();
+    await expect(panel(page)).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#term')).toBeFocused();
+    await expect(panel(page)).toBeHidden();
+  });
+
+  test('Escape goes back to the button when no field has been used', async ({ page }) => {
+    await load(page);
+    await corner(page).click();
+    await panel(page).getByRole('button', { name: 'k underbar' }).focus();
+    await page.keyboard.press('Escape');
+    await expect(corner(page)).toBeFocused();
+  });
+
+  test('never stays over the focused field, even when kept open', async ({ page }) => {
+    await load(page);
+    await page.locator('#term').focus();
+    await page.keyboard.press('Control+Shift+Space');
+    await panel(page).getByLabel('Keep open').check();
+    await page.keyboard.press('Escape');
+    await expect(panel(page)).toBeVisible();
+
+    // A field under the panel that the page can't scroll out from under it.
+    await page.locator('#under').focus();
+    await expect(panel(page)).toBeHidden();
+    await expect(panel(page).getByLabel('Keep open')).toBeChecked();
   });
 
   test('a mouse keeps focus and the caret in the field', async ({ page }) => {

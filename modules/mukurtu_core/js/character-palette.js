@@ -6,8 +6,9 @@
  * the characters site managers listed on the Character palette settings
  * page, and each character goes into whichever marked field had focus last:
  * a text field, a rich text editor or a Tagify box. Ctrl+Shift+Space jumps
- * from a field to the panel, and Escape goes back with the caret where it
- * was. "Keep open" leaves the panel up while people type.
+ * from a field to the panel and back, and Escape goes back with the caret
+ * where it was. The panel never stays over whatever has focus, even when
+ * kept open. "Keep open" leaves the panel up while people type.
  *
  * Mouse and touch insertion keep focus in the field, so the caret stays put
  * and a phone keyboard stays open.
@@ -296,8 +297,10 @@
 
     const description = document.createElement('span');
     description.id = 'mukurtu-character-palette-description';
-    description.className = 'visually-hidden';
-    description.textContent = plain(Drupal.t('Inserts characters into the field you were last typing in. Shortcut: @shortcut.', {'@shortcut': SHORTCUT}));
+    // Hidden, so reading through the page doesn't meet it on its own. A
+    // description reference still reads hidden text.
+    description.hidden = true;
+    description.textContent = plain(Drupal.t('Inserts characters into the field you were last typing in. Shortcut: @shortcut. Press Escape to go back to the field.', {'@shortcut': SHORTCUT}));
     button.setAttribute('aria-describedby', description.id);
 
     const panel = document.createElement('div');
@@ -399,11 +402,94 @@
         const first = panel.querySelector('.mukurtu-character-palette__character');
         (first || panel.querySelector('select, input')).focus();
       }
+      else {
+        // Opened with a mouse, focus stays in the field, which may be under
+        // the panel.
+        getOutOfTheWay();
+      }
     }
 
     function close() {
       panel.hidden = true;
       button.setAttribute('aria-expanded', 'false');
+      // Back to its usual height next time.
+      panel.style.maxBlockSize = '';
+    }
+
+    // The area that has focus: the caret in a rich text editor or Tagify
+    // box, which can be far smaller than the box itself, or else the
+    // focused element.
+    function focusRect() {
+      const active = document.activeElement;
+      if (!active || active === document.body) {
+        return null;
+      }
+      if (active.isContentEditable && window.getSelection().rangeCount) {
+        const caret = window.getSelection().getRangeAt(0).getBoundingClientRect();
+        if (caret.width || caret.height) {
+          return caret;
+        }
+      }
+      return active.getBoundingClientRect();
+    }
+
+    // The panel floats over the page, so it never stays over whatever has
+    // focus (WCAG 2.4.11), even when it's kept open. The page scrolls the
+    // focus up above the panel if it can. If it can't, the panel shrinks to
+    // the room between the focus and the button, and scrolls. If even that
+    // is too small, it closes, and "Keep open" stays checked for next time.
+    let checking = false;
+    function getOutOfTheWay() {
+      if (panel.hidden || checking || inPalette(document.activeElement)) {
+        return;
+      }
+      checking = true;
+      window.requestAnimationFrame(function () {
+        checking = false;
+        const focused = focusRect();
+        if (panel.hidden || !focused || inPalette(document.activeElement)) {
+          return;
+        }
+        const area = panel.getBoundingClientRect();
+        if (!(area.left < focused.right && area.right > focused.left && area.top < focused.bottom && area.bottom > focused.top)) {
+          return;
+        }
+        const needed = focused.bottom - area.top + 8;
+        const before = window.scrollY;
+        if (focused.top - needed >= 0) {
+          window.scrollBy(0, needed);
+        }
+        if (window.scrollY !== before) {
+          return;
+        }
+        // The panel is anchored at its bottom, so a shorter one clears the
+        // focus above it.
+        const room = area.bottom - focused.bottom - 8;
+        if (room >= 100) {
+          panel.style.maxBlockSize = room + 'px';
+        }
+        else {
+          close();
+        }
+      });
+    }
+    document.addEventListener('focusin', getOutOfTheWay);
+    document.addEventListener('selectionchange', getOutOfTheWay);
+    window.addEventListener('scroll', getOutOfTheWay, {capture: true, passive: true});
+    window.addEventListener('resize', getOutOfTheWay, {passive: true});
+
+    // Back to the field people were typing in, closing the panel unless
+    // it's kept open. With no field yet, back to the button.
+    function returnToField() {
+      if (!pin.checked) {
+        close();
+      }
+      if (current && current.input.isConnected) {
+        current.focus();
+      }
+      else {
+        button.focus();
+      }
     }
 
     button.addEventListener('click', function () {
@@ -425,17 +511,21 @@
         }
         event.preventDefault();
         event.stopPropagation();
-        if (!pin.checked) {
-          close();
-        }
-        if (current && current.input.isConnected) {
-          current.focus();
-        }
+        returnToField();
       });
     });
 
-    // Focus and clicks outside the palette close it unless it's kept open,
-    // because it floats over the page (WCAG 2.4.11).
+    // Escape in the field closes the panel, so it can always be cleared
+    // without leaving the field. The field's own Escape still happens.
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !panel.hidden && current && current.hasFocus()) {
+        close();
+      }
+    });
+
+    // Focus moving out of the palette, and clicks outside it and the field,
+    // close it unless it's kept open, because it floats over the page
+    // (WCAG 2.4.11).
     document.addEventListener('pointerdown', function (event) {
       if (!panel.hidden && !pin.checked && !inPalette(event.target) && !(current && current.contains(event.target))) {
         close();
@@ -448,15 +538,14 @@
             target.commitHeldText(event.relatedTarget);
           }
         });
-        if (!panel.hidden && !pin.checked && event.relatedTarget && !inPalette(event.relatedTarget)
-          && !(current && current.contains(event.relatedTarget))) {
+        if (!panel.hidden && !pin.checked && event.relatedTarget && !inPalette(event.relatedTarget)) {
           close();
         }
       });
     });
 
     document.body.append(button, description, panel);
-    return {button: button, panel: panel, open: open, close: close};
+    return {button: button, panel: panel, open: open, returnToField: returnToField};
   }
 
   // The field people were last typing in is where characters go.
@@ -482,9 +571,7 @@
     }
     event.preventDefault();
     if (inPalette(document.activeElement)) {
-      if (current && current.input.isConnected) {
-        current.focus();
-      }
+      palette.returnToField();
       return;
     }
     palette.open(true);
