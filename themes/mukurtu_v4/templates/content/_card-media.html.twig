@@ -10,16 +10,25 @@
  * manual thumbnail override is set), whose controls need to stay
  * clickable rather than navigate away.
  *
+ * Media with a content warning is never wrapped: the warning's own "Show
+ * media" button can't sit inside a link. The wrapper hands the overlay the
+ * node URL instead, for its "Access item to view" link.
+ *
  * Expected variables:
  * - media_bundle: machine name of the representative media's bundle.
  * - media: pre-rendered representative media field content.
  * - url: node URL to link to.
  */
 #}
-{% if media_bundle in ['image', 'document', 'external_embed'] %}
+{% set media_markup = media|render %}
+{% if 'mukurtu-content-warnings' in media_markup ~ '' %}
+<div class="card-media--content-warning" data-mukurtu-card-url="{{ url }}">
+  {{ media_markup }}
+</div>
+{% elseif media_bundle in ['image', 'document', 'external_embed'] %}
 <a href="{{ url }}" aria-hidden="true" tabindex="-1">
-  {{ media }}
+  {{ media_markup }}
 </a>
 {% else %}
-{{ media }}
+{{ media_markup }}
 {% endif %}

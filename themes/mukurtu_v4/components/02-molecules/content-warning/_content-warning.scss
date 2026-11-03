@@ -51,12 +51,15 @@
     display: none;
   }
 
-  // Cards: the media sits inside a link to the item, and a card is too small
-  // for the warnings. Show the title and the hint; the link opens the item,
-  // which shows every warning before the media can be revealed.
+  // Cards are too small for the warnings. Show the title, a link to the item
+  // (which shows every warning), and the button. The --card class is set by
+  // content-warnings.js; media still inside a link shows the title and hint,
+  // and the link opens the item.
+  &--card,
   a & {
     justify-content: center;
     gap: var(--v-space-6xs);
+    padding: var(--v-space-5xs) var(--v-space-5xs) 0;
   }
 }
 
@@ -64,14 +67,35 @@
   display: none;
   margin: 0;
 
+  .mukurtu-content-warnings--card &,
   a & {
     display: block;
   }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+
+    &:focus-visible {
+      // On the overlay's own dark scrim, like the button below (#2199).
+      outline: 2px solid currentcolor;
+      outline-offset: 2px;
+    }
+  }
 }
 
+.mukurtu-content-warnings--card .mukurtu-content-warnings__list,
 a .mukurtu-content-warnings__list,
 a .mukurtu-content-warnings__actions {
   display: none;
+}
+
+// A card holds no warning text to scroll past, so its button needs no band.
+// Without this, the band's extra padding could itself make a small card
+// scroll. Doubled class to outrank the --scrolls rule further down.
+.mukurtu-content-warnings.mukurtu-content-warnings--card .mukurtu-content-warnings__actions {
+  padding-block: 0 var(--v-space-5xs);
+  background: none;
 }
 
 .mukurtu-content-warnings__title {

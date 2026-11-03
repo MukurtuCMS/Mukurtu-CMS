@@ -26,7 +26,21 @@
           }).observe(element);
         }
 
-        // Cards wrap their media in a link that is hidden from AT and out of
+        // Cards (themes' _card-media.html.twig) leave warned media unlinked and
+        // pass the item's URL instead. A card is too small for the warnings,
+        // so it shows the title, a link to the item, which shows every
+        // warning, and the "Show media" button.
+        const cardUrl = element.closest('[data-mukurtu-card-url]')?.dataset.mukurtuCardUrl;
+        const hint = element.querySelector('.mukurtu-content-warnings__card-hint');
+        if (cardUrl && hint) {
+          element.classList.add('mukurtu-content-warnings--card');
+          const link = document.createElement('a');
+          link.href = cardUrl;
+          link.textContent = hint.textContent.trim();
+          hint.replaceChildren(link);
+        }
+
+        // Media still wrapped in a link that is hidden from AT and out of
         // the Tab order, since the card's title link goes to the same page.
         // A button there would be a Tab stop AT can't see (WCAG 4.1.2). A card
         // is too small to show every warning, so it shows only the title and
@@ -41,6 +55,10 @@
         // inside it gives keyboard and AT users the same action, since a
         // native button fires click on Enter and Space.
         element.addEventListener('click', (event) => {
+          // Let the card's link to the item navigate.
+          if (event.target.closest('a')) {
+            return;
+          }
           event.preventDefault();
           this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
         });

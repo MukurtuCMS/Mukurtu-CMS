@@ -118,35 +118,62 @@ test('Long warnings scroll from the top on a phone instead of clipping', async (
   expect(metrics.firstLineInside, 'the first warning starts inside the overlay').toBe(true);
 });
 
-// Mirrors a browse card: the media sits in a link hidden from AT, and the
-// card's title link is the one keyboard users reach.
+// Mirrors _card-media.html.twig for warned media: no link around the media,
+// and the item URL handed to the overlay. The card's title link follows.
 const CARD = `
-  <a href="#item" aria-hidden="true" tabindex="-1">
+  <div class="card-media--content-warning" data-mukurtu-card-url="#item">
     <div class="media" style="inline-size: 203px; block-size: 135px">${overlay(4)}</div>
+  </div>
+  <a href="#item">Card title</a>`;
+
+// Media some other template still wraps in a link hidden from AT.
+const LINKED_CARD = `
+  <a href="#item" aria-hidden="true" tabindex="-1">
+    <div class="media" style="inline-size: 203px; block-size: 135px">${overlay(6)}</div>
   </a>
   <a href="#item">Card title</a>`;
 
-test('A warning inside a card link adds no Tab stop', async ({ page }) => {
-  await load(page, CARD);
-  await page.keyboard.press('Tab');
-  await expect(page.getByRole('link', { name: 'Card title' })).toBeFocused();
-  await expect(page.locator('.mukurtu-content-warnings__dismiss')).toHaveAttribute('tabindex', '-1');
-});
-
-test('A card shows only the title and a hint, and opens the item', async ({ page }) => {
+test('A card shows the title, a link to the item, and Show media last', async ({ page }) => {
   await load(page, CARD);
   const warning = page.locator('.mukurtu-content-warnings');
+  const link = page.getByRole('link', { name: 'Access item to view' });
+  const button = page.getByRole('button', { name: 'Show media' });
   await expect(page.getByText('Media content warnings')).toBeVisible();
-  await expect(page.getByText('Access item to view')).toBeVisible();
+  await expect(link).toHaveAttribute('href', '#item');
+  await expect(button).toBeVisible();
   await expect(page.getByText(WARNINGS[0])).toBeHidden();
-  await expect(page.locator('.mukurtu-content-warnings__dismiss')).toBeHidden();
   const fits = await warning.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
-  expect(fits, 'the card text fits the smallest card').toBe(true);
+  expect(fits, 'the card fits the smallest card').toBe(true);
+  const linkBox = (await link.boundingBox())!;
+  const buttonBox = (await button.boundingBox())!;
+  expect(buttonBox.y, 'Show media comes after the link').toBeGreaterThan(linkBox.y);
+  // Screen readers still hear every warning with the button.
+  await expect(button).toHaveAccessibleDescription(new RegExp(WARNINGS[1].slice(0, 30)));
+});
 
-  // A click follows the card's link instead of revealing the media.
+test('A card link opens the item without revealing the media', async ({ page }) => {
+  await load(page, CARD);
+  await page.getByRole('link', { name: 'Access item to view' }).click();
+  await expect(page).toHaveURL(/#item$/);
+  await expect(page.locator('.mukurtu-content-warnings')).not.toHaveClass(/dismissed/);
+});
+
+test('Show media on a card reveals the media in place', async ({ page }) => {
+  await load(page, CARD);
+  await page.getByRole('button', { name: 'Show media' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.mukurtu-content-warnings')).toHaveClass(/dismissed/);
+  await expect(page).not.toHaveURL(/#item$/);
+});
+
+test('Media still inside a link shows the title and hint, and adds no Tab stop', async ({ page }) => {
+  await load(page, LINKED_CARD);
+  await expect(page.getByText('Access item to view')).toBeVisible();
+  await expect(page.locator('.mukurtu-content-warnings__dismiss')).toBeHidden();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Card title' })).toBeFocused();
   await page.getByText('Access item to view').click();
   await expect(page).toHaveURL(/#item$/);
-  await expect(warning).not.toHaveClass(/dismissed/);
 });
 
 test('Outside cards, the card hint stays hidden', async ({ page }) => {

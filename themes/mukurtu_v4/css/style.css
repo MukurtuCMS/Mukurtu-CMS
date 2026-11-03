@@ -1563,24 +1563,39 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .splide__track--nav .mukurtu-content-warnings > * {
   display: none;
 }
-a .mukurtu-content-warnings {
+.mukurtu-content-warnings--card, a .mukurtu-content-warnings {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
   gap: var(--v-space-6xs);
+  padding: var(--v-space-5xs) var(--v-space-5xs) 0;
 }
 
 .mukurtu-content-warnings__card-hint {
   display: none;
   margin: 0;
 }
-a .mukurtu-content-warnings__card-hint {
+.mukurtu-content-warnings--card .mukurtu-content-warnings__card-hint, a .mukurtu-content-warnings__card-hint {
   display: block;
 }
+.mukurtu-content-warnings__card-hint a {
+  color: inherit;
+  text-decoration: underline;
+}
+.mukurtu-content-warnings__card-hint a:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
 
+.mukurtu-content-warnings--card .mukurtu-content-warnings__list,
 a .mukurtu-content-warnings__list,
 a .mukurtu-content-warnings__actions {
   display: none;
+}
+
+.mukurtu-content-warnings.mukurtu-content-warnings--card .mukurtu-content-warnings__actions {
+  padding-block: 0 var(--v-space-5xs);
+  background: none;
 }
 
 .mukurtu-content-warnings__title {
