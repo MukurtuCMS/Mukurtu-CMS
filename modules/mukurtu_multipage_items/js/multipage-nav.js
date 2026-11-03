@@ -71,13 +71,40 @@
      */
     loadPage: function(element, pageId) {
       try {
-        Drupal.ajax({ url: `/multipageitem/${pageId}/ajax` }).execute();
+        // execute() returns nothing while another request is in flight.
+        Drupal.ajax({ url: `/multipageitem/${pageId}/ajax` }).execute()
+          ?.then(() => this.announcePage(element, pageId));
         history.replaceState({}, '', `/node/${pageId}`);
       }
       catch (error) {
         return false;
       }
       return true;
+    },
+
+    /**
+     * Tell screen reader users which page is now showing.
+     *
+     * The page content is replaced over AJAX, which nothing announces. A
+     * page the reader has already moved on from is skipped.
+     *
+     * @param {HTMLElement} element
+     *   The multipage items wrapper element.
+     * @param {string} pageId
+     *   The id of the page that finished loading.
+     */
+    announcePage: function(element, pageId) {
+      const tocElement = element.querySelector('#multipage-item-table-of-contents');
+      const option = tocElement?.selectedOptions[0];
+      if (!option || option.value !== pageId) {
+        return;
+      }
+      // Drupal.announce() writes HTML; Drupal.t() has escaped @title.
+      Drupal.announce(Drupal.t('Page @number of @total: @title', {
+        '@number': tocElement.selectedIndex + 1,
+        '@total': tocElement.options.length,
+        '@title': option.textContent.trim(),
+      }));
     },
 
     /**
