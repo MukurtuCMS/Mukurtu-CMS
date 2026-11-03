@@ -321,6 +321,10 @@ function mukurtu_protocol_entity_type_build(array &$entity_types)
 
   if (isset($entity_types['media'])) {
     $entity_types['media']->setHandlerClass('access', 'Drupal\mukurtu_protocol\MukurtuProtocolMediaAccessControlHandler');
+    // Listings are filtered by the user's protocol memberships in
+    // mukurtu_protocol_query_media_access_alter(), so cached lists must vary
+    // by them. See MembershipsCacheContext.
+    $entity_types['media']->set('list_cache_contexts', array_unique(array_merge($entity_types['media']->getListCacheContexts(), ['mukurtu_memberships'])));
   }
 
   // Mukurtu Comment handlers.
