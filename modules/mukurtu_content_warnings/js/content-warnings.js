@@ -81,10 +81,20 @@
         this.setMediaInert(contentWarnings, false);
       });
 
-      if (hadFocus) {
-        const candidates = element.closest('.media')?.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]:not([tabindex="-1"])') ?? [];
-        const media = [...candidates].find((el) => !element.contains(el));
-        media?.focus();
+      const mediaEl = element.closest('.media');
+      if (hadFocus && mediaEl) {
+        // Skip overlay controls and anything not rendered, such as the hidden
+        // lightbox copy of the media nested inside this .media.
+        const candidates = mediaEl.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]:not([tabindex="-1"])');
+        const target = [...candidates].find((el) => !el.closest('.mukurtu-content-warnings') && el.getClientRects().length > 0);
+        if (target) {
+          target.focus();
+        }
+        else {
+          // Images have no control of their own, so focus the media itself.
+          mediaEl.setAttribute('tabindex', '-1');
+          mediaEl.focus();
+        }
       }
     },
 
