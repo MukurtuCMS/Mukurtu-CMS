@@ -96,7 +96,10 @@
         return;
       }
       mediaEl.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]').forEach((el) => {
-        if (warningEl.contains(el)) {
+        // Skip every overlay's own controls, not only this one's: the hidden
+        // lightbox copy of the media is nested inside this .media, and its
+        // dismiss button must stay focusable once the lightbox shows it.
+        if (el.closest('.mukurtu-content-warnings')) {
           return;
         }
         if (inert) {

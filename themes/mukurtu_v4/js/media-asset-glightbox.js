@@ -154,12 +154,23 @@
         mediaEl = null;
       }
 
+      // An undismissed content warning covers the slide's media, so its
+      // dismiss button replaces the media as the first stop. Without it,
+      // keyboard users could not reach the warning inside the lightbox.
+      const warningButton = currentSlide
+        ? currentSlide.querySelector('.mukurtu-content-warnings:not(.dismissed) .mukurtu-content-warnings__dismiss')
+        : null;
+      if (warningButton) {
+        zoomableImg = null;
+        mediaEl = null;
+      }
+
       // Preserves the original gnext/gprev/gclose order for other slides;
       // the zoomable image or the slide's own media element (when present -
       // mutually exclusive, since only image slides have the former and
       // only video/audio/remote-video/external-embed slides have the
       // latter) simply becomes the first stop.
-      const stops = [zoomableImg, mediaEl, container.querySelector('.gnext'), container.querySelector('.gprev'), container.querySelector('.gclose')]
+      const stops = [warningButton, zoomableImg, mediaEl, container.querySelector('.gnext'), container.querySelector('.gprev'), container.querySelector('.gclose')]
         .filter((el) => el && !el.classList.contains('disabled'));
       if (!stops.length) return;
 

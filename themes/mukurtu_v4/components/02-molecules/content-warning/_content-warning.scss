@@ -55,6 +55,12 @@
   padding: 0;
   list-style: none;
 
+  // The theme gives list items square markers and a taller line height.
+  li {
+    list-style: none;
+    line-height: inherit;
+  }
+
   li + li {
     margin-block-start: var(--v-space-5xs);
   }

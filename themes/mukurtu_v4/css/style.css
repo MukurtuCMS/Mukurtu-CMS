@@ -1542,6 +1542,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
   padding: 0;
   list-style: none;
 }
+.mukurtu-content-warnings__list li {
+  list-style: none;
+  line-height: inherit;
+}
 .mukurtu-content-warnings__list li + li {
   -webkit-margin-before: var(--v-space-5xs);
           margin-block-start: var(--v-space-5xs);
