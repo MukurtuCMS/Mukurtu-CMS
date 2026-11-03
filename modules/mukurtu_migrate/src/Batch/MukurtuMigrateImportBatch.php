@@ -273,6 +273,10 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
     $row_failures = $results['row_failures'] ?? 0;
     $row_ignored = $results['row_ignored'] ?? 0;
 
+    // The source database credentials are only needed while the batch runs,
+    // and the credential step saves them again before every run.
+    static::deleteSourceCredentials();
+
     if ($successes > 0) {
       \Drupal::messenger()->addStatus(\Drupal::translation()
         ->formatPlural($successes, 'Completed 1 migration task successfully', 'Completed @count migration tasks successfully'));
@@ -341,6 +345,25 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
           ->addStatus(t('The front page was set to the Drupal default of "/node". You will likely want to update this by navigating to <a href="/admin/config/system/site-information">Configuration > System > Basic Site Settings</a>.'));
       }
     }
+  }
+
+  /**
+   * Deletes the saved source database credentials from state.
+   *
+   * The credential form saves them, including the password, through
+   * MigrationConfigurationTrait::createDatabaseStateSettings().
+   *
+   * @return bool
+   *   TRUE if saved credentials were found and deleted.
+   */
+  public static function deleteSourceCredentials(): bool {
+    $state = \Drupal::state();
+    $database_state_key = $state->get('migrate.fallback_state_key');
+    if ($database_state_key === NULL) {
+      return FALSE;
+    }
+    $state->deleteMultiple([$database_state_key, 'migrate.fallback_state_key']);
+    return TRUE;
   }
 
 }
