@@ -257,7 +257,7 @@ class CommunityRecordNodeViewBuilder extends NodeViewBuilder {
           'id' => $record->id(),
           'tabid' => "record-{$record->id()}",
           'communities' => $this->getCommunitiesLabel($record),
-          'title' => $record->getTitle(),
+          'title' => $this->entityRepository->getTranslationFromContext($record)->getTitle(),
           'content' => parent::view($record, $view_mode),
           'is_cr' => mukurtu_community_records_is_community_record($record),
         ];
