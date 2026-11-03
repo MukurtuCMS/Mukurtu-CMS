@@ -2324,15 +2324,15 @@ label.form-required::after,
 :is(#extra-specificity-hack, .horizontal-tabs) *:focus {
   outline: var(--admin-toolbar-size-focus, 2px) solid var(--admin-toolbar-color-focus, var(--focus-color));
 }
-:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *)) {
+:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *, [data-horizontal-tabs-panes], [data-horizontal-tabs-panes] *)) {
   all: revert;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
 }
-:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *)) button {
+:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *, [data-horizontal-tabs-panes], [data-horizontal-tabs-panes] *)) button {
   font-family: inherit;
 }
-:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *))::after, :is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *))::before {
+:is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *, [data-horizontal-tabs-panes], [data-horizontal-tabs-panes] *))::after, :is(#extra-specificity-hack, .horizontal-tabs) *:not(:where(svg, svg *, .horizontal-tabs-panes, .horizontal-tabs-panes *, [data-horizontal-tabs-panes], [data-horizontal-tabs-panes] *))::before {
   all: revert;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
@@ -2341,8 +2341,8 @@ label.form-required::after,
   position: absolute !important;
   overflow: hidden;
   clip: rect(1px, 1px, 1px, 1px);
-  inline-size: 1px;
-  block-size: 1px;
+  inline-size: 1px !important;
+  block-size: 1px !important;
   word-wrap: normal;
 }
 :is(#extra-specificity-hack, .horizontal-tabs) ul.horizontal-tabs-list {
@@ -2475,6 +2475,40 @@ label.form-required::after,
   padding: 0;
   -webkit-padding-before: var(--v-separation);
           padding-block-start: var(--v-separation);
+}
+:is(#extra-specificity-hack, .horizontal-tabs) [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) > details {
+  -webkit-border-after: 1px solid var(--cr-border);
+          border-block-end: 1px solid var(--cr-border);
+}
+:is(#extra-specificity-hack, .horizontal-tabs) [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) > details:last-of-type {
+  -webkit-border-after: none;
+          border-block-end: none;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) > details > summary {
+  cursor: pointer;
+  padding-block: 0.6em;
+  padding-inline: 1em;
+  background-color: var(--cr-default-bg);
+  color: var(--horizontal-tab-link-text);
+  font-weight: 700;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) > details > summary:focus-visible {
+  outline: 4px solid var(--focus-color);
+  outline-offset: -4px;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) > details > summary .div-title,
+:is(#extra-specificity-hack, .horizontal-tabs) [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) > details > summary .details-title {
+  display: inline;
+}
+:is(#extra-specificity-hack, .horizontal-tabs) [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) > details[open] {
+  -webkit-padding-after: var(--v-separation);
+          padding-block-end: var(--v-separation);
+}
+:is(#extra-specificity-hack, .horizontal-tabs) [data-horizontal-tabs-panes]:not(.horizontal-tabs-panes) > details[open] > summary {
+  background-color: var(--brand-primary-dark);
+  color: var(--light-text-color);
+  -webkit-margin-after: var(--v-separation);
+          margin-block-end: var(--v-separation);
 }
 
 .block--image-with-description {

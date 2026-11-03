@@ -179,7 +179,9 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
 
     $build['records'] = [
       '#theme' => 'taxonomy_records',
-      '#active' => 1,
+      // The first record is the one shown first, as a tab or, below the tabs
+      // breakpoint, as the open accordion section. This is a node ID.
+      '#active' => $records[0]['id'] ?? NULL,
       '#records' => $records,
       '#referenced_content' => $referencedContent,
       '#term_description' => $this->getTermDescription($taxonomy_term),
