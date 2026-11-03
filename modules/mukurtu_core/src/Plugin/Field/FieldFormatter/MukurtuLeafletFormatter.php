@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_core\Plugin\Field\FieldFormatter;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -100,7 +101,10 @@ class MukurtuLeafletFormatter extends LeafletDefaultFormatter implements Contain
           $new_geo_json = $geo_json;
           $new_geo_json['features'] = [$geo_feature];
           $value['value'] = json_encode($new_geo_json);
-          $descriptions[$new_values_delta] = $geo_feature['properties']['location_description'] ?? NULL;
+          // The description is plain text typed into the widget, but Leaflet
+          // inserts popup content as HTML, so it must be escaped here.
+          $description = $geo_feature['properties']['location_description'] ?? NULL;
+          $descriptions[$new_values_delta] = is_scalar($description) ? Html::escape((string) $description) : NULL;
           $new_values[] = $value;
         }
       }
