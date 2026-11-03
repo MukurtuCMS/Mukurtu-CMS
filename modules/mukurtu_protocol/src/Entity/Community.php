@@ -72,6 +72,10 @@ use Exception;
     'collection' => '/admin/communities',
   ],
   admin_permission: 'administer community entities',
+  // Listings are filtered by the user's memberships in
+  // mukurtu_protocol_query_community_access_alter(), so cached lists must
+  // vary by them. See MembershipsCacheContext.
+  list_cache_contexts: ['mukurtu_memberships'],
   base_table: 'community',
   data_table: 'community_field_data',
   revision_table: 'community_revision',
