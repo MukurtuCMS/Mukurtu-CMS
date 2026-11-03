@@ -74,7 +74,7 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
     $form['enabled'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show the character palette'),
-      '#description' => $this->t('Adds a button beside text fields and search boxes that inserts the characters listed below. Each person can still hide it.'),
+      '#description' => $this->t('Adds a button to the corner of each page that opens the characters listed below, so people can insert them into text fields and search boxes.'),
       '#default_value' => (bool) $config->get('enabled'),
     ];
 
@@ -125,13 +125,22 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
     ];
 
     // Before the table and tied to it, so screen readers hear it on the way
-    // in rather than after the Add new row button.
+    // in rather than after the Add new row button. Rare letters and marks
+    // can be read as nothing at all, so it also asks for names.
     $help_id = $wrapper_id . '-help';
     $element['help'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'p',
-      '#value' => $this->t('Empty rows are ignored.'),
+      '#type' => 'container',
       '#attributes' => ['class' => ['description'], 'id' => $help_id],
+      'empty' => [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('Empty rows are ignored.'),
+      ],
+      'names' => [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('Screen readers read the name instead of the character. Add a name for any character a screen reader might skip or misread, such as ʼ or ʷ.'),
+      ],
     ];
     $element['characters'] = [
       '#type' => 'table',
