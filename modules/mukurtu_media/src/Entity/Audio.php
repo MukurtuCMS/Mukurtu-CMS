@@ -24,7 +24,7 @@ class Audio extends Media implements AudioInterface, CulturalProtocolControlledI
    * {@inheritdoc}
    */
   public function getDefaultThumbnail(): ?int {
-    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    $config = \Drupal::config('mukurtu_media.thumbnail_settings');
     return $config->get('audio_default_thumbnail')[0] ?? NULL;
   }
 

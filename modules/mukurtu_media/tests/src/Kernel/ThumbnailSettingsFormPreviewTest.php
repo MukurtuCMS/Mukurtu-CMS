@@ -132,7 +132,7 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
    */
   public function testPreviewPresentWhenImageFileConfigured(): void {
     $file = $this->createImageFile('audio-default.png');
-    \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings')
+    \Drupal::configFactory()->getEditable('mukurtu_media.thumbnail_settings')
       ->set('audio_default_thumbnail', [$file->id()])
       ->save();
 
@@ -165,7 +165,7 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
    */
   public function testNoPreviewForNonImageFile(): void {
     $file = $this->createNonImageFile();
-    \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings')
+    \Drupal::configFactory()->getEditable('mukurtu_media.thumbnail_settings')
       ->set('document', [$file->id()])
       ->save();
 
@@ -179,7 +179,7 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
    * not resolve to an existing file entity (stale config).
    */
   public function testNoPreviewForMissingFile(): void {
-    \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings')
+    \Drupal::configFactory()->getEditable('mukurtu_media.thumbnail_settings')
       ->set('video_default_thumbnail', [99999])
       ->save();
 
@@ -195,7 +195,7 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
    */
   public function testSuffixedConfigKeyUsedForVideoBundle(): void {
     $file = $this->createImageFile('video-default.png');
-    \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings')
+    \Drupal::configFactory()->getEditable('mukurtu_media.thumbnail_settings')
       ->set('video_default_thumbnail', [$file->id()])
       ->save();
 

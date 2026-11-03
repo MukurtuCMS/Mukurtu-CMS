@@ -26,7 +26,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
    */
   protected function getEditableConfigNames()
   {
-    return ['mukurtu_thumbnail.settings'];
+    return ['mukurtu_media.thumbnail_settings'];
   }
 
   /**
@@ -34,7 +34,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state)
   {
-    $config = $this->config('mukurtu_thumbnail.settings');
+    $config = $this->config('mukurtu_media.thumbnail_settings');
     $mediaBundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
     foreach($mediaBundleInfo as $key => $value) {
       if (in_array($key, $this->excludedMediaBundles)) {
@@ -78,7 +78,7 @@ class ThumbnailSettingsForm extends ConfigFormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    $config = $this->config('mukurtu_thumbnail.settings');
+    $config = $this->config('mukurtu_media.thumbnail_settings');
     $mediaBundleInfo = \Drupal::service('entity_type.bundle.info')->getBundleInfo('media');
     foreach ($mediaBundleInfo as $key => $value) {
       $formFile = $form_state->getValue($key);
