@@ -134,6 +134,20 @@ test.describe('Character palette', () => {
     await expect(corner(page)).toHaveCSS('position', 'fixed');
   });
 
+  test('a page with nothing to type in gets no button', async ({ page }) => {
+    await page.unrouteAll();
+    await page.route(`${ORIGIN}/**`, (route) => route.fulfill({
+      contentType: 'text/html; charset=utf-8',
+      body: `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>No fields</title></head><body>
+        <div id="announce"></div><script>${STUBS} window.drupalSettings = {mukurtuCharacterPalette: {groups: ${JSON.stringify(GROUPS)}}};</script>
+        <p>Nothing to type in.</p></body></html>`,
+    }));
+    await page.goto(`${ORIGIN}/`);
+    await page.addScriptTag({ path: path.join(MODULE_DIR, 'js/character-palette.js') });
+    await page.evaluate(() => (window as any).Drupal.behaviors.mukurtuCharacterPalette.attach(document));
+    await expect(page.locator('.mukurtu-character-palette__toggle')).toHaveCount(0);
+  });
+
   test('Ctrl+Shift+Space jumps from a field to the palette, Escape goes back', async ({ page }) => {
     await load(page);
     const term = page.locator('#term');

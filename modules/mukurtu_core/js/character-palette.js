@@ -586,9 +586,6 @@
       if (!groups.length) {
         return;
       }
-      if (!palette) {
-        palette = buildPalette(groups);
-      }
       once('mukurtu-character-palette', '[data-mukurtu-character-palette]', context).forEach(function (input) {
         if (input.disabled || input.readOnly || input.type === 'hidden' || typeof input.setRangeText !== 'function') {
           return;
@@ -598,6 +595,11 @@
         // its textarea too, but the palette writes to the editor instead.
         if (window.getComputedStyle(input).display === 'none' && !hasEditorFormat(input)) {
           return;
+        }
+        // Built with the page's first marked field, so a page with nothing
+        // to type in gets no button.
+        if (!palette) {
+          palette = buildPalette(groups);
         }
         const target = makeTarget(input);
         targets.push(target);
