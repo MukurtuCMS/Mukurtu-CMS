@@ -77,10 +77,10 @@ class ParagraphsWidgetHooks {
         if ($key === 'edit_all') {
           $this->relabel($button, (string) $this->t('Expand all'));
         }
-        if ($group === 'actions') {
-          $prefix = preg_replace('/_(edit|collapse)_all$/', '', $button['#name']);
-          $this->manageFocus($button, [$prefix . '_edit_all', $prefix . '_collapse_all'], $form_state);
-        }
+        // A button hidden in the dropdown never takes focus.
+        $prefix = preg_replace('/_(edit|collapse)_all$/', '', $button['#name']);
+        $pair = $group === 'actions' ? [$prefix . '_edit_all', $prefix . '_collapse_all'] : [];
+        $this->manageFocus($button, $pair, $form_state);
         unset($button);
       }
     }

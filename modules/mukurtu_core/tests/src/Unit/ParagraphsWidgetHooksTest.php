@@ -171,6 +171,7 @@ class ParagraphsWidgetHooksTest extends UnitTestCase {
     $collapse_all = $form['widget']['header_actions']['dropdown_actions']['collapse_all'];
     $this->assertSame('Collapse all', $collapse_all['#value']);
     $this->assertArrayNotHasKey(ParagraphsWidgetHooks::FOCUS_ATTRIBUTE, $collapse_all['#attributes'], 'A button hidden in the dropdown never takes focus.');
+    $this->assertSame('true', $collapse_all['#attributes']['data-disable-refocus'], 'Drupal must not refocus a parent after a dropdown button is clicked either.');
   }
 
   /**
