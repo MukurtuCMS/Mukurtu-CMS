@@ -29,7 +29,7 @@ class Document extends Media implements DocumentInterface, CulturalProtocolContr
    */
   public function getDefaultThumbnail()
   {
-    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    $config = \Drupal::config('mukurtu_media.thumbnail_settings');
     $defaultDocumentThumbnail = $config->get('document')[0] ?? NULL;
     return $defaultDocumentThumbnail;
   }

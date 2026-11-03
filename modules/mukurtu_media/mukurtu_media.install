@@ -35,7 +35,7 @@ function _mukurtu_media_create_bundled_thumbnail(string $filename): ?int {
  * Sets default video and audio thumbnails from bundled images if not already configured.
  */
 function _mukurtu_media_set_default_thumbnails(): void {
-  $config = \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings');
+  $config = \Drupal::configFactory()->getEditable('mukurtu_media.thumbnail_settings');
   $defaults = [
     'video_default_thumbnail' => 'video.png',
     'audio_default_thumbnail' => 'audio.png',
@@ -114,4 +114,26 @@ function mukurtu_media_update_40024(): void {
     }
     $display->removeComponent('field_media_video_tracks')->save();
   }
+}
+
+/**
+ * Rename the default media thumbnail settings so configuration imports work.
+ */
+function mukurtu_media_update_40025(): string {
+  // Drupal takes the owner of simple config from its name. No
+  // "mukurtu_thumbnail" extension exists, so import validation rejected the
+  // old name, and with it every configuration import on the site.
+  $factory = \Drupal::configFactory();
+  $old = $factory->getEditable('mukurtu_thumbnail.settings');
+  if ($old->isNew()) {
+    return (string) t('The default media thumbnail settings are already up to date; nothing to change.');
+  }
+
+  // Values already saved under the new name win.
+  $new = $factory->getEditable('mukurtu_media.thumbnail_settings');
+  $data = $old->getRawData();
+  unset($data['_core']);
+  $new->setData($new->getRawData() + $data)->save();
+  $old->delete();
+  return (string) t('Moved the default media thumbnail settings to mukurtu_media.thumbnail_settings.');
 }
