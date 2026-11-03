@@ -8,6 +8,7 @@ use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\user\Entity\Role;
+use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -26,10 +27,13 @@ class DictionaryParagraphSummaryTest extends DictionaryTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->installEntitySchema('file');
     $this->installEntitySchema('media');
-    $this->installSchema('file', ['file_usage']);
-    MediaType::create(['id' => 'audio', 'label' => 'Audio', 'source' => 'audio_file', 'source_configuration' => ['source_field' => 'field_media_audio_file']])->save();
+    $media_type = MediaType::create(['id' => 'audio', 'label' => 'Audio', 'source' => 'audio_file']);
+    $media_type->save();
+    $source_field = $media_type->getSource()->createSourceField($media_type);
+    $source_field->getFieldStorageDefinition()->save();
+    $source_field->save();
+    $media_type->set('source_configuration', ['source_field' => $source_field->getName()])->save();
 
     $role = Role::load('authenticated');
     $role->grantPermission('view media');
@@ -133,6 +137,11 @@ class DictionaryParagraphSummaryTest extends DictionaryTestBase {
     $role = Role::load('authenticated');
     $role->revokePermission('view media');
     $role->save();
+
+    // The base class's current user is uid 1, which bypasses access checks.
+    $viewer = User::create(['name' => $this->randomMachineName()]);
+    $viewer->save();
+    $this->container->get('current_user')->setAccount($viewer);
 
     $sentence = Paragraph::create([
       'type' => 'sample_sentence',
