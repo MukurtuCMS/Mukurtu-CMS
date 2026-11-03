@@ -56,7 +56,7 @@ class SampleSentence extends Paragraph implements SampleSentenceInterface {
    */
   public function getSummaryItems(array $options = []) {
     $summary = parent::getSummaryItems($options);
-    $text = Unicode::truncate(trim(html_entity_decode(strip_tags($this->get('field_sentence')->value ?? ''))), 150);
+    $text = Unicode::truncate(trim(html_entity_decode(strip_tags($this->get('field_sentence')->value ?? ''))), 150, TRUE, TRUE);
     if ($text === '') {
       $recording = $this->get('field_sentence_recording')->entity;
       if ($recording && $recording->access('view label')) {

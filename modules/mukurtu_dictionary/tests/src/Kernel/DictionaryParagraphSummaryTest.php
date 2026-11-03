@@ -71,14 +71,14 @@ class DictionaryParagraphSummaryTest extends DictionaryTestBase {
   }
 
   /**
-   * A long term is truncated.
+   * A long term is cut to 150 characters, ellipsis included.
    */
   public function testWordEntryTermIsTruncated(): void {
     $entry = Paragraph::create([
       'type' => 'dictionary_word_entry',
       'field_word_entry_term' => str_repeat('a', 200),
     ]);
-    $this->assertSame([str_repeat('a', 150)], $this->summaryContent($entry));
+    $this->assertSame([str_repeat('a', 149) . '…'], $this->summaryContent($entry));
   }
 
   /**
@@ -93,14 +93,14 @@ class DictionaryParagraphSummaryTest extends DictionaryTestBase {
   }
 
   /**
-   * A long sentence is truncated.
+   * A long sentence is cut at a word boundary, with an ellipsis.
    */
   public function testSampleSentenceIsTruncated(): void {
     $sentence = Paragraph::create([
       'type' => 'sample_sentence',
-      'field_sentence' => str_repeat('b', 300),
+      'field_sentence' => str_repeat('apple ', 30),
     ]);
-    $this->assertSame([str_repeat('b', 150)], $this->summaryContent($sentence));
+    $this->assertSame([rtrim(str_repeat('apple ', 25)) . '…'], $this->summaryContent($sentence));
   }
 
   /**

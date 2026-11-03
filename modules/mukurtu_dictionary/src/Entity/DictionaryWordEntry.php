@@ -207,7 +207,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
    */
   public function getSummaryItems(array $options = []) {
     $summary = parent::getSummaryItems($options);
-    $term = Unicode::truncate(trim($this->get('field_word_entry_term')->value ?? ''), 150);
+    $term = Unicode::truncate(trim($this->get('field_word_entry_term')->value ?? ''), 150, TRUE, TRUE);
     if ($term !== '') {
       array_unshift($summary['content'], $term);
     }
