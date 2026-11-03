@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_dictionary\Entity;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\paragraphs\Entity\Paragraph;
@@ -44,6 +45,29 @@ class SampleSentence extends Paragraph implements SampleSentenceInterface {
       ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Paragraphs only summarizes configurable fields, and every field on this
+   * bundle is code-defined, so add the sentence ourselves, falling back to the
+   * recording's name for audio-only sentences.
+   */
+  public function getSummaryItems(array $options = []) {
+    $summary = parent::getSummaryItems($options);
+    $text = Unicode::truncate(trim(html_entity_decode(strip_tags($this->get('field_sentence')->value ?? ''))), 150);
+    if ($text === '') {
+      $recording = $this->get('field_sentence_recording')->entity;
+      if ($recording && $recording->access('view label')) {
+        $recording = \Drupal::service('entity.repository')->getTranslationFromContext($recording, $this->language()->getId());
+        $text = (string) $recording->label();
+      }
+    }
+    if ($text !== '') {
+      array_unshift($summary['content'], $text);
+    }
+    return $summary;
   }
 
   /**
