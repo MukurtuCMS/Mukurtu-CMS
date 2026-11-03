@@ -8,7 +8,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 
 /**
- * Tests mukurtu_content_warnings_update_40801().
+ * Tests mukurtu_content_warnings_update_40901().
  *
  * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/1301
  */
@@ -39,7 +39,7 @@ class ContentWarningsDefaultTextUpdateTest extends KernelTestBase {
    */
   public function testOldDefaultsAreReplaced(): void {
     $this->setPeopleWarnings(self::OLD_SINGLE, self::OLD_MULTIPLE);
-    $message = (string) mukurtu_content_warnings_update_40801();
+    $message = (string) mukurtu_content_warnings_update_40901();
 
     $config = $this->config('mukurtu_content_warnings.settings');
     $this->assertSame('[name] is deceased.', $config->get('people_warnings.warning_single'));
@@ -52,7 +52,7 @@ class ContentWarningsDefaultTextUpdateTest extends KernelTestBase {
    */
   public function testCustomizedTextIsKept(): void {
     $this->setPeopleWarnings('[name] has passed on.', self::OLD_MULTIPLE);
-    mukurtu_content_warnings_update_40801();
+    mukurtu_content_warnings_update_40901();
 
     $config = $this->config('mukurtu_content_warnings.settings');
     $this->assertSame('[name] has passed on.', $config->get('people_warnings.warning_single'));
@@ -64,7 +64,7 @@ class ContentWarningsDefaultTextUpdateTest extends KernelTestBase {
    */
   public function testAllCustomizedReportsKept(): void {
     $this->setPeopleWarnings('[name] has passed on.', 'These people have passed on: [names]');
-    $message = (string) mukurtu_content_warnings_update_40801();
+    $message = (string) mukurtu_content_warnings_update_40901();
 
     $config = $this->config('mukurtu_content_warnings.settings');
     $this->assertSame('[name] has passed on.', $config->get('people_warnings.warning_single'));
@@ -81,7 +81,7 @@ class ContentWarningsDefaultTextUpdateTest extends KernelTestBase {
     $override = $this->container->get('language_manager')->getLanguageConfigOverride('es', 'mukurtu_content_warnings.settings');
     $override->set('people_warnings.warning_single', 'Aviso: [name] ha fallecido.')->save();
 
-    mukurtu_content_warnings_update_40801();
+    mukurtu_content_warnings_update_40901();
 
     $override = $this->container->get('language_manager')->getLanguageConfigOverride('es', 'mukurtu_content_warnings.settings');
     $this->assertSame('Aviso: [name] ha fallecido.', $override->get('people_warnings.warning_single'));

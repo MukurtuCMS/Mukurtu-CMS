@@ -8,7 +8,7 @@
 /**
  * Remove the click-through instruction from default deceased-person warning text.
  */
-function mukurtu_content_warnings_update_40801() {
+function mukurtu_content_warnings_update_40901() {
   // Old default => new default, per setting. Text a site changed is kept, and
   // so are translations, which are stored separately from this base config.
   $defaults = [
