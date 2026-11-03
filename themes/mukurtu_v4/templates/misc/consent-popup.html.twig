@@ -1,9 +1,26 @@
-<div id="javali-popup">
-  {% if items.title %}<h3>{{ items.title }}</h3>{% endif %}
-  <div class="consent-text">{{ items.text|raw }}</div>
+{#
+/**
+ * @file
+ * Theme override for the consent_popup block's content.
+ *
+ * Marked up as a modal dialog. The consent-popup behavior makes the rest of
+ * the page inert and moves focus in while it's open. The title is an h2
+ * styled as an h3 because the module replaces the text with an h2 decline
+ * message, and a lower-level title above it reversed the heading order.
+ * Without a title, the text names the dialog instead. The link is hidden
+ * until "I decline" reveals it, so it stays out of the tab order and away
+ * from screen readers until then.
+ */
+#}
+{{ attach_library('mukurtu_v4/consent-popup') }}
+<div id="javali-popup" role="dialog" aria-modal="true" tabindex="-1"
+  aria-labelledby="{{ items.title ? 'consent-popup-title' : 'consent-popup-text' }}"
+  {% if items.title %}aria-describedby="consent-popup-text"{% endif %}>
+  {% if items.title %}<h2 id="consent-popup-title" class="h3">{{ items.title }}</h2>{% endif %}
+  <div id="consent-popup-text" class="consent-text">{{ items.text|raw }}</div>
   <div class="consent-buttons">
     <button class="accept">{{ items.accept }}</button>
     <button class="decline">{{ items.decline }}</button>
   </div>
-  <a class="visually-hidden" href="{{ items.url }}">{{ items.url_text }}</a>
+  <a class="visually-hidden" href="{{ items.url }}" tabindex="-1" aria-hidden="true">{{ items.url_text }}</a>
 </div>
