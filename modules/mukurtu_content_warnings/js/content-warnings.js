@@ -18,11 +18,23 @@
         // Watch for iframes/objects inserted later by lazy loaders (e.g. Blazy).
         this.watchForNewEmbeds(element);
 
+        // Mark the overlay while its text scrolls, so the theme can put a
+        // band behind the pinned button only then.
+        if (window.ResizeObserver) {
+          new ResizeObserver(() => {
+            element.classList.toggle('mukurtu-content-warnings--scrolls', element.scrollHeight > element.clientHeight + 1);
+          }).observe(element);
+        }
+
         // Cards wrap their media in a link that is hidden from AT and out of
         // the Tab order, since the card's title link goes to the same page.
-        // A button there would be a Tab stop AT can't see (WCAG 4.1.2).
+        // A button there would be a Tab stop AT can't see (WCAG 4.1.2). A card
+        // is too small to show every warning, so it shows only the title and
+        // a click follows the link: the item page shows the full warnings
+        // before the media can be revealed.
         if (element.closest('a')) {
           element.querySelector('.mukurtu-content-warnings__dismiss')?.setAttribute('tabindex', '-1');
+          return;
         }
 
         // A click anywhere on the overlay dismisses it. The dismiss button
