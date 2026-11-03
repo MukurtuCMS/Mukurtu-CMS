@@ -93,9 +93,9 @@ class MukurtuProtocolMediaAccessControlHandler extends MediaAccessControlHandler
 
       case 'update':
       case 'delete':
-        // Ask each member OG group about specific permissions. For 'all'
-        // sharing this needs permission in every strict protocol, and open
-        // protocols are skipped (see protocolOperationAccess()).
+        // The account can see the item, so permission in any one of its member
+        // protocols is enough, for 'all' sharing too (see
+        // protocolOperationAccess()).
         $result = CulturalProtocols::protocolOperationAccess($operation, $entity, $account);
 
         // Protocols are very opinionated, neutral is not good enough for

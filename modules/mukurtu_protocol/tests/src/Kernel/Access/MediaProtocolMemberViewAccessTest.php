@@ -316,13 +316,12 @@ class MediaProtocolMemberViewAccessTest extends KernelTestBase {
   }
 
   /**
-   * 'all' sharing skips open protocols for update/delete (#2515).
+   * 'all' sharing needs edit permission in only one protocol (#2515).
    *
-   * Everyone is a member of an open protocol, usually with no role in it, so
-   * a steward of the strict protocol keeps edit access. When every protocol
-   * is open, a role that grants edit in any one of them is enough.
+   * The sharing setting decides who can see the item. Once the account can
+   * see it, a steward of any of its protocols can edit it.
    */
-  public function testAllSharingEditSkipsOpenProtocols(): void {
+  public function testAllSharingEditNeedsPermissionInOneProtocol(): void {
     $this->createProtocolRole('protocol_steward', 'Protocol Steward', [
       'update any test media',
       'delete any test media',
@@ -343,6 +342,17 @@ class MediaProtocolMemberViewAccessTest extends KernelTestBase {
     $strictMember = $this->createUser();
     $strictProtocol->addMember($strictMember);
     $this->assertTrue($mixed->access('update', $strictMember, TRUE)->isForbidden());
+
+    // A steward of the open protocol who is a member of the strict one.
+    $strictMemberOpenSteward = $this->createUser();
+    $strictProtocol->addMember($strictMemberOpenSteward);
+    $openProtocol->addMember($strictMemberOpenSteward, ['protocol_steward']);
+    $this->assertTrue($mixed->access('update', $strictMemberOpenSteward, TRUE)->isAllowed());
+
+    // A steward of the open protocol who can't see the item.
+    $openStewardOnly = $this->createUser();
+    $openProtocol->addMember($openStewardOnly, ['protocol_steward']);
+    $this->assertTrue($mixed->access('update', $openStewardOnly, TRUE)->isForbidden());
 
     $openSteward = $this->createUser();
     $openProtocol->addMember($openSteward, ['protocol_steward']);

@@ -878,7 +878,7 @@ class AccessByProtocolTest extends KernelTestBase {
       // investigation into OG's permission/group-type cache invalidation
       // between kernel test methods before this can be reliably asserted.
       //
-      // When every protocol is open, 'all' sharing combines them like 'any'
+      // Edit permission in any one protocol is enough, for 'all' sharing too
       // (see CulturalProtocols::protocolOperationAccess()), so a
       // protocol_steward role in one of them is enough, even with no role in
       // the other.
@@ -944,7 +944,7 @@ class AccessByProtocolTest extends KernelTestBase {
       ],
       // Owner + contributor-in-open1/member-in-open2: contributor's "own"
       // permission covers open1 since the account owns the content, and
-      // that is enough when every protocol is open.
+      // permission in one protocol is enough.
       [
         'owner' => TRUE,
         'memberships' => [
@@ -1109,12 +1109,12 @@ class AccessByProtocolTest extends KernelTestBase {
   }
 
   /**
-   * Tests that an open protocol doesn't block edits on strict/open, all.
+   * Tests edit access on strict/open, all.
    *
-   * Everyone is a member of an open protocol, usually with no role in it, so
-   * 'all' sharing takes update/delete access from the strict protocols only.
+   * 'all' sharing decides who can see the item. Once the account can see it,
+   * permission in any one of its protocols is enough to edit (#2515).
    */
-  public function testTwoProtocolsMixedAllSkipsOpenForEdit() {
+  public function testTwoProtocolsMixedAllEdit() {
     $protocols = [
       'open1' => $this->openProtocols[1],
       'strict1' => $this->strictProtocols[1],
@@ -1169,6 +1169,20 @@ class AccessByProtocolTest extends KernelTestBase {
           'delete' => TRUE,
         ],
       ],
+      // A steward of the open protocol can edit when also a member of
+      // strict1.
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => ['protocol_steward'],
+          'strict1' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
       // A steward of the open protocol only isn't a member of strict1, so
       // has no access at all.
       [
@@ -1216,9 +1230,12 @@ class AccessByProtocolTest extends KernelTestBase {
   }
 
   /**
-   * Tests that 'all' still needs permission in every strict protocol.
+   * Tests that a steward of one strict protocol can edit strict/strict/open.
+   *
+   * Membership is still needed in every strict protocol, but edit
+   * permission in only one of them.
    */
-  public function testThreeProtocolsMixedAllNeedsEveryStrict() {
+  public function testThreeProtocolsMixedAllStewardOfOne() {
     $protocols = [
       'open1' => $this->openProtocols[1],
       'strict1' => $this->strictProtocols[1],
@@ -1235,8 +1252,47 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => [],
+          'strict1' => ['member'],
+          'strict2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
           'update' => FALSE,
           'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'open1' => [],
+          'strict1' => ['protocol_steward'],
+          'strict2' => [],
+        ],
+        'expected_access' => [
+          'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      [
+        'owner' => TRUE,
+        'memberships' => [
+          'open1' => [],
+          'strict1' => ['contributor'],
+          'strict2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
         ],
       ],
       [
@@ -1409,6 +1465,31 @@ class AccessByProtocolTest extends KernelTestBase {
         ],
         'expected_access' => [
           'view' => FALSE,
+          'update' => FALSE,
+          'delete' => FALSE,
+        ],
+      ],
+      // A member of both can edit with a steward role in either one.
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'strict1' => ['member'],
+          'strict2' => ['protocol_steward'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
+          'update' => TRUE,
+          'delete' => TRUE,
+        ],
+      ],
+      [
+        'owner' => FALSE,
+        'memberships' => [
+          'strict1' => ['member'],
+          'strict2' => ['member'],
+        ],
+        'expected_access' => [
+          'view' => TRUE,
           'update' => FALSE,
           'delete' => FALSE,
         ],

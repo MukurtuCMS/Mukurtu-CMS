@@ -127,13 +127,16 @@ class CulturalProtocols {
   /**
    * Combines each protocol's OG answer for an update or delete operation.
    *
-   * For 'any' sharing, permission in a single member protocol is enough.
+   * Permission in any one of the account's member protocols is enough, for
+   * both 'any' and 'all' sharing. The sharing setting decides who can see the
+   * item, which callers check first with isProtocolSetMember(). Once the
+   * account can see it, a steward of any of its protocols can edit it, and a
+   * contributor can edit their own item.
    *
-   * For 'all' sharing, the account needs permission in every strict protocol
-   * on the item. Open protocols are skipped: everyone is a virtual member of
-   * an open protocol, usually with no role in it, so requiring permission
-   * there would lock out a steward of the item's strict protocols. When every
-   * protocol on the item is open, permission in any one of them is enough.
+   * Requiring permission in every protocol for 'all' sharing would lock out
+   * stewards: everyone is a virtual member of an open protocol, usually with
+   * no role in it, and a steward of one strict protocol is often a plain
+   * member of the others.
    *
    * @param string $operation
    *   The operation, 'update' or 'delete'.
@@ -148,23 +151,9 @@ class CulturalProtocols {
   public static function protocolOperationAccess(string $operation, CulturalProtocolControlledInterface $entity, AccountInterface $account): AccessResultInterface {
     /** @var \Drupal\og\OgAccessInterface $ogAccess */
     $ogAccess = \Drupal::service('og.access');
-    $protocols = $entity->getMemberProtocols($account);
-
-    if ($entity->getSharingSetting() === 'all') {
-      $strict = array_filter($protocols, fn(ProtocolInterface $protocol) => !$protocol->isOpen());
-      if ($strict) {
-        // Start from allowed(), the identity for andIf().
-        $result = AccessResult::allowed();
-        foreach ($strict as $protocol) {
-          $result = $result->andIf($ogAccess->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
-        }
-        return $result;
-      }
-    }
-
     // Start from neutral(), the identity for orIf().
     $result = AccessResult::neutral();
-    foreach ($protocols as $protocol) {
+    foreach ($entity->getMemberProtocols($account) as $protocol) {
       $result = $result->orIf($ogAccess->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
     }
     return $result;
