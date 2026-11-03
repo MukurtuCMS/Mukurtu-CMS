@@ -77,7 +77,6 @@ third_party_settings:
         speed: fast
     group_sidebar_mukurtu_fields:
       children:
-        - field_title
         - field_category
         - field_keywords
         - field_creator
@@ -485,11 +484,6 @@ content:
     third_party_settings: {  }
     weight: 34
     region: content
-  field_title:
-    settings: {  }
-    third_party_settings: {  }
-    weight: 23
-    region: content
   field_traditional_knowledge:
     type: text_default
     label: above
@@ -522,6 +516,7 @@ hidden:
   field_related_content: true
   field_representative_media: true
   field_sequence_collection: true
+  field_title: true
   flag_email_node: true
   flag_email_og: true
   flag_export_content: true
