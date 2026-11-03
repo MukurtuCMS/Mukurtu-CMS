@@ -185,7 +185,7 @@ class MediaContentWarningsDisplayTest extends KernelTestBase {
     $overlay = $this->cssSelect('.mukurtu-content-warnings')[0];
     $this->assertEmpty((string) $overlay['role'], 'The overlay is not itself a button.');
     $this->assertEmpty((string) $overlay['aria-label'], 'The overlay has no label that would hide the warnings.');
-    $this->assertEmpty((string) $overlay['tabindex'], 'The overlay is not a focus stop.');
+    $this->assertSame('-1', (string) $overlay['tabindex'], 'The overlay is never a Tab stop, even when it scrolls.');
 
     $items = $this->cssSelect("ul#{$id}[role=list] > li");
     $this->assertCount(2, $items);

@@ -32,7 +32,7 @@ const WARNINGS = [
 function overlay(mid: number): string {
   const id = `mukurtu-content-warnings-${mid}`;
   return `
-    <div class="mukurtu-content-warnings" data-mid="${mid}">
+    <div class="mukurtu-content-warnings" data-mid="${mid}" tabindex="-1">
       <ul id="${id}" class="mukurtu-content-warnings__list" role="list">
         ${WARNINGS.map((w) => `<li><div class="mukurtu-content-warning">${w}</div></li>`).join('')}
       </ul>
@@ -112,6 +112,21 @@ test('Long warnings scroll from the top on a phone instead of clipping', async (
   expect(metrics.scrolls, 'the fixture is taller than the media').toBe(true);
   expect(metrics.overflowY).toBe('auto');
   expect(metrics.firstLineInside, 'the first warning starts inside the overlay').toBe(true);
+});
+
+// Mirrors a browse card: the media sits in a link hidden from AT, and the
+// card's title link is the one keyboard users reach.
+const CARD = `
+  <a href="/node/1" aria-hidden="true" tabindex="-1">
+    <div class="media" style="inline-size: 296px; block-size: 197px">${overlay(4)}</div>
+  </a>
+  <a href="/node/1">Card title</a>`;
+
+test('A warning inside a card link adds no Tab stop', async ({ page }) => {
+  await load(page, CARD);
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Card title' })).toBeFocused();
+  await expect(page.locator('.mukurtu-content-warnings__dismiss')).toHaveAttribute('tabindex', '-1');
 });
 
 test('Thumbnails keep the scrim but have no Tab stop', async ({ page }) => {

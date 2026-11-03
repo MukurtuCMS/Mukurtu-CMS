@@ -18,6 +18,13 @@
         // Watch for iframes/objects inserted later by lazy loaders (e.g. Blazy).
         this.watchForNewEmbeds(element);
 
+        // Cards wrap their media in a link that is hidden from AT and out of
+        // the Tab order, since the card's title link goes to the same page.
+        // A button there would be a Tab stop AT can't see (WCAG 4.1.2).
+        if (element.closest('a')) {
+          element.querySelector('.mukurtu-content-warnings__dismiss')?.setAttribute('tabindex', '-1');
+        }
+
         // A click anywhere on the overlay dismisses it. The dismiss button
         // inside it gives keyboard and AT users the same action, since a
         // native button fires click on Enter and Space.

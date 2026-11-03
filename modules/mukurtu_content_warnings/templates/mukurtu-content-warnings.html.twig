@@ -14,7 +14,10 @@
  */
 #}
 {% set warnings_id = 'mukurtu-content-warnings-' ~ media.id %}
-<div {{ attributes.addClass('mukurtu-content-warnings').setAttribute('data-mid', media.id) }}>
+{# tabindex -1: Chrome makes a scrolling box with no focusable children a Tab
+   stop, and long warnings scroll. Where the button is out of the Tab order
+   (an inactive carousel slide, a card link), the overlay must be too. #}
+<div {{ attributes.addClass('mukurtu-content-warnings').setAttribute('data-mid', media.id).setAttribute('tabindex', '-1') }}>
   {% if warnings|length > 1 %}
     <ul id="{{ warnings_id }}" class="mukurtu-content-warnings__list" role="list">
       {% for warning in warnings %}
