@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_protocol;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
@@ -120,6 +122,52 @@ class CulturalProtocols {
       }
     }
     return FALSE;
+  }
+
+  /**
+   * Combines each protocol's OG answer for an update or delete operation.
+   *
+   * For 'any' sharing, permission in a single member protocol is enough.
+   *
+   * For 'all' sharing, the account needs permission in every strict protocol
+   * on the item. Open protocols are skipped: everyone is a virtual member of
+   * an open protocol, usually with no role in it, so requiring permission
+   * there would lock out a steward of the item's strict protocols. When every
+   * protocol on the item is open, permission in any one of them is enough.
+   *
+   * @param string $operation
+   *   The operation, 'update' or 'delete'.
+   * @param \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $entity
+   *   The entity under protocol control.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The account to check.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The combined result. Neutral means no protocol granted the operation.
+   */
+  public static function protocolOperationAccess(string $operation, CulturalProtocolControlledInterface $entity, AccountInterface $account): AccessResultInterface {
+    /** @var \Drupal\og\OgAccessInterface $ogAccess */
+    $ogAccess = \Drupal::service('og.access');
+    $protocols = $entity->getMemberProtocols($account);
+
+    if ($entity->getSharingSetting() === 'all') {
+      $strict = array_filter($protocols, fn(ProtocolInterface $protocol) => !$protocol->isOpen());
+      if ($strict) {
+        // Start from allowed(), the identity for andIf().
+        $result = AccessResult::allowed();
+        foreach ($strict as $protocol) {
+          $result = $result->andIf($ogAccess->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
+        }
+        return $result;
+      }
+    }
+
+    // Start from neutral(), the identity for orIf().
+    $result = AccessResult::neutral();
+    foreach ($protocols as $protocol) {
+      $result = $result->orIf($ogAccess->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
+    }
+    return $result;
   }
 
   public static function getAccountGrantIds(AccountInterface $account) {

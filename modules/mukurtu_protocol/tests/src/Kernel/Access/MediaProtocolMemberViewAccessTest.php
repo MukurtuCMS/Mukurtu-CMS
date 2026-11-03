@@ -316,6 +316,44 @@ class MediaProtocolMemberViewAccessTest extends KernelTestBase {
   }
 
   /**
+   * 'all' sharing skips open protocols for update/delete (#2515).
+   *
+   * Everyone is a member of an open protocol, usually with no role in it, so
+   * a steward of the strict protocol keeps edit access. When every protocol
+   * is open, a role that grants edit in any one of them is enough.
+   */
+  public function testAllSharingEditSkipsOpenProtocols(): void {
+    $this->createProtocolRole('protocol_steward', 'Protocol Steward', [
+      'update any test media',
+      'delete any test media',
+    ]);
+
+    $owner = $this->createUser();
+    $strictProtocol = $this->createProtocol('strict');
+    $openProtocol = $this->createProtocol('open');
+    $openProtocol2 = $this->createProtocol('open');
+    $mixed = $this->createProtocolMedia([$strictProtocol, $openProtocol], 'all', TRUE, (int) $owner->id());
+    $allOpen = $this->createProtocolMedia([$openProtocol, $openProtocol2], 'all', TRUE, (int) $owner->id());
+
+    $strictSteward = $this->createUser();
+    $strictProtocol->addMember($strictSteward, ['protocol_steward']);
+    $this->assertTrue($mixed->access('update', $strictSteward, TRUE)->isAllowed());
+    $this->assertTrue($mixed->access('delete', $strictSteward, TRUE)->isAllowed());
+
+    $strictMember = $this->createUser();
+    $strictProtocol->addMember($strictMember);
+    $this->assertTrue($mixed->access('update', $strictMember, TRUE)->isForbidden());
+
+    $openSteward = $this->createUser();
+    $openProtocol->addMember($openSteward, ['protocol_steward']);
+    $this->assertTrue($allOpen->access('update', $openSteward, TRUE)->isAllowed());
+
+    $openMember = $this->createUser();
+    $openProtocol->addMember($openMember);
+    $this->assertTrue($allOpen->access('update', $openMember, TRUE)->isForbidden());
+  }
+
+  /**
    * Directly covers the reviewer's concern: a public node can still have
    * an individually protocol-gated media asset alongside a public one.
    * Per-media protocol gating (checked before this fix's changed branch
