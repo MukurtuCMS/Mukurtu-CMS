@@ -173,15 +173,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     foreach ($message->getErrorMessages() as $error_message) {
       $context['results'][$migration->id()]['messages'][] = (object) ['message' => $error_message, 'src_ID' => NULL];
     }
-    if ($unresolved = $executable->getUnresolvedParentCount()) {
-      $context['results'][$migration->id()]['messages'][] = (object) [
-        'message' => (string) \Drupal::translation()->formatPlural($unresolved,
-          '1 term was imported at the top level because its parent term couldn\'t be found.',
-          '@count terms were imported at the top level because their parent terms couldn\'t be found.'
-        ),
-        'src_ID' => NULL,
-      ];
-    }
+    // Shown as a warning by batchFinishedImport(), not a failure: the terms
+    // themselves were imported.
+    $context['results'][$migration->id()]['@unresolved_parents'] = ($context['results'][$migration->id()]['@unresolved_parents'] ?? 0) + $executable->getUnresolvedParentCount();
 
     // Store the definition for ID map cleanup after the batch completes.
     $context['results']['definitions'][$migration->id()] = $migration_definition;
@@ -286,9 +280,20 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // batchProcessImportDefinition() above) that aren't per-migration
     // results -- only entries with a '@numitems' key are.
     $messages = [];
+    $warnings = $store->get('batch_results_warnings') ?? [];
     foreach ($results as $migration_id => $migration_result) {
       if ($migration_id === 'definitions' || !is_array($migration_result) || !isset($migration_result['@numitems'])) {
         continue;
+      }
+
+      if (!empty($migration_result['@unresolved_parents'])) {
+        $warnings[] = [
+          'fid' => $migration_result['fid'],
+          'message' => \Drupal::translation()->formatPlural($migration_result['@unresolved_parents'],
+            '1 term was imported at the top level because its parent term couldn\'t be found.',
+            '@count terms were imported at the top level because their parent terms couldn\'t be found.'
+          ),
+        ];
       }
 
       $imported_count += ($migration_result['@created'] ?? 0) + ($migration_result['@updated'] ?? 0);
@@ -352,6 +357,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // the batch.
     $store->set('batch_results_noop', $has_silent_noop && !$has_row_failures && !$has_migration_failure && $imported_count === 0);
     $store->set('batch_results_messages', $messages);
+    $store->set('batch_results_warnings', $warnings);
 
     // Summarize created/updated/failed counts per target entity type. Unlike
     // node/media/community/protocol/taxonomy_term, User entities have no

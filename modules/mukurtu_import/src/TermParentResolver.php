@@ -23,9 +23,12 @@ use Drupal\migrate\Plugin\MigrateIdMapInterface;
 class TermParentResolver {
 
   /**
-   * Key-value collection of parents still to resolve, keyed by migration ID.
+   * Prefix of the key-value collection of parents still to resolve.
+   *
+   * Each import gets its own collection, with one entry per row, so
+   * recording a row doesn't rewrite the others.
    */
-  const COLLECTION = 'mukurtu_import.deferred_term_parents';
+  const COLLECTION = 'mukurtu_import.deferred_term_parents.';
 
   /**
    * How long an unfinished import's records are kept, in seconds.
@@ -88,9 +91,11 @@ class TermParentResolver {
    *   The parent as given in the file.
    */
   public function defer(string $migration_id, array $source_ids, string $vid, string $value): void {
-    $deferred = $this->store()->get($migration_id, []);
-    $deferred[] = ['source_ids' => $source_ids, 'vid' => $vid, 'value' => $value];
-    $this->store()->setWithExpire($migration_id, $deferred, self::EXPIRE);
+    $this->store($migration_id)->setWithExpire(
+      hash('sha256', serialize($source_ids)),
+      ['source_ids' => $source_ids, 'vid' => $vid, 'value' => $value],
+      self::EXPIRE
+    );
   }
 
   /**
@@ -101,8 +106,8 @@ class TermParentResolver {
    *   the top level.
    */
   public function resolveDeferred(string $migration_id, MigrateIdMapInterface $id_map): int {
-    $deferred = $this->store()->get($migration_id, []);
-    $this->store()->delete($migration_id);
+    $deferred = $this->store($migration_id)->getAll();
+    $this->store($migration_id)->deleteAll();
 
     $storage = $this->entityTypeManager->getStorage('taxonomy_term');
     $unresolved = 0;
@@ -128,10 +133,10 @@ class TermParentResolver {
   }
 
   /**
-   * Gets the store of parents still to resolve.
+   * Gets the store of one import's parents still to resolve.
    */
-  protected function store(): KeyValueStoreExpirableInterface {
-    return $this->keyValueExpirable->get(self::COLLECTION);
+  protected function store(string $migration_id): KeyValueStoreExpirableInterface {
+    return $this->keyValueExpirable->get(self::COLLECTION . $migration_id);
   }
 
 }
