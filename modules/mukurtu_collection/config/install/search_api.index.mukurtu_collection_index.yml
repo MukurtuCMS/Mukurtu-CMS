@@ -4,12 +4,21 @@ dependencies:
   config:
     - search_api.server.mukurtu_database_server
   module:
+    - mukurtu_collection
     - node
 id: mukurtu_collection_index
 name: 'Mukurtu Collection Index'
 description: 'Index for Mukurtu Collections.'
 read_only: false
 field_settings:
+  collection_display_weight:
+    label: 'Collection display weight'
+    datasource_id: 'entity:node'
+    property_path: collection_display_weight
+    type: integer
+    dependencies:
+      module:
+        - mukurtu_collection
   language_with_fallback:
     label: 'Language (with fallback)'
     property_path: language_with_fallback
@@ -130,6 +139,7 @@ processor_settings:
       - field_description
       - title
   language_with_fallback: {  }
+  mukurtu_collection_display_weight: {  }
   rendered_item: {  }
   tokenizer:
     weights:
