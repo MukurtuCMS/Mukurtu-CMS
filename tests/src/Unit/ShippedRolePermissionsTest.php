@@ -124,6 +124,7 @@ class ShippedRolePermissionsTest extends UnitTestCase {
     yield 'unflag content for export' => ['unflag export_content'];
     yield 'flag media for export' => ['flag export_media'];
     yield 'unflag media for export' => ['unflag export_media'];
+    yield 'content revision history' => ['view all revisions'];
   }
 
   #[DataProvider('managerPermissionProvider')]
@@ -161,6 +162,17 @@ class ShippedRolePermissionsTest extends UnitTestCase {
       $permission,
       self::effectivePermissions('authenticated'),
       "The authenticated role does not hold '$permission' on a fresh install."
+    );
+  }
+
+  /**
+   * Revision history is for administrators and Mukurtu Managers.
+   */
+  public function testAuthenticatedCannotViewRevisionHistory(): void {
+    $this->assertNotContains(
+      'view all revisions',
+      self::effectivePermissions('authenticated'),
+      'Every logged-in user who can view an item would see its revision history and log messages (#2580).'
     );
   }
 
