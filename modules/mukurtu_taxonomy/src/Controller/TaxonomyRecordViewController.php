@@ -184,6 +184,13 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       'type' => 'entity:node',
       'options' => ['view_mode' => 'grid_browse'],
     ]);
+    // The listing includes content tagged with terms nested under this one,
+    // so moving a term changes it (#2521). Views caches the listing apart
+    // from this page, under the view's own tags, which a term move doesn't
+    // invalidate: tag the rendered listing with the vocabulary's term list,
+    // and don't cache the query results, which can't carry that tag.
+    $view->display_handler->overrideOption('cache', ['type' => 'none', 'options' => []]);
+    $view->element['#cache']['tags'][] = 'taxonomy_term_list:' . $taxonomy_term->bundle();
     $referencedContent = $view->buildRenderable('default');
 
     $build['records'] = [
@@ -216,8 +223,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
     $place_vocabularies = $this->mukurtuTaxonomySettings->get('place_records_enabled_vocabularies') ?? [];
     $cache = CacheableMetadata::createFromRenderArray($build)->merge($cache);
-    // The content listed comes from terms nested under this one, so moving a
-    // term in the vocabulary changes it (#2521).
+    // The nested terms list changes when a term in the vocabulary moves.
     $cache->addCacheTags(['taxonomy_term_list:' . $taxonomy_term->bundle()]);
     if (in_array($taxonomy_term->bundle(), $person_vocabularies)) {
       $cache->addCacheTags(['node_list:person']);

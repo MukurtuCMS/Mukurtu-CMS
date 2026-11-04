@@ -124,6 +124,27 @@ class TermPageNestedContentTest extends DigitalHeritageTestBase {
   }
 
   /**
+   * Moving a term refreshes the content on its old parent's page.
+   *
+   * The listing is cached separately from the page, under the view's own
+   * cache tags, so it needs the vocabulary's term list tag too.
+   */
+  public function testMovingTermRefreshesListing(): void {
+    $this->createItem('Baskets item', [$this->terms['baskets']]);
+    $renderer = $this->container->get('renderer');
+    $render = function () use ($renderer): string {
+      $build = TaxonomyRecordViewController::create($this->container)->build(Term::load($this->terms['arts']->id()));
+      return (string) $renderer->renderInIsolation($build);
+    };
+
+    $this->assertStringContainsString('Baskets item', $render());
+
+    Term::load($this->terms['weaving']->id())->set('parent', 0)->save();
+
+    $this->assertStringNotContainsString('Baskets item', $render());
+  }
+
+  /**
    * Content the viewer can't see under its protocols stays hidden.
    */
   public function testProtocolAccessStillApplies(): void {
