@@ -5,3 +5,6 @@ services:
   mukurtu_import.log_storage:
     class: Drupal\mukurtu_import\MukurtuImportLogStorage
     arguments: ['@database']
+  mukurtu_import.term_parent_resolver:
+    class: Drupal\mukurtu_import\TermParentResolver
+    arguments: ['@entity_type.manager', '@keyvalue.expirable']

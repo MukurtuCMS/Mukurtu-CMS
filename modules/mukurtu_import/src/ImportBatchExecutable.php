@@ -16,6 +16,33 @@ use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
 class ImportBatchExecutable extends MigrateBatchExecutable {
 
   /**
+   * Terms whose parent couldn't be found once the whole file was imported.
+   */
+  protected int $unresolvedParents = 0;
+
+  /**
+   * {@inheritdoc}
+   *
+   * Once every row is in, sets the term parents that were named before their
+   * own row was imported (#2520).
+   */
+  public function import() {
+    $result = parent::import();
+    if ($result === MigrationInterface::RESULT_COMPLETED) {
+      $this->unresolvedParents = \Drupal::service('mukurtu_import.term_parent_resolver')
+        ->resolveDeferred($this->migration->id(), $this->migration->getIdMap());
+    }
+    return $result;
+  }
+
+  /**
+   * Counts terms left at the top level because their parent wasn't found.
+   */
+  public function getUnresolvedParentCount(): int {
+    return $this->unresolvedParents;
+  }
+
+  /**
    * Batch import from a set of migration definitions rather than plugins.
    */
   public function batchImportMultiple(array $migration_definitons) {
@@ -145,6 +172,15 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     );
     foreach ($message->getErrorMessages() as $error_message) {
       $context['results'][$migration->id()]['messages'][] = (object) ['message' => $error_message, 'src_ID' => NULL];
+    }
+    if ($unresolved = $executable->getUnresolvedParentCount()) {
+      $context['results'][$migration->id()]['messages'][] = (object) [
+        'message' => (string) \Drupal::translation()->formatPlural($unresolved,
+          '1 term was imported at the top level because its parent term couldn\'t be found.',
+          '@count terms were imported at the top level because their parent terms couldn\'t be found.'
+        ),
+        'src_ID' => NULL,
+      ];
     }
 
     // Store the definition for ID map cleanup after the batch completes.

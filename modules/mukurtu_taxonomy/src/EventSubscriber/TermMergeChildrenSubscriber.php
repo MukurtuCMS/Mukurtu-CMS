@@ -11,8 +11,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * Moves the children of merged terms under the target term (#2520).
  *
- * term_merge deletes the merged terms after this event, and deleting a term
- * would otherwise move its children up a level instead.
+ * The term_merge module deletes the merged terms after this event, and
+ * deleting a term would otherwise move its children up a level instead.
  *
  * @see mukurtu_taxonomy_taxonomy_term_predelete()
  */
