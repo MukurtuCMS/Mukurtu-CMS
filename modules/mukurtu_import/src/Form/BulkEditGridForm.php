@@ -309,7 +309,10 @@ class BulkEditGridForm extends FormBase {
         '#limit_validation_errors' => [],
       ];
     }
-    $form['grid_columns']['pick'] += ['#type' => 'container', '#attributes' => ['class' => ['mukurtu-bulk-edit-grid__pick']]];
+    $form['grid_columns']['pick'] += [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['mukurtu-bulk-edit-grid__pick']],
+    ];
     $form['grid_columns']['fields'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Fields'),

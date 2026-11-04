@@ -86,7 +86,7 @@ class BulkEditGridFormTest extends MukurtuImportTestBase {
   }
 
   /**
-   * "Select all" and "Clear all" tick the panel's fields and keep it open.
+   * Select all and Clear all tick the panel's fields and keep it open.
    */
   public function testPickColumns(): void {
     $form = ['grid_columns' => ['fields' => ['#options' => ['field_a' => 'A', 'field_b' => 'B']]]];

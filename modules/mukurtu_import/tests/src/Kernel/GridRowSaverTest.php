@@ -50,7 +50,11 @@ class GridRowSaverTest extends MukurtuImportTestBase {
         'handler_settings' => ['target_bundles' => ['keywords' => 'keywords'], 'auto_create' => TRUE],
       ],
     ])->save();
-    FieldStorageConfig::create(['field_name' => 'field_original_date', 'entity_type' => 'node', 'type' => 'original_date'])->save();
+    FieldStorageConfig::create([
+      'field_name' => 'field_original_date',
+      'entity_type' => 'node',
+      'type' => 'original_date',
+    ])->save();
     FieldConfig::create([
       'field_name' => 'field_original_date',
       'entity_type' => 'node',
