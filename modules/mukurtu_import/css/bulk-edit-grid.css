@@ -2,14 +2,15 @@
  * The per-item bulk edit grid.
  */
 
-/* Each column's CSV format, under its label. */
-.mukurtu-bulk-edit-grid__format {
-  display: block;
-  font-size: 0.875em;
-  font-weight: normal;
+/* Each shown column's CSV format. */
+.mukurtu-bulk-edit-grid__formats dt {
+  font-weight: bold;
 }
 
-/* Long format help shouldn't widen a column past its cells. */
+.mukurtu-bulk-edit-grid__formats dd {
+  margin: 0 0 0.75em;
+}
+
 .mukurtu-bulk-edit-grid__table th {
   min-width: 12rem;
   vertical-align: top;

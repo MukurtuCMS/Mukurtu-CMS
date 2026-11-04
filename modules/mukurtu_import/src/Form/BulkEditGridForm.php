@@ -93,10 +93,6 @@ class BulkEditGridForm extends FormBase {
     ];
 
     $this->buildColumnsPanel($form, $form_state, $available, $fields);
-    $errors = $form_state->get('grid_errors') ?? [];
-    if ($errors) {
-      $form['error_summary'] = $this->errorSummary($errors, $loaded, $available);
-    }
 
     // Each cell's starting text, kept across rebuilds so a failed row is
     // compared with its stored values, not with what the editor typed.
@@ -104,9 +100,14 @@ class BulkEditGridForm extends FormBase {
     $cells = new GridCellText();
     $definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($first->getEntityTypeId(), $type);
 
+    $form['formats'] = $this->formatsPanel($fields, $available, $definitions);
+    $errors = $form_state->get('grid_errors') ?? [];
+    if ($errors) {
+      $form['error_summary'] = $this->errorSummary($errors, $loaded, $available);
+    }
     $header = ['item' => $this->t('Item')];
     foreach ($fields as $field) {
-      $header[$field] = ['data' => $this->columnHeader($field, (string) $available[$field], $definitions)];
+      $header[$field] = ['data' => ['#plain_text' => $available[$field]]];
     }
     $form['grid'] = [
       '#type' => 'table',
@@ -324,21 +325,26 @@ class BulkEditGridForm extends FormBase {
   }
 
   /**
-   * Returns a column header: the field label and its CSV format.
+   * Returns the "Value formats" panel: each shown column's CSV format.
    */
-  protected function columnHeader(string $field, string $label, array $definitions): array {
-    $header = ['label' => ['#plain_text' => $label]];
-    $plugin = \Drupal::service('plugin.manager.mukurtu_import_field_process')->getInstance(['field_definition' => $definitions[$field]]);
-    $format = $plugin ? $plugin->getFormatDescription($definitions[$field]) : '';
-    if ((string) $format !== '') {
-      $header['format'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#attributes' => ['class' => ['mukurtu-bulk-edit-grid__format']],
-        '#value' => $format,
-      ];
+  protected function formatsPanel(array $fields, array $available, array $definitions): array {
+    $plugins = \Drupal::service('plugin.manager.mukurtu_import_field_process');
+    $list = ['#type' => 'html_tag', '#tag' => 'dl'];
+    foreach ($fields as $field) {
+      $plugin = $plugins->getInstance(['field_definition' => $definitions[$field]]);
+      $format = $plugin ? $plugin->getFormatDescription($definitions[$field]) : '';
+      if ((string) $format !== '') {
+        $list[$field . '_label'] = ['#type' => 'html_tag', '#tag' => 'dt', '#value' => $available[$field]];
+        $list[$field . '_format'] = ['#type' => 'html_tag', '#tag' => 'dd', '#value' => $format];
+      }
     }
-    return $header;
+    return [
+      '#type' => 'details',
+      '#title' => $this->t('Value formats'),
+      '#open' => FALSE,
+      '#attributes' => ['class' => ['mukurtu-bulk-edit-grid__formats']],
+      'list' => $list,
+    ];
   }
 
   /**
