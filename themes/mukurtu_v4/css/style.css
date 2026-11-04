@@ -9869,6 +9869,11 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   }
 }
 
+.taxonomy-nested-terms {
+  -webkit-margin-after: var(--v-space-m);
+          margin-block-end: var(--v-space-m);
+}
+
 .referenced-content--divided {
   -webkit-padding-before: var(--v-space-2xs);
           padding-block-start: var(--v-space-2xs);
