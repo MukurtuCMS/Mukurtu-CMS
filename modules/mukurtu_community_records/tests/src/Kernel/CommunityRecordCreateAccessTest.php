@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_community_records\Kernel;
 
+use Drupal\field\Entity\FieldConfig;
 use Drupal\mukurtu_community_records\Controller\CommunityRecordController;
 use Drupal\mukurtu_protocol\Entity\Protocol;
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\og\Entity\OgRole;
 use Drupal\user\Entity\User;
@@ -35,8 +38,17 @@ class CommunityRecordCreateAccessTest extends CommunityRecordTestBase {
   protected function setUp(): void {
     parent::setUp();
 
+    // The base class's 'page' bundle isn't under protocol control (see
+    // mukurtu_protocol_entity_bundle_info_alter()), so use another one.
+    NodeType::create(['type' => 'item', 'name' => 'Item'])->save();
+    FieldConfig::create([
+      'field_name' => 'field_mukurtu_original_record',
+      'entity_type' => 'node',
+      'bundle' => 'item',
+      'label' => 'Original Record',
+    ])->save();
     $this->config('mukurtu_community_records.settings')
-      ->set('allowed_community_record_bundles', ['page'])
+      ->set('allowed_community_record_bundles', ['item'])
       ->save();
 
     $role = OgRole::create([
@@ -71,7 +83,12 @@ class CommunityRecordCreateAccessTest extends CommunityRecordTestBase {
    * Creates a saved item with the given protocols and sharing setting.
    */
   protected function item(array $protocols, string $sharing): NodeInterface {
-    $node = $this->buildRecord(implode('+', $protocols) . " $sharing");
+    $node = Node::create([
+      'type' => 'item',
+      'title' => implode('+', $protocols) . " $sharing",
+      'status' => TRUE,
+      'uid' => $this->currentUser->id(),
+    ]);
     $node->setSharingSetting($sharing);
     $node->setProtocols(array_map(fn($name) => $this->p[$name], $protocols));
     $node->save();

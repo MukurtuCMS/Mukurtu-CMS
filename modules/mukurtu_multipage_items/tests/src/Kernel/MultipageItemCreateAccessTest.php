@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_multipage_items\Kernel;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_multipage_items\Controller\MultipageItemPageController;
+use Drupal\mukurtu_multipage_items\Entity\MultipageItem;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -104,37 +105,55 @@ class MultipageItemCreateAccessTest extends MultipageItemTestBase {
   }
 
   /**
-   * Whether the user can open the "new multipage item" page for the item.
+   * Asserts whether the user can open the "new multipage item" page.
+   *
+   * On a mismatch, the message says which check refused or allowed it.
    */
-  protected function canCreate(NodeInterface $item, User $user): bool {
+  protected function assertCanCreate(bool $expected, NodeInterface $item, User $user): void {
     // The validator checks the current user.
     $this->container->get('current_user')->setAccount($user);
-    $result = MultipageItemPageController::create($this->container)->newFromNodeAccess($user, $item)->isAllowed();
+    $actual = MultipageItemPageController::create($this->container)->newFromNodeAccess($user, $item)->isAllowed();
+
+    $message = '';
+    if ($actual !== $expected) {
+      $violations = MultipageItem::create(['title' => $item->getTitle(), 'field_pages' => [$item->id()]])->validate();
+      $messages = [];
+      foreach ($violations as $violation) {
+        $messages[] = $violation->getPropertyPath() . ': ' . strip_tags((string) $violation->getMessage());
+      }
+      $message = sprintf('%s: view=%s, create=%s, violations=[%s]',
+        $item->label(),
+        var_export($item->access('view', $user), TRUE),
+        var_export($this->container->get('entity_type.manager')->getAccessControlHandler('multipage_item')->createAccess('multipage_item', $user), TRUE),
+        implode('; ', $messages),
+      );
+    }
     $this->container->get('current_user')->setAccount($this->currentUser);
-    return $result;
+
+    $this->assertSame($expected, $actual, $message);
   }
 
   /**
    * Tests an item in one protocol.
    */
   public function testSingleProtocol(): void {
-    $this->assertTrue($this->canCreate($this->item(['A'], 'any'), $this->user(['A' => ['protocol_steward']])));
-    $this->assertFalse($this->canCreate($this->item(['A'], 'any'), $this->user(['A' => []])));
+    $this->assertCanCreate(TRUE, $this->item(['A'], 'any'), $this->user(['A' => ['protocol_steward']]));
+    $this->assertCanCreate(FALSE, $this->item(['A'], 'any'), $this->user(['A' => []]));
 
     // Can see an open item, but isn't a steward of its protocol.
-    $this->assertFalse($this->canCreate($this->item(['O'], 'any'), $this->user(['C' => ['protocol_steward']])));
+    $this->assertCanCreate(FALSE, $this->item(['O'], 'any'), $this->user(['C' => ['protocol_steward']]));
   }
 
   /**
    * Tests an item in two protocols where the user stewards one of them.
    */
   public function testStewardOfOneProtocol(): void {
-    $this->assertTrue($this->canCreate($this->item(['A', 'B'], 'any'), $this->user(['B' => ['protocol_steward']])));
-    $this->assertTrue($this->canCreate($this->item(['A', 'B'], 'all'), $this->user(['A' => ['protocol_steward'], 'B' => []])));
-    $this->assertTrue($this->canCreate($this->item(['O', 'B'], 'all'), $this->user(['B' => ['protocol_steward']])));
+    $this->assertCanCreate(TRUE, $this->item(['A', 'B'], 'any'), $this->user(['B' => ['protocol_steward']]));
+    $this->assertCanCreate(TRUE, $this->item(['A', 'B'], 'all'), $this->user(['A' => ['protocol_steward'], 'B' => []]));
+    $this->assertCanCreate(TRUE, $this->item(['O', 'B'], 'all'), $this->user(['B' => ['protocol_steward']]));
 
     // Not a member of A, so can't see the item.
-    $this->assertFalse($this->canCreate($this->item(['A', 'B'], 'all'), $this->user(['B' => ['protocol_steward']])));
+    $this->assertCanCreate(FALSE, $this->item(['A', 'B'], 'all'), $this->user(['B' => ['protocol_steward']]));
   }
 
 }
