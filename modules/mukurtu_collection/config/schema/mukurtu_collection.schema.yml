@@ -1,0 +1,13 @@
+mukurtu_collection.collection_order:
+  type: config_object
+  label: 'Collection order'
+  mapping:
+    sort_mode:
+      type: string
+      label: 'Sort mode'
+    order:
+      type: sequence
+      label: 'Top-level collection IDs, in display order'
+      sequence:
+        type: integer
+        label: 'Collection ID'
