@@ -925,9 +925,35 @@ function mukurtu_core_update_40222(): void {
 }
 
 /**
+ * Limit content revision history to administrators and Mukurtu Managers.
+ */
+function mukurtu_core_update_40224(): string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Every logged-in user who could view an item could read its whole
+  // revision history and log messages (#2580). Only administrators could
+  // revert, so nobody loses the ability to undo a change.
+  $changed = FALSE;
+  $authenticated = Role::load('authenticated');
+  if ($authenticated && $authenticated->hasPermission('view all revisions')) {
+    $authenticated->revokePermission('view all revisions')->save();
+    $changed = TRUE;
+  }
+  $manager = Role::load('mukurtu_manager');
+  if ($manager && !$manager->hasPermission('view all revisions')) {
+    $manager->grantPermission('view all revisions')->save();
+    $changed = TRUE;
+  }
+  return $changed
+    ? (string) t('Only administrators and Mukurtu Managers can now see content revision history.')
+    : (string) t('Content revision history is already limited to administrators and Mukurtu Managers; nothing to change.');
+}
+
+/**
  * Add the character palette setting, turned off.
  */
-function mukurtu_core_update_40223(): string {
+function mukurtu_core_update_40225(): string {
   // Keep the docblock above to one line; see mukurtu_core_update_40201() for
   // why.
   //

@@ -250,7 +250,7 @@ class MultipageItemPageController extends ControllerBase {
    */
   public function title(NodeInterface $node) {
     $mpi = $this->multipageItemManager->getMultipageEntity($node);
-    return $mpi ? $mpi->label() : $node->getTitle();
+    return $this->entityRepository->getTranslationFromContext($mpi ?? $node)->label();
   }
 
   /**
@@ -269,7 +269,7 @@ class MultipageItemPageController extends ControllerBase {
     /** @var \Drupal\mukurtu_multipage_items\Entity\MultipageItem $mpi */
     $current_page = $node ?? $mpi->getFirstPage();
     $pages = $mpi->getPages(TRUE);
-    $toc_options = array_map(fn($p) => $p->getTitle(), $pages);
+    $toc_options = array_map(fn($p) => $this->entityRepository->getTranslationFromContext($p)->getTitle(), $pages);
     $toc = [
       '#id' => 'multipage-item-table-of-contents',
       '#type' => 'select',
@@ -346,7 +346,10 @@ class MultipageItemPageController extends ControllerBase {
 
   public function addNewPageTitle($node_type, $page_node) {
     $mpi = $this->multipageItemManager->getMultipageEntity($page_node);
-    return $this->t("Adding new %type page to %title", ['%type' => $node_type->label(), '%title' => $mpi->getTitle()]);
+    return $this->t("Adding new %type page to %title", [
+      '%type' => $node_type->label(),
+      '%title' => $this->entityRepository->getTranslationFromContext($mpi)->getTitle(),
+    ]);
   }
 
   public function addNewPage() {

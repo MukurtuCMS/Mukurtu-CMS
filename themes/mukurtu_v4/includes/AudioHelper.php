@@ -15,7 +15,7 @@ class MukurtuV4AudioHelper {
    *
    * Priority order:
    *   1. User-uploaded field_thumbnail on the media entity.
-   *   2. Admin-configured site default (mukurtu_thumbnail.settings).
+   *   2. Admin-configured site default (mukurtu_media.thumbnail_settings).
    *   3. Static audio.png bundled with the theme.
    *
    * field_thumbnail is hidden in the media_assets view mode, so the URL must
@@ -42,9 +42,9 @@ class MukurtuV4AudioHelper {
     }
 
     // Bust the render cache whenever the admin thumbnail config changes.
-    $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
+    $variables['#cache']['tags'][] = 'config:mukurtu_media.thumbnail_settings';
 
-    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    $config = \Drupal::config('mukurtu_media.thumbnail_settings');
     $defaultFid = $config->get('audio')[0] ?? $config->get('audio_default_thumbnail')[0] ?? NULL;
     if ($defaultFid) {
       $url = MukurtuV4FileUrl::fromFile(\Drupal\file\Entity\File::load($defaultFid));
