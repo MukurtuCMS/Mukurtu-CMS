@@ -58,6 +58,7 @@ class TermPageNestedContentTest extends DigitalHeritageTestBase {
 
     // The term index is only kept when taxonomy's own settings are installed.
     $this->installConfig(['taxonomy', 'language']);
+    $this->installEntitySchema('path_alias');
     $path = \Drupal::service('extension.list.module')->getPath('mukurtu_taxonomy');
     View::create(Yaml::decode(file_get_contents("$path/config/install/views.view.taxonomy_term.yml")))->save();
 
@@ -149,10 +150,11 @@ class TermPageNestedContentTest extends DigitalHeritageTestBase {
   }
 
   /**
-   * The term page lists the terms nested directly under it, in order.
+   * The term page links to its parent and lists the terms nested under it.
    *
-   * Names are in the current content language, and moving any term in the
-   * vocabulary refreshes the page.
+   * Nested terms are in the vocabulary's order. Names are in the current
+   * content language, and moving any term in the vocabulary refreshes the
+   * page.
    */
   public function testNestedTermsList(): void {
     $this->createTerm('Carving', $this->terms['arts'], -1);
@@ -166,13 +168,22 @@ class TermPageNestedContentTest extends DigitalHeritageTestBase {
     $this->assertContains('taxonomy_term_list:category', $build['#cache']['tags']);
     $this->assertContains('languages:language_content', $build['#cache']['contexts']);
 
-    $this->assertSame([], $controller->build($this->terms['baskets'])['records']['#nested_terms']);
+    $this->assertNull($build['records']['#parent_term']);
+
+    $baskets = $controller->build($this->terms['baskets']);
+    $this->assertSame([], $baskets['records']['#nested_terms']);
+    $this->assertSame(
+      'Nested under <a href="' . $this->terms['weaving']->toUrl()->toString() . '">Weaving</a>',
+      (string) $baskets['records']['#parent_term']
+    );
 
     $this->config('system.site')->set('default_langcode', 'es')->save();
     $this->container->get('language.default')->set(ConfigurableLanguage::load('es'));
     $this->container->get('language_manager')->reset();
     $build = TaxonomyRecordViewController::create($this->container)->build($this->terms['arts']);
     $this->assertSame(['Carving', 'Tejido'], array_column($build['records']['#nested_terms'], 'name'));
+    $parent_term = (string) TaxonomyRecordViewController::create($this->container)->build($this->terms['baskets'])['records']['#parent_term'];
+    $this->assertStringContainsString('>Tejido</a>', $parent_term);
   }
 
   /**

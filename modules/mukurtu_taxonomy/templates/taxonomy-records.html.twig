@@ -1,4 +1,8 @@
 <div class="taxonomy-term-page">
+  {% if parent_term %}
+    <p class="taxonomy-term-parent">{{ parent_term }}</p>
+  {% endif %}
+
   {% if term_description %}
     <div class="taxonomy-term-description">{{ term_description }}</div>
   {% endif %}

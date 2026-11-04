@@ -11,6 +11,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
@@ -194,6 +195,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       '#referenced_content' => $referencedContent,
       '#term_description' => $this->getTermDescription($taxonomy_term),
       '#nested_terms' => $this->getNestedTerms($taxonomy_term, $cache),
+      '#parent_term' => $this->getParentTermNote($taxonomy_term, $cache),
       '#attached' => [
         'library' => [
           'field_group/element.horizontal_tabs',
@@ -226,6 +228,35 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     $cache->applyTo($build);
 
     return $build;
+  }
+
+  /**
+   * Gets a line linking to the term this one is nested under, if any.
+   *
+   * @param \Drupal\taxonomy\TermInterface $term
+   *   The term.
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache
+   *   Collects the cacheability of the line.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The line, or NULL for a top-level term.
+   */
+  protected function getParentTermNote(TermInterface $term, CacheableMetadata $cache): ?TranslatableMarkup {
+    $parent = $term->get('parent')->entity;
+    if (!$parent instanceof TermInterface) {
+      return NULL;
+    }
+    $access = $parent->access('view', NULL, TRUE);
+    $cache->addCacheableDependency($access);
+    $cache->addCacheableDependency($parent);
+    $cache->addCacheContexts(['languages:language_content']);
+    if (!$access->isAllowed()) {
+      return NULL;
+    }
+    return $this->t('Nested under <a href=":url">@parent</a>', [
+      ':url' => $parent->toUrl()->toString(),
+      '@parent' => $this->translationResolver->translate($parent)->label(),
+    ]);
   }
 
   /**
