@@ -8,11 +8,11 @@ use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\EnforcedResponseException;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\mukurtu_taxonomy\Batch\NestedTermsBatch;
 use Drupal\mukurtu_taxonomy\NestedTerms;
 use Drupal\taxonomy\VocabularyInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Offers to restore the nesting a vocabulary had before it was made flat.
@@ -52,7 +52,7 @@ class RestoreNestingConfirmForm extends ConfirmFormBase {
 
     // Still flat, or nothing saved (already restored in another tab).
     if ($this->nestedTerms->isFlat($this->vocabulary) || !$this->nestedTerms->hasSnapshot($this->vocabulary->id())) {
-      throw new EnforcedResponseException(new TrustedRedirectResponse($this->getCancelUrl()->setAbsolute()->toString()));
+      throw new EnforcedResponseException(new RedirectResponse($this->getCancelUrl()->setAbsolute()->toString()));
     }
 
     return parent::buildForm($form, $form_state);

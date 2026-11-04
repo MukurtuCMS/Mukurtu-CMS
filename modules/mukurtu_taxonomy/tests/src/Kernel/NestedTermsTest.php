@@ -143,8 +143,12 @@ class NestedTermsTest extends EntityKernelTestBase {
    * The snapshot stores the parent and weight of nested terms only.
    */
   public function testSnapshot(): void {
+    ConfigurableLanguage::createFromLangcode('es')->save();
     $terms = $this->createTree();
     $this->assertFalse($this->nestedTerms->hasSnapshot('location'));
+
+    // A translation adds rows to the term's tables, but not to the snapshot.
+    $terms['spokane']->addTranslation('es', ['name' => 'Espokane'])->save();
 
     $this->nestedTerms->snapshot('location');
 
@@ -228,12 +232,42 @@ class NestedTermsTest extends EntityKernelTestBase {
    * A failed restore keeps the snapshot so it can be tried again.
    */
   public function testFailedRestoreKeepsSnapshot(): void {
+    $this->container->get('router.builder')->rebuild();
     $this->createTree();
     $this->nestedTerms->snapshot('location');
 
     NestedTermsBatch::restoreFinished(TRUE, ['vid' => 'location', 'restored' => 1, 'orphaned' => 0, 'errors' => 1]);
 
     $this->assertTrue($this->nestedTerms->hasSnapshot('location'));
+    // The error links to the restore page, since allowing nested terms again
+    // would mean making the vocabulary flat first, which replaces the snapshot.
+    $errors = array_map('strval', $this->container->get('messenger')->messagesByType('error'));
+    $this->assertCount(1, $errors);
+    $this->assertStringContainsString('href="/admin/structure/taxonomy/manage/location/restore-nesting"', $errors[0]);
+  }
+
+  /**
+   * Restoring never makes a term an ancestor of its own parent.
+   *
+   * The restore page also opens on a vocabulary that allows nesting, for
+   * example after "Not now", so terms may have been nested by hand since.
+   */
+  public function testRestoreSkipsParentLoops(): void {
+    $y = $this->createTerm('Y');
+    $x = $this->createTerm('X', (int) $y->id());
+    $this->nestedTerms->snapshot('location');
+    $this->runBatch('flatten', ['location', $this->nestedTerms->getNestedTermIds('location')], 'flattenFinished');
+    Vocabulary::load('location')->unsetThirdPartySetting('flat_taxonomy', 'flat')->save();
+
+    // Nested the other way round by hand.
+    Term::load($y->id())->set('parent', $x->id())->save();
+
+    $results = $this->runBatch('restore', ['location', $this->nestedTerms->getSnapshot('location')], 'restoreFinished');
+
+    $this->assertSame(0, $results['restored']);
+    $this->assertSame(1, $results['orphaned']);
+    $this->assertSame(0, $this->parentOf($x));
+    $this->assertSame((int) $x->id(), $this->parentOf($y));
   }
 
   /**

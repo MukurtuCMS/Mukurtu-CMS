@@ -8,11 +8,11 @@ use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\EnforcedResponseException;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\mukurtu_taxonomy\Batch\NestedTermsBatch;
 use Drupal\mukurtu_taxonomy\NestedTerms;
 use Drupal\taxonomy\VocabularyInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Confirms making a vocabulary that has nested terms flat.
@@ -27,6 +27,11 @@ class FlattenVocabularyConfirmForm extends ConfirmFormBase {
    * The vocabulary to make flat.
    */
   protected VocabularyInterface $vocabulary;
+
+  /**
+   * The number of nested terms, counted once when the form is built.
+   */
+  protected int $nestedCount = 0;
 
   public function __construct(protected NestedTerms $nestedTerms) {}
 
@@ -51,8 +56,9 @@ class FlattenVocabularyConfirmForm extends ConfirmFormBase {
     $this->vocabulary = $taxonomy_vocabulary;
 
     // Already flat, or nothing to move (a second tab, or the back button).
-    if ($this->nestedTerms->isFlat($this->vocabulary) || !$this->nestedTerms->countNestedTerms($this->vocabulary->id())) {
-      throw new EnforcedResponseException(new TrustedRedirectResponse($this->getCancelUrl()->setAbsolute()->toString()));
+    $this->nestedCount = $this->nestedTerms->countNestedTerms($this->vocabulary->id());
+    if ($this->nestedTerms->isFlat($this->vocabulary) || !$this->nestedCount) {
+      throw new EnforcedResponseException(new RedirectResponse($this->getCancelUrl()->setAbsolute()->toString()));
     }
 
     return parent::buildForm($form, $form_state);
@@ -70,7 +76,7 @@ class FlattenVocabularyConfirmForm extends ConfirmFormBase {
    */
   public function getDescription() {
     return $this->formatPlural(
-      $this->nestedTerms->countNestedTerms($this->vocabulary->id()),
+      $this->nestedCount,
       '1 term in %vocabulary is nested under another term. Making the vocabulary flat moves it to the top level. The current nesting is saved, and you can restore it if you allow nested terms again.',
       '@count terms in %vocabulary are nested under other terms. Making the vocabulary flat moves them to the top level. The current nesting is saved, and you can restore it if you allow nested terms again.',
       ['%vocabulary' => $this->nestedTerms->label($this->vocabulary->id())]

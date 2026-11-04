@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_taxonomy;
 
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
@@ -29,6 +30,7 @@ class NestedTerms {
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected KeyValueFactoryInterface $keyValueFactory,
+    protected Connection $database,
   ) {}
 
   /**
@@ -75,14 +77,25 @@ class NestedTerms {
    *
    * Only call this when the vocabulary has nested terms, so that making a
    * vocabulary with no nesting flat never replaces an older snapshot.
+   *
+   * Reads the tables directly rather than loading every nested term, which
+   * matters for large vocabularies.
    */
   public function snapshot(string $vid): void {
+    $query = $this->database->select('taxonomy_term__parent', 'p');
+    $query->join('taxonomy_term_field_data', 'd', '[d].[tid] = [p].[entity_id] AND [d].[default_langcode] = 1');
+    $query->fields('p', ['entity_id', 'parent_target_id']);
+    $query->fields('d', ['weight']);
+    $query->condition('p.bundle', $vid);
+    $query->condition('p.deleted', 0);
+    $query->condition('p.parent_target_id', 0, '>');
+    $query->orderBy('p.entity_id');
+
     $snapshot = [];
-    $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadMultiple($this->getNestedTermIds($vid));
-    foreach ($terms as $term) {
-      $snapshot[(int) $term->id()] = [
-        'parent' => (int) $term->get('parent')->target_id,
-        'weight' => (int) $term->getWeight(),
+    foreach ($query->execute() as $row) {
+      $snapshot[(int) $row->entity_id] = [
+        'parent' => (int) $row->parent_target_id,
+        'weight' => (int) $row->weight,
       ];
     }
     $this->store()->set($vid, $snapshot);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_taxonomy\Batch;
 
+use Drupal\Core\Url;
+
 /**
  * Batch operations that make a vocabulary flat or restore its nesting.
  *
@@ -106,8 +108,9 @@ class NestedTermsBatch {
   /**
    * Batch operation: puts terms back under their saved parents.
    *
-   * Terms deleted since the snapshot are skipped. A term whose saved parent
-   * no longer exists stays at the top level.
+   * Terms deleted since the snapshot are skipped. A term stays at the top
+   * level if its saved parent no longer exists, or if the parent has been
+   * nested under the term since, which would make a loop.
    *
    * @param string $vid
    *   The vocabulary ID.
@@ -143,7 +146,7 @@ class NestedTermsBatch {
           continue;
         }
         $parent = $saved['parent'] ? $storage->load($saved['parent']) : NULL;
-        if ($saved['parent'] && (!$parent || $parent->bundle() !== $vid)) {
+        if ($saved['parent'] && (!$parent || $parent->bundle() !== $vid || isset($storage->loadAllParents($saved['parent'])[$tid]))) {
           $context['results']['orphaned']++;
           continue;
         }
@@ -172,7 +175,7 @@ class NestedTermsBatch {
    * Batch finished callback for restore().
    *
    * Deletes the snapshot only if every term was handled, so a failed restore
-   * can be tried again.
+   * can be tried again from the restore page, which the error links to.
    */
   public static function restoreFinished(bool $success, array $results): void {
     $vocabulary = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load($results['vid'] ?? '');
@@ -182,8 +185,9 @@ class NestedTermsBatch {
     $label = \Drupal::service('mukurtu_taxonomy.nested_terms')->label($vocabulary->id());
 
     if (!$success || !empty($results['errors'])) {
-      \Drupal::messenger()->addError(t("Some terms in %vocabulary couldn't be restored. The saved nesting is kept, so you can try again the next time you allow nested terms. See the recent log messages for details.", [
+      \Drupal::messenger()->addError(t('Some terms in %vocabulary couldn\'t be restored. The saved nesting is kept. <a href=":url">Try restoring again</a>. See the recent log messages for details.', [
         '%vocabulary' => $label,
+        ':url' => Url::fromRoute('mukurtu_taxonomy.restore_nesting', ['taxonomy_vocabulary' => $vocabulary->id()])->toString(),
       ]));
       return;
     }

@@ -18,4 +18,4 @@ services:
 
   mukurtu_taxonomy.nested_terms:
     class: Drupal\mukurtu_taxonomy\NestedTerms
-    arguments: ['@entity_type.manager', '@keyvalue']
+    arguments: ['@entity_type.manager', '@keyvalue', '@database']
