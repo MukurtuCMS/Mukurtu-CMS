@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_taxonomy\Unit;
 
+use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\taxonomy\VocabularyInterface;
 use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the flat_taxonomy checkbox guard on the vocabulary edit form.
+ * Tests how Mukurtu takes over the flat_taxonomy checkbox (#2519).
  *
  * @see mukurtu_taxonomy_form_taxonomy_vocabulary_form_alter()
- * @see mukurtu_taxonomy_lock_flat_taxonomy_checkbox()
+ * @see mukurtu_taxonomy_flat_taxonomy_process()
  */
 #[Group('mukurtu_taxonomy')]
 class FlatTaxonomyGuardTest extends UnitTestCase {
@@ -27,14 +29,23 @@ class FlatTaxonomyGuardTest extends UnitTestCase {
   }
 
   /**
+   * Builds a form state whose form object edits a new or saved vocabulary.
+   */
+  protected function formState(bool $isNew): FormStateInterface {
+    $vocabulary = $this->createMock(VocabularyInterface::class);
+    $vocabulary->method('isNew')->willReturn($isNew);
+    $formObject = $this->createMock(EntityFormInterface::class);
+    $formObject->method('getEntity')->willReturn($vocabulary);
+    $formState = $this->createMock(FormStateInterface::class);
+    $formState->method('getFormObject')->willReturn($formObject);
+    return $formState;
+  }
+
+  /**
    * The alter attaches the #process callback without touching the form.
    *
    * It must not modify $form['flat'] directly, since flat_taxonomy's own
-   * hook_form_taxonomy_vocabulary_form_alter() may not have run yet. It
-   * must use #process (not #after_build), since #after_build runs after
-   * FormBuilder has already converted each child element's #disabled
-   * property into the real HTML `disabled` attribute - by then it's too
-   * late to affect the rendered checkbox (see issue #1788 follow-up).
+   * hook_form_taxonomy_vocabulary_form_alter() may not have run yet.
    */
   public function testAlterAttachesProcessCallback(): void {
     $form = [];
@@ -42,56 +53,63 @@ class FlatTaxonomyGuardTest extends UnitTestCase {
 
     mukurtu_taxonomy_form_taxonomy_vocabulary_form_alter($form, $formState);
 
-    $this->assertSame(['mukurtu_taxonomy_lock_flat_taxonomy_checkbox'], $form['#process']);
+    $this->assertSame(['mukurtu_taxonomy_flat_taxonomy_process'], $form['#process']);
     $this->assertArrayNotHasKey('flat', $form);
   }
 
   /**
-   * The #process callback locks an existing flat checkbox on.
-   *
-   * Covers both an existing vocabulary (flat already TRUE, matching every
-   * stock Mukurtu vocabulary today) and a brand-new vocabulary (flat_taxonomy
-   * defaults the checkbox to a falsy value for an unsaved vocabulary).
+   * The checkbox stays enabled and is on by default for new vocabularies.
    */
-  #[DataProvider('defaultValueProvider')]
-  public function testLocksFlatCheckboxOn(bool $initialDefaultValue): void {
+  #[DataProvider('newVocabularyProvider')]
+  public function testCheckbox(bool $isNew, bool $initialDefaultValue, bool $expectedDefaultValue): void {
     $form = [
-      'flat' => [
-        '#type' => 'checkbox',
-        '#default_value' => $initialDefaultValue,
-      ],
+      'flat' => ['#type' => 'checkbox', '#default_value' => $initialDefaultValue],
+      '#entity_builders' => [],
+      'actions' => ['submit' => ['#submit' => ['::submitForm', '::save']]],
     ];
-    $formState = $this->createMock(FormStateInterface::class);
 
-    $result = mukurtu_taxonomy_lock_flat_taxonomy_checkbox($form, $formState, $form);
+    $result = mukurtu_taxonomy_flat_taxonomy_process($form, $this->formState($isNew), $form);
 
-    $this->assertTrue($result['flat']['#default_value']);
-    $this->assertTrue($result['flat']['#disabled']);
+    $this->assertSame($expectedDefaultValue, $result['flat']['#default_value']);
+    $this->assertArrayNotHasKey('#disabled', $result['flat']);
     $this->assertNotEmpty($result['flat']['#description']->getUntranslatedString());
   }
 
   /**
-   * Data provider of the checkbox's #default_value before the guard runs.
+   * Data provider: is the vocabulary new, the default, the expected default.
    */
-  public static function defaultValueProvider(): array {
+  public static function newVocabularyProvider(): array {
     return [
-      'existing flat vocabulary' => [TRUE],
-      'new, unsaved vocabulary' => [FALSE],
+      'new vocabulary is flat by default' => [TRUE, FALSE, TRUE],
+      'saved nested vocabulary stays nested' => [FALSE, FALSE, FALSE],
+      'saved flat vocabulary stays flat' => [FALSE, TRUE, TRUE],
     ];
   }
 
   /**
+   * The flat_taxonomy builder is replaced, and the redirect runs after save.
+   */
+  public function testReplacesBuilderAndAddsSubmit(): void {
+    $otherBuilder = [new \stdClass(), 'build'];
+    $form = [
+      'flat' => ['#type' => 'checkbox', '#default_value' => TRUE],
+      '#entity_builders' => [$otherBuilder, 'flat_taxonomy_form_taxonomy_vocabulary_form_builder'],
+      'actions' => ['submit' => ['#submit' => ['::submitForm', '::save']]],
+    ];
+
+    $result = mukurtu_taxonomy_flat_taxonomy_process($form, $this->formState(FALSE), $form);
+
+    $this->assertSame([$otherBuilder, 'mukurtu_taxonomy_vocabulary_flat_builder'], $result['#entity_builders']);
+    $this->assertSame(['::submitForm', '::save', 'mukurtu_taxonomy_vocabulary_flat_submit'], $result['actions']['submit']['#submit']);
+  }
+
+  /**
    * Forms without a 'flat' element are left untouched.
-   *
-   * This can't normally happen for taxonomy_vocabulary_form since
-   * flat_taxonomy always adds the element, but the callback should be
-   * defensive regardless.
    */
   public function testFormWithoutFlatElementIsLeftAlone(): void {
     $form = [];
-    $formState = $this->createMock(FormStateInterface::class);
 
-    $result = mukurtu_taxonomy_lock_flat_taxonomy_checkbox($form, $formState, $form);
+    $result = mukurtu_taxonomy_flat_taxonomy_process($form, $this->formState(FALSE), $form);
 
     $this->assertSame([], $result);
   }

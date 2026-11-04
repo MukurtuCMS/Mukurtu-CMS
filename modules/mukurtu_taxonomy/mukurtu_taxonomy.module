@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Implements hook_theme().
@@ -65,14 +66,17 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_FORM_ID_alter() for taxonomy_term_form.
  *
- * Hides the entire "Relations" fieldset (parent terms + weight) on all stock
- * Mukurtu taxonomy term forms. flat_taxonomy already hides only the parent
- * field; hiding the whole block keeps the UI clean and consistent across all
- * stock vocabs.
+ * On a flat stock Mukurtu vocabulary, hides the entire "Relations" fieldset
+ * (parent term + weight). flat_taxonomy already hides only the parent field;
+ * hiding the whole block keeps the UI clean and consistent across all stock
+ * vocabs.
+ *
+ * On a vocabulary that allows nested terms, makes the parent a single choice,
+ * since a term can have only one parent (#2519).
  */
-function mukurtu_taxonomy_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+function mukurtu_taxonomy_form_taxonomy_term_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
   static $mukurtu_vocabs = [
     'category',
     'community_type',
@@ -93,55 +97,155 @@ function mukurtu_taxonomy_form_alter(&$form, \Drupal\Core\Form\FormStateInterfac
     'word_type',
   ];
 
-  if (!str_starts_with($form_id, 'taxonomy_term_') || !str_ends_with($form_id, '_form')) {
+  // The delete form shares this base form ID but has no Relations.
+  if (!isset($form['relations'])) {
     return;
   }
 
-  $vid = substr($form_id, strlen('taxonomy_term_'), -strlen('_form'));
-
-  if (!in_array($vid, $mukurtu_vocabs, TRUE)) {
+  $vocabulary = Vocabulary::load($form_state->getFormObject()->getEntity()->bundle());
+  if (!$vocabulary) {
     return;
   }
 
-  if (isset($form['relations'])) {
-    $form['relations']['#access'] = FALSE;
+  if (\Drupal::service('mukurtu_taxonomy.nested_terms')->isFlat($vocabulary)) {
+    if (in_array($vocabulary->id(), $mukurtu_vocabs, TRUE)) {
+      $form['relations']['#access'] = FALSE;
+    }
+    return;
   }
+
+  if (isset($form['relations']['parent'])) {
+    $parents = (array) ($form['relations']['parent']['#default_value'] ?? []);
+    $form['relations']['parent']['#multiple'] = FALSE;
+    $form['relations']['parent']['#title'] = t('Parent term');
+    $form['relations']['parent']['#default_value'] = reset($parents) ?: 0;
+    $form['relations']['parent']['#element_validate'][] = 'mukurtu_taxonomy_term_parent_validate';
+  }
+}
+
+/**
+ * Element validate callback for the single parent select on the term form.
+ *
+ * TermForm::buildEntity() expects a list of parents, so wrap the one choice.
+ */
+function mukurtu_taxonomy_term_parent_validate(array &$element, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $form_state->setValueForElement($element, [$element['#value']]);
 }
 
 /**
  * Implements hook_form_FORM_ID_alter() for taxonomy_vocabulary_form.
  *
- * Mukurtu does not support hierarchical taxonomies, but the flat_taxonomy
- * module exposes a checkbox to turn flat enforcement off per-vocabulary.
- * Lock it on and explain why, rather than letting an admin quietly put a
- * vocabulary into an unsupported hierarchical state (see issue #1788,
- * mirrors the Layout Builder guard added for issue #1807).
+ * Lets administrators allow nested terms per vocabulary with flat_taxonomy's
+ * checkbox, but replaces that module's entity builder, which flattened every
+ * term on every save with no confirmation and no way back (#2519).
  */
 function mukurtu_taxonomy_form_taxonomy_vocabulary_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
-  $form['#process'][] = 'mukurtu_taxonomy_lock_flat_taxonomy_checkbox';
+  $form['#process'][] = 'mukurtu_taxonomy_flat_taxonomy_process';
 }
 
 /**
- * Form #process callback: locks the flat_taxonomy checkbox on.
+ * Form #process callback: takes over the flat_taxonomy checkbox.
  *
  * Attached via #process on the root form element (not #after_build, and
- * not directly in the alter above) so it runs before FormBuilder's
- * handleInputElement() converts #disabled into the real HTML `disabled`
- * attribute for the 'flat' child element - #after_build runs after that
- * conversion has already happened for every child, so setting #disabled
- * there never reaches the rendered HTML. Attaching to the root form
- * (rather than checking for $form['flat'] directly in the alter) also
- * works regardless of whether flat_taxonomy's own
- * hook_form_taxonomy_vocabulary_form_alter() runs before or after this
- * one, since all modules' form alters complete before any #process runs.
+ * not directly in the alter above) so it runs before the 'flat' child
+ * element is processed, and so it works regardless of whether
+ * flat_taxonomy's own hook_form_taxonomy_vocabulary_form_alter() runs before
+ * or after this one, since all modules' form alters complete before any
+ * #process runs.
  */
-function mukurtu_taxonomy_lock_flat_taxonomy_checkbox($element, \Drupal\Core\Form\FormStateInterface $form_state, &$complete_form) {
-  if (isset($element['flat'])) {
-    $element['flat']['#default_value'] = TRUE;
-    $element['flat']['#disabled'] = TRUE;
-    $element['flat']['#description'] = t('Mukurtu does not currently support nested/hierarchical taxonomies.');
+function mukurtu_taxonomy_flat_taxonomy_process($element, \Drupal\Core\Form\FormStateInterface $form_state, &$complete_form) {
+  if (!isset($element['flat'])) {
+    return $element;
   }
+
+  $element['flat']['#description'] = t("If checked, terms in this vocabulary can't be nested. If the vocabulary has nested terms, you'll be asked to confirm before they're moved to the top level.");
+
+  // New vocabularies are flat until an administrator opts in.
+  if ($form_state->getFormObject()->getEntity()->isNew()) {
+    $element['flat']['#default_value'] = TRUE;
+  }
+
+  $element['#entity_builders'] = array_values(array_filter(
+    $element['#entity_builders'] ?? [],
+    fn ($builder) => $builder !== 'flat_taxonomy_form_taxonomy_vocabulary_form_builder',
+  ));
+  $element['#entity_builders'][] = 'mukurtu_taxonomy_vocabulary_flat_builder';
+
+  if (isset($element['actions']['submit'])) {
+    $element['actions']['submit']['#submit'][] = 'mukurtu_taxonomy_vocabulary_flat_submit';
+  }
+
   return $element;
+}
+
+/**
+ * Entity builder: sets whether the vocabulary is flat.
+ *
+ * Making a vocabulary that has nested terms flat waits for confirmation, and
+ * allowing nested terms again offers to restore a saved structure. Both are
+ * flagged here and redirected to in mukurtu_taxonomy_vocabulary_flat_submit().
+ * Entity builders run during validation and again on submit, so this must
+ * give the same result each time.
+ */
+function mukurtu_taxonomy_vocabulary_flat_builder(string $entity_type, \Drupal\taxonomy\VocabularyInterface $vocabulary, array &$form, \Drupal\Core\Form\FormStateInterface $form_state): void {
+  /** @var \Drupal\mukurtu_taxonomy\NestedTerms $nested_terms */
+  $nested_terms = \Drupal::service('mukurtu_taxonomy.nested_terms');
+  $make_flat = (bool) $form_state->getValue('flat');
+
+  $was_flat = FALSE;
+  if (!$vocabulary->isNew()) {
+    $original = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->loadUnchanged($vocabulary->id());
+    $was_flat = $original && $nested_terms->isFlat($original);
+  }
+
+  $form_state->set('mukurtu_taxonomy_flat_redirect', NULL);
+
+  if ($make_flat && !$was_flat && !$vocabulary->isNew() && $nested_terms->countNestedTerms($vocabulary->id())) {
+    $vocabulary->unsetThirdPartySetting('flat_taxonomy', 'flat');
+    $form_state->set('mukurtu_taxonomy_flat_redirect', 'mukurtu_taxonomy.flatten_vocabulary');
+  }
+  elseif ($make_flat) {
+    $vocabulary->setThirdPartySetting('flat_taxonomy', 'flat', 1);
+  }
+  else {
+    $vocabulary->unsetThirdPartySetting('flat_taxonomy', 'flat');
+    if ($was_flat && $nested_terms->hasSnapshot($vocabulary->id())) {
+      $form_state->set('mukurtu_taxonomy_flat_redirect', 'mukurtu_taxonomy.restore_nesting');
+    }
+  }
+}
+
+/**
+ * Submit handler: sends the administrator to confirm flattening or restoring.
+ *
+ * Runs after VocabularyForm::save(), which sets its own redirect.
+ */
+function mukurtu_taxonomy_vocabulary_flat_submit(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $route = $form_state->get('mukurtu_taxonomy_flat_redirect');
+  if (!$route) {
+    return;
+  }
+  // A ?destination= query would otherwise win over this redirect.
+  \Drupal::request()->query->remove('destination');
+  $form_state->setRedirect($route, ['taxonomy_vocabulary' => $form_state->getFormObject()->getEntity()->id()]);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for taxonomy_vocabulary.
+ */
+function mukurtu_taxonomy_taxonomy_vocabulary_delete(\Drupal\taxonomy\VocabularyInterface $vocabulary) {
+  \Drupal::service('mukurtu_taxonomy.nested_terms')->deleteSnapshot($vocabulary->id());
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ *
+ * A term can have only one parent (#2519).
+ */
+function mukurtu_taxonomy_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  if ($entity_type->id() === 'taxonomy_term' && isset($fields['parent'])) {
+    $fields['parent']->addConstraint('MukurtuSingleParent');
+  }
 }
 
 /**
@@ -165,11 +269,6 @@ if (isset($form['description'])) {
   // Add helper text to path field.
   if (isset($form['path'])) {
     $form['path']['widget'][0]['#description'] = t('Leave blank to auto-generate a URL path based on the category name. Optionally, enter a custom path.');
-  }
-
-  // Hide the relations field (see issue #204).
-  if (isset($form['relations'])) {
-    $form['relations']['#access'] = FALSE;
   }
 }
 

@@ -24,8 +24,7 @@ use PHPUnit\Framework\Attributes\Group;
  * own validateForm()/submitForm() consume the converted value.
  *
  * mukurtu_taxonomy's full dependency chain isn't needed, so its .module file
- * is required here rather than the module being enabled, mirroring
- * FlatTaxonomyCheckboxRenderTest.
+ * is required here rather than the module being enabled.
  *
  * @see mukurtu_taxonomy_form_taxonomy_merge_terms_alter()
  * @see mukurtu_taxonomy_term_merge_terms_validate()
