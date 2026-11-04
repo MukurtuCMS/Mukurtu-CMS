@@ -177,14 +177,14 @@ class BulkEditGridForm extends FormBase {
       '#value' => $this->t('Save changes'),
       '#button_type' => 'primary',
     ];
-    if (($data['redirect_url'] ?? NULL) instanceof Url) {
-      $form['actions']['cancel'] = [
-        '#type' => 'link',
-        '#title' => $this->t('Cancel'),
-        '#url' => $data['redirect_url'],
-        '#attributes' => ['class' => ['button']],
-      ];
-    }
+    // A button, not a link, so leaving also clears the selection; otherwise
+    // the list would show these items still selected.
+    $form['actions']['cancel'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Cancel'),
+      '#submit' => ['::cancel'],
+      '#limit_validation_errors' => [],
+    ];
     return $form;
   }
 
@@ -246,6 +246,13 @@ class BulkEditGridForm extends FormBase {
     if (!$saved) {
       $this->messenger()->addStatus($this->t('Nothing was changed.'));
     }
+    $this->finish($form_state);
+  }
+
+  /**
+   * Clears the selection and returns to the list without saving.
+   */
+  public function cancel(array &$form, FormStateInterface $form_state): void {
     $this->finish($form_state);
   }
 

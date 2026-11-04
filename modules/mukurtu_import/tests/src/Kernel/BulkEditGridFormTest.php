@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
 use Drupal\Core\Extension\ModuleInstallerInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\mukurtu_import\Form\BulkEditGridForm;
 use Drupal\mukurtu_import\Plugin\Action\MukurtuEditItemsGridAction;
 use Drupal\node\Entity\Node;
@@ -68,6 +69,20 @@ class BulkEditGridFormTest extends MukurtuImportTestBase {
     // With every result selected, VBO lists the excluded rows instead.
     $this->select(['list' => [], 'exclude_mode' => TRUE, 'total_results' => 60]);
     $this->assertStringStartsWith('You selected 60 items.', (string) $this->grid()['too_many']['#value']);
+  }
+
+  /**
+   * Cancel clears the selection, so the list doesn't show it still selected.
+   */
+  public function testCancelClearsSelection(): void {
+    $this->select(['list' => ['key1' => [1, 'en', 'node', 1]]]);
+    $form_state = (new FormState())->addBuildInfo('args', ['mukurtu_bulk_edit_content', 'page']);
+    $form = [];
+
+    BulkEditGridForm::create($this->container)->cancel($form, $form_state);
+
+    $store = $this->container->get('tempstore.private')->get('views_bulk_operations_mukurtu_bulk_edit_content_page');
+    $this->assertNull($store->get((string) $this->currentUser->id()));
   }
 
   /**

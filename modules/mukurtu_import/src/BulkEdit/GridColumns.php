@@ -12,8 +12,10 @@ use Drupal\mukurtu_core\BulkEdit\BulkEditColumns;
  *
  * The grid offers the item's label field plus the fields the bulk edit page
  * offers as columns, leaving out those whose CSV text is only IDs or WKT:
- * paragraphs, files, images and map coverage. It starts with the fields the
- * editor shows on the bulk edit table; their grid choice is saved per type.
+ * paragraphs, files, images and map coverage. Media also offers its text
+ * source (embed code, video or SoundCloud URL) and Published. The grid
+ * starts with the fields the editor shows on the bulk edit table; their grid
+ * choice is saved per type.
  */
 class GridColumns {
 
@@ -38,12 +40,30 @@ class GridColumns {
     $label_key = \Drupal::entityTypeManager()->getDefinition($entity_type_id)->getKey('label');
 
     $fields = [$label_key => $definitions[$label_key]->getLabel()];
+
+    // A media type's own source, when it's text rather than a file. The bulk
+    // edit forms leave it out, as setting one file on many items rarely makes
+    // sense, but each row here gets its own value.
+    if ($entity_type_id === 'media') {
+      $media_type = \Drupal::entityTypeManager()->getStorage('media_type')->load($type);
+      $source = $media_type?->getSource()->getSourceFieldDefinition($media_type);
+      if ($source && !in_array($source->getType(), self::EXCLUDED_TYPES, TRUE)) {
+        $fields[$source->getName()] = $source->getLabel();
+      }
+    }
+
     foreach ($this->columns->available($type) as $key => $label) {
       if (isset($definitions[$key])
         && !in_array($key, BulkEditColumns::ITEM_COLUMNS, TRUE)
         && !in_array($definitions[$key]->getType(), self::EXCLUDED_TYPES, TRUE)) {
         $fields[$key] = $label;
       }
+    }
+
+    // Media is published or not; content goes through moderation states,
+    // which the grid doesn't edit.
+    if ($entity_type_id === 'media' && isset($definitions['status'])) {
+      $fields['status'] = $definitions['status']->getLabel();
     }
     return $fields;
   }
