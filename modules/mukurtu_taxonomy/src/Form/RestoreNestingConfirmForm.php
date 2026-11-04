@@ -62,7 +62,7 @@ class RestoreNestingConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Restore the nesting in %vocabulary?', ['%vocabulary' => $this->vocabulary->label()]);
+    return $this->t('Restore the nesting in %vocabulary?', ['%vocabulary' => $this->nestedTerms->label($this->vocabulary->id())]);
   }
 
   /**
@@ -73,7 +73,7 @@ class RestoreNestingConfirmForm extends ConfirmFormBase {
       count($this->nestedTerms->getSnapshot($this->vocabulary->id())),
       "%vocabulary had nested terms before it was made flat. Restoring puts 1 term back under its previous parent, in its previous order. Terms whose previous parent no longer exists stay at the top level. If you don't restore now, you can do it the next time you allow nested terms.",
       "%vocabulary had nested terms before it was made flat. Restoring puts @count terms back under their previous parents, in their previous order. Terms whose previous parent no longer exists stay at the top level. If you don't restore now, you can do it the next time you allow nested terms.",
-      ['%vocabulary' => $this->vocabulary->label()]
+      ['%vocabulary' => $this->nestedTerms->label($this->vocabulary->id())]
     );
   }
 

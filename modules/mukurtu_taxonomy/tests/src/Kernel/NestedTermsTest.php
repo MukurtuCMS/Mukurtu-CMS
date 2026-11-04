@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_taxonomy\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\mukurtu_taxonomy\Batch\NestedTermsBatch;
 use Drupal\mukurtu_taxonomy\NestedTerms;
 use Drupal\taxonomy\Entity\Term;
@@ -34,6 +35,7 @@ class NestedTermsTest extends EntityKernelTestBase {
     'text',
     'filter',
     'flat_taxonomy',
+    'language',
     'mukurtu_taxonomy',
   ];
 
@@ -57,13 +59,18 @@ class NestedTermsTest extends EntityKernelTestBase {
   protected VocabularyInterface $vocabulary;
 
   /**
+   * The progress message from the last batch pass run by runBatch().
+   */
+  protected string $lastBatchMessage = '';
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('taxonomy_term');
-    $this->installConfig(['taxonomy']);
+    $this->installConfig(['taxonomy', 'language']);
 
     $this->vocabulary = Vocabulary::create(['vid' => 'location', 'name' => 'Location']);
     $this->vocabulary->save();
@@ -96,6 +103,7 @@ class NestedTermsTest extends EntityKernelTestBase {
       NestedTermsBatch::$operation(...[...$arguments, &$context]);
     } while ($context['finished'] < 1);
     NestedTermsBatch::$finished(TRUE, $context['results']);
+    $this->lastBatchMessage = (string) ($context['message'] ?? '');
     return $context['results'];
   }
 
@@ -158,6 +166,7 @@ class NestedTermsTest extends EntityKernelTestBase {
     $results = $this->runBatch('flatten', ['location', $this->nestedTerms->getNestedTermIds('location')], 'flattenFinished');
 
     $this->assertSame(2, $results['moved']);
+    $this->assertSame('Moved 2 of 2 terms to the top level.', $this->lastBatchMessage);
     $this->assertSame(0, $this->parentOf($terms['spokane']));
     $this->assertSame(0, $this->parentOf($terms['hillyard']));
     $this->assertSame(7, (int) Term::load($terms['hillyard']->id())->getWeight());
@@ -205,6 +214,7 @@ class NestedTermsTest extends EntityKernelTestBase {
     $results = $this->runBatch('restore', ['location', $this->nestedTerms->getSnapshot('location')], 'restoreFinished');
 
     $this->assertSame(2, $results['restored']);
+    $this->assertSame('Restored 4 of 4 terms.', $this->lastBatchMessage);
     $this->assertSame(1, $results['orphaned']);
     $this->assertSame((int) $terms['washington']->id(), $this->parentOf($terms['spokane']));
     $this->assertSame(3, (int) Term::load($terms['spokane']->id())->getWeight());
@@ -236,6 +246,30 @@ class NestedTermsTest extends EntityKernelTestBase {
     Vocabulary::load('location')->delete();
 
     $this->assertFalse($this->nestedTerms->hasSnapshot('location'));
+  }
+
+  /**
+   * Messages use the translated name, which is never saved as the original.
+   *
+   * Flattening saves the vocabulary when it finishes. Saving a copy loaded
+   * with translations would replace the original name with the translation.
+   */
+  public function testTranslatedVocabularyName(): void {
+    ConfigurableLanguage::createFromLangcode('es')->save();
+    $language_manager = $this->container->get('language_manager');
+    $language_manager->getLanguageConfigOverride('es', 'taxonomy.vocabulary.location')->set('name', 'Ubicación')->save();
+    $language_manager->setConfigOverrideLanguage($language_manager->getLanguage('es'));
+
+    $this->assertSame('Ubicación', $this->nestedTerms->label('location'));
+
+    $this->createTree();
+    $this->nestedTerms->snapshot('location');
+    $this->runBatch('flatten', ['location', $this->nestedTerms->getNestedTermIds('location')], 'flattenFinished');
+
+    $this->assertSame('Location', $this->config('taxonomy.vocabulary.location')->getOriginal('name', FALSE));
+    $this->assertTrue($this->nestedTerms->isFlat($this->container->get('entity_type.manager')->getStorage('taxonomy_vocabulary')->loadOverrideFree('location')));
+    $messages = array_map('strval', $this->container->get('messenger')->messagesByType('status'));
+    $this->assertStringContainsString('Ubicación', implode(' ', $messages));
   }
 
   /**

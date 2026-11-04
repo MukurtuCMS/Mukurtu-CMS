@@ -39,6 +39,16 @@ class NestedTerms {
   }
 
   /**
+   * Gets a vocabulary's name in the current language, for messages.
+   *
+   * Admin routes pass the vocabulary without translations, and a vocabulary
+   * loaded with them must never be saved, so the name is loaded separately.
+   */
+  public function label(string $vid): string {
+    return (string) $this->entityTypeManager->getStorage('taxonomy_vocabulary')->load($vid)?->label();
+  }
+
+  /**
    * Gets the IDs of terms in a vocabulary that have a parent.
    *
    * @return int[]

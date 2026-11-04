@@ -63,6 +63,10 @@ class NestedTermsBatch {
       $context['sandbox']['progress']++;
     }
 
+    $context['message'] = t('Moved @current of @total terms to the top level.', [
+      '@current' => $context['sandbox']['progress'],
+      '@total' => $context['sandbox']['max'],
+    ]);
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
 
@@ -73,14 +77,17 @@ class NestedTermsBatch {
    * nested, and its snapshot is still there to restore from.
    */
   public static function flattenFinished(bool $success, array $results): void {
-    $vocabulary = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->load($results['vid'] ?? '');
+    // Saved below, so it's loaded without translations, which would otherwise
+    // be saved as the original values.
+    $vocabulary = \Drupal::entityTypeManager()->getStorage('taxonomy_vocabulary')->loadOverrideFree($results['vid'] ?? '');
     if (!$vocabulary) {
       return;
     }
+    $label = \Drupal::service('mukurtu_taxonomy.nested_terms')->label($vocabulary->id());
 
     if (!$success || !empty($results['errors'])) {
       \Drupal::messenger()->addError(t("Some terms in %vocabulary couldn't be moved to the top level, so the vocabulary still allows nested terms. See the recent log messages for details.", [
-        '%vocabulary' => $vocabulary->label(),
+        '%vocabulary' => $label,
       ]));
       return;
     }
@@ -92,7 +99,7 @@ class NestedTermsBatch {
       $results['moved'] ?? 0,
       '%vocabulary is now flat. 1 term moved to the top level.',
       '%vocabulary is now flat. @count terms moved to the top level.',
-      ['%vocabulary' => $vocabulary->label()]
+      ['%vocabulary' => $label]
     ));
   }
 
@@ -154,6 +161,10 @@ class NestedTermsBatch {
       }
     }
 
+    $context['message'] = t('Restored @current of @total terms.', [
+      '@current' => $context['sandbox']['progress'],
+      '@total' => $context['sandbox']['max'],
+    ]);
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
 
@@ -168,10 +179,11 @@ class NestedTermsBatch {
     if (!$vocabulary) {
       return;
     }
+    $label = \Drupal::service('mukurtu_taxonomy.nested_terms')->label($vocabulary->id());
 
     if (!$success || !empty($results['errors'])) {
       \Drupal::messenger()->addError(t("Some terms in %vocabulary couldn't be restored. The saved nesting is kept, so you can try again the next time you allow nested terms. See the recent log messages for details.", [
-        '%vocabulary' => $vocabulary->label(),
+        '%vocabulary' => $label,
       ]));
       return;
     }
@@ -183,7 +195,7 @@ class NestedTermsBatch {
       $results['restored'] ?? 0,
       'Restored the nesting for 1 term in %vocabulary.',
       'Restored the nesting for @count terms in %vocabulary.',
-      ['%vocabulary' => $vocabulary->label()]
+      ['%vocabulary' => $label]
     ));
     if (!empty($results['orphaned'])) {
       \Drupal::messenger()->addWarning($translation->formatPlural(

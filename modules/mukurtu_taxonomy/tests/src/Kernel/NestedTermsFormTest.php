@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_taxonomy\Kernel;
 
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Render\RenderContext;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -23,6 +24,8 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group('mukurtu_taxonomy')]
 class NestedTermsFormTest extends EntityKernelTestBase {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}
@@ -191,11 +194,25 @@ class NestedTermsFormTest extends EntityKernelTestBase {
     mukurtu_taxonomy_vocabulary_flat_submit($form, $form_state);
     $this->assertNull($form_state->getRedirect());
 
+    // Core's save message is dropped before the Make flat page, since nothing
+    // has been flattened yet. Other messages stay.
+    $messenger = $this->container->get('messenger');
+    $messenger->addStatus($this->t('Updated vocabulary %name.', ['%name' => 'Location']));
+    $messenger->addStatus('Another message.');
     $form_state->set('mukurtu_taxonomy_flat_redirect', 'mukurtu_taxonomy.flatten_vocabulary');
     mukurtu_taxonomy_vocabulary_flat_submit($form, $form_state);
     $redirect = $form_state->getRedirect();
     $this->assertSame('mukurtu_taxonomy.flatten_vocabulary', $redirect->getRouteName());
     $this->assertSame(['taxonomy_vocabulary' => 'location'], $redirect->getRouteParameters());
+    $this->assertSame(['Another message.'], array_map('strval', $messenger->deleteByType('status')));
+
+    // Allowing nested terms did save, so the message stays before the restore
+    // page.
+    $messenger->addStatus($this->t('Updated vocabulary %name.', ['%name' => 'Location']));
+    $form_state->set('mukurtu_taxonomy_flat_redirect', 'mukurtu_taxonomy.restore_nesting');
+    mukurtu_taxonomy_vocabulary_flat_submit($form, $form_state);
+    $this->assertSame('mukurtu_taxonomy.restore_nesting', $form_state->getRedirect()->getRouteName());
+    $this->assertSame(['Updated vocabulary <em class="placeholder">Location</em>.'], array_map('strval', $messenger->deleteByType('status')));
   }
 
   /**

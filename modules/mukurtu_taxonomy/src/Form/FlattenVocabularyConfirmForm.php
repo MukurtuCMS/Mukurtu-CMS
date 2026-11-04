@@ -62,7 +62,7 @@ class FlattenVocabularyConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Make %vocabulary flat?', ['%vocabulary' => $this->vocabulary->label()]);
+    return $this->t('Make %vocabulary flat?', ['%vocabulary' => $this->nestedTerms->label($this->vocabulary->id())]);
   }
 
   /**
@@ -73,7 +73,7 @@ class FlattenVocabularyConfirmForm extends ConfirmFormBase {
       $this->nestedTerms->countNestedTerms($this->vocabulary->id()),
       '1 term in %vocabulary is nested under another term. Making the vocabulary flat moves it to the top level. The current nesting is saved, and you can restore it if you allow nested terms again.',
       '@count terms in %vocabulary are nested under other terms. Making the vocabulary flat moves them to the top level. The current nesting is saved, and you can restore it if you allow nested terms again.',
-      ['%vocabulary' => $this->vocabulary->label()]
+      ['%vocabulary' => $this->nestedTerms->label($this->vocabulary->id())]
     );
   }
 

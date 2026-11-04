@@ -235,9 +235,24 @@ function mukurtu_taxonomy_vocabulary_flat_submit(array &$form, \Drupal\Core\Form
   if (!$route) {
     return;
   }
+  $vocabulary = $form_state->getFormObject()->getEntity();
+
+  // Core's "Updated vocabulary" message would read as if the terms were
+  // already moved, before the administrator has confirmed it.
+  if ($route === 'mukurtu_taxonomy.flatten_vocabulary') {
+    $messenger = \Drupal::messenger();
+    $updated = (string) t('Updated vocabulary %name.', ['%name' => $vocabulary->label()]);
+    $statuses = $messenger->deleteByType($messenger::TYPE_STATUS) ?? [];
+    foreach ($statuses as $status) {
+      if ((string) $status !== $updated) {
+        $messenger->addStatus($status);
+      }
+    }
+  }
+
   // A ?destination= query would otherwise win over this redirect.
   \Drupal::request()->query->remove('destination');
-  $form_state->setRedirect($route, ['taxonomy_vocabulary' => $form_state->getFormObject()->getEntity()->id()]);
+  $form_state->setRedirect($route, ['taxonomy_vocabulary' => $vocabulary->id()]);
 }
 
 /**
