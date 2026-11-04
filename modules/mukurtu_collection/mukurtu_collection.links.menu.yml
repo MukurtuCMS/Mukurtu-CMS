@@ -46,3 +46,10 @@ mukurtu_collection.my_personal_collections_dashboard:
 mukurtu_collection.collection_menu:
   class: \Drupal\mukurtu_collection\Plugin\Menu\CollectionMenuItem
   deriver: \Drupal\mukurtu_collection\Plugin\Deriver\CollectionMenuItemDeriver
+
+mukurtu_collection.collection_order:
+  title: 'Collection order'
+  menu_name: dashboard-content-settings
+  description: 'Set the display order of collections on the Collections page.'
+  route_name: mukurtu_collection.collection_order
+  parent: mukurtu_dashboard
