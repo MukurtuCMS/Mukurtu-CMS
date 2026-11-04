@@ -131,6 +131,13 @@
 
       main.on('mounted moved resized', () => updateTrackHeight(main));
 
+      // Stop media on the slide being left, so it doesn't keep playing
+      // behind the next one.
+      main.on('move', (newIndex, prevIndex) => {
+        const prev = main.Components.Slides.getAt(prevIndex);
+        if (prev) Drupal.mukurtuStopMedia(prev.slide);
+      });
+
       main.sync( thumbnails );
       main.mount();
       thumbnails.mount();
