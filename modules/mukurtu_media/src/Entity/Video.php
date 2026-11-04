@@ -28,7 +28,7 @@ class Video extends Media implements VideoInterface, CulturalProtocolControlledI
    * {@inheritdoc}
    */
   function getDefaultThumbnail() {
-    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    $config = \Drupal::config('mukurtu_media.thumbnail_settings');
     $defaultVideoThumbnail = $config->get('video_default_thumbnail')[0] ?? NULL;
     return $defaultVideoThumbnail;
   }
