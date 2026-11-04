@@ -365,6 +365,7 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - mukurtu_memberships
         - url
         - url.query_args
         - user.permissions
@@ -381,6 +382,7 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - mukurtu_memberships
         - url
         - url.query_args
         - user.permissions

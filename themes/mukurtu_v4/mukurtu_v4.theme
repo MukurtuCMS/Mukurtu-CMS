@@ -549,8 +549,8 @@ function mukurtu_v4_preprocess_media(array &$variables) {
     }
     elseif ($bundle === 'soundcloud') {
       if ($media->get('field_thumbnail')->isEmpty()) {
-        $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
-        $sc_config = \Drupal::config('mukurtu_thumbnail.settings');
+        $variables['#cache']['tags'][] = 'config:mukurtu_media.thumbnail_settings';
+        $sc_config = \Drupal::config('mukurtu_media.thumbnail_settings');
         $defaultFid = $sc_config->get('soundcloud')[0] ?? NULL;
         if ($defaultFid) {
           $scFile = \Drupal\file\Entity\File::load($defaultFid);
@@ -597,8 +597,8 @@ function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): vo
 function mukurtu_v4_preprocess_media__soundcloud__carousel_thumbnail(array &$variables): void {
   $media = $variables['media'];
   if ($media->get('field_thumbnail')->isEmpty()) {
-    $variables['#cache']['tags'][] = 'config:mukurtu_thumbnail.settings';
-    $config = \Drupal::config('mukurtu_thumbnail.settings');
+    $variables['#cache']['tags'][] = 'config:mukurtu_media.thumbnail_settings';
+    $config = \Drupal::config('mukurtu_media.thumbnail_settings');
     $defaultFid = $config->get('soundcloud')[0] ?? NULL;
     if ($defaultFid) {
       $file = \Drupal\file\Entity\File::load($defaultFid);
