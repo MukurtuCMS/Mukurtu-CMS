@@ -10,7 +10,7 @@ use Drupal\mukurtu_core\StaleConfigKeyCleanup;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests the mukurtu_thumbnail.settings schema.
+ * Tests the mukurtu_media.thumbnail_settings schema.
  *
  * ThumbnailSettingsForm stores one flat key per media bundle (suffixed for
  * audio and video, see getConfigKey()), and older sites still have the bare
@@ -67,7 +67,7 @@ class ThumbnailSettingsSchemaTest extends KernelTestBase {
     foreach ($keys as $key) {
       $data[$key] = [7];
     }
-    $result = $this->checkConfigSchema(\Drupal::service('config.typed'), 'mukurtu_thumbnail.settings', $data);
+    $result = $this->checkConfigSchema(\Drupal::service('config.typed'), 'mukurtu_media.thumbnail_settings', $data);
     $this->assertTrue($result, is_array($result) ? implode("\n", $result) : 'No schema');
   }
 
@@ -75,15 +75,15 @@ class ThumbnailSettingsSchemaTest extends KernelTestBase {
    * The update cleanup casts file IDs the installer stored as strings.
    */
   public function testCleanupCastsStoredFileIds(): void {
-    \Drupal::service('config.storage')->write('mukurtu_thumbnail.settings', [
+    \Drupal::service('config.storage')->write('mukurtu_media.thumbnail_settings', [
       'audio_default_thumbnail' => ['3'],
       'video_default_thumbnail' => [4],
     ]);
-    \Drupal::configFactory()->reset('mukurtu_thumbnail.settings');
+    \Drupal::configFactory()->reset('mukurtu_media.thumbnail_settings');
 
     (new StaleConfigKeyCleanup(\Drupal::entityTypeManager(), \Drupal::configFactory()))->castThumbnailSettings();
 
-    $data = \Drupal::service('config.storage')->read('mukurtu_thumbnail.settings');
+    $data = \Drupal::service('config.storage')->read('mukurtu_media.thumbnail_settings');
     $this->assertSame([3], $data['audio_default_thumbnail']);
     $this->assertSame([4], $data['video_default_thumbnail']);
   }

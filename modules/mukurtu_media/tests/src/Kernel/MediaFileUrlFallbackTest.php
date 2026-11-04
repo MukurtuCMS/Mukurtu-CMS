@@ -257,7 +257,7 @@ class MediaFileUrlFallbackTest extends KernelTestBase {
    */
   public function testAudioThumbnailFallsThroughToConfiguredDefault(): void {
     $default = $this->createFile('public://site-default.png');
-    \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings')
+    \Drupal::configFactory()->getEditable('mukurtu_media.thumbnail_settings')
       ->set('audio', [$default->id()])
       ->save();
 
@@ -273,7 +273,7 @@ class MediaFileUrlFallbackTest extends KernelTestBase {
    * With every tier unreachable, the bundled icon is used.
    */
   public function testAudioThumbnailFallsThroughToBundledIcon(): void {
-    \Drupal::configFactory()->getEditable('mukurtu_thumbnail.settings')
+    \Drupal::configFactory()->getEditable('mukurtu_media.thumbnail_settings')
       ->set('audio', [$this->createFile('private://site-default.png')->id()])
       ->save();
 
