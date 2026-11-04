@@ -226,6 +226,7 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - mukurtu_memberships
         - url.query_args
         - user.permissions
       tags: {  }
@@ -243,6 +244,7 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - mukurtu_memberships
         - url.query_args
         - user.permissions
       tags: {  }

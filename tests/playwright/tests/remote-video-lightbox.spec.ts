@@ -75,6 +75,7 @@ async function setUpLightboxFixture(page) {
     `,
   });
   await page.addScriptTag({ path: path.join(THEME_DIR, 'libraries/glightbox/glightbox.min.js') });
+  await page.addScriptTag({ path: path.join(THEME_DIR, 'js/media-stop.js') });
   await page.addScriptTag({ path: path.join(THEME_DIR, 'js/media-asset-glightbox.js') });
 
   // mediaAssetGLightbox's global init runs GLightbox's own constructor after
