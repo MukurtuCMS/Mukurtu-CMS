@@ -96,7 +96,8 @@ class MultipageItemCreateAccessTest extends MultipageItemTestBase {
    * An empty role list makes a plain member.
    */
   protected function user(array $memberships): User {
-    $user = User::create(['name' => $this->randomMachineName()]);
+    // Active, so the new multipage item can reference the user as its owner.
+    $user = User::create(['name' => $this->randomMachineName(), 'status' => 1]);
     $user->save();
     foreach ($memberships as $name => $roles) {
       $this->p[$name]->addMember($user, $roles);
