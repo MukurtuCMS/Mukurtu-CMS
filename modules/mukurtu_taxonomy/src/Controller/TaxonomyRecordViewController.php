@@ -11,6 +11,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
 use Drupal\views\Views;
@@ -33,8 +34,13 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
    *   The entity field manager service.
+   * @param \Drupal\mukurtu_core\Service\EntityTranslationResolver $translationResolver
+   *   Resolves entities to the current content language.
    */
-  public function __construct(protected EntityFieldManagerInterface $entityFieldManager) {
+  public function __construct(
+    protected EntityFieldManagerInterface $entityFieldManager,
+    protected EntityTranslationResolver $translationResolver,
+  ) {
     $this->mukurtuTaxonomySettings = $this->config('mukurtu_taxonomy.settings');
   }
 
@@ -43,7 +49,8 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    */
   public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('entity_field.manager')
+      $container->get('entity_field.manager'),
+      $container->get('mukurtu_core.entity_translation_resolver'),
     );
   }
 
@@ -135,6 +142,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     }
 
     $build = [];
+    $cache = new CacheableMetadata();
     $allRecords = $this->getTaxonomyTermRecords($taxonomy_term);
 
     // Load the entities so we can render them.
@@ -185,6 +193,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       '#records' => $records,
       '#referenced_content' => $referencedContent,
       '#term_description' => $this->getTermDescription($taxonomy_term),
+      '#nested_terms' => $this->getNestedTerms($taxonomy_term, $cache),
       '#attached' => [
         'library' => [
           'field_group/element.horizontal_tabs',
@@ -204,7 +213,10 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     // tag would require a custom cache tag strategy.
     $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
     $place_vocabularies = $this->mukurtuTaxonomySettings->get('place_records_enabled_vocabularies') ?? [];
-    $cache = CacheableMetadata::createFromRenderArray($build);
+    $cache = CacheableMetadata::createFromRenderArray($build)->merge($cache);
+    // The content listed comes from terms nested under this one, so moving a
+    // term in the vocabulary changes it (#2521).
+    $cache->addCacheTags(['taxonomy_term_list:' . $taxonomy_term->bundle()]);
     if (in_array($taxonomy_term->bundle(), $person_vocabularies)) {
       $cache->addCacheTags(['node_list:person']);
     }
@@ -214,6 +226,37 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     $cache->applyTo($build);
 
     return $build;
+  }
+
+  /**
+   * Gets the terms nested directly under a term, in the vocabulary's order.
+   *
+   * @param \Drupal\taxonomy\TermInterface $term
+   *   The term.
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache
+   *   Collects the cacheability of the list.
+   *
+   * @return array
+   *   Each nested term's name, in the current language, and URL.
+   */
+  protected function getNestedTerms(TermInterface $term, CacheableMetadata $cache): array {
+    $cache->addCacheContexts(['languages:language_content']);
+    /** @var \Drupal\taxonomy\TermStorageInterface $storage */
+    $storage = $this->entityTypeManager()->getStorage('taxonomy_term');
+    $nested = [];
+    foreach ($storage->loadTree($term->bundle(), (int) $term->id(), 1, TRUE) as $child) {
+      $access = $child->access('view', NULL, TRUE);
+      $cache->addCacheableDependency($access);
+      $cache->addCacheableDependency($child);
+      if (!$access->isAllowed()) {
+        continue;
+      }
+      $nested[] = [
+        'name' => $this->translationResolver->translate($child)->label(),
+        'url' => $child->toUrl(),
+      ];
+    }
+    return $nested;
   }
 
   /**

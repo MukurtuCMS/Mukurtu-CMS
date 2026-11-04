@@ -33,6 +33,17 @@
   </div>
   {% endif %}
 
+  {% if nested_terms %}
+    <section class="taxonomy-nested-terms" aria-labelledby="taxonomy-nested-terms-heading">
+      <h2 id="taxonomy-nested-terms-heading" class="taxonomy-nested-terms__heading">{{ 'Nested terms'|t }}</h2>
+      <ul class="taxonomy-nested-terms__list">
+        {% for nested_term in nested_terms %}
+          <li>{{ link(nested_term.name, nested_term.url) }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
   {% if referenced_content is not empty %}
     <div class="referenced-content grid{% if term_description %} referenced-content--divided{% endif %}" aria-label="{{ 'Referenced content'|t }}">
       {{ referenced_content }}

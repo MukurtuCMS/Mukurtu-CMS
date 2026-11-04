@@ -14,6 +14,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\shortcut\Entity\Shortcut;
 use Drupal\captcha\Entity\CaptchaPoint;
 use Drupal\node\NodeAccessRebuild;
+use Drupal\Core\Config\FileStorage;
 
 /**
  * Implements hook_install().
@@ -935,4 +936,39 @@ function mukurtu_update_40034(): string {
 
   $role->grantPermission('access geocoder api endpoints')->save();
   return (string) t('Logged-in users can now search for addresses on map fields.');
+}
+
+/**
+ * Include nested terms in the Category and Keywords filters on Manage content.
+ */
+function mukurtu_update_40040(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // The filters now show nesting and match content tagged with terms nested
+  // under the chosen one (#2521). config/install ships the result for new
+  // sites. Numbered 40040 because milestone 11 uses 40035 to 40039. A filter
+  // a site changed from the shipped taxonomy_index one is left alone.
+  $view = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($view->isNew()) {
+    return NULL;
+  }
+
+  $profile_path = \Drupal::service('extension.list.profile')->getPath('mukurtu');
+  $shipped = (new FileStorage($profile_path . '/config/install'))->read('views.view.mukurtu_manage_all_content');
+  $updated = 0;
+  foreach (['field_category_target_id', 'field_keywords_target_id'] as $filter) {
+    $key = "display.default.display_options.filters.$filter";
+    if (($view->get("$key.plugin_id") ?? NULL) !== 'taxonomy_index_tid') {
+      continue;
+    }
+    $view->set($key, $shipped['display']['default']['display_options']['filters'][$filter]);
+    $updated++;
+  }
+  if (!$updated) {
+    return NULL;
+  }
+  $view->save();
+
+  return (string) t('The Category and Keywords filters on Manage content now include nested terms.');
 }
