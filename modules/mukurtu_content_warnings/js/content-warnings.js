@@ -20,10 +20,13 @@
 
         // Mark the overlay while its text scrolls, so the theme can put a
         // band behind the pinned button only then.
+        // Watch the contents too: text can grow inside an overlay that keeps
+        // its size, for example when the web font swaps in.
         if (window.ResizeObserver) {
-          new ResizeObserver(() => {
+          const observer = new ResizeObserver(() => {
             element.classList.toggle('mukurtu-content-warnings--scrolls', element.scrollHeight > element.clientHeight + 1);
-          }).observe(element);
+          });
+          [element, ...element.children].forEach((el) => observer.observe(el));
         }
 
         // Cards (themes' _card-media.html.twig) leave warned media unlinked and
@@ -37,6 +40,13 @@
           const link = document.createElement('a');
           link.href = cardUrl;
           link.textContent = hint.textContent.trim();
+          // Every card's link has the same text, so describe it by the card's
+          // title to tell them apart (WCAG 2.4.4).
+          const title = element.closest('article')?.querySelector('h2');
+          if (title) {
+            title.id ||= `mukurtu-card-title-${cardUrl.replace(/[^\w-]/g, '-')}`;
+            link.setAttribute('aria-describedby', title.id);
+          }
           hint.replaceChildren(link);
         }
 

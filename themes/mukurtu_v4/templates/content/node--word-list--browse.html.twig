@@ -82,7 +82,7 @@
       } %}
     {% elseif node.field_word_list_image.0.entity is not empty %}
       {% include '@mukurtu_v4/content/_card-media.html.twig' with {
-        media_bundle: node.field_word_list_image.entity.bundle,
+        media_bundle: node.field_word_list_image.0.entity.bundle.value.0['target_id'],
         media: content.field_word_list_image,
         url: url,
       } %}
