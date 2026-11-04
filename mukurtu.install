@@ -344,7 +344,6 @@ function mukurtu_install() {
     // Fresh installs therefore kept getting it. See ShippedRolePermissionsTest.
     'view the administration theme',
     'view media',
-    'view all revisions',
     'view published community entities',
     'view published personal collection entities',
     'view published protocol control entities',
@@ -540,6 +539,8 @@ function mukurtu_install() {
     'update tokens',
     'use text format full_html',
     'view all community revisions',
+    // Content revision history is for administrators and managers (#2580).
+    'view all revisions',
     'view any message template',
     'view mukurtu_batch_import_report message',
     'view mukurtu_new_user_registration message',

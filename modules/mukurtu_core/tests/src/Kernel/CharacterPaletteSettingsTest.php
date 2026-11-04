@@ -239,14 +239,14 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
     Role::create(['id' => 'mukurtu_manager', 'label' => 'Mukurtu Manager'])->save();
 
     $this->container->get('module_handler')->loadInclude('mukurtu_core', 'install');
-    mukurtu_core_update_40223();
+    mukurtu_core_update_40225();
 
     $config = $this->config(CharacterPaletteSettingsForm::SETTINGS);
     $this->assertFalse($config->get('enabled'), 'The palette stays off.');
     $this->assertSame([], $config->get('groups'));
     $this->assertTrue(Role::load('mukurtu_manager')->hasPermission('administer mukurtu character palette'));
 
-    $this->assertSame('The character palette was already set up; nothing to change.', mukurtu_core_update_40223());
+    $this->assertSame('The character palette was already set up; nothing to change.', mukurtu_core_update_40225());
   }
 
   /**
@@ -257,7 +257,7 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
     $this->config(CharacterPaletteSettingsForm::SETTINGS)->set('enabled', TRUE)->set('groups', $groups)->save();
 
     $this->container->get('module_handler')->loadInclude('mukurtu_core', 'install');
-    mukurtu_core_update_40223();
+    mukurtu_core_update_40225();
 
     $this->assertTrue($this->config(CharacterPaletteSettingsForm::SETTINGS)->get('enabled'));
     $this->assertSame($groups, $this->config(CharacterPaletteSettingsForm::SETTINGS)->get('groups'));
