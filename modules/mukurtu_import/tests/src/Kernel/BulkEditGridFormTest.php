@@ -86,6 +86,24 @@ class BulkEditGridFormTest extends MukurtuImportTestBase {
   }
 
   /**
+   * "Select all" and "Clear all" tick the panel's fields and keep it open.
+   */
+  public function testPickColumns(): void {
+    $form = ['grid_columns' => ['fields' => ['#options' => ['field_a' => 'A', 'field_b' => 'B']]]];
+    $grid = BulkEditGridForm::create($this->container);
+
+    $form_state = (new FormState())->setTriggeringElement(['#name' => 'grid_columns_select_all']);
+    $grid->pickColumns($form, $form_state);
+    $this->assertSame(['field_a' => 'field_a', 'field_b' => 'field_b'], $form_state->getUserInput()['grid_columns']['fields']);
+    $this->assertTrue($form_state->get('grid_columns_open'));
+    $this->assertTrue($form_state->isRebuilding());
+
+    $form_state->setTriggeringElement(['#name' => 'grid_columns_clear_all']);
+    $grid->pickColumns($form, $form_state);
+    $this->assertSame([], $form_state->getUserInput()['grid_columns']['fields']);
+  }
+
+  /**
    * The action needs "Use bulk editing" and edit access to each item.
    */
   public function testActionAccess(): void {

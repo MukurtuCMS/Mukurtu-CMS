@@ -92,7 +92,7 @@ class BulkEditGridForm extends FormBase {
       '#value' => $this->t('Each row is one item. Change any cells, then save. Values use the same format as a CSV import: separate multiple values with a semicolon (;).'),
     ];
 
-    $this->buildColumnsPanel($form, $available, $fields);
+    $this->buildColumnsPanel($form, $form_state, $available, $fields);
     $errors = $form_state->get('grid_errors') ?? [];
     if ($errors) {
       $form['error_summary'] = $this->errorSummary($errors, $loaded, $available);
@@ -269,15 +269,28 @@ class BulkEditGridForm extends FormBase {
   }
 
   /**
+   * Ticks every field in the "Columns" panel, or none, without saving.
+   */
+  public function pickColumns(array &$form, FormStateInterface $form_state): void {
+    $input = $form_state->getUserInput();
+    $options = array_keys($form['grid_columns']['fields']['#options']);
+    $all = $form_state->getTriggeringElement()['#name'] === 'grid_columns_select_all';
+    $input['grid_columns']['fields'] = $all ? array_combine($options, $options) : [];
+    $form_state->setUserInput($input);
+    $form_state->set('grid_columns_open', TRUE);
+    $form_state->setRebuild();
+  }
+
+  /**
    * Adds the "Columns" panel.
    */
-  protected function buildColumnsPanel(array &$form, array $available, array $fields): void {
+  protected function buildColumnsPanel(array &$form, FormStateInterface $form_state, array $available, array $fields): void {
     $label_key = array_key_first($available);
     $options = array_map('strval', array_diff_key($available, [$label_key => TRUE]));
     $form['grid_columns'] = [
       '#type' => 'details',
       '#title' => $this->t('Columns'),
-      '#open' => FALSE,
+      '#open' => (bool) $form_state->get('grid_columns_open'),
       '#tree' => TRUE,
       '#attributes' => ['class' => ['mukurtu-bulk-edit-columns']],
     ];
@@ -286,6 +299,16 @@ class BulkEditGridForm extends FormBase {
       '#tag' => 'p',
       '#value' => $this->t('Choose which fields to edit. Your choice is saved for next time.'),
     ];
+    foreach (['select_all' => $this->t('Select all'), 'clear_all' => $this->t('Clear all')] as $key => $label) {
+      $form['grid_columns']['pick'][$key] = [
+        '#type' => 'submit',
+        '#name' => "grid_columns_$key",
+        '#value' => $label,
+        '#submit' => ['::pickColumns'],
+        '#limit_validation_errors' => [],
+      ];
+    }
+    $form['grid_columns']['pick'] += ['#type' => 'container', '#attributes' => ['class' => ['mukurtu-bulk-edit-grid__pick']]];
     $form['grid_columns']['fields'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Fields'),
