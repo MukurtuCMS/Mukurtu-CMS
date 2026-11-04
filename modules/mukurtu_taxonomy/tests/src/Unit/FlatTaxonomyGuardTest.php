@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_taxonomy\Unit;
 
 use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\taxonomy\VocabularyForm;
 use Drupal\taxonomy\VocabularyInterface;
 use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -30,11 +31,16 @@ class FlatTaxonomyGuardTest extends UnitTestCase {
 
   /**
    * Builds a form state whose form object edits a new or saved vocabulary.
+   *
+   * @param bool $isNew
+   *   Whether the vocabulary is new.
+   * @param string $formClass
+   *   The form object's class.
    */
-  protected function formState(bool $isNew): FormStateInterface {
+  protected function formState(bool $isNew, string $formClass = VocabularyForm::class): FormStateInterface {
     $vocabulary = $this->createMock(VocabularyInterface::class);
     $vocabulary->method('isNew')->willReturn($isNew);
-    $formObject = $this->createMock(EntityFormInterface::class);
+    $formObject = $this->createMock($formClass);
     $formObject->method('getEntity')->willReturn($vocabulary);
     $formState = $this->createMock(FormStateInterface::class);
     $formState->method('getFormObject')->willReturn($formObject);
@@ -101,6 +107,26 @@ class FlatTaxonomyGuardTest extends UnitTestCase {
 
     $this->assertSame([$otherBuilder, 'mukurtu_taxonomy_vocabulary_flat_builder'], $result['#entity_builders']);
     $this->assertSame(['::submitForm', '::save', 'mukurtu_taxonomy_vocabulary_flat_submit'], $result['actions']['submit']['#submit']);
+  }
+
+  /**
+   * Other vocabulary forms hide the checkbox and keep their own handlers.
+   *
+   * The term overview, delete, and reset forms share the vocabulary form's
+   * base form ID. A submit handler on the overview's Save button would stop
+   * the form-level one from running, so new parents and weights weren't saved.
+   */
+  public function testOtherVocabularyFormsAreLeftAlone(): void {
+    $form = [
+      'flat' => ['#type' => 'checkbox', '#default_value' => FALSE],
+      'actions' => ['submit' => ['#type' => 'submit']],
+    ];
+
+    $result = mukurtu_taxonomy_flat_taxonomy_process($form, $this->formState(FALSE, EntityFormInterface::class), $form);
+
+    $this->assertFalse($result['flat']['#access']);
+    $this->assertArrayNotHasKey('#submit', $result['actions']['submit']);
+    $this->assertArrayNotHasKey('#entity_builders', $result);
   }
 
   /**

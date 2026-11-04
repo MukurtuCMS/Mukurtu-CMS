@@ -152,9 +152,19 @@ function mukurtu_taxonomy_form_taxonomy_vocabulary_form_alter(&$form, \Drupal\Co
  * flat_taxonomy's own hook_form_taxonomy_vocabulary_form_alter() runs before
  * or after this one, since all modules' form alters complete before any
  * #process runs.
+ *
+ * The taxonomy_vocabulary_form base form ID also covers the vocabulary's term
+ * overview, delete, and reset forms, where flat_taxonomy adds its checkbox too.
+ * There the checkbox does nothing, so it's hidden, and the form's own submit
+ * handlers are left alone.
  */
 function mukurtu_taxonomy_flat_taxonomy_process($element, \Drupal\Core\Form\FormStateInterface $form_state, &$complete_form) {
   if (!isset($element['flat'])) {
+    return $element;
+  }
+
+  if (!$form_state->getFormObject() instanceof \Drupal\taxonomy\VocabularyForm) {
+    $element['flat']['#access'] = FALSE;
     return $element;
   }
 

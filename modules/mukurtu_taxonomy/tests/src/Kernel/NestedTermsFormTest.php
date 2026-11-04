@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_taxonomy\Kernel;
 
 use Drupal\Core\Form\FormState;
+use Drupal\Core\Render\RenderContext;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -195,6 +196,49 @@ class NestedTermsFormTest extends EntityKernelTestBase {
     $redirect = $form_state->getRedirect();
     $this->assertSame('mukurtu_taxonomy.flatten_vocabulary', $redirect->getRouteName());
     $this->assertSame(['taxonomy_vocabulary' => 'location'], $redirect->getRouteParameters());
+  }
+
+  /**
+   * Dragging a term under another on the term overview saves its parent.
+   *
+   * The overview shares the vocabulary form's base form ID, so the vocabulary
+   * form changes must leave it alone.
+   */
+  public function testOverviewSavesParent(): void {
+    $vocabulary = $this->createVocabulary('location', FALSE);
+    $washington = Term::create(['vid' => 'location', 'name' => 'Washington']);
+    $washington->save();
+    $spokane = Term::create(['vid' => 'location', 'name' => 'Spokane', 'weight' => 1]);
+    $spokane->save();
+
+    $form_object = $this->container->get('entity_type.manager')->getFormObject('taxonomy_vocabulary', 'overview')->setEntity($vocabulary);
+    $form = $this->container->get('form_builder')->getForm($form_object, $vocabulary);
+    $this->assertFalse($form['flat']['#access']);
+    $this->assertNotContains('mukurtu_taxonomy_vocabulary_flat_submit', $form['actions']['submit']['#submit'] ?? []);
+
+    $form_state = (new FormState())
+      ->addBuildInfo('args', [$vocabulary])
+      ->setValues([
+        'terms' => [
+          'tid:' . $washington->id() . ':0' => [
+            'term' => ['tid' => $washington->id(), 'parent' => 0, 'depth' => 0],
+            'weight' => 0,
+          ],
+          'tid:' . $spokane->id() . ':0' => [
+            'term' => ['tid' => $spokane->id(), 'parent' => $washington->id(), 'depth' => 1],
+            'weight' => 1,
+          ],
+        ],
+        'op' => (string) $form['actions']['submit']['#value'],
+      ]);
+    // OverviewTerms renders parts of the form while building it.
+    $this->container->get('renderer')->executeInRenderContext(
+      new RenderContext(),
+      fn () => $this->container->get('form_builder')->submitForm($form_object, $form_state),
+    );
+
+    $this->assertSame([], array_map('strval', $form_state->getErrors()));
+    $this->assertSame((int) $washington->id(), (int) Term::load($spokane->id())->get('parent')->target_id);
   }
 
   /**
