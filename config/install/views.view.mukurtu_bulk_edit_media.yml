@@ -90,6 +90,8 @@ display:
               action_id: mukurtu_remove_protocol_action
             -
               action_id: mukurtu_change_sharing_action
+            -
+              action_id: mukurtu_edit_items_grid_action
         name:
           id: name
           table: media_field_data

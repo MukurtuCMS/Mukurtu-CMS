@@ -1,0 +1,30 @@
+/**
+ * The per-item bulk edit grid.
+ */
+
+/* Each column's CSV format, under its label. */
+.mukurtu-bulk-edit-grid__format {
+  display: block;
+  font-size: 0.875em;
+  font-weight: normal;
+}
+
+/* Long format help shouldn't widen a column past its cells. */
+.mukurtu-bulk-edit-grid__table th {
+  min-width: 12rem;
+  vertical-align: top;
+}
+
+/* A translation row's language, after its title. */
+.mukurtu-bulk-edit-grid__language,
+.mukurtu-bulk-edit-grid__note {
+  display: block;
+  color: var(--gin-color-text-light, #545560);
+  font-size: 0.875em;
+}
+
+.mukurtu-bulk-edit-grid__table input.form-text,
+.mukurtu-bulk-edit-grid__table textarea {
+  width: 100%;
+  min-width: 10rem;
+}
