@@ -19,9 +19,9 @@
         this.watchForNewEmbeds(element);
 
         // Mark the overlay while its text scrolls, so the theme can put a
-        // band behind the pinned button only then.
-        // Watch the contents too: text can grow inside an overlay that keeps
-        // its size, for example when the web font swaps in.
+        // band behind the pinned button only then. Watch the contents too:
+        // text can grow inside an overlay that keeps its size, for example
+        // when the web font swaps in.
         if (window.ResizeObserver) {
           const observer = new ResizeObserver(() => {
             element.classList.toggle('mukurtu-content-warnings--scrolls', element.scrollHeight > element.clientHeight + 1);

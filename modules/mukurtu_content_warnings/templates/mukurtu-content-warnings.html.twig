@@ -26,8 +26,8 @@
   <p id="{{ title_id }}" class="mukurtu-content-warnings__title">
     {% trans %}Media content warning{% plural count %}Media content warnings{% endtrans %}
   </p>
-  {# Shown only on cards, where the media is inside a link to the item: the
-     card shows this instead of the warnings, and opens the item. #}
+  {# Shown only on cards, which show this instead of the warnings.
+     content-warnings.js makes it a link to the item. #}
   <p class="mukurtu-content-warnings__card-hint">{{ 'Access item to view'|t }}</p>
   {% if count > 1 %}
     <ul id="{{ warnings_id }}" class="mukurtu-content-warnings__list" role="list">
