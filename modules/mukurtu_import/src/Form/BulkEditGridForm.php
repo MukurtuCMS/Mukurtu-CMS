@@ -366,11 +366,16 @@ class BulkEditGridForm extends FormBase {
         }
       }
     }
+    // Focused on load (see bulk-edit-grid.js), so it's read out right away.
     return [
       '#theme' => 'item_list',
+      '#title' => $this->t('Problems to fix'),
       '#items' => $links,
       '#attributes' => ['class' => ['mukurtu-bulk-edit-grid__errors']],
-      '#wrapper_attributes' => ['role' => 'alert'],
+      '#wrapper_attributes' => [
+        'class' => ['mukurtu-bulk-edit-grid__error-summary'],
+        'tabindex' => '-1',
+      ],
     ];
   }
 

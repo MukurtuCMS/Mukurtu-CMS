@@ -55,11 +55,13 @@ class GridRowSaver {
     $errors = $destination instanceof GridEntityContent ? $destination->getFieldErrors() : [];
     // Conversion problems, such as an ambiguous term name, arrive as
     // "migration:field:plugin: message".
+    // The destination's own errors also arrive here, joined into one message.
+    $known = array_merge([], ...array_values($errors));
     foreach ($executable->messages as $message) {
       if (preg_match('/^[^:\s]+:([^:\s]+):[^:\s]+: (.*)$/s', $message, $parts) && array_key_exists($parts[1], $cells)) {
         $errors[$parts[1]][] = $parts[2];
       }
-      elseif (!in_array($message, array_merge([], ...array_values($errors)), TRUE)) {
+      elseif (!in_array($message, $known, TRUE) && $message !== implode("\n", $known)) {
         $errors[''][] = $message;
       }
     }

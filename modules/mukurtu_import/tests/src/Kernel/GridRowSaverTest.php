@@ -25,6 +25,11 @@ class GridRowSaverTest extends MukurtuImportTestBase {
   /**
    * {@inheritdoc}
    */
+  protected static $modules = ['original_date'];
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     Vocabulary::create(['vid' => 'keywords', 'name' => 'Keywords'])->save();
@@ -44,6 +49,13 @@ class GridRowSaverTest extends MukurtuImportTestBase {
         'handler' => 'default:taxonomy_term',
         'handler_settings' => ['target_bundles' => ['keywords' => 'keywords'], 'auto_create' => TRUE],
       ],
+    ])->save();
+    FieldStorageConfig::create(['field_name' => 'field_original_date', 'entity_type' => 'node', 'type' => 'original_date'])->save();
+    FieldConfig::create([
+      'field_name' => 'field_original_date',
+      'entity_type' => 'node',
+      'bundle' => 'protocol_aware_content',
+      'label' => 'Original Date',
     ])->save();
     foreach (['field_summary' => FALSE, 'field_source' => TRUE] as $field => $required) {
       FieldStorageConfig::create(['field_name' => $field, 'entity_type' => 'node', 'type' => 'string'])->save();
@@ -160,6 +172,19 @@ class GridRowSaverTest extends MukurtuImportTestBase {
     $errors = (new GridRowSaver())->save($node, ['field_keywords' => 'Twice'], 'Grid log');
 
     $this->assertArrayHasKey('field_keywords', $errors);
+    $this->assertSame($before, $this->revisions($node));
+  }
+
+  /**
+   * A value a field refuses while it's set is reported against its cell.
+   */
+  public function testRefusedValueReported(): void {
+    $node = $this->item();
+    $before = $this->revisions($node);
+
+    $errors = (new GridRowSaver())->save($node, ['field_original_date' => 'not a date', 'field_summary' => 'Changed'], 'Grid log');
+
+    $this->assertSame(['field_original_date' => ['Dates must be in YYYY, YYYY-MM, or YYYY-MM-DD format.']], $errors);
     $this->assertSame($before, $this->revisions($node));
   }
 

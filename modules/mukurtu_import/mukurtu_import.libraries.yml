@@ -9,3 +9,8 @@ bulk_edit_grid:
   css:
     component:
       css/bulk-edit-grid.css: {}
+  js:
+    js/bulk-edit-grid.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

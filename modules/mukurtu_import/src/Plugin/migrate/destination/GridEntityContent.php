@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import\Plugin\migrate\destination;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\migrate\Attribute\MigrateDestination;
 use Drupal\migrate\MigrateException;
+use Drupal\migrate\Row;
 use Drupal\mukurtu_import\Plugin\Derivative\GridEntityContentDeriver;
 
 /**
@@ -34,6 +36,33 @@ class GridEntityContent extends ProtocolAwareEntityContent {
    * @var array<string, string[]>
    */
   protected array $fieldErrors = [];
+
+  /**
+   * {@inheritdoc}
+   *
+   * Some fields, such as Original Date, refuse a value by throwing while it's
+   * set. Trying each changed field on a copy first ties that to its cell.
+   */
+  protected function updateEntity(EntityInterface $entity, Row $row) {
+    $this->fieldErrors = [];
+    if ($entity instanceof FieldableEntityInterface) {
+      $probe = clone $entity;
+      foreach ($this->configuration['grid_fields'] ?? [] as $field) {
+        if ($probe->hasField($field) && $row->hasDestinationProperty($field)) {
+          try {
+            $probe->get($field)->setValue($row->getDestinationProperty($field));
+          }
+          catch (\InvalidArgumentException $e) {
+            $this->fieldErrors[$field][] = $e->getMessage();
+          }
+        }
+      }
+      if ($this->fieldErrors) {
+        throw new MigrateException(implode("\n", array_merge(...array_values($this->fieldErrors))));
+      }
+    }
+    return parent::updateEntity($entity, $row);
+  }
 
   /**
    * {@inheritdoc}
