@@ -62,10 +62,19 @@ class GridRowSaver {
         $errors[$parts[1]][] = $parts[2];
       }
       elseif (!in_array($message, $known, TRUE) && $message !== implode("\n", $known)) {
-        $errors[''][] = $message;
+        $errors[''][] = self::withoutServerPath($message);
       }
     }
     return $errors;
+  }
+
+  /**
+   * Removes the file and line core adds to an unexpected error's message.
+   *
+   * Editors don't need the server path.
+   */
+  public static function withoutServerPath(string $message): string {
+    return preg_replace('/ \([^()\s]+\.(?:php|module|inc|install):\d+\)$/', '', $message);
   }
 
 }

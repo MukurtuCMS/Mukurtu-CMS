@@ -193,6 +193,14 @@ class GridRowSaverTest extends MukurtuImportTestBase {
   }
 
   /**
+   * An unexpected error's message loses the server path core adds.
+   */
+  public function testServerPathRemoved(): void {
+    $this->assertSame('Something broke.', GridRowSaver::withoutServerPath('Something broke. (/var/www/html/web/modules/x/src/Y.php:141)'));
+    $this->assertSame('Keep (these) words.', GridRowSaver::withoutServerPath('Keep (these) words.'));
+  }
+
+  /**
    * No changes, no save.
    */
   public function testNothingToSave(): void {

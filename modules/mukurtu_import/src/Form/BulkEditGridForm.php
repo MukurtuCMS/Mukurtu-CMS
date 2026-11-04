@@ -63,7 +63,7 @@ class BulkEditGridForm extends FormBase {
       return $this->addBackLink($form, $data);
     }
 
-    $items = $form_state->get('grid_items') ?? $this->loadItems($data);
+    $items = $form_state->get('grid_items') ?? $this->loadItems($data, $columns->entityTypeId());
     $form_state->set('grid_items', $items);
     if (!$items) {
       return $this->stale($form, $data);
@@ -81,7 +81,7 @@ class BulkEditGridForm extends FormBase {
     $fields = $grid->selected($type, $this->currentUser());
     $form_state->set('grid_context', [$columns->viewId(), $type]);
 
-    $form['#title'] = $this->formatPlural(count($form_state->get('grid_items')), 'Edit 1 item one by one', 'Edit @count items one by one');
+    $form['#title'] = $this->formatPlural(count($loaded), 'Edit 1 item one by one', 'Edit @count items one by one');
     $form['#attributes']['class'][] = 'mukurtu-bulk-edit-grid';
     $form['#attached']['library'][] = 'mukurtu_import/bulk_edit_grid';
     $form['#attached']['library'][] = 'mukurtu_core/bulk_edit_columns';
@@ -206,6 +206,7 @@ class BulkEditGridForm extends FormBase {
     $definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($first->getEntityTypeId(), $type);
 
     $saver = new GridRowSaver();
+    $cells = new GridCellText();
     $saved = 0;
     $errors = [];
     foreach ($loaded as $key => $item) {
@@ -218,7 +219,23 @@ class BulkEditGridForm extends FormBase {
           $changes[$field] = trim($text);
         }
       }
-      if (!$changes) {
+
+      // A changed cell someone else saved since the grid opened isn't
+      // overwritten unasked. Its new value becomes the starting one, so
+      // saving again replaces it on purpose.
+      foreach (array_keys($changes) as $field) {
+        $current = $cells->text($item, $field);
+        if (trim($current) === trim($originals[$key][$field])) {
+          continue;
+        }
+        $originals[$key][$field] = $current;
+        if (trim($current) === $changes[$field]) {
+          unset($changes[$field]);
+          continue;
+        }
+        $errors[$key][$field][] = (string) $this->t("Someone else changed this after you opened the page. It's now: @value. Save again to replace it with yours.", ['@value' => $current]);
+      }
+      if (!$changes || isset($errors[$key])) {
         continue;
       }
       $labels = array_map(fn($field) => (string) $definitions[$field]->getLabel(), array_keys($changes));
@@ -237,6 +254,7 @@ class BulkEditGridForm extends FormBase {
     if ($saved) {
       $this->messenger()->addStatus($this->formatPlural($saved, 'Saved 1 item.', 'Saved @count items.'));
     }
+    $form_state->set('grid_originals', $originals);
     if ($errors) {
       $this->messenger()->addError($this->formatPlural(count($errors), "1 item couldn't be saved. Fix the values below and save again.", "@count items couldn't be saved. Fix the values below and save again."));
       $form_state->set('grid_errors', $errors);
@@ -415,14 +433,19 @@ class BulkEditGridForm extends FormBase {
    *
    * With every result selected, VBO lists the excluded rows instead, so the
    * view runs again to find the rest.
+   *
+   * @param array $data
+   *   The VBO selection.
+   * @param string $entity_type_id
+   *   The bulk edit page's entity type. Items of other types are left out.
    */
-  protected function loadItems(array $data): array {
+  protected function loadItems(array $data, string $entity_type_id): array {
     $rows = [];
     if (empty($data['exclude_mode'])) {
       foreach ($data['list'] ?? [] as $item) {
-        [, $langcode, $entity_type_id, $id] = $item + [NULL, NULL, NULL, NULL];
-        if ($entity_type_id && $id) {
-          $rows["$id-$langcode"] = [$entity_type_id, (string) $id, (string) $langcode];
+        [, $langcode, $type, $id] = $item + [NULL, NULL, NULL, NULL];
+        if ($type === $entity_type_id && $id) {
+          $rows["$id-$langcode"] = [$type, (string) $id, (string) $langcode];
         }
       }
     }
@@ -441,7 +464,7 @@ class BulkEditGridForm extends FormBase {
       $view_data->init($view, $view->getDisplay(), $data['relationship_id'] ?? 'none');
       foreach ($view->result as $result) {
         $entity = $view_data->getEntity($result);
-        if ($entity) {
+        if ($entity && $entity->getEntityTypeId() === $entity_type_id) {
           $key = $entity->id() . '-' . $entity->language()->getId();
           if (!isset($excluded[$key])) {
             $rows[$key] = [$entity->getEntityTypeId(), (string) $entity->id(), $entity->language()->getId()];
@@ -450,9 +473,11 @@ class BulkEditGridForm extends FormBase {
       }
     }
 
-    // Only items the editor can edit; the bulk edit page offers no others.
-    $loaded = $this->loadTranslations($rows);
-    return array_intersect_key($rows, array_filter($loaded, fn($item) => $item->access('update')));
+    // Only items the editor can edit, of one type; the bulk edit page offers
+    // no others.
+    $loaded = array_filter($this->loadTranslations($rows), fn($item) => $item->access('update'));
+    $bundle = $loaded ? reset($loaded)->bundle() : NULL;
+    return array_intersect_key($rows, array_filter($loaded, fn($item) => $item->bundle() === $bundle));
   }
 
   /**
