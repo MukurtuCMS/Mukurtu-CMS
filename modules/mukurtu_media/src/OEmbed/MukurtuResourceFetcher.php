@@ -24,12 +24,158 @@ use Psr\Log\LoggerInterface;
  *   resource instead of leaving the embed broken.
  * - Carries a segment's start/end time from the video URL (for example
  *   ?t=90 or #t=1m30s) onto the embed, since providers drop it from the
- *   oEmbed HTML. YouTube honors start and end; Vimeo honors start only.
+ *   oEmbed HTML. Both embeds take the start time on the src. For the end
+ *   time, a script pauses the player: Vimeo's embed has no end setting, and
+ *   YouTube's end= jumps to its end screen instead of pausing.
  *
  * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/565
  * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/557
+ * @see https://github.com/MukurtuCMS/Mukurtu-CMS/issues/2548
  */
 class MukurtuResourceFetcher implements ResourceFetcherInterface {
+
+  /**
+   * Pauses a Vimeo player when playback reaches its data-mukurtu-end time.
+   *
+   * Uses the Vimeo player's postMessage API, so nothing extra is loaded from
+   * Vimeo. The handshake mirrors Vimeo's player SDK (@vimeo/player): send
+   * object messages, and ping the player, since its ready event may fire
+   * before this script listens. It pauses once each time playback crosses
+   * the end time, so a viewer can still press play to continue past it.
+   *
+   * Core serves oEmbed HTML in its own iframe page, which has no placeholder
+   * for Drupal JavaScript libraries, so this is added inline.
+   *
+   * @see https://developer.vimeo.com/player/sdk/basics
+   */
+  protected const VIMEO_END_SCRIPT = <<<'JS'
+<script>
+(function () {
+  var frame = document.querySelector('iframe[data-mukurtu-end]');
+  if (!frame) {
+    return;
+  }
+  var origin = 'https://player.vimeo.com';
+  var end = parseInt(frame.getAttribute('data-mukurtu-end'), 10);
+  var armed = true;
+  var listening = false;
+  function post(message) {
+    frame.contentWindow.postMessage(message, origin);
+  }
+  window.addEventListener('message', function (event) {
+    if (event.origin !== origin || event.source !== frame.contentWindow) {
+      return;
+    }
+    var data = event.data;
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      }
+      catch (e) {
+        return;
+      }
+    }
+    if (!data) {
+      return;
+    }
+    if ((data.event === 'ready' || data.method === 'ping') && !listening) {
+      listening = true;
+      post({method: 'addEventListener', value: 'timeupdate'});
+    }
+    else if (data.event === 'timeupdate' && data.data) {
+      if (data.data.seconds < end) {
+        armed = true;
+      }
+      else if (armed) {
+        armed = false;
+        post({method: 'pause'});
+      }
+    }
+  });
+  post({method: 'ping'});
+  frame.addEventListener('load', function () {
+    post({method: 'ping'});
+  });
+})();
+</script>
+JS;
+
+  /**
+   * Pauses a YouTube player when playback reaches its data-mukurtu-end time.
+   *
+   * Uses the postMessage protocol of YouTube's IFrame Player API, which the
+   * embed enables with enablejsapi=1, so nothing extra is loaded from
+   * YouTube. Like YouTube's own iframe_api script, it sends "listening"
+   * until the player answers (starting again when the player's iframe
+   * finishes loading, in case that is slow), then reads currentTime from the
+   * player's infoDelivery messages. It pauses once each time playback crosses
+   * the end time, so a viewer can still press play to continue past it.
+   *
+   * Core serves oEmbed HTML in its own iframe page, which has no placeholder
+   * for Drupal JavaScript libraries, so this is added inline.
+   *
+   * @see https://developers.google.com/youtube/iframe_api_reference
+   */
+  protected const YOUTUBE_END_SCRIPT = <<<'JS'
+<script>
+(function () {
+  var frame = document.querySelector('iframe[data-mukurtu-end]');
+  if (!frame) {
+    return;
+  }
+  var origin = new URL(frame.src).origin;
+  var end = parseInt(frame.getAttribute('data-mukurtu-end'), 10);
+  var armed = true;
+  var answered = false;
+  function post(message) {
+    message.id = 1;
+    message.channel = 'widget';
+    frame.contentWindow.postMessage(JSON.stringify(message), origin);
+  }
+  window.addEventListener('message', function (event) {
+    if (event.origin !== origin || event.source !== frame.contentWindow) {
+      return;
+    }
+    var data = event.data;
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      }
+      catch (e) {
+        return;
+      }
+    }
+    if (!data) {
+      return;
+    }
+    answered = true;
+    if (data.event === 'infoDelivery' && data.info && typeof data.info.currentTime === 'number') {
+      if (data.info.currentTime < end) {
+        armed = true;
+      }
+      else if (armed) {
+        armed = false;
+        post({event: 'command', func: 'pauseVideo', args: []});
+      }
+    }
+  });
+  var timer;
+  function listen() {
+    var tries = 0;
+    clearInterval(timer);
+    timer = setInterval(function () {
+      if (answered || ++tries > 40) {
+        clearInterval(timer);
+        return;
+      }
+      post({event: 'listening'});
+    }, 250);
+  }
+  listen();
+  frame.addEventListener('load', listen);
+})();
+</script>
+JS;
 
   /**
    * Constructs a MukurtuResourceFetcher object.
@@ -69,10 +215,11 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
 
     $provider_name = $this->getProviderName($resource);
     if ($provider_name === 'YouTube') {
-      return $this->rebuildResource($resource, $this->applyYoutubePrivacyParams($resource->getHtml(), $segment));
+      $html = $this->applyYoutubePrivacyParams($resource->getHtml(), $segment);
+      return $this->rebuildResource($resource, $this->addEndScript($html, $segment['end'], static::YOUTUBE_END_SCRIPT));
     }
-    if ($provider_name === 'Vimeo' && $segment['start']) {
-      return $this->rebuildResource($resource, $this->applyVimeoStartTime($resource->getHtml(), $segment['start']));
+    if ($provider_name === 'Vimeo' && ($segment['start'] || $segment['end'])) {
+      return $this->rebuildResource($resource, $this->applyVimeoSegment($resource->getHtml(), $segment));
     }
 
     return $resource;
@@ -93,8 +240,10 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
    *   does not set cookies until the viewer interacts with the player.
    * - rel=0: suppresses related videos at the end of playback.
    * - modestbranding=1: removes the YouTube logo from the control bar.
-   * - start/end: the segment's start and end time in seconds, if any and if
-   *   YouTube has not already set them.
+   * - start: the segment's start time in seconds, if any and if YouTube has
+   *   not already set it.
+   * - enablejsapi=1: if the segment has an end time, so YOUTUBE_END_SCRIPT
+   *   can pause the player there.
    *
    * @param string $html
    *   The embed HTML returned by YouTube.
@@ -120,8 +269,11 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
   /**
    * Builds the YouTube embed query parameters for a segment.
    *
-   * YouTube's oEmbed HTML sometimes already includes a start time, so a
-   * parameter is left out if the src already has it.
+   * The end time is not passed as end=, because YouTube's player then jumps
+   * to its end screen. Instead, enablejsapi=1 lets YOUTUBE_END_SCRIPT pause
+   * the player at the end time. YouTube's oEmbed HTML sometimes already
+   * includes a start time, so a parameter is left out if the src already
+   * has it.
    *
    * @param array{start: ?int, end: ?int} $segment
    *   The segment to play, as returned by extractSegment().
@@ -132,27 +284,60 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
    *   The parameters, each prefixed with "&", or an empty string.
    */
   protected function buildYoutubeSegmentParams(array $segment, string $src = ''): string {
-    $params = '';
-    foreach (['start', 'end'] as $name) {
-      if ($segment[$name] && !preg_match('/[?&](?:amp;)?' . $name . '=/', $src)) {
-        $params .= '&' . $name . '=' . $segment[$name];
+    $params = [
+      'start' => $segment['start'],
+      'enablejsapi' => $segment['end'] ? 1 : NULL,
+    ];
+    $query = '';
+    foreach (array_filter($params) as $name => $value) {
+      if (!preg_match('/[?&](?:amp;)?' . $name . '=/', $src)) {
+        $query .= '&' . $name . '=' . $value;
       }
     }
-    return $params;
+    return $query;
   }
 
   /**
-   * Sets the start time on a Vimeo embed's iframe src.
+   * Applies a segment's start and end time to a Vimeo embed.
    *
-   * Vimeo's player takes the start time as a #t= fragment. It has no
-   * equivalent for an end time.
+   * Vimeo's player takes the start time as a #t= fragment on the iframe
+   * src. It has no equivalent for an end time, so the iframe is marked with
+   * data-mukurtu-end and VIMEO_END_SCRIPT pauses the player there.
+   *
+   * @param string $html
+   *   The embed HTML returned by Vimeo.
+   * @param array{start: ?int, end: ?int} $segment
+   *   The segment to play, as returned by extractSegment().
    */
-  protected function applyVimeoStartTime(string $html, int $start): string {
-    return preg_replace_callback(
-      '/src="([^"#]+)(?:#[^"]*)?"/',
-      fn (array $matches): string => 'src="' . $matches[1] . '#t=' . $start . 's"',
-      $html
-    );
+  protected function applyVimeoSegment(string $html, array $segment): string {
+    if ($segment['start']) {
+      $html = preg_replace_callback(
+        '/src="([^"#]+)(?:#[^"]*)?"/',
+        fn (array $matches): string => 'src="' . $matches[1] . '#t=' . $segment['start'] . 's"',
+        $html
+      );
+    }
+    return $this->addEndScript($html, $segment['end'], static::VIMEO_END_SCRIPT);
+  }
+
+  /**
+   * Marks an embed's iframe with an end time and adds the script to pause it.
+   *
+   * @param string $html
+   *   The embed HTML.
+   * @param int|null $end
+   *   The end time in seconds, or NULL for none.
+   * @param string $script
+   *   The provider's pause script, such as VIMEO_END_SCRIPT.
+   *
+   * @return string
+   *   The HTML, unchanged if there is no end time.
+   */
+  protected function addEndScript(string $html, ?int $end, string $script): string {
+    if (!$end) {
+      return $html;
+    }
+    return preg_replace('/<iframe\b/', '<iframe data-mukurtu-end="' . $end . '"', $html, 1) . $script;
   }
 
   /**
@@ -160,9 +345,10 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
    *
    * Reads the start and end query parameters used by YouTube embed URLs,
    * then the t query parameter or #t= fragment used by YouTube and Vimeo
-   * share links. Values may be seconds ("90", "90s") or hours, minutes and
-   * seconds ("1h2m3s"). Invalid values, and an end time that is not after
-   * the start time, are ignored.
+   * share links. Since Vimeo share links have no end time, an end= in the
+   * fragment (#t=30s&end=45s) is also read. Values may be seconds ("90",
+   * "90s") or hours, minutes and seconds ("1h2m3s"). Invalid values, and an
+   * end time that is not after the start time, are ignored.
    *
    * @return array{start: ?int, end: ?int}
    *   The start and end time in seconds, each NULL if not set.
@@ -181,7 +367,8 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
     $start = $this->toSeconds($query['start'] ?? NULL)
       ?? $this->toSeconds($query['t'] ?? NULL)
       ?? $this->toSeconds($fragment['t'] ?? NULL);
-    $end = $this->toSeconds($query['end'] ?? NULL);
+    $end = $this->toSeconds($query['end'] ?? NULL)
+      ?? $this->toSeconds($fragment['end'] ?? NULL);
     if ($end !== NULL && $end <= ($start ?? 0)) {
       $end = NULL;
     }
@@ -332,6 +519,7 @@ class MukurtuResourceFetcher implements ResourceFetcherInterface {
       $video_id,
       $this->buildYoutubeSegmentParams($segment)
     );
+    $html = $this->addEndScript($html, $segment['end'], static::YOUTUBE_END_SCRIPT);
 
     return Resource::video(
       $html,
