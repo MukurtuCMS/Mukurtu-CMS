@@ -5,6 +5,49 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## 4.0.8
+
+A security and maintenance release. It fixes two security issues, and fixes
+new installs that failed after migrate_source_csv 3.10 was released.
+
+Security fixes:
+
+- Map popups now show location descriptions as plain text. Before this
+  release, HTML in a location description ran in the browser of anyone who
+  opened the popup.
+- Cached lists of media, communities, and protocols no longer show one user's
+  results to another user who has the same roles.
+
+This release also updates symfony/mime to 7.4.22 for CVE-2026-45070.
+
+New in this release: logged-in users can search for addresses on map fields,
+browse facet headers show plus and minus collapse indicators, and record and
+page titles appear as headings instead of in the digital heritage sidebar. The
+consent popup is now a dialog that fits narrow screens, and screen readers
+announce multipage page changes.
+
+This release also fixes several bugs. Image media imports work again,
+collection creators can open an empty Collections page, and related content
+shows on dictionary words that have several media items. The Media type filter
+lists SoundCloud and remote video under Audio and Video.
+
+To update, back up your site, run `composer update`, and then run database
+updates (`drush updb`). If `composer update` stops with "No available patcher
+was able to apply patch" for migrate_source_csv, run `composer patches-relock`
+and try again. This release includes 6 database updates. They:
+
+- Turn off the CAPTCHA setting "Add CAPTCHA challenges on all forms." CAPTCHA
+  still protects the login, registration, and password reset forms. If you use
+  configuration sync, export your configuration after updating, or a later
+  import turns the setting back on.
+- Let logged-in users search for addresses on map fields.
+- Remove the title from the digital heritage sidebar, since it repeats the page
+  title.
+- Remove the saved Mukurtu 3 database credentials.
+- Reindex search so SoundCloud and remote video count as Audio and Video.
+- Re-save all views so cached lists of media, communities, and protocols vary
+  by membership.
+
 ## 4.0.7
 
 A security and maintenance release. It requires CAPTCHA 2.0.11 or later, which
