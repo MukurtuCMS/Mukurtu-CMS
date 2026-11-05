@@ -3,10 +3,12 @@
 namespace Drupal\mukurtu_collection\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_core\Form\AjaxRowTableAccessibilityTrait;
@@ -261,6 +263,20 @@ class CollectionOrganizationForm extends FormBase {
   }
 
   public function addCollectionToTableCallback(array &$form, FormStateInterface $form_state) {
+    $response = new AjaxResponse();
+
+    // A failed validation changes nothing, so show its errors instead of
+    // announcing an update. This response only replaces the table, so errors
+    // left in the queue would wait for the next page.
+    if ($form_state->hasAnyErrors()) {
+      $clear_previous = TRUE;
+      foreach ($this->messenger()->deleteByType(MessengerInterface::TYPE_ERROR) as $error) {
+        $response->addCommand(new MessageCommand($error, NULL, ['type' => 'error'], $clear_previous));
+        $clear_previous = FALSE;
+      }
+      return $response;
+    }
+
     // Marks the table so the shared ajax-row-table-status JS behavior can
     // find it as a descendant of the #collections-table wrapper once() is
     // scoped to - Drupal.attachBehaviors() runs with that wrapper itself as
@@ -270,7 +286,6 @@ class CollectionOrganizationForm extends FormBase {
     $message = $this->formatPlural($count, 'Collection organization updated. 1 item in the collection.', 'Collection organization updated. @count items in the collection.');
     $this->markAjaxRowTableChanged($form['collections'], $message, 'collections-table-status', 'collections-table-add-button');
 
-    $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#collections-table', $form['collections']));
     return $response;
   }

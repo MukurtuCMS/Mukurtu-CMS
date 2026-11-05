@@ -296,6 +296,11 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
    * Selects and returns the fieldset with the names in it.
    */
   public function addMoreCallback(array &$form, FormStateInterface $form_state) {
+    // A failed validation changes nothing, so it announces no update.
+    if ($form_state->hasAnyErrors()) {
+      return $form['taxonomy_warnings'];
+    }
+
     // Marks the fieldset so the shared ajax-row-table-status JS behavior can
     // find it as a descendant of the #taxonomy-warnings-fieldset-wrapper
     // once() is scoped to - Drupal.attachBehaviors() runs with that wrapper

@@ -172,4 +172,28 @@ class CollectionOrganizationFormAccessibilityTest extends ProtocolAwareEntityTes
     $this->assertStringContainsString('data-mukurtu-focus-target="collections-table-add-button"', $rendered);
   }
 
+  /**
+   * Tests that a failed validation shows its error and announces no update.
+   */
+  public function testValidationErrorIsShown(): void {
+    $form_object = CollectionOrganizationForm::create(\Drupal::getContainer());
+    $form_state = new FormState();
+    $form_state->addBuildInfo('args', [$this->rootCollection, []]);
+    $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
+    $form_state->setErrorByName('collections', 'Not a valid organization.');
+    // Validation moves errors to the messenger when it finishes.
+    \Drupal::messenger()->addError('Not a valid organization.');
+
+    $response = $form_object->addCollectionToTableCallback($form, $form_state);
+    $commands = (new \ReflectionProperty($response, 'commands'))->getValue($response);
+    $form_state->clearErrors();
+
+    $this->assertCount(1, $commands);
+    $this->assertSame('message', $commands[0]['command']);
+    $this->assertSame('Not a valid organization.', (string) $commands[0]['message']);
+    $this->assertSame('error', $commands[0]['messageOptions']['type']);
+    // The error isn't left waiting for the next page.
+    $this->assertEmpty(\Drupal::messenger()->messagesByType('error'));
+  }
+
 }
