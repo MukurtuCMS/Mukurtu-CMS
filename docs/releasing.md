@@ -86,8 +86,7 @@ them from drifting apart again.
    created by a workflow using `GITHUB_TOKEN`, the event does not fire; run the
    workflow by hand with the tag in `ref` (leave `dev` unticked). After a new
    `mukurtu-template` release, update the `ARG MUKURTU_TEMPLATE_VERSION` default
-   in the `Dockerfile` (in the next release, or as an [image
-   revision](#releasing-an-image-revision)). See [docker-build.md](docker-build.md),
+   in the `Dockerfile`, for the next release. See [docker-build.md](docker-build.md),
    "Publishing and supply chain".
 
    The image is built from the **tag**, not from `main`, so what `main` holds at
@@ -158,6 +157,10 @@ To release one:
    `main` (`git cherry-pick <sha>`), or edit the `FROM` lines or `docker/` by hand. Do
    **not** run `scripts/set-version.sh`: the Mukurtu version stays `4.0.5`.
 3. **Run the image tests**: `for t in scripts/docker/test-*.sh; do $t || break; done`.
+   These build fresh, without the published image's lock files, so a failure in a contrib
+   package the fix didn't touch may not apply to the revision; the workflow's build is the
+   one that counts. See [Image revisions keep their
+   dependencies](docker-build.md#image-revisions-keep-their-dependencies).
 4. **Tag and push**: `git tag 4.0.5-r1 && git push origin image-4.0.5-r1 4.0.5-r1`.
 5. **Publish a GitHub release** for `4.0.5-r1` (not a pre-release), with **Set as latest**
    turned off (`gh release create 4.0.5-r1 --latest=false`, or untick it on the release
@@ -213,8 +216,8 @@ Three further consequences worth knowing:
   a new one is cut.
 - **The container image pins a template version.** After a template release,
   update the `ARG MUKURTU_TEMPLATE_VERSION` default in the `Dockerfile`. The next
-  release picks it up, or ship it sooner as an [image
-  revision](#releasing-an-image-revision).
+  release picks it up. An image revision can't: it keeps the lock files of the image
+  it revises.
 - **A profile PR's CI resolves against the released template.**
   `.github/workflows/build-and-test.yml` and `.tugboat/config.yml` both scaffold
   with `composer create mukurtu/mukurtu-template:^4.0`, then overlay the branch

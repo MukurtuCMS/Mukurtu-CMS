@@ -51,6 +51,13 @@ assert_eq "4.x-dev-abcdef1 edge" "$(dev ABCDEF1234)" "dev build: the commit is l
 for bad in "" "main" "0123" "xyz1234" "0123abc; rm"; do
   if "$TAGS" --dev "$bad" >/dev/null 2>&1; then fail "dev build rejects: '$bad'"; else pass "dev build rejects: '$bad'"; fi
 done
+# A revision can seed its dependencies from the images before it, newest first.
+previous() { "$TAGS" --previous "$1" 2>&1 | paste -sd' ' -; }
+assert_eq "4.0.5" "$(previous 4.0.5-r1)" "first revision: the release it revises"
+assert_eq "4.0.5-r2 4.0.5-r1 4.0.5" "$(previous 4.0.5-r3)" "later revision: earlier revisions first, then the release"
+for bad in "" "4.0.5" "4.0.0-rc" "4.x-dev"; do
+  if "$TAGS" --previous "$bad" >/dev/null 2>&1; then fail "--previous rejects: '$bad'"; else pass "--previous rejects: '$bad'"; fi
+done
 # There is one image: no variant argument, no suffixes.
 for bad in "4.x-dev" "v4.0.5" "4.0" "4.0.5-r0" "4.0.5-r01" "4.0.5 full" "4.0.5 slim" ""; do
   # shellcheck disable=SC2086

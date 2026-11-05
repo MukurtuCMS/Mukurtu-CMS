@@ -134,6 +134,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      # A revision keeps the dependencies of the image it revises, so a contrib release
+      # since then can't break it. Images are public, so this needs no login. The first
+      # revision of a release with no published image resolves fresh.
+      - name: Find the image this revision replaces
+        id: seed
+        if: needs.resolve.outputs.kind == 'revision'
+        run: |
+          set -euo pipefail
+          repository="${IMAGE,,}"
+          for previous in $(scripts/docker/compute-tags.sh --previous "$VERSION"); do
+            if docker buildx imagetools inspect "$repository:$previous" >/dev/null 2>&1; then
+              echo "context=lock-seed=docker-image://$repository:$previous" >> "$GITHUB_OUTPUT"
+              echo "::notice::Keeping the dependency versions of $repository:$previous."
+              exit 0
+            fi
+          done
+          echo "::warning::No earlier image of $VERSION was found, so its dependencies resolve fresh."
+
       # The image is built once and kept in the local Docker daemon. Everything
       # below runs against it, and the push step publishes it.
       - name: Build the image
@@ -142,6 +160,7 @@ jobs:
           context: .
           build-args: |
             COMPOSER_AUDIT_FLAGS=${{ env.COMPOSER_AUDIT_FLAGS }}
+          build-contexts: ${{ steps.seed.outputs.context }}
           load: true
           push: false
           tags: mukurtu-ci:image
