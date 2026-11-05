@@ -1,8 +1,8 @@
 diff --git a/css/tagify.css b/css/tagify.css
-index 1c53c01..4395622 100644
+index 1c53c01..d95fe70 100644
 --- a/css/tagify.css
 +++ b/css/tagify.css
-@@ -392,8 +392,10 @@ select.tagify-select-widget {
+@@ -392,8 +392,33 @@ select.tagify-select-widget {
    height: 30px;
  }
  
@@ -11,10 +11,33 @@ index 1c53c01..4395622 100644
 +.tagify__tag-text-with-entity-id .tagify__tag-text-parent {
    font-weight: normal;
 +  font-size: 0.85em;
++}
++
++/* A path can be long, so let its tag wrap rather than hide the term's name. */
++
++.tagify__tag:has(.tagify__tag-text-parent) {
++  --tag-inset-shadow-size: 100vmax;
++  height: auto;
++  min-height: 32px;
++}
++
++.tagify__tag:has(.tagify__tag-text-parent) > div {
++  min-width: 0;
++  white-space: normal;
++}
++
++.tagify__tag .tagify__tag-text:has(.tagify__tag-text-parent),
++.tagify__tag .tagify__tag-text-with-entity-id:has(.tagify__tag-text-parent) {
++  white-space: normal !important;
++  overflow-wrap: anywhere;
++}
++
++.tagify__tag .tagify__tag__removeBtn {
++  flex-shrink: 0;
  }
  
  .tagify__tag-text .tagify__tag-text-child {
-@@ -402,6 +404,10 @@ select.tagify-select-widget {
+@@ -402,6 +427,10 @@ select.tagify-select-widget {
  
  /* Group suggestions */
  
@@ -26,7 +49,7 @@ index 1c53c01..4395622 100644
    display: flex;
    flex-direction: column;
 diff --git a/js/tagify.js b/js/tagify.js
-index bcca509..d3a2926 100644
+index bcca509..07f1167 100644
 --- a/js/tagify.js
 +++ b/js/tagify.js
 @@ -122,15 +122,20 @@
@@ -86,7 +109,25 @@ index bcca509..d3a2926 100644
                )}
            </tag>`;
          }
-@@ -285,23 +296,6 @@
+@@ -279,29 +290,24 @@
+           },
+         });
+ 
++        // Tagify scrolls the highlighted suggestion's parent, which is a group
++        // rather than the scrolling list when suggestions are nested, so keep
++        // the highlight in view during arrow-key navigation.
++        const { highlightOption } = tagify.dropdown;
++        tagify.dropdown.highlightOption = (elm, ...args) => {
++          const result = highlightOption(elm, ...args);
++          if (elm && elm.scrollIntoView) {
++            elm.scrollIntoView({ block: 'nearest' });
++          }
++          return result;
++        };
++
+         // Split the taxonomy terms into groups, when rendering the suggestions list dropdown:
+         // (since each term also has a 'parent' property)
+         tagify.dropdown.createListHTML = (suggestionsList) => {
            if (isTagLimitReached()) {
              return '';
            }
@@ -110,7 +151,7 @@ index bcca509..d3a2926 100644
            const getTermsSuggestionsHTML = (parentTerms) =>
              parentTerms
                .map((suggestion) => {
-@@ -328,51 +322,66 @@
+@@ -328,51 +334,66 @@
                })
                .join('');
  
@@ -164,7 +205,7 @@ index bcca509..d3a2926 100644
 +            // The parent is an option only if parents can be selected.
 +            const header = isParentSelectionEnabled
 +              ? getTermsSuggestionsHTML([suggestion])
-+              : `<span class="dropdown_group">${name}</span>`;
++              : `<span class="dropdown_group" aria-hidden="true">${name}</span>`;
 +            return `${header}<div class="tagify__dropdown__itemsGroup tagify__dropdown__itemsGroup--nested" role="group" aria-label="${name}">${children
 +              .map(renderBranch)
 +              .join('')}</div>`;
@@ -212,13 +253,13 @@ index bcca509..d3a2926 100644
 -              return getTermsSuggestionsHTML(filteredChildName);
 +              const path = Drupal.checkPlain(entry.path);
 +              return `<div class="tagify__dropdown__itemsGroup" role="group" aria-label="${path}" data-title="${path}">
-+                <span class="dropdown_group">${path}</span>
++                <span class="dropdown_group" aria-hidden="true">${path}</span>
 +                ${entry.items.map(renderBranch).join('')}
 +              </div>`;
              })
              .join('');
          };
-@@ -415,6 +424,7 @@
+@@ -415,6 +436,7 @@
                  value: current.entity_id,
                  entity_id: current.entity_id,
                  parent_name: current.parent_name,
