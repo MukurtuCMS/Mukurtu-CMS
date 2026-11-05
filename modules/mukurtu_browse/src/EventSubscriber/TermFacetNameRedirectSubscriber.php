@@ -42,8 +42,9 @@ class TermFacetNameRedirectSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents(): array {
-    // After routing, before the controller.
-    return [KernelEvents::REQUEST => ['redirectTermNames', 0]];
+    // After routing (32), and before the Dynamic Page Cache (27) can serve a
+    // cached response for the route.
+    return [KernelEvents::REQUEST => ['redirectTermNames', 30]];
   }
 
   /**
@@ -82,7 +83,11 @@ class TermFacetNameRedirectSubscriber implements EventSubscriberInterface {
 
     if ($changed) {
       $url = Url::fromRoute($route_name, $request->attributes->get('_raw_variables')?->all() ?? [], ['query' => $query]);
-      $event->setResponse(new LocalRedirectResponse($url->toString(), 301));
+      $response = new LocalRedirectResponse($url->toString(), 301);
+      // The redirect is only right for this query string. Without this, the
+      // Dynamic Page Cache would serve it for every query on the page.
+      $response->getCacheableMetadata()->addCacheContexts(['url.query_args']);
+      $event->setResponse($response);
     }
   }
 

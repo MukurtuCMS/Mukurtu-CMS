@@ -8,6 +8,7 @@ use Drupal\Component\Serialization\Yaml;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\mukurtu_browse\EventSubscriber\TermFacetNameRedirectSubscriber;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\search_api\Entity\Index;
@@ -21,6 +22,7 @@ use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Tests nested term facets on the database search (#2522).
@@ -354,6 +356,34 @@ class NestedTermFacetsTest extends KernelTestBase {
     $event = new RequestEvent($this->container->get('http_kernel'), $request, HttpKernelInterface::MAIN_REQUEST);
     $subscriber->redirectTermNames($event);
     $this->assertNull($event->getResponse());
+  }
+
+  /**
+   * An old-link redirect is only ever served for the URL it came from.
+   *
+   * The Dynamic Page Cache keys responses by route and the response's cache
+   * contexts. A redirect set after its request subscriber, without the query
+   * string as a context, was cached for every query on the page, so one old
+   * bookmark sent every later filtered visit to the same term, and its own
+   * target into a loop. The cache doesn't run under PHPUnit's command line,
+   * so this checks the two things that prevent it; browse.spec.ts checks the
+   * behaviour on a real site.
+   */
+  public function testRedirectIsNotCachedForOtherQueries(): void {
+    $priority = TermFacetNameRedirectSubscriber::getSubscribedEvents()[KernelEvents::REQUEST][1];
+    // After routing (32), before the Dynamic Page Cache (27).
+    $this->assertGreaterThan(27, $priority);
+    $this->assertLessThan(32, $priority);
+
+    $this->container->get('router.builder')->rebuild();
+    $this->createIndex(['category_tid' => ['field_category', 'integer']]);
+    $this->createView(['facets_name' => $this->shippedCategoryFilter('facets_category_tid')]);
+    $request = Request::create('/digital-heritage', 'GET', ['category' => ['Weaving' => 'Weaving']]);
+    $request->attributes->set('_route', 'mukurtu_browse.browse_digital_heritage_page');
+    $event = new RequestEvent($this->container->get('http_kernel'), $request, HttpKernelInterface::MAIN_REQUEST);
+    $this->container->get('mukurtu_browse.term_facet_name_redirect')->redirectTermNames($event);
+
+    $this->assertContains('url.query_args', $event->getResponse()->getCacheableMetadata()->getCacheContexts());
   }
 
 }
