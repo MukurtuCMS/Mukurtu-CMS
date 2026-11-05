@@ -65,7 +65,7 @@ proxy](#behind-a-reverse-proxy). To host several sites on one machine, use `mult
 
 ## Images and tags
 
-Images are published to `ghcr.io/<owner>/mukurtu` for `linux/amd64` and
+Images are published to `ghcr.io/mukurtucms/mukurtu` for `linux/amd64` and
 `linux/arm64`. There is one image. It includes `ffmpeg` and `poppler-utils`, which
 Mukurtu uses for video thumbnails, PDF thumbnails and PDF text search (without them
 Mukurtu skips those features silently), so every tag has them. There is no variant

@@ -9,8 +9,8 @@ self-contained: open it, follow its README, run `docker compose up -d`.
 | [`single-site/`](single-site) | Run one site the way you would in production. | Random, in secret files. | `./generate-secrets.sh` |
 | [`multi-tenant/`](multi-tenant) | Host several independent sites on one machine, each at its own domain. | Random, in `.env`. | `./generate-secrets.sh` |
 
-All three use the published image `ghcr.io/<owner>/mukurtu`; edit the image line (or
-`MUKURTU_IMAGE` in `.env`) to pin the version you want. How the image is built is in
+All three use the published image `ghcr.io/mukurtucms/mukurtu`; edit the image line (or
+`MUKURTU_IMAGE` in `.env`) to pin an exact version. How the image is built is in
 [docs/docker-build.md](../../docs/docker-build.md); every setting it accepts is in
 [docs/docker.md](../../docs/docker.md).
 

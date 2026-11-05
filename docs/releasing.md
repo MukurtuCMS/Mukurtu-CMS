@@ -82,7 +82,7 @@ them from drifting apart again.
 9. **The container image publishes itself.** Publishing the release starts
    `.github/workflows/docker-publish.yml`, which builds the image on both
    architectures, runs the test suite against it, scans it, and pushes it to
-   `ghcr.io/<owner>/mukurtu`. Check that the run succeeded. If the release was
+   `ghcr.io/mukurtucms/mukurtu`. Check that the run succeeded. If the release was
    created by a workflow using `GITHUB_TOKEN`, the event does not fire; run the
    workflow by hand with the tag in `ref` (leave `dev` unticked). After a new
    `mukurtu-template` release, update the `ARG MUKURTU_TEMPLATE_VERSION` default
@@ -159,11 +159,13 @@ To release one:
    **not** run `scripts/set-version.sh`: the Mukurtu version stays `4.0.5`.
 3. **Run the image tests**: `for t in scripts/docker/test-*.sh; do $t || break; done`.
 4. **Tag and push**: `git tag 4.0.5-r1 && git push origin image-4.0.5-r1 4.0.5-r1`.
-5. **Publish a GitHub release** for `4.0.5-r1` (not a pre-release) saying what changed,
-   for example "Image-only release. No change to Mukurtu 4.0.5. Updates the base image to
-   Alpine 3.24.3." The workflow tests, scans and pushes it. `4.0`, `4` and `latest` move
-   only if it is the newest in their scope, so a backport (`4.0.4-r1` after `4.0.5`)
-   never pulls `latest` backwards. `4.0.5` itself never changes.
+5. **Publish a GitHub release** for `4.0.5-r1` (not a pre-release), with **Set as latest**
+   turned off (`gh release create 4.0.5-r1 --latest=false`, or untick it on the release
+   page) and a title that starts with "Image-only". The Releases page then keeps pointing
+   at the newest Mukurtu release. Say what changed, for example "No change to Mukurtu
+   4.0.5. Updates the base image to Alpine 3.24.3." The workflow tests, scans and pushes
+   it. `4.0`, `4` and `latest` move only if it is the newest in their scope, so a backport
+   (`4.0.4-r1` after `4.0.5`) never pulls `latest` backwards. `4.0.5` itself never changes.
 6. **Make sure the same fix is on `main`** (merging Dependabot's pull request does it),
    so the next Mukurtu release has it too.
 
@@ -204,11 +206,15 @@ Both halves were reverted (#2210, mukurtu-template#7, released as template
 against live Packagist on every pull request, which fails a root requirement no
 released profile can satisfy.
 
-Two further consequences worth knowing:
+Three further consequences worth knowing:
 
 - **Merging a template fix is not enough; it must be tagged.** Packagist serves
   the newest matching tag, so `^4.0` keeps resolving to the broken release until
   a new one is cut.
+- **The container image pins a template version.** After a template release,
+  update the `ARG MUKURTU_TEMPLATE_VERSION` default in the `Dockerfile`. The next
+  release picks it up, or ship it sooner as an [image
+  revision](#releasing-an-image-revision).
 - **A profile PR's CI resolves against the released template.**
   `.github/workflows/build-and-test.yml` and `.tugboat/config.yml` both scaffold
   with `composer create mukurtu/mukurtu-template:^4.0`, then overlay the branch

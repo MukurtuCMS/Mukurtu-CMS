@@ -376,7 +376,7 @@ values); and `innodb_buffer_pool_size` at roughly half the database container's 
 ## Publishing and supply chain
 
 `.github/workflows/docker-publish.yml` publishes to `ghcr.io/<owner>/mukurtu`, where `<owner>` is
-the repository's owner (lower-cased); no owner is written into any file, so it runs unchanged in a
+the repository's owner (lower-cased); no owner is written into the workflow, so it runs unchanged in a
 fork and upstream.
 
 **When it runs.** On a published release, or by hand (*Run workflow*) with a tag in `ref`, for a
@@ -457,7 +457,7 @@ advisory before the image is assembled.
   major version, following the repository's other workflows. Dependabot proposes updates to both.
 - **Provenance and SBOM.** Each architecture's image has an SBOM attestation (SPDX, made by Trivy),
   and the published tag has a build-provenance attestation from `actions/attest-build-provenance`.
-  Verify with `gh attestation verify oci://ghcr.io/<owner>/mukurtu:<tag> --owner <owner>`.
+  Verify with `gh attestation verify oci://ghcr.io/mukurtucms/mukurtu:<tag> --owner mukurtucms`.
 - **Least privilege.** Default permission is read-only; only `build` and `publish` can write
   packages and create attestations, and `build` pushes only after its tests and scan passed. Event data (tag names, inputs) reaches scripts through environment
   variables, never interpolated into script text, which would allow script injection.
