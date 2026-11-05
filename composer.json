@@ -170,6 +170,9 @@
                     "depth": 1
                 }
             ],
+            "drupal/tagify": {
+                "Group nested term suggestions by parent, with translated names and screen reader groups": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/2421ca79795192f07fdb3aafc6ca5ff3fefe6360/patches/tagify-nested-groups.patch"
+            },
             "drupal/paragraphs": {
                 "Ensure empty paragraphs register as empty": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/paragraphs-118.patch"
             },
