@@ -98,6 +98,15 @@ test.describe('Focus visible (admin)', () => {
     await expect(field).toHaveCSS('outline-style', 'solid');
   });
 
+  // The outline is limited by this attribute, because the public theme draws
+  // its own focus ring and a second one would double it.
+  test('Focus visible: public pages are outside the forced colors outline', async ({ page }) => {
+    await page.goto('/admin/config/system/site-information');
+    await expect(page.locator('body')).toHaveAttribute('data-gin-layout-density');
+    await page.goto('/');
+    await expect(page.locator('body')).not.toHaveAttribute('data-gin-layout-density');
+  });
+
   // The fix hides the in-form originals, so the sticky copies become the
   // only way to submit. Pin that they are there and usable, or a future
   // change to Gin's markup could take the buttons away entirely and still

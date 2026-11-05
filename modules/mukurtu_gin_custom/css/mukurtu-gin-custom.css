@@ -25,19 +25,27 @@ on any one class. */
 }
 
 /* WCAG 1.4.11: Gin's default focus color is 60% transparent, which measures
-2.27:1 on white. The same blue with no transparency is 3.95:1, and every Gin
-focus ring takes its color from this one variable. Scoped to light mode, since
-Gin's dark mode color already passes. A focus color picked in Gin's settings
-is set on <body>, so it still wins. */
+2.27:1 on white. The same blue with no transparency is 3.95:1 on white and
+3.77:1 on Gin's page background, and every Gin focus ring takes its color from
+this one variable. Scoped to light mode, since Gin's dark mode color already
+passes. A focus color picked in Gin's settings is set on <body>, so it still
+wins. */
 html:not(.gin--dark-mode) {
   --gin-color-focus: rgb(0, 125, 250);
 }
 
+/* Messages have dark backgrounds in light mode, where blue is under 3:1. */
+html:not(.gin--dark-mode) :is([data-drupal-messages], .mukurtu-super-admin-warning-wrapper) {
+  --gin-color-focus: #fff;
+}
+
 /* WCAG 2.4.7: Gin draws focus as a box-shadow, which forced colors mode
-removes, leaving form fields with only a small border change. Gin clears the
-outline with :is(#extra-specificity-hack), so this needs !important. */
+removes, leaving form fields with only a small border change. This file also
+loads on the public theme, which has its own focus styles, so
+data-gin-layout-density limits this to pages in Gin. Gin clears the outline
+with :is(#extra-specificity-hack), so this needs !important. */
 @media (forced-colors: active) {
-  :is(a, button, input, select, textarea, summary, [tabindex], [contenteditable]):focus-visible {
+  [data-gin-layout-density] :is(.form-element, .form-boolean, .button, .tagify__input):focus-visible {
     outline: 2px solid Highlight !important;
     outline-offset: 2px;
   }
