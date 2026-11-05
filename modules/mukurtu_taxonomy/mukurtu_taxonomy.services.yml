@@ -19,3 +19,9 @@ services:
   mukurtu_taxonomy.nested_terms:
     class: Drupal\mukurtu_taxonomy\NestedTerms
     arguments: ['@entity_type.manager', '@keyvalue', '@database']
+
+  mukurtu_taxonomy.term_merge_children:
+    class: Drupal\mukurtu_taxonomy\EventSubscriber\TermMergeChildrenSubscriber
+    arguments: ['@mukurtu_taxonomy.nested_terms']
+    tags:
+      - { name: event_subscriber }

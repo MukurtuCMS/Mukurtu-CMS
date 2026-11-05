@@ -39,7 +39,7 @@ configuration:
   delimiter: ','
   enclosure: '"'
   escape: \
-  multivalue_delimiter: '||'
+  multivalue_delimiter: ';'
   default_format: basic_html
   identifier_column: null
   local_contexts_delimiter: '>'

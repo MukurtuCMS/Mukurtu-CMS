@@ -312,13 +312,16 @@ class CSV extends ExporterBase {
     $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
 
     foreach ($entities as $key) {
+      // Regardless of the result, remove entity from the list. An entity can
+      // be queued again after it was exported, for example a parent term
+      // exported as a referenced entity, and leaving it queued would keep the
+      // batch from ever finishing.
+      unset($context['results']['entities'][$entity_type_id][$key]);
+
       $alreadyExported = $context['results']['exported_entities'][$entity_type_id][$key] ?? FALSE;
       if (!$alreadyExported) {
         [$id, $langcode] = ExportItemIdentity::decode($key);
         $entity = $storage->load($id);
-
-        // Regardless of the result, remove entity from the list.
-        unset($context['results']['entities'][$entity_type_id][$key]);
 
         if (!$entity) {
           // @todo what do we do on this failure?

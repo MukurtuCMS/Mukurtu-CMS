@@ -97,7 +97,6 @@ function mukurtu_taxonomy_form_taxonomy_term_form_alter(&$form, \Drupal\Core\For
     'word_type',
   ];
 
-  // The delete form shares this base form ID but has no Relations.
   if (!isset($form['relations'])) {
     return;
   }
@@ -260,6 +259,81 @@ function mukurtu_taxonomy_vocabulary_flat_submit(array &$form, \Drupal\Core\Form
  */
 function mukurtu_taxonomy_taxonomy_vocabulary_delete(\Drupal\taxonomy\VocabularyInterface $vocabulary) {
   \Drupal::service('mukurtu_taxonomy.nested_terms')->deleteSnapshot($vocabulary->id());
+
+  // Core deletes only a vocabulary's top-level terms, expecting their
+  // children to go with them, but mukurtu_taxonomy_taxonomy_term_predelete()
+  // moved those children up. The vocabulary is gone now, so deleting what's
+  // left at the top level takes everything below it too.
+  $storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+  $tids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('vid', $vocabulary->id())
+    ->condition('parent.target_id', 0)
+    ->execute();
+  if ($tids) {
+    $storage->delete($storage->loadMultiple($tids));
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete() for taxonomy_term.
+ *
+ * Moves a deleted term's children up to its parent, or to the top level,
+ * where core would delete them with it (#2520).
+ */
+function mukurtu_taxonomy_taxonomy_term_predelete(\Drupal\taxonomy\TermInterface $term) {
+  // While a vocabulary is deleted, its terms go with it.
+  if (!Vocabulary::load($term->bundle())) {
+    return;
+  }
+  \Drupal::service('mukurtu_taxonomy.nested_terms')->moveChildren((int) $term->id(), (int) $term->get('parent')->target_id);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for taxonomy_term_confirm_form.
+ *
+ * Says where a term's children move to on its delete form, replacing core's
+ * description, which says they're deleted.
+ *
+ * @see mukurtu_taxonomy_taxonomy_term_predelete()
+ */
+function mukurtu_taxonomy_form_taxonomy_term_confirm_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $form_object = $form_state->getFormObject();
+  if (!$form_object instanceof \Drupal\taxonomy\Form\TermDeleteForm) {
+    return;
+  }
+  /** @var \Drupal\taxonomy\TermInterface $term */
+  $term = $form_object->getEntity();
+
+  // Deleting one translation leaves the term and its children in place.
+  if (!$term->isDefaultTranslation()) {
+    return;
+  }
+
+  $count = count(\Drupal::service('mukurtu_taxonomy.nested_terms')->getChildIds((int) $term->id()));
+  if (!$count) {
+    $form['description']['#markup'] = t('This action cannot be undone.');
+    return;
+  }
+
+  $entity_repository = \Drupal::service('entity.repository');
+  $parent = $term->get('parent')->entity;
+  $args = ['%term' => $entity_repository->getTranslationFromContext($term)->label()];
+  if ($parent) {
+    $args['%parent'] = $entity_repository->getTranslationFromContext($parent)->label();
+    $form['description']['#markup'] = \Drupal::translation()->formatPlural($count,
+      '1 term nested under %term will move under %parent. This action cannot be undone.',
+      '@count terms nested under %term will move under %parent. This action cannot be undone.',
+      $args
+    );
+  }
+  else {
+    $form['description']['#markup'] = \Drupal::translation()->formatPlural($count,
+      '1 term nested under %term will move to the top level. This action cannot be undone.',
+      '@count terms nested under %term will move to the top level. This action cannot be undone.',
+      $args
+    );
+  }
 }
 
 /**
