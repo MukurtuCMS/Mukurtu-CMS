@@ -79,7 +79,7 @@ abstract class ManageSupportedProjectsBase extends FormBase {
         }
       }
       else {
-        $this->messenger()->addError(t('Could not retrieve Local Contexts project information for the API key <code>@key</code>. Requesting the project list returned the following error: <code>@error</code>', [
+        $this->messenger()->addError(t("Couldn't get the Local Contexts projects for the API key <code>@key</code>: @error", [
           '@key' => $this->maskApiKey($api_key),
           '@error' => $lcApi->getErrorMessage(),
         ]));

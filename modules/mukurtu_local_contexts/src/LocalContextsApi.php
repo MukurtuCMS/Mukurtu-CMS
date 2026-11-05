@@ -2,10 +2,14 @@
 
 namespace Drupal\mukurtu_local_contexts;
 
-use GuzzleHttp\Exception\RequestException;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 
 class LocalContextsApi {
+
+  use StringTranslationTrait;
+
   /**
    * The settings configuration key.
    *
@@ -102,7 +106,6 @@ class LocalContextsApi {
       'query' => $query_params,
       'connect_timeout' => 5,
     ];
-    $request = new $this->httpClient($options);
 
     if (!str_starts_with($path, '/')) {
       $path = '/' . $path;
@@ -112,16 +115,31 @@ class LocalContextsApi {
 
     try {
       // Send the request.
-      $response = $request->request('GET', $url);
+      $response = $this->httpClient->request('GET', $url, $options);
       $http_code = $response->getStatusCode();
       $this->statusCode = $http_code;
       $result = json_decode($response->getBody()->getContents(), TRUE);
+      if (!is_array($result)) {
+        $result = [];
+      }
       if ($http_code != 200) {
-        $this->errorMessage = $result['detail'] ?? 'Unknown error.';
+        // The Hub explains its own errors. Anything else, such as a proxy's
+        // challenge page, gets a plain message. Either way the details go to
+        // the log, never the API key.
+        $this->errorMessage = $result['detail'] ?? (string) $this->t("The Local Contexts Hub didn't accept the request (HTTP @code). Try again later. If this keeps happening, ask your site administrator to check the site log.", ['@code' => $http_code]);
+        \Drupal::logger('mukurtu_local_contexts')->warning('Local Contexts Hub request to @path failed: HTTP @code, @content_type.', [
+          '@path' => $path,
+          '@code' => $http_code,
+          '@content_type' => $response->getHeaderLine('Content-Type') ?: 'no content type',
+        ]);
       }
     }
     catch (RequestException|ConnectException $e) {
-      $this->errorMessage = $e->getMessage();
+      $this->errorMessage = (string) $this->t("Couldn't connect to the Local Contexts Hub. Try again later. If this keeps happening, ask your site administrator to check the site log.");
+      \Drupal::logger('mukurtu_local_contexts')->error("Couldn't connect to the Local Contexts Hub for @path: @error", [
+        '@path' => $path,
+        '@error' => $e->getMessage(),
+      ]);
     }
 
     return $result;

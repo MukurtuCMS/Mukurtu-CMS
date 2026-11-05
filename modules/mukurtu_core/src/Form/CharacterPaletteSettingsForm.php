@@ -10,6 +10,9 @@ use Drupal\Core\Ajax\FocusFirstCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\language\ConfigurableLanguageManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Turns the character palette on and lists its characters (#2560).
@@ -21,6 +24,10 @@ use Drupal\Core\Form\FormStateInterface;
  * Every group ends with one empty row and an "Add new row" button, and there
  * is always one empty group at the end for adding a new one. Saving drops
  * whatever was left empty.
+ *
+ * Rows reorder within their group, by dragging or with arrow buttons, and the
+ * palette shows them in saved order. The form's weights are never stored:
+ * saving writes the list in its new order.
  */
 class CharacterPaletteSettingsForm extends ConfigFormBase {
 
@@ -50,6 +57,20 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
   const NAME_MAX_LENGTH = 255;
 
   /**
+   * The language manager.
+   */
+  protected LanguageManagerInterface $languageManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    $instance = parent::create($container);
+    $instance->languageManager = $container->get('language_manager');
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
@@ -70,6 +91,7 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config(static::SETTINGS);
+    $form['#attached']['library'][] = 'mukurtu_core/character_palette_settings';
 
     $form['enabled'] = [
       '#type' => 'checkbox',
@@ -84,7 +106,10 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
     $groups[] = ['label' => '', 'characters' => []];
     foreach (array_values($groups) as $index => $group) {
       $empty_rows = $form_state->get(['empty_rows', $index]) ?? static::EMPTY_ROWS;
-      $form['groups'][$index] = $this->buildGroup($group, $index, $empty_rows, $index === count($groups) - 1);
+      // Rebuilds and failed saves keep the order on the page, not the stored
+      // one, so unsaved moves survive.
+      $submitted = $form_state->getUserInput()['groups'][$index]['characters'] ?? [];
+      $form['groups'][$index] = $this->buildGroup($group, $index, $empty_rows, $index === count($groups) - 1, $submitted);
     }
 
     return parent::buildForm($form, $form_state);
@@ -101,8 +126,10 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
    *   How many empty rows to show after the group's characters.
    * @param bool $is_new
    *   Whether this is the empty group for adding a new one.
+   * @param array $submitted
+   *   The group's submitted rows, if any, for their order.
    */
-  protected function buildGroup(array $group, int $index, int $empty_rows, bool $is_new): array {
+  protected function buildGroup(array $group, int $index, int $empty_rows, bool $is_new, array $submitted = []): array {
     $label = (string) ($group['label'] ?? '');
     $legend = $is_new ? $this->t('New language') : $label;
     $wrapper_id = static::groupWrapperId($index);
@@ -131,6 +158,11 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
     $element['help'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['description'], 'id' => $help_id],
+      'order' => [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('The palette shows characters in this order.'),
+      ],
       'empty' => [
         '#type' => 'html_tag',
         '#tag' => 'p',
@@ -142,18 +174,49 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
         '#value' => $this->t('Screen readers read the name instead of the character. Add a name for any character a screen reader might skip or misread, such as ʼ or ʷ.'),
       ],
     ];
+    // The Order column is what gets submitted. Dragging and the arrow buttons
+    // both set it, and it's the only control left without JavaScript. Its
+    // number box has no upper limit, unlike the select a weight element uses.
+    $weight_class = 'mukurtu-character-weight-' . $index;
     $element['characters'] = [
       '#type' => 'table',
-      '#header' => [$this->t('Character'), $this->t('Name')],
-      '#attributes' => ['aria-describedby' => $help_id],
+      '#header' => [
+        $this->t('Character'),
+        $this->t('Name'),
+        ['data' => $this->t('Move'), 'class' => ['mukurtu-character-move']],
+        ['data' => $this->t('Order'), 'class' => ['mukurtu-character-order']],
+      ],
+      '#attributes' => [
+        'aria-describedby' => $help_id,
+        'class' => ['mukurtu-character-table'],
+        'data-group' => (string) $legend,
+        'id' => 'mukurtu-character-table-' . $index,
+      ],
+      '#tabledrag' => [
+        [
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => $weight_class,
+        ],
+      ],
     ];
     $rows = array_values($group['characters'] ?? []);
     $rows = array_merge($rows, array_fill(0, $empty_rows, ['character' => '', 'name' => '']));
+    // Rows keep their stored position as their key, however they're shown,
+    // so each one's input stays with it and saving can see where it moved.
+    uksort($rows, fn ($a, $b) => static::rowWeight($submitted[$a] ?? []) <=> static::rowWeight($submitted[$b] ?? []));
+    $number = 0;
     foreach ($rows as $delta => $row) {
+      $number++;
+      // Core uses the id to show a row as changed again after Add new row.
+      $element['characters'][$delta]['#attributes'] = [
+        'class' => ['draggable'],
+        'id' => $wrapper_id . '-row-' . $delta,
+      ];
       // The column headings label the boxes visually. Screen readers get the
-      // row number and the group, since every row repeats the same two
-      // headings.
-      $args = ['@number' => $delta + 1, '@group' => $legend];
+      // row number and the group, since every row repeats the same headings.
+      // The arrow buttons' script keeps these numbers right as rows move.
+      $args = ['@number' => $number, '@group' => $legend];
       $element['characters'][$delta]['character'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Character @number in @group', $args),
@@ -169,6 +232,18 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
         '#default_value' => $row['name'] ?? '',
         '#maxlength' => static::NAME_MAX_LENGTH,
         '#size' => 30,
+      ];
+      // The script adds the arrow buttons here, since they only work with it.
+      $element['characters'][$delta]['move'] = [
+        '#wrapper_attributes' => ['class' => ['mukurtu-character-move']],
+      ];
+      $element['characters'][$delta]['weight'] = [
+        '#type' => 'number',
+        '#title' => $this->t('Order for character @number in @group', $args),
+        '#title_display' => 'invisible',
+        '#default_value' => $number,
+        '#attributes' => ['class' => [$weight_class]],
+        '#wrapper_attributes' => ['class' => ['mukurtu-character-order']],
       ];
     }
     $element['add_row'] = [
@@ -205,6 +280,20 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
   }
 
   /**
+   * The sort value of a submitted row.
+   *
+   * @param array $row
+   *   A submitted row, or an empty array for a row that wasn't submitted.
+   *
+   * @return int
+   *   The row's weight. A row without one, such as a new row, sorts last.
+   */
+  protected static function rowWeight(array $row): int {
+    $weight = $row['weight'] ?? NULL;
+    return is_numeric($weight) ? (int) $weight : PHP_INT_MAX;
+  }
+
+  /**
    * Submit handler for "Add new row": one more empty row for that group.
    *
    * Works without JavaScript too, as a full-page rebuild.
@@ -220,14 +309,15 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
    * AJAX callback for "Add new row".
    *
    * Replaces the group and moves focus to the new row's Character box, so
-   * keyboard and screen reader users land where they're about to type.
+   * keyboard and screen reader users land where they're about to type. The
+   * selector names the box because the row now starts with a drag handle.
    */
   public function addRowAjax(array &$form, FormStateInterface $form_state): AjaxResponse {
     $index = $form_state->getTriggeringElement()['#group_index'];
     $selector = '#' . static::groupWrapperId($index);
     $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand($selector, $form['groups'][$index]));
-    $response->addCommand(new FocusFirstCommand($selector . ' tbody tr:last-child'));
+    $response->addCommand(new FocusFirstCommand($selector . ' tbody tr:last-child input[type="text"]'));
     return $response;
   }
 
@@ -253,24 +343,85 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $groups = [];
-    foreach ($form_state->getValue('groups') ?? [] as $group) {
+    $positions = [];
+    foreach ($form_state->getValue('groups') ?? [] as $index => $group) {
       if (!empty($group['delete'])) {
         continue;
       }
       $label = trim((string) $group['label']);
-      $characters = static::cleanCharacters($group['characters'] ?? []);
+      $rows = $group['characters'] ?? [];
+      uasort($rows, fn ($a, $b) => static::rowWeight($a) <=> static::rowWeight($b));
+      $characters = static::cleanCharacters($rows);
       if ($label === '' && $characters === []) {
         continue;
       }
-      $groups[] = ['label' => $label, 'characters' => $characters];
+      $positions[$index] = [
+        'group' => count($groups),
+        'rows' => array_flip(array_keys($characters)),
+      ];
+      $groups[] = ['label' => $label, 'characters' => array_values($characters)];
     }
 
+    // Before the save, which discards translations at positions the new list
+    // doesn't have.
+    $this->moveTranslations($positions);
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('enabled', (bool) $form_state->getValue('enabled'))
       ->set('groups', $groups)
       ->save();
 
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Keeps translated names with their characters.
+   *
+   * Configuration translations are stored by position in the list, so without
+   * this a moved or deleted row would leave a translated name on the wrong
+   * character, and a screen reader would read that name out.
+   *
+   * @param array $positions
+   *   Where each kept group went, keyed by its old position: its new position
+   *   as 'group', and its rows' new positions keyed by their old ones as
+   *   'rows'.
+   */
+  protected function moveTranslations(array $positions): void {
+    if (!$this->languageManager instanceof ConfigurableLanguageManagerInterface) {
+      return;
+    }
+    foreach (array_keys($this->languageManager->getLanguages()) as $langcode) {
+      $override = $this->languageManager->getLanguageConfigOverride($langcode, static::SETTINGS);
+      $translated = $override->get('groups');
+      if (!is_array($translated)) {
+        continue;
+      }
+      $moved = [];
+      foreach ($translated as $index => $group) {
+        if (!isset($positions[$index])) {
+          continue;
+        }
+        $rows = $group['characters'] ?? [];
+        unset($group['characters']);
+        foreach ($rows as $delta => $row) {
+          if (isset($positions[$index]['rows'][$delta])) {
+            $group['characters'][$positions[$index]['rows'][$delta]] = $row;
+          }
+        }
+        if (isset($group['characters'])) {
+          ksort($group['characters']);
+        }
+        if ($group !== []) {
+          $moved[$positions[$index]['group']] = $group;
+        }
+      }
+      ksort($moved);
+      if ($moved === []) {
+        $override->delete();
+      }
+      else {
+        $override->set('groups', $moved)->save();
+      }
+    }
   }
 
   /**
@@ -283,16 +434,16 @@ class CharacterPaletteSettingsForm extends ConfigFormBase {
    *   Submitted rows, each with a character and a name.
    *
    * @return array
-   *   The rows that have a character, in order.
+   *   The rows that have a character, in order, with their keys.
    */
   public static function cleanCharacters(array $rows): array {
     $characters = [];
-    foreach ($rows as $row) {
+    foreach ($rows as $delta => $row) {
       $character = trim((string) ($row['character'] ?? ''));
       if ($character === '') {
         continue;
       }
-      $characters[] = [
+      $characters[$delta] = [
         'character' => $character,
         'name' => trim((string) ($row['name'] ?? '')),
       ];
