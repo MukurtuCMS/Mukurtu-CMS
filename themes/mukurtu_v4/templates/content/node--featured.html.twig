@@ -89,6 +89,11 @@
       {% set media = content.field_word_list_image.0 %}
     {% endif %}
 
+{# Dictionary words pick their own; see mukurtu_v4_preprocess_node(). #}
+{% if card_media %}
+  {% set media = card_media %}
+{% endif %}
+
 <article{{ attributes }}>
 
   <div class="featured-item__media">
