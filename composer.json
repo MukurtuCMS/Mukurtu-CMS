@@ -78,7 +78,7 @@
         "drupal/search_api": "^1.41",
         "drupal/search_api_glossary": "^4.2",
         "drupal/search_api_solr": "^4.3",
-        "drupal/tagify": "^2.0",
+        "drupal/tagify": "^2.0.5",
         "drupal/term_merge": "^2.0",
         "drupal/term_merge_manager": "^2.0",
         "drupal/term_reference_change": "^2.0@beta",
