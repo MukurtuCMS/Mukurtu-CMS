@@ -75,6 +75,29 @@ test.describe('Focus visible (admin)', () => {
     });
   }
 
+  // Gin's default focus color is 60% transparent, which measures 2.27:1 on
+  // white (#2626). Every Gin focus ring takes its color from this variable.
+  test('Focus visible: the light mode focus ring has enough contrast', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/admin/config/system/site-information');
+    const field = page.locator('input[name="site_name"]');
+    await field.focus();
+    // The ring fades in, so this retries until the transition has finished.
+    await expect(field).toHaveCSS('box-shadow', /rgb\(0, 125, 250\)/);
+  });
+
+  // Forced colors removes box-shadow, which is how Gin draws focus (#2626).
+  test('Focus visible: form fields keep an outline in forced colors', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/admin/config/system/site-information');
+    const field = page.locator('input[name="site_name"]');
+    await field.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(field).toBeFocused();
+    await expect(field).toHaveCSS('outline-style', 'solid');
+  });
+
   // The fix hides the in-form originals, so the sticky copies become the
   // only way to submit. Pin that they are there and usable, or a future
   // change to Gin's markup could take the buttons away entirely and still
