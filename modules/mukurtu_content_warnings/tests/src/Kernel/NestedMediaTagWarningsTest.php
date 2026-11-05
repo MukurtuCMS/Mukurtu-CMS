@@ -181,6 +181,16 @@ class NestedMediaTagWarningsTest extends KernelTestBase {
   }
 
   /**
+   * A saved nested term's Remove button names the term by its path.
+   */
+  public function testRemoveButtonNamesThePath(): void {
+    $this->setWarnings([['funeral', 'Shows a funeral.']]);
+    $form = \Drupal::formBuilder()->getForm(MukurtuContentWarningsSettingsForm::class);
+
+    $this->assertSame('Remove taxonomy warning for Ceremony › Funeral', (string) $form['taxonomy_warnings'][0]['actions']['#attributes']['aria-label']);
+  }
+
+  /**
    * The settings form lists tags with their paths, in tree order.
    */
   public function testSettingsFormListsPaths(): void {
