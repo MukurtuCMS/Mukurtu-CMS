@@ -131,3 +131,118 @@
     background-color: var(--brand-primary-accent);
   }
 }
+
+// An audio thumbnail with a play button over it, from
+// media--audio--teaser-featured.html.twig. Featured content and related
+// content cards use it, and so do dictionary word cards on the browse pages.
+@mixin audio-thumbnail-player {
+  block-size: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--brand-secondary-accent);
+
+  .media__thumbnail {
+    flex: 1;
+    min-block-size: 0;
+    overflow: hidden;
+
+    // A dictionary word's own thumbnail is a nested image media item, whose
+    // wrappers must fill the box too.
+    .media,
+    .field,
+    .field__item {
+      block-size: 100%;
+    }
+
+    img {
+      block-size: 100%;
+      inline-size: 100%;
+      object-fit: cover;
+    }
+
+    .media__audio-fallback {
+      block-size: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--brand-secondary-accent);
+
+      img {
+        block-size: auto;
+        max-block-size: 100%;
+        inline-size: auto;
+        object-fit: contain;
+      }
+    }
+  }
+
+  // Thumbnail play/pause button for .media--teaser-featured--clean.
+  .media__thumbnail--playable {
+    position: relative;
+
+    .audio-play-button {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      z-index: 2;
+
+      &::before {
+        content: '';
+        display: block;
+        inline-size: 3rem;
+        block-size: 3rem;
+        border-radius: 50%;
+        background: rgb(0 0 0 / 70%);
+        position: absolute;
+        transition: background 0.15s;
+      }
+
+      &:hover::before,
+      &:focus-visible::before {
+        background: rgb(0 0 0 / 85%);
+      }
+
+      &:focus-visible {
+        // Inside the edge: the media well clips anything outside it
+        // (overflow: hidden), which left only the thin inset line.
+        outline: 3px solid #005fcc;
+        outline-offset: -6px;
+        box-shadow: inset 0 0 0 3px #ffffff;
+      }
+
+      svg {
+        fill: white;
+        position: relative;
+        z-index: 1;
+      }
+
+      .audio-play-button__icon--pause {
+        display: none;
+      }
+
+      &.is-playing {
+        .audio-play-button__icon--play {
+          display: none;
+        }
+
+        .audio-play-button__icon--pause {
+          display: block;
+        }
+      }
+    }
+  }
+
+  // Collapse the hidden audio source container once controls are removed by JS.
+  .media__audio-source {
+    block-size: 0;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+}
