@@ -137,9 +137,11 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     // Get the number of warning widgets in the form already.
     $num_widgets = $form_state->get('num_widgets');
 
-    // We have to ensure that there is at least one warning fieldset.
+    // On first build, show a row for every configured warning (at least one).
+    // Starting at one row dropped every warning after the first, and saving
+    // the form then deleted them from config.
     if ($num_widgets === NULL) {
-      $num_widgets = 1;
+      $num_widgets = max(1, count($taxonomyWarnings ?: []));
       $form_state->set('num_widgets', $num_widgets);
     }
 
