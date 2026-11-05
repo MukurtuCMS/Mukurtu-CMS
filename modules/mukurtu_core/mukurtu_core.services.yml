@@ -31,6 +31,9 @@ services:
   mukurtu_core.entity_translation_resolver:
     class: Drupal\mukurtu_core\Service\EntityTranslationResolver
     arguments: ['@entity_type.manager', '@entity.repository']
+  mukurtu_core.term_path_options:
+    class: Drupal\mukurtu_core\Service\TermPathOptions
+    arguments: ['@entity_type.manager', '@mukurtu_core.entity_translation_resolver']
   mukurtu_core.roundtrip_entity_types:
     class: Drupal\mukurtu_core\Service\RoundtripEntityTypeRegistry
     arguments: ['@entity_type.manager']
