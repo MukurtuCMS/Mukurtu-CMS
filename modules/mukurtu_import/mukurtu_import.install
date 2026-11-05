@@ -533,7 +533,7 @@ function mukurtu_import_update_40404(): ?string {
 /**
  * Use semicolons between values in the default taxonomy import templates.
  */
-function mukurtu_import_update_40405(): ?string {
+function mukurtu_import_update_40406(): ?string {
   // Keep the docblock above to one line: Drupal renders it verbatim as this
   // update's description on update.php and in `drush updatedb:status`.
   //
@@ -542,6 +542,7 @@ function mukurtu_import_update_40405(): ?string {
   // template (#2520). config/install now ships ";". As in
   // mukurtu_import_update_40402(), only the shipped templates are touched, by
   // id, and a template a site switched to another delimiter keeps it.
+  // Numbered 40406 because milestone 11 uses 40405.
   $vids = [
     'category',
     'community_type',

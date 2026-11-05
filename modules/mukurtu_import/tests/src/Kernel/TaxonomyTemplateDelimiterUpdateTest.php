@@ -8,9 +8,9 @@ use Drupal\Core\Serialization\Yaml;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_import_update_40405() (#2520).
+ * Tests mukurtu_import_update_40406() (#2520).
  *
- * @see mukurtu_import_update_40405()
+ * @see mukurtu_import_update_40406()
  */
 #[Group('mukurtu_import')]
 class TaxonomyTemplateDelimiterUpdateTest extends MukurtuImportTestBase {
@@ -62,7 +62,7 @@ class TaxonomyTemplateDelimiterUpdateTest extends MukurtuImportTestBase {
     // Changed by the site.
     $this->setDelimiter('people', '|');
 
-    $message = mukurtu_import_update_40405();
+    $message = mukurtu_import_update_40406();
 
     $this->assertSame(';', $this->delimiterOf('location'));
     $this->assertSame(';', $this->delimiterOf('keywords'));
@@ -70,7 +70,7 @@ class TaxonomyTemplateDelimiterUpdateTest extends MukurtuImportTestBase {
     $this->assertStringStartsWith('Set 2 default taxonomy import templates', (string) $message);
 
     // Running it again changes nothing.
-    $this->assertNull(mukurtu_import_update_40405());
+    $this->assertNull(mukurtu_import_update_40406());
   }
 
 }
