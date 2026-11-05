@@ -1859,3 +1859,12 @@ the only requirement is that the selector matches, which it does. */
 #visitors-country-map .leaflet-tooltip {
   pointer-events: auto;
 }
+
+/* Paragraphs widget header buttons (Collapse all / Expand all): Gin's
+   primary teal text on the --gin-bg-header tint set above measures
+   4.29:1, short of WCAG 1.4.3's 4.5:1 for their 12px text. The darker
+   hover teal measures 6.08:1. Light mode only: the dark-mode pairing
+   already passes. */
+html:not(.gin--dark-mode) .field--widget-paragraphs .field-multiple-table thead .paragraphs-actions .button {
+  color: var(--gin-color-primary-hover);
+}

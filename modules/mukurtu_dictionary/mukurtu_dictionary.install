@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for the mukurtu_dictionary module.
  */
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\user\Entity\Role;
 
 /**
@@ -95,4 +96,40 @@ function mukurtu_dictionary_update_40047() {
   }
   $role->grantPermission('administer dictionary glossary order');
   $role->save();
+}
+
+/**
+ * Make sample sentences collapsible on the dictionary word edit form.
+ */
+function mukurtu_dictionary_update_40048() {
+  // Only displays still on the legacy widget are switched, so a site that
+  // already picked a different widget keeps it.
+  foreach (['node.dictionary_word.default', 'paragraph.dictionary_word_entry.default'] as $display_id) {
+    $display = EntityFormDisplay::load($display_id);
+    $component = $display?->getComponent('field_sample_sentences');
+    if (($component['type'] ?? NULL) !== 'entity_reference_paragraphs') {
+      continue;
+    }
+    $display->setComponent('field_sample_sentences', [
+      'type' => 'paragraphs',
+      'weight' => $component['weight'] ?? 0,
+      'region' => $component['region'] ?? 'content',
+      'settings' => [
+        'title' => 'Sample Sentence',
+        'title_plural' => 'Sample Sentences',
+        'edit_mode' => 'open',
+        'closed_mode' => 'summary',
+        'autocollapse' => 'none',
+        'closed_mode_threshold' => 0,
+        'add_mode' => 'dropdown',
+        'form_display_mode' => 'default',
+        'default_paragraph_type' => '',
+        'features' => [
+          'collapse_edit_all' => 'collapse_edit_all',
+          'duplicate' => 'duplicate',
+        ],
+      ],
+      'third_party_settings' => [],
+    ])->save();
+  }
 }
