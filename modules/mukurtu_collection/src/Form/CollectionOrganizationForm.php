@@ -277,6 +277,12 @@ class CollectionOrganizationForm extends FormBase {
       return $response;
     }
 
+    // Pressing Add with nothing new to add changes nothing, so there's no
+    // update to announce.
+    if ($form_state->get('organization_unchanged')) {
+      return $response;
+    }
+
     // Marks the table so the shared ajax-row-table-status JS behavior can
     // find it as a descendant of the #collections-table wrapper once() is
     // scoped to - Drupal.attachBehaviors() runs with that wrapper itself as
@@ -352,6 +358,8 @@ class CollectionOrganizationForm extends FormBase {
   public function addCollectionToOrganizationAjax(array &$form, FormStateInterface $form_state) {
     $new_collection_autocomplete_value = $form_state->getValue('add_subcollection') ?? '';
 
+    // Form storage lasts across AJAX requests, so both submit handlers set this.
+    $form_state->set('organization_unchanged', TRUE);
     $matches = [];
     if (preg_match('/^(.*) \((\d+)\)$/', $new_collection_autocomplete_value, $matches)) {
       $id = $matches[2];
@@ -366,6 +374,7 @@ class CollectionOrganizationForm extends FormBase {
           $this->addCollectionWithChildren($collection, $root_collection_id, $collection_values);
 
           $form_state->setValue('collections', $collection_values);
+          $form_state->set('organization_unchanged', FALSE);
 
           // Rebuild the collections table.
           $form['collections'] = $this->buildCollectionsTable($this->getOrganizationFromValues($collection_values), $root_collection_id);
@@ -379,6 +388,7 @@ class CollectionOrganizationForm extends FormBase {
    * Ajax submit handler to remove a collection from the organization.
    */
   public function removeCollectionFromOrganizationAjax(array &$form, FormStateInterface $form_state) {
+    $form_state->set('organization_unchanged', FALSE);
     $triggering_element = $form_state->getTriggeringElement();
     $collection_id_to_remove = $triggering_element['#collection_id'] ?? NULL;
 

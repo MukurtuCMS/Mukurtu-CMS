@@ -173,6 +173,28 @@ class CollectionOrganizationFormAccessibilityTest extends ProtocolAwareEntityTes
   }
 
   /**
+   * Tests that pressing Add with nothing to add announces no update.
+   */
+  public function testNothingToAddAnnouncesNoUpdate(): void {
+    $form_object = CollectionOrganizationForm::create(\Drupal::getContainer());
+    $form_state = new FormState();
+    $form_state->addBuildInfo('args', [$this->rootCollection, []]);
+    $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
+    $form_state->setValue('add_subcollection', '');
+
+    $form_object->addCollectionToOrganizationAjax($form, $form_state);
+    $response = $form_object->addCollectionToTableCallback($form, $form_state);
+
+    $this->assertSame([], (new \ReflectionProperty($response, 'commands'))->getValue($response));
+
+    // A Remove after that still updates the table.
+    $form_state->setTriggeringElement(['#collection_id' => NULL]);
+    $form_object->removeCollectionFromOrganizationAjax($form, $form_state);
+    $response = $form_object->addCollectionToTableCallback($form, $form_state);
+    $this->assertNotEmpty((new \ReflectionProperty($response, 'commands'))->getValue($response));
+  }
+
+  /**
    * Tests that a failed validation shows its error and announces no update.
    */
   public function testValidationErrorIsShown(): void {
