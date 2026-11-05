@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_dictionary\Entity;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\mukurtu_core\BaseFieldDefinition;
@@ -109,7 +110,7 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
 
     $definitions['field_sample_sentences'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Sample Sentences'))
-      ->setDescription(t('The entry can be included in longer sentences or phrases to provide more context or better show multiple forms of the entry. A single sample sentence can be text only, audio only, or both corresponding text and audio. <br />To include additional sample sentences, select "Add another item".'))
+      ->setDescription(t('The entry can be included in longer sentences or phrases to provide more context or better show multiple forms of the entry. A single sample sentence can be text only, audio only, or both corresponding text and audio. <br />To include additional sample sentences, select "Add Sample Sentence".'))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
@@ -196,6 +197,21 @@ class DictionaryWordEntry extends Paragraph implements DictionaryWordEntryInterf
       ->setDisplayConfigurable('form', TRUE);
 
       return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Paragraphs only summarizes configurable fields, and every field on this
+   * bundle is code-defined, so add the term ourselves.
+   */
+  public function getSummaryItems(array $options = []) {
+    $summary = parent::getSummaryItems($options);
+    $term = Unicode::truncate(trim($this->get('field_word_entry_term')->value ?? ''), 150, TRUE, TRUE);
+    if ($term !== '') {
+      array_unshift($summary['content'], $term);
+    }
+    return $summary;
   }
 
   /**
