@@ -57,3 +57,23 @@ test('Browse tests - facet headers show a collapse indicator', async ({ page }) 
   expect(await isOpen()).toBe(true);
   expect(await indicator()).toContain('−');
 });
+
+/**
+ * Regression test for issue #2522: checking a facet submits the browse form
+ * and reloads the page, which used to send focus back to the top. Focus must
+ * come back to the checkbox, so keyboard users carry on from there
+ * (modules/mukurtu_browse/js/facet-focus.js).
+ */
+test('Browse tests - checking a facet keeps focus on it', async ({ page }) => {
+  await gotoReady(page, '/digital-heritage');
+  const checkbox = page.locator('form[id^="views-exposed-form-"] input[type="checkbox"][data-drupal-selector^="edit-category-"]').first();
+  test.skip(await checkbox.count() === 0, 'No category facet values in this content.');
+  const selector = await checkbox.getAttribute('data-drupal-selector');
+
+  await checkbox.focus();
+  await Promise.all([page.waitForURL(/category/), page.keyboard.press('Space')]);
+  await page.waitForLoadState('load');
+
+  await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset?.drupalSelector)).toBe(selector);
+  await expect(page.locator(`[data-drupal-selector="${selector}"]`).first()).toBeChecked();
+});
