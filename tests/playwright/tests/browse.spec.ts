@@ -57,3 +57,45 @@ test('Browse tests - facet headers show a collapse indicator', async ({ page }) 
   expect(await isOpen()).toBe(true);
   expect(await indicator()).toContain('−');
 });
+
+/**
+ * Regression test for issue #2522: checking a facet submits the browse form
+ * and reloads the page, which used to send focus back to the top. Focus must
+ * come back to the checkbox, so keyboard users carry on from there
+ * (modules/mukurtu_browse/js/facet-focus.js).
+ */
+test('Browse tests - checking a facet keeps focus on it', async ({ page }) => {
+  await gotoReady(page, '/digital-heritage');
+  const checkbox = page.locator('form[id^="views-exposed-form-"] input[type="checkbox"][data-drupal-selector^="edit-category-"]').first();
+  test.skip(await checkbox.count() === 0, 'No category facet values in this content.');
+  const selector = await checkbox.getAttribute('data-drupal-selector');
+
+  await checkbox.focus();
+  await Promise.all([page.waitForURL(/category/), page.keyboard.press('Space')]);
+  await page.waitForLoadState('load');
+
+  await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset?.drupalSelector)).toBe(selector);
+  await expect(page.locator(`[data-drupal-selector="${selector}"]`).first()).toBeChecked();
+});
+
+/**
+ * Regression test for issue #2522: an old link that filters by a category
+ * name redirects to the category's term ID, and that redirect must only be
+ * served for its own URL. It used to be cached for the whole page, so every
+ * later filtered visit was sent to the same category, and the redirect's
+ * own target looped.
+ */
+test('Browse tests - old category name links redirect without breaking other filters', async ({ page }) => {
+  await gotoReady(page, '/digital-heritage');
+  const checkbox = page.locator('form[id^="views-exposed-form-"] input[type="checkbox"][data-drupal-selector^="edit-category-"]').first();
+  test.skip(await checkbox.count() === 0, 'No category facet values in this content.');
+  const tid = await checkbox.getAttribute('value');
+  const label = (await page.locator(`label[for="${await checkbox.getAttribute('id')}"]`).first().innerText()).replace(/\s*\(\d+\)\s*$/, '');
+
+  await page.goto(`/digital-heritage?category[${encodeURIComponent(label)}]=${encodeURIComponent(label)}`);
+  expect(decodeURIComponent(new URL(page.url()).search)).toContain(`category[${tid}]=${tid}`);
+
+  const response = await page.goto('/digital-heritage?search_api_fulltext=zzzz');
+  expect(response?.status()).toBe(200);
+  expect(new URL(page.url()).search).toBe('?search_api_fulltext=zzzz');
+});

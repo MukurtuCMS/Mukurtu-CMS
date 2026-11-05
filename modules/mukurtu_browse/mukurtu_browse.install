@@ -53,3 +53,40 @@ function mukurtu_browse_update_40023() {
     }
   }
 }
+
+/**
+ * Let the Category and Keywords browse facets show nested terms.
+ */
+function mukurtu_browse_update_40024(array &$sandbox): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // The facets used term names, which can't nest and merge terms that share a
+  // name (#2522). They now use term ID fields, and the hierarchy processor
+  // indexes each term's ancestors, so choosing a parent finds content tagged
+  // with terms nested under it. Content is reindexed here, so the facets work
+  // as soon as the update finishes. A facet a site changed is left alone.
+  $indexed = \Drupal::service('mukurtu_search.nested_term_facets')->updateShippedFacets(
+    $sandbox,
+    \Drupal::service('extension.list.module')->getPath('mukurtu_browse') . '/config/install',
+    'mukurtu_default_content_index',
+    ['category_tid', 'keywords_tid'],
+    [
+      'mukurtu_browse' => [
+        'facets_name' => ['facets_name', 'facets_category_tid'],
+        'facets_name_1' => ['facets_name_1', 'facets_keywords_tid'],
+      ],
+      'mukurtu_digital_heritage_browse' => [
+        'facets_name' => ['facets_name', 'facets_category_tid'],
+        'facets_name_1' => ['facets_name_1', 'facets_keywords_tid'],
+      ],
+    ],
+  );
+  if ($indexed === NULL) {
+    return NULL;
+  }
+  return (string) \Drupal::translation()->formatPlural($indexed,
+    'The Category and Keywords facets now show nested terms. Reindexed 1 item.',
+    'The Category and Keywords facets now show nested terms. Reindexed @count items.'
+  );
+}
