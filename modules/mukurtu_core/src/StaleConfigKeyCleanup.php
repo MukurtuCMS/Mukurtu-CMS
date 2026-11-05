@@ -230,7 +230,7 @@ final class StaleConfigKeyCleanup {
    * as strings and the settings form as integers.
    */
   public function castThumbnailSettings(): void {
-    $config = $this->configFactory->getEditable('mukurtu_thumbnail.settings');
+    $config = $this->configFactory->getEditable('mukurtu_media.thumbnail_settings');
     if (!$config->isNew()) {
       $config->save();
     }
