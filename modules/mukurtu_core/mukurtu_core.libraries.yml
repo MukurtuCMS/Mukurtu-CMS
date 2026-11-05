@@ -56,6 +56,14 @@ entity_browser_modal_title:
     - core/jquery
     - core/once
 
+paragraphs_widget_focus:
+  version: 1.x
+  js:
+    js/paragraphs-widget-focus.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
 entity_browser_form:
   version: 1.x
   css:

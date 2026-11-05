@@ -176,8 +176,9 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
    * Check if the current user has access to add the target entity to an MPI.
    *
    * Users with 'administer multipage item' permission globally have access.
-   * For protocol-controlled nodes, users must have 'administer multipage item'
-   * permission in at least one of the node's owning protocols.
+   * For protocol-controlled nodes, users must be able to see the node and
+   * have 'administer multipage item' permission in at least one of its
+   * owning protocols.
    *
    * @param \Drupal\Core\Entity\EntityInterface $target_entity
    *   The entity being added to the multipage item.
@@ -189,6 +190,9 @@ class MultipageValidNodeConstraintValidator extends ConstraintValidator implemen
     // If this isn't a node, or doesn't have cultural protocol access control,
     // it shouldn't be allowed to be added.
     if (!$target_entity instanceof NodeInterface || !$target_entity instanceof CulturalProtocolControlledInterface) {
+      return FALSE;
+    }
+    if (!$target_entity->access('view', $this->currentUser)) {
       return FALSE;
     }
     // Check for the multipage item admin permission in one of the owning
