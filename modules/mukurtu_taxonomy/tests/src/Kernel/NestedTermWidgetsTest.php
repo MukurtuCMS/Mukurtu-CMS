@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_taxonomy\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Form\FormState;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -128,7 +129,8 @@ class NestedTermWidgetsTest extends EntityKernelTestBase {
 
     $this->useSpanish();
     $this->container->get('entity_type.manager')->getStorage('taxonomy_term')->resetCache();
-    $this->assertSame('Artes › Tejido', $this->container->get('tagify.hierarchical_term_manager')->getParentName((string) $this->terms['baskets']->id(), 'category'));
+    $manager = $this->container->get('tagify.hierarchical_term_manager');
+    $this->assertSame('Artes › Tejido', $manager->getParentName((string) $this->terms['baskets']->id(), 'category'));
   }
 
   /**
@@ -149,9 +151,13 @@ class NestedTermWidgetsTest extends EntityKernelTestBase {
       'label' => $field_name,
       'settings' => ['handler_settings' => ['target_bundles' => ['category' => 'category']]],
     ])->save();
-    EntityFormDisplay::load('entity_test.entity_test.default')
-      ?? EntityFormDisplay::create(['targetEntityType' => 'entity_test', 'bundle' => 'entity_test', 'mode' => 'default', 'status' => TRUE])->save();
-    EntityFormDisplay::load('entity_test.entity_test.default')->setComponent($field_name, ['type' => 'options_buttons'])->save();
+    $display = EntityFormDisplay::load('entity_test.entity_test.default') ?? EntityFormDisplay::create([
+      'targetEntityType' => 'entity_test',
+      'bundle' => 'entity_test',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+    $display->setComponent($field_name, ['type' => 'options_buttons'])->save();
   }
 
   /**
@@ -192,14 +198,15 @@ class NestedTermWidgetsTest extends EntityKernelTestBase {
     $this->config('mukurtu_dictionary_languages.settings')
       ->set('available_languages', [$ids['weaving'] => $ids['weaving'], $ids['music'] => $ids['music']])
       ->save();
-    $form = ['field_dictionary_word_language' => ['widget' => ['#options' => [
+    $options = [
       '_none' => '- None -',
       $ids['arts'] => 'Artes',
       $ids['weaving'] => 'Tejido',
       $ids['music'] => 'Música',
-    ]]]];
+    ];
+    $form = ['field_dictionary_word_language' => ['widget' => ['#options' => $options]]];
 
-    mukurtu_dictionary_language_field_config_helper($form, new \Drupal\Core\Form\FormState());
+    mukurtu_dictionary_language_field_config_helper($form, new FormState());
 
     $this->assertSame(['_none' => '- None -', $ids['weaving'] => 'Tejido', $ids['music'] => 'Música'], $form['field_dictionary_word_language']['widget']['#options']);
   }
