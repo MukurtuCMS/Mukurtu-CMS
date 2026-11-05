@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\facets\Entity\Facet;
 use Drupal\mukurtu_browse\Service\BrowseLinkBuilder;
+use Drupal\taxonomy\TermInterface;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Yaml\Yaml;
 
@@ -93,16 +94,29 @@ class BrowseLinkBuilderTest extends KernelTestBase {
     $this->assertSame(['browse_solr_community:California City'], $this->getQuery($url)['f'] ?? NULL);
   }
 
+  /**
+   * Builds a category term with the given ID and name.
+   */
+  protected function category(int $id, string $name): TermInterface {
+    $term = $this->createMock(TermInterface::class);
+    $term->method('id')->willReturn($id);
+    $term->method('label')->willReturn($name);
+    return $term;
+  }
+
+  /**
+   * The database facet is on term IDs, so same-named categories differ.
+   */
   public function testCategoryUrlOnDbBackend(): void {
     $this->setBackend('db');
-    $url = $this->builder->getCategoryBrowseUrl('Places');
+    $url = $this->builder->getCategoryBrowseUrl($this->category(12, 'Places'));
     $this->assertStringContainsString('/digital-heritage', $url->toString());
-    $this->assertSame(['Places' => 'Places'], $this->getQuery($url)['category'] ?? NULL);
+    $this->assertSame(['12' => '12'], $this->getQuery($url)['category'] ?? NULL);
   }
 
   public function testCategoryUrlOnSolrBackend(): void {
     $this->setBackend('solr');
-    $url = $this->builder->getCategoryBrowseUrl('Places');
+    $url = $this->builder->getCategoryBrowseUrl($this->category(12, 'Places'));
     $this->assertStringContainsString('/digital-heritage', $url->toString());
     $this->assertSame(['digital_heritage_browse_solr_category:Places'], $this->getQuery($url)['f'] ?? NULL);
   }

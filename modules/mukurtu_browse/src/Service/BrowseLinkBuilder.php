@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_browse\Service;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
+use Drupal\taxonomy\TermInterface;
 
 /**
  * Builds links to the browse pages pre-filtered by a facet value.
@@ -47,14 +48,19 @@ class BrowseLinkBuilder {
   /**
    * Builds a link to /digital-heritage filtered to a single category.
    *
-   * @param string $categoryName
-   *   The category term's name.
+   * The database backend's category facet is on term IDs, so categories with
+   * the same name stay separate and nested ones work (#2522). The Solr facet
+   * is still on names (#2615).
+   *
+   * @param \Drupal\taxonomy\TermInterface $category
+   *   The category term.
    *
    * @return \Drupal\Core\Url
    *   The digital heritage browse URL, pre-filtered to the given category.
    */
-  public function getCategoryBrowseUrl(string $categoryName): Url {
-    return $this->buildFacetUrl('mukurtu_browse.browse_digital_heritage_page', 'category', 'digital_heritage_browse_solr_category', $categoryName);
+  public function getCategoryBrowseUrl(TermInterface $category): Url {
+    $value = $this->getBackend() === 'solr' ? (string) $category->label() : (string) $category->id();
+    return $this->buildFacetUrl('mukurtu_browse.browse_digital_heritage_page', 'category', 'digital_heritage_browse_solr_category', $value);
   }
 
   /**
