@@ -9,9 +9,9 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_update_40040() (#2521).
+ * Tests mukurtu_update_40042() (#2521).
  *
- * @see mukurtu_update_40040()
+ * @see mukurtu_update_40042()
  */
 #[Group('mukurtu')]
 class ManageContentNestedTermFilterUpdateTest extends KernelTestBase {
@@ -95,12 +95,12 @@ class ManageContentNestedTermFilterUpdateTest extends KernelTestBase {
   public function testSwitchesShippedFilters(): void {
     $this->storeOldView();
 
-    $message = mukurtu_update_40040();
+    $message = mukurtu_update_40042();
 
     $this->assertSame($this->shippedFilters['field_category_target_id'], $this->storedFilter('field_category_target_id'));
     $this->assertSame($this->shippedFilters['field_keywords_target_id'], $this->storedFilter('field_keywords_target_id'));
     $this->assertStringContainsString('now include nested terms', (string) $message);
-    $this->assertNull(mukurtu_update_40040());
+    $this->assertNull(mukurtu_update_40042());
   }
 
   /**
@@ -113,7 +113,7 @@ class ManageContentNestedTermFilterUpdateTest extends KernelTestBase {
       ->set('display.default.display_options.filters.field_keywords_target_id', $customised)
       ->save();
 
-    mukurtu_update_40040();
+    mukurtu_update_40042();
 
     $this->assertSame($this->shippedFilters['field_category_target_id'], $this->storedFilter('field_category_target_id'));
     $this->assertSame(2, $this->storedFilter('field_keywords_target_id')['depth']);
@@ -123,7 +123,7 @@ class ManageContentNestedTermFilterUpdateTest extends KernelTestBase {
    * A site without the view is left alone.
    */
   public function testMissingView(): void {
-    $this->assertNull(mukurtu_update_40040());
+    $this->assertNull(mukurtu_update_40042());
   }
 
 }

@@ -942,13 +942,13 @@ function mukurtu_update_40034(): string {
 /**
  * Include nested terms in the Category and Keywords filters on Manage content.
  */
-function mukurtu_update_40040(): ?string {
+function mukurtu_update_40042(): ?string {
   // Keep the docblock above to one line: Drupal renders it verbatim as this
   // update's description on update.php and in `drush updatedb:status`.
   //
   // The filters now show nesting and match content tagged with terms nested
   // under the chosen one (#2521). config/install ships the result for new
-  // sites. Numbered 40040 because milestone 11 uses 40035 to 40039. A filter
+  // sites. Numbered 40042 because milestone 11 uses 40035 to 40041. A filter
   // a site changed from the shipped taxonomy_index one is left alone.
   $view = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
   if ($view->isNew()) {

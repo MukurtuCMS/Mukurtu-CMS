@@ -166,6 +166,13 @@ class MultipageItemPageController extends ControllerBase {
    * @return \Drupal\Core\Access\AccessResultInterface
    */
   public function newFromNodeAccess(AccountInterface $account, NodeInterface $node): AccessResultInterface {
+    // The new item copies the page's title, so the account must be able to
+    // see the page.
+    $view = $node->access('view', $account, TRUE);
+    if (!$view->isAllowed()) {
+      return AccessResult::forbidden()->addCacheableDependency($view);
+    }
+
     $access_handler = $this->entityTypeManager()->getAccessControlHandler('multipage_item');
 
     // User must be able to create MPIs.
