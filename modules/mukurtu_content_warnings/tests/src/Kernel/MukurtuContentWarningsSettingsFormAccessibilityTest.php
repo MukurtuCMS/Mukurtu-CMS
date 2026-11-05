@@ -108,8 +108,10 @@ class MukurtuContentWarningsSettingsFormAccessibilityTest extends KernelTestBase
     $this->assertContains('visually-hidden', $form['taxonomy_warnings_status']['#attributes']['class']);
 
     // The Add taxonomy warning button has a deterministic id for JS focus
-    // targeting.
-    $this->assertSame('taxonomy-warnings-add-button', $form['taxonomy_warnings']['actions']['add_taxonomy_warning']['#attributes']['id']);
+    // targeting, set where Drupal's #ajax binding finds it.
+    $button = $form['taxonomy_warnings']['actions']['add_taxonomy_warning'];
+    $this->assertSame('taxonomy-warnings-add-button', $button['#id']);
+    $this->assertArrayNotHasKey('id', $button['#attributes'] ?? []);
   }
 
   /**

@@ -235,9 +235,8 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     $form['taxonomy_warnings']['actions']['add_taxonomy_warning'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add taxonomy warning'),
-      '#attributes' => [
-        'id' => 'taxonomy-warnings-add-button',
-      ],
+      // Drupal binds #ajax to #id, so an id in #attributes would stop it.
+      '#id' => 'taxonomy-warnings-add-button',
       '#submit' => ['::addOne'],
       '#ajax' => [
         'callback' => '::addMoreCallback',

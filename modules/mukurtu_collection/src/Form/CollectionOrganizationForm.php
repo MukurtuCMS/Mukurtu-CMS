@@ -231,9 +231,8 @@ class CollectionOrganizationForm extends FormBase {
     $form['add'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add to Collection'),
-      '#attributes' => [
-        'id' => 'collections-table-add-button',
-      ],
+      // Drupal binds #ajax to #id, so an id in #attributes would stop it.
+      '#id' => 'collections-table-add-button',
       '#submit' => ['::addCollectionToOrganizationAjax'],
       '#ajax' => [
         'callback' => '::addCollectionToTableCallback',

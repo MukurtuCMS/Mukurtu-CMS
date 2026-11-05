@@ -143,8 +143,9 @@ class CollectionOrganizationFormAccessibilityTest extends ProtocolAwareEntityTes
     $this->assertContains('visually-hidden', $form['collections_status']['#attributes']['class']);
 
     // The Add to Collection button has a deterministic id for JS focus
-    // targeting.
-    $this->assertSame('collections-table-add-button', $form['add']['#attributes']['id']);
+    // targeting, set where Drupal's #ajax binding finds it.
+    $this->assertSame('collections-table-add-button', $form['add']['#id']);
+    $this->assertArrayNotHasKey('id', $form['add']['#attributes'] ?? []);
   }
 
   /**
