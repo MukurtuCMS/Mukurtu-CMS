@@ -1,4 +1,5 @@
 @use "../../../external/include-media";
+@use "../../00-base/mixins/mixins";
 
 // The horizontal card component can be seen on the List Browse display,
 // as well as the related content section at the bottom of the main content
@@ -16,6 +17,21 @@
 
   // Media container.
   &__media {
+    // A dictionary word's recording, with a play button over its image
+    // (#2571). Same 4:3 box as the related content cards.
+    .media--teaser-featured.media--audio {
+      aspect-ratio: 4 / 3;
+      @include mixins.audio-thumbnail-player;
+
+      // A stretched row would otherwise override the 4:3 box. The gap keeps
+      // the button, which fills the box, clear of the title link below it
+      // (WCAG 2.5.8).
+      & {
+        block-size: auto;
+        margin-block-end: var(--v-space-5xs);
+      }
+    }
+
     grid-column: 1 / span 1;
 
     @include include-media.media('>=md') {
