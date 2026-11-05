@@ -114,6 +114,15 @@ class BrowseLinkBuilderTest extends KernelTestBase {
     $this->assertSame(['12' => '12'], $this->getQuery($url)['category'] ?? NULL);
   }
 
+  /**
+   * A category name from older callers still builds a link.
+   */
+  public function testCategoryUrlFromName(): void {
+    $this->setBackend('db');
+    $url = $this->builder->getCategoryBrowseUrl('Places');
+    $this->assertSame(['Places' => 'Places'], $this->getQuery($url)['category'] ?? NULL);
+  }
+
   public function testCategoryUrlOnSolrBackend(): void {
     $this->setBackend('solr');
     $url = $this->builder->getCategoryBrowseUrl($this->category(12, 'Places'));

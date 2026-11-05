@@ -383,7 +383,9 @@ class NestedTermFacetsTest extends KernelTestBase {
     $event = new RequestEvent($this->container->get('http_kernel'), $request, HttpKernelInterface::MAIN_REQUEST);
     $this->container->get('mukurtu_browse.term_facet_name_redirect')->redirectTermNames($event);
 
-    $this->assertContains('url.query_args', $event->getResponse()->getCacheableMetadata()->getCacheContexts());
+    $cacheability = $event->getResponse()->getCacheableMetadata();
+    $this->assertContains('url.query_args', $cacheability->getCacheContexts());
+    $this->assertContains('taxonomy_term_list', $cacheability->getCacheTags());
   }
 
 }

@@ -86,7 +86,10 @@ class TermFacetNameRedirectSubscriber implements EventSubscriberInterface {
       $response = new LocalRedirectResponse($url->toString(), 301);
       // The redirect is only right for this query string. Without this, the
       // Dynamic Page Cache would serve it for every query on the page.
-      $response->getCacheableMetadata()->addCacheContexts(['url.query_args']);
+      $response->getCacheableMetadata()
+        ->addCacheContexts(['url.query_args'])
+        // Renaming or deleting a term changes where the name points.
+        ->addCacheTags(['taxonomy_term_list']);
       $event->setResponse($response);
     }
   }

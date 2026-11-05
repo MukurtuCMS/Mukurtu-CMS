@@ -52,14 +52,21 @@ class BrowseLinkBuilder {
    * the same name stay separate and nested ones work (#2522). The Solr facet
    * is still on names (#2615).
    *
-   * @param \Drupal\taxonomy\TermInterface $category
-   *   The category term.
+   * @param \Drupal\taxonomy\TermInterface|string $category
+   *   The category term. A name is still accepted for older callers; on the
+   *   database backend it's redirected to the term's ID when it matches one
+   *   term.
    *
    * @return \Drupal\Core\Url
    *   The digital heritage browse URL, pre-filtered to the given category.
    */
-  public function getCategoryBrowseUrl(TermInterface $category): Url {
-    $value = $this->getBackend() === 'solr' ? (string) $category->label() : (string) $category->id();
+  public function getCategoryBrowseUrl(TermInterface|string $category): Url {
+    if (is_string($category)) {
+      $value = $category;
+    }
+    else {
+      $value = $this->getBackend() === 'solr' ? (string) $category->label() : (string) $category->id();
+    }
     return $this->buildFacetUrl('mukurtu_browse.browse_digital_heritage_page', 'category', 'digital_heritage_browse_solr_category', $value);
   }
 
