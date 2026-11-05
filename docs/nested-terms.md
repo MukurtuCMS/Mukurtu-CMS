@@ -18,8 +18,9 @@ On content forms, term fields show nesting (#2523).
   - Each term's nested terms appear right after it, indented, in a group named after it. Screen readers announce the group.
   - Labels have no depth dashes.
 - **Autocomplete fields (Tagify):**
-  - Suggestions are grouped under their direct parent.
-  - Each group is labelled with the path from the top-level term, such as "Washington › Spokane", in the current language.
+  - Suggestions show as a tree: each term is followed by its nested terms, indented, at every level, in the current language.
+  - A nested term whose parent isn't among the suggestions is grouped under the parent's path, such as "Washington › Spokane".
+  - A selected nested term's tag shows its path too, such as "Washington › Spokane › Hillyard".
   - This relies on `patches/tagify-nested-groups.patch` until the Tagify module includes the change.
 - **New terms always start at the top level.** A term created by typing a new name into an autocomplete field has no parent. To nest it, edit the term afterwards, or drag it under its parent on the vocabulary's term list.
 

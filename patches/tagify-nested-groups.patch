@@ -1,8 +1,20 @@
 diff --git a/css/tagify.css b/css/tagify.css
-index 1c53c01..0ece098 100644
+index 1c53c01..4395622 100644
 --- a/css/tagify.css
 +++ b/css/tagify.css
-@@ -402,6 +402,10 @@ select.tagify-select-widget {
+@@ -392,8 +392,10 @@ select.tagify-select-widget {
+   height: 30px;
+ }
+ 
+-.tagify__tag-text .tagify__tag-text-parent {
++.tagify__tag-text .tagify__tag-text-parent,
++.tagify__tag-text-with-entity-id .tagify__tag-text-parent {
+   font-weight: normal;
++  font-size: 0.85em;
+ }
+ 
+ .tagify__tag-text .tagify__tag-text-child {
+@@ -402,6 +404,10 @@ select.tagify-select-widget {
  
  /* Group suggestions */
  
@@ -14,10 +26,67 @@ index 1c53c01..0ece098 100644
    display: flex;
    flex-direction: column;
 diff --git a/js/tagify.js b/js/tagify.js
-index bcca509..c5f18ef 100644
+index bcca509..d3a2926 100644
 --- a/js/tagify.js
 +++ b/js/tagify.js
-@@ -285,23 +285,6 @@
+@@ -122,15 +122,20 @@
+          * @param {string} tagLabel - The label.
+          * @param {string} tagInfoLabel - The info label information.
+          * @param {string} tagEntityId - The entity id.
++         * @param {string} tagParentPath - The escaped path to the term's parent.
+          * @return {string} The tag markup HTML.
+          */
+-        function tagMarkup(tagLabel, tagInfoLabel, tagEntityId) {
++        function tagMarkup(tagLabel, tagInfoLabel, tagEntityId, tagParentPath) {
+           return `<div id="tagify__tag-items">${tagEntityId}
+             <span class="${
+               tagEntityId
+                 ? 'tagify__tag-text-with-entity-id'
+                 : 'tagify__tag-text'
+-            }">${tagLabel}</span>${tagInfoLabel}</div>`;
++            }">${
++              tagParentPath
++                ? `<span class="tagify__tag-text-parent">${tagParentPath} › </span>`
++                : ''
++            }${tagLabel}</span>${tagInfoLabel}</div>`;
+         }
+ 
+         /**
+@@ -148,24 +153,30 @@
+           const label = tagData.label ?? tagData.value;
+           // Drupal.t() escapes its '@' placeholders, so give it decoded text.
+           const plainLabel = Drupal.tagify.decodeEntities(label);
++          // A nested term shows where it sits, so two terms with the same
++          // name can be told apart. The path isn't escaped by Tagify.
++          const plainPath = Drupal.tagify.decodeEntities(tagData.parent_name ?? '');
++          const parentPath = Drupal.checkPlain(plainPath);
++          const fullName = plainPath ? `${plainPath} › ${plainLabel}` : plainLabel;
+ 
+-          return `<tag title="${label}"
++          return `<tag title="${parentPath ? `${parentPath} › ${label}` : label}"
+             contenteditable='false'
+             spellcheck='false'
+             tabIndex="-1"
+             class="tagify__tag ${tagData.class ? tagData.class : ''}"
+             ${this.getAttributes(tagData)}>
+               <x id="tagify__tag-remove-button"
+-                title="${Drupal.t('Remove @label', { '@label': plainLabel })}"
++                title="${Drupal.t('Remove @label', { '@label': fullName })}"
+                 class='tagify__tag__removeBtn'
+                 role='button'
+-                aria-label="${Drupal.t('remove @label tag', { '@label': plainLabel })}"
++                aria-label="${Drupal.t('remove @label tag', { '@label': fullName })}"
+                 tabindex="0">
+               </x>
+               ${tagMarkup(
+                 label,
+                 infoLabelMarkup(tagData.info_label),
+                 entityIdMarkup(tagData.entity_id),
++                parentPath,
+               )}
+           </tag>`;
+         }
+@@ -285,23 +296,6 @@
            if (isTagLimitReached()) {
              return '';
            }
@@ -41,7 +110,7 @@ index bcca509..c5f18ef 100644
            const getTermsSuggestionsHTML = (parentTerms) =>
              parentTerms
                .map((suggestion) => {
-@@ -328,51 +311,66 @@
+@@ -328,51 +322,66 @@
                })
                .join('');
  
@@ -149,7 +218,7 @@ index bcca509..c5f18ef 100644
              })
              .join('');
          };
-@@ -415,6 +413,7 @@
+@@ -415,6 +424,7 @@
                  value: current.entity_id,
                  entity_id: current.entity_id,
                  parent_name: current.parent_name,
