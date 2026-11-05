@@ -14,6 +14,12 @@
   }
 }
 
+// The nested terms list and the content below it are separate sections
+// (#2521), so keep the cards from reading as part of the list.
+.taxonomy-nested-terms {
+  margin-block-end: var(--v-space-m);
+}
+
 .referenced-content--divided {
   @include mixins.divider;
   margin-block-start: 0;

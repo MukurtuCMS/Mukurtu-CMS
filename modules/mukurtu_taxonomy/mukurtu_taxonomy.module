@@ -29,6 +29,8 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
         'records' => NULL,
         'referenced_content' => NULL,
         'term_description' => '',
+        'nested_terms' => [],
+        'parent_term' => NULL,
       ],
     ],
   ];
