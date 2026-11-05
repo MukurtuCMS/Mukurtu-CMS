@@ -1,0 +1,5 @@
+nested-term-options:
+  version: VERSION
+  css:
+    component:
+      css/nested-term-options.css: {}
