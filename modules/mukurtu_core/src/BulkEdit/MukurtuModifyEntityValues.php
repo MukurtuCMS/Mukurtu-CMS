@@ -178,11 +178,16 @@ class MukurtuModifyEntityValues extends ModifyEntityValues {
 
     // Each field gets its own "Change method" choice right below it. With
     // several fields open, identical titles leave no way to tell them apart.
+    // VBE pre-selects its first option, Append or Add; a value an editor
+    // types should replace the current one unless they choose otherwise.
     foreach (Element::children($section) as $key) {
       if (str_ends_with($key, '_change_method') && ($section[$key]['#type'] ?? '') === 'radios') {
         $field = substr($key, 0, -strlen('_change_method'));
         $label = $section['_field_selector'][$field]['#title'] ?? $field;
         $section[$key]['#title'] = $this->t('Change method for @field', ['@field' => $label]);
+        if (isset($section[$key]['#options']['replace'])) {
+          $section[$key]['#default_value'] = 'replace';
+        }
       }
     }
 
