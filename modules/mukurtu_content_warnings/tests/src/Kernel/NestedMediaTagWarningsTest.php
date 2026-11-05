@@ -110,11 +110,7 @@ class NestedMediaTagWarningsTest extends KernelTestBase {
     $display = $this->createMock(EntityViewDisplayInterface::class);
     $display->method('getMode')->willReturn('full');
 
-    $hook = new MukurtuMediaContentWarnings(
-      $this->container->get('config.factory'),
-      $this->container->get('entity_type.manager'),
-      $this->container->get('router.admin_context'),
-    );
+    $hook = $this->container->get(MukurtuMediaContentWarnings::class);
     $build = ['#view_mode' => 'full'];
     $hook->mediaViewAlter($build, $media, $display);
     return $build['media_content_warnings'];
