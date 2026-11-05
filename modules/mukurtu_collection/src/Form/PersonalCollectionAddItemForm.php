@@ -78,7 +78,7 @@ class PersonalCollectionAddItemForm extends FormBase {
      */
     $node = \Drupal::entityTypeManager()->getStorage('node')->load($nodeId);
 
-    if (!$node) {
+    if (!$node || !$node->access('view')) {
       return;
     }
 

@@ -15,6 +15,8 @@
  * - attributes: HTML attributes for the containing element.
  * - skip_player: TRUE on community/protocol pages where no player is wanted.
  * - audio_fallback_thumbnail_url: URL of the default audio icon image.
+ * - card_image: On a dictionary word's card, the word's own thumbnail, which
+ *   replaces the recording's image.
  * @see template_preprocess_media()
  * @see mukurtu_v4_preprocess_media__audio__teaser_featured()
  */
@@ -33,7 +35,9 @@
   {% if not skip_player %}
   {{ attach_library('mukurtu_v4/audio-thumbnail-player') }}
   <div class="media__thumbnail media__thumbnail--playable">
-    {% if content.field_thumbnail['#items'] is not empty %}
+    {% if card_image %}
+      {{ card_image }}
+    {% elseif content.field_thumbnail['#items'] is not empty %}
       {{ content.field_thumbnail }}
     {% else %}
       <div class="media__audio-fallback">
@@ -67,7 +71,9 @@
   {% else %}
 
   <div class="media__thumbnail">
-    {% if content.field_thumbnail['#items'] is not empty %}
+    {% if card_image %}
+      {{ card_image }}
+    {% elseif content.field_thumbnail['#items'] is not empty %}
       {{ content.field_thumbnail }}
     {% else %}
       <div class="media__audio-fallback">
