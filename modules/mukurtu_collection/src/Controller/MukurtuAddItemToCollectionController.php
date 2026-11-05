@@ -21,6 +21,12 @@ class MukurtuAddItemToCollectionController extends ControllerBase {
    *   The access result.
    */
   public function access(AccountInterface $account, NodeInterface $node) {
+    // The page shows the item's title, so the account must be able to see it.
+    $view = $node->access('view', $account, TRUE);
+    if (!$view->isAllowed()) {
+      return AccessResult::forbidden()->addCacheableDependency($view);
+    }
+
     if (static::isValidCollectionItemBundle($node)) {
       if ($this->userCanEditExistingCollections($node) || $this->entityTypeManager()->getAccessControlHandler('node')->createAccess('collection', $account)) {
         return AccessResult::allowed();
