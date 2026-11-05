@@ -264,6 +264,9 @@ class BulkFieldEditTest extends KernelTestBase {
     $this->assertSame('Related content', (string) $toggles['field_related']['#title']);
     $this->assertLessThan($toggles['field_related']['#weight'], $toggles['field_aliases']['#weight']);
     $this->assertSame('Change method for Aliases', (string) $section['field_aliases_change_method']['#title']);
+    // Replace, not VBE's first option (Append or Add a new value).
+    $this->assertSame('replace', $section['field_aliases_change_method']['#default_value']);
+    $this->assertSame('replace', $section['field_related_change_method']['#default_value']);
     $this->assertSame('Change method for Related content', (string) $section['field_related_change_method']['#title']);
     $this->assertContains('mukurtu_core/bulk_edit_columns', $section['#attached']['library']);
     // Media uploaded from the bulk form doesn't inherit that selection.

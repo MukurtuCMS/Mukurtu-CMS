@@ -247,7 +247,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_sample_sentences'] = BaseFieldDefinition::create('entity_reference_revisions')
       ->setLabel(t('Sample Sentences'))
-      ->setDescription(t('The entry can be included in longer sentences or phrases to provide more context or better show multiple forms of the entry. A single sample sentence can be text only, audio only, or both corresponding text and audio. <br />To include additional sample sentences, select "Add another item".'))
+      ->setDescription(t('The entry can be included in longer sentences or phrases to provide more context or better show multiple forms of the entry. A single sample sentence can be text only, audio only, or both corresponding text and audio. <br />To include additional sample sentences, select "Add Sample Sentence".'))
       ->setSettings([
         'target_type' => 'paragraph',
         'handler' => 'default:paragraph',
