@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\mukurtu_core\Form\CharacterPaletteSettingsForm;
 use Drupal\user\Entity\Role;
 use PHPUnit\Framework\Attributes\Group;
@@ -203,6 +204,156 @@ class CharacterPaletteSettingsTest extends KernelTestBase {
     $tagged_state = new FormState();
     $tagged = $form_builder->buildForm($form_object, $tagged_state);
     $this->assertSame('&lt;em&gt;Tlingit&lt;/em&gt;', (string) $tagged['groups'][0]['#title'], 'The legend shows a name exactly as typed.');
+  }
+
+  /**
+   * Tests that rows save in the order the form submits them.
+   */
+  public function testRowsSaveInSubmittedOrder(): void {
+    $this->submit([
+      'groups' => [
+        [
+          'label' => 'Test',
+          'characters' => [
+            ['character' => 'a', 'name' => 'First', 'weight' => 3],
+            // Osage, outside the Basic Multilingual Plane.
+            ['character' => "\u{104B0}", 'name' => 'Second', 'weight' => 1],
+            ['character' => '', 'name' => '', 'weight' => 2],
+            ['character' => 'c', 'name' => 'Third', 'weight' => 0],
+          ],
+        ],
+      ],
+    ], [0 => 4]);
+
+    $this->assertSame([
+      ['character' => 'c', 'name' => 'Third'],
+      ['character' => "\u{104B0}", 'name' => 'Second'],
+      ['character' => 'a', 'name' => 'First'],
+    ], $this->config(CharacterPaletteSettingsForm::SETTINGS)->get('groups')[0]['characters']);
+  }
+
+  /**
+   * Tests that a long list, past any select's limit, can still move its rows.
+   */
+  public function testLongListKeepsItsOrder(): void {
+    $rows = [];
+    foreach (range(0, 150) as $number) {
+      $rows[] = ['character' => "c$number", 'name' => '', 'weight' => 150 - $number];
+    }
+    $form_state = $this->submit(['groups' => [['label' => 'Test', 'characters' => $rows]]], [0 => 151]);
+
+    $this->assertSame([], $form_state->getErrors());
+    $saved = $this->config(CharacterPaletteSettingsForm::SETTINGS)->get('groups')[0]['characters'];
+    $this->assertSame(['c150', 'c149'], array_column(array_slice($saved, 0, 2), 'character'));
+    $this->assertSame('c0', $saved[150]['character']);
+  }
+
+  /**
+   * Tests that a rebuild keeps unsaved moves and puts a new row last.
+   *
+   * Pressing "Add new row" rebuilds the form, and so does a failed save, so
+   * both come through here.
+   */
+  public function testRebuildKeepsSubmittedOrder(): void {
+    $this->config(CharacterPaletteSettingsForm::SETTINGS)->set('groups', [
+      [
+        'label' => 'Test',
+        'characters' => [
+          ['character' => 'a', 'name' => ''],
+          ['character' => 'b', 'name' => ''],
+        ],
+      ],
+    ])->save();
+    $form_state = (new FormState())->setUserInput([
+      'groups' => [
+        [
+          'characters' => [
+            ['character' => 'a', 'name' => '', 'weight' => '2'],
+            ['character' => 'b', 'name' => '', 'weight' => '1'],
+            ['character' => '', 'name' => '', 'weight' => '3'],
+          ],
+        ],
+      ],
+    ]);
+    $form_state->set('empty_rows', [0 => 2]);
+    $form_object = $this->container->get('class_resolver')->getInstanceFromDefinition(CharacterPaletteSettingsForm::class);
+    $form_state->setFormObject($form_object);
+    $table = $form_object->buildForm([], $form_state)['groups'][0]['characters'];
+
+    $deltas = array_values(array_filter(array_keys($table), 'is_int'));
+    $this->assertSame([1, 0, 2, 3], $deltas, 'Rows show in submitted order, with the new row last.');
+    $this->assertSame('b', $table[1]['character']['#default_value']);
+    $this->assertSame('Character 1 in Test', (string) $table[1]['character']['#title'], 'Labels number the rows as shown.');
+    $this->assertSame('Order for character 2 in Test', (string) $table[0]['weight']['#title']);
+  }
+
+  /**
+   * Tests that translated names stay with their characters.
+   */
+  public function testTranslationsFollowTheirCharacters(): void {
+    $this->installConfig(['language']);
+    ConfigurableLanguage::createFromLangcode('es')->save();
+    $this->config(CharacterPaletteSettingsForm::SETTINGS)->set('groups', [
+      [
+        'label' => 'Removed',
+        'characters' => [['character' => 'z', 'name' => 'Zed']],
+      ],
+      [
+        'label' => 'Kept',
+        'characters' => [
+          ['character' => 'a', 'name' => 'Aye'],
+          ['character' => 'b', 'name' => 'Bee'],
+          ['character' => 'c', 'name' => 'Cee'],
+        ],
+      ],
+    ])->save();
+    $language_manager = $this->container->get('language_manager');
+    $override = $language_manager->getLanguageConfigOverride('es', CharacterPaletteSettingsForm::SETTINGS);
+    $override->set('groups', [
+      0 => ['label' => 'Quitado', 'characters' => [0 => ['name' => 'Zeta']]],
+      1 => [
+        'label' => 'Guardado',
+        'characters' => [
+          0 => ['name' => 'A'],
+          1 => ['name' => 'Be'],
+          2 => ['name' => 'Ce'],
+        ],
+      ],
+    ])->save();
+
+    // Delete the first group and a row, and swap the other two rows.
+    $this->submit([
+      'groups' => [
+        [
+          'label' => 'Removed',
+          'delete' => 1,
+          'characters' => $this->rows([['character' => 'z', 'name' => 'Zed']]),
+        ],
+        [
+          'label' => 'Kept',
+          'characters' => [
+            ['character' => 'a', 'name' => 'Aye', 'weight' => 2],
+            ['character' => '', 'name' => '', 'weight' => 1],
+            ['character' => 'c', 'name' => 'Cee', 'weight' => 0],
+          ],
+        ],
+      ],
+    ], [1 => 3]);
+
+    $override = $language_manager->getLanguageConfigOverride('es', CharacterPaletteSettingsForm::SETTINGS);
+    $this->assertEquals([
+      0 => [
+        'label' => 'Guardado',
+        'characters' => [
+          0 => ['name' => 'Ce'],
+          1 => ['name' => 'A'],
+        ],
+      ],
+    ], $override->get('groups'));
+
+    // Removing everything translated leaves no translation behind.
+    $this->submit(['groups' => [['label' => 'Kept', 'delete' => 1]]]);
+    $this->assertTrue($language_manager->getLanguageConfigOverride('es', CharacterPaletteSettingsForm::SETTINGS)->isNew());
   }
 
   /**
