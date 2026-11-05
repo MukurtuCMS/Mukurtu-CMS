@@ -182,6 +182,8 @@ class NestedTermWidgetsTest extends EntityKernelTestBase {
       $this->assertSame('Weaving', (string) $widget[$ids['weaving']]['#title'], $field_name);
       $this->assertSame('Baskets', (string) $widget[$ids['baskets']]['#title'], $field_name);
       $this->assertStringContainsString('role="group" aria-label="Arts"', $widget[$ids['weaving']]['#prefix'] ?? '', $field_name);
+      $list_class = $field_name === 'field_categories' ? 'form-checkboxes' : 'form-radios';
+      $this->assertStringContainsString('class="' . $list_class . ' mukurtu-nested-term-options__group"', $widget[$ids['weaving']]['#prefix'] ?? '', $field_name);
       $this->assertStringContainsString('role="group" aria-label="Weaving"', $widget[$ids['baskets']]['#prefix'] ?? '', $field_name);
       // Baskets is the last nested term under Arts, so both groups close.
       $this->assertSame('</div></div>', $widget[$ids['baskets']]['#suffix'] ?? '', $field_name);

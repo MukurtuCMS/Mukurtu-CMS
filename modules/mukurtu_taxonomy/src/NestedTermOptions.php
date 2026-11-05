@@ -84,6 +84,10 @@ class NestedTermOptions {
       return $element;
     }
 
+    // Themes style options by their direct parent, for example Gin shows a
+    // checkbox as a toggle switch unless its parent is .form-checkboxes, so
+    // each group carries the same class as the list it's in.
+    $list_class = ($element['#type'] ?? '') === 'radios' ? 'form-radios' : 'form-checkboxes';
     $open = [];
     $previous = NULL;
     foreach (array_keys($options) as $tid) {
@@ -100,7 +104,7 @@ class NestedTermOptions {
       // Open the groups it's in that aren't open yet.
       foreach (array_diff($ancestors, $open) as $ancestor) {
         $name = Html::escape(strip_tags((string) $options[$ancestor]));
-        $element[$tid]['#prefix'] = ($element[$tid]['#prefix'] ?? '') . '<div class="mukurtu-nested-term-options__group" role="group" aria-label="' . $name . '">';
+        $element[$tid]['#prefix'] = ($element[$tid]['#prefix'] ?? '') . '<div class="' . $list_class . ' mukurtu-nested-term-options__group" role="group" aria-label="' . $name . '">';
         $open[] = $ancestor;
       }
       $previous = $tid;

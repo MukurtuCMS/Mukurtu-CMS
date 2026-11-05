@@ -1,88 +1,155 @@
+diff --git a/css/tagify.css b/css/tagify.css
+index 1c53c01..0ece098 100644
+--- a/css/tagify.css
++++ b/css/tagify.css
+@@ -402,6 +402,10 @@ select.tagify-select-widget {
+ 
+ /* Group suggestions */
+ 
++.tagify__dropdown__itemsGroup--nested {
++  padding-inline-start: 1rem;
++}
++
+ .tagify__dropdown__itemsGroup {
+   display: flex;
+   flex-direction: column;
 diff --git a/js/tagify.js b/js/tagify.js
-index bcca509..b3f7cab 100644
+index bcca509..c5f18ef 100644
 --- a/js/tagify.js
 +++ b/js/tagify.js
-@@ -285,8 +285,12 @@
+@@ -285,23 +285,6 @@
            if (isTagLimitReached()) {
              return '';
            }
-+          // Group by the parent's ID, so two parents with the same name stay
-+          // apart. The group is labelled with the parent's path.
-           const parentsOfTerms = suggestionsList.reduce((acc, suggestion) => {
+-          const parentsOfTerms = suggestionsList.reduce((acc, suggestion) => {
 -            const parent = suggestion.parent_name || '';
-+            const parent = String(
-+              suggestion.parent_id || suggestion.parent_name || '',
-+            );
- 
-             if (!acc[parent]) acc[parent] = [suggestion];
-             else acc[parent].push(suggestion);
-@@ -294,11 +298,11 @@
-             return acc;
-           }, {});
- 
+-
+-            if (!acc[parent]) acc[parent] = [suggestion];
+-            else acc[parent].push(suggestion);
+-
+-            return acc;
+-          }, {});
+-
 -          // Build a set of parent names that have children
 -          const parentNamesWithChildren = new Set();
-+          // Build a set of parent IDs that have children
-+          const parentIdsWithChildren = new Set();
-           Object.keys(parentsOfTerms).forEach((key) => {
-             if (key) {
+-          Object.keys(parentsOfTerms).forEach((key) => {
+-            if (key) {
 -              parentNamesWithChildren.add(key);
-+              parentIdsWithChildren.add(key);
-             }
-           });
+-            }
+-          });
+-
+           const getTermsSuggestionsHTML = (parentTerms) =>
+             parentTerms
+               .map((suggestion) => {
+@@ -328,51 +311,66 @@
+               })
+               .join('');
  
-@@ -330,11 +334,17 @@
- 
-           // Assign the item to a group.
-           return Object.entries(parentsOfTerms)
+-          // Assign the item to a group.
+-          return Object.entries(parentsOfTerms)
 -            .map(([parentName, childName]) => {
 -              if (parentName) {
-+            .map(([parentId, childName]) => {
-+              if (parentId) {
-+                const parentName = childName[0].parent_name || parentId;
-+                // An ID screen readers use to name the group after its header.
-+                const headerId = `${input.id || 'tagify'}-group-${parentId}`.replace(
-+                  /[^A-Za-z0-9_-]/g,
-+                  '-',
-+                );
-                 // Find the parent suggestion to get its attributes
-                 const parentSuggestion = suggestionsList.find(
+-                // Find the parent suggestion to get its attributes
+-                const parentSuggestion = suggestionsList.find(
 -                  (s) => s.label === parentName && !s.parent_name,
-+                  (s) => String(s.entity_id) === parentId,
-                 );
+-                );
+-
+-                // Create parent header (clickable only if parentSelection is enabled)
+-                let parentHeaderHTML = '';
+-                const isParentSelectionEnabled = parseInt(
+-                  input.dataset.parentSelection,
+-                  10,
+-                );
++          // Show the suggestions as a tree: each term is followed by its
++          // suggested nested terms, in a group named after it. Nested terms
++          // whose parent isn't suggested are grouped under the parent's
++          // path. Groups use the parent's ID, so two parents with the same
++          // name stay apart.
++          const isParentSelectionEnabled = parseInt(
++            input.dataset.parentSelection,
++            10,
++          );
++          const idOf = (suggestion) => String(suggestion.entity_id ?? '');
++          const suggested = new Set(suggestionsList.map(idOf));
++          const childrenOf = {};
++          suggestionsList.forEach((suggestion) => {
++            const parent = String(suggestion.parent_id || '');
++            if (parent && suggested.has(parent)) {
++              (childrenOf[parent] = childrenOf[parent] || []).push(suggestion);
++            }
++          });
  
-                 // Create parent header (clickable only if parentSelection is enabled)
-@@ -352,7 +362,7 @@
-                   // Keep the raw value on the data model; rendering escapes it.
-                   parentSuggestion.label = value;
+-                if (parentSuggestion && isParentSelectionEnabled) {
+-                  const value = tagify.dropdown.getMappedValue.call(
+-                    tagify,
+-                    parentSuggestion,
+-                  );
+-                  // Keep the raw value on the data model; rendering escapes it.
+-                  parentSuggestion.label = value;
++          const renderBranch = (suggestion) => {
++            const children = childrenOf[idOf(suggestion)];
++            if (!children) {
++              return getTermsSuggestionsHTML([suggestion]);
++            }
++            const name = Drupal.checkPlain(String(suggestion.label ?? ''));
++            // The parent is an option only if parents can be selected.
++            const header = isParentSelectionEnabled
++              ? getTermsSuggestionsHTML([suggestion])
++              : `<span class="dropdown_group">${name}</span>`;
++            return `${header}<div class="tagify__dropdown__itemsGroup tagify__dropdown__itemsGroup--nested" role="group" aria-label="${name}">${children
++              .map(renderBranch)
++              .join('')}</div>`;
++          };
  
 -                  parentHeaderHTML = `<div class="tagify__dropdown__item tagify__dropdown__item--parent" ${
-+                  parentHeaderHTML = `<div id="${headerId}" class="tagify__dropdown__item tagify__dropdown__item--parent" ${
-                     tagify.getAttributes
-                       ? tagify.getAttributes(parentSuggestion)
-                       : ''
-@@ -360,17 +370,17 @@
-                     <div class="tagify__dropdown__item-highlighted dropdown_group">${Drupal.checkPlain(parentName)}</div>
-                   </div>`;
-                 } else {
+-                    tagify.getAttributes
+-                      ? tagify.getAttributes(parentSuggestion)
+-                      : ''
+-                  } tabindex="0" role="option">
+-                    <div class="tagify__dropdown__item-highlighted dropdown_group">${Drupal.checkPlain(parentName)}</div>
+-                  </div>`;
+-                } else {
 -                  parentHeaderHTML = `<span class="dropdown_group">${Drupal.checkPlain(parentName)}</span>`;
-+                  parentHeaderHTML = `<span id="${headerId}" class="dropdown_group">${Drupal.checkPlain(parentName)}</span>`;
-                 }
+-                }
++          const entries = [];
++          const pathGroups = {};
++          suggestionsList.forEach((suggestion) => {
++            const parent = String(suggestion.parent_id || '');
++            if (!parent) {
++              entries.push(suggestion);
++            }
++            else if (!suggested.has(parent)) {
++              if (!pathGroups[parent]) {
++                pathGroups[parent] = { path: suggestion.parent_name || '', items: [] };
++                entries.push(pathGroups[parent]);
++              }
++              pathGroups[parent].items.push(suggestion);
++            }
++          });
  
 -                return `<div class="tagify__dropdown__itemsGroup" data-title="${Drupal.checkPlain(parentName)}">
-+                return `<div class="tagify__dropdown__itemsGroup" role="group" aria-labelledby="${headerId}" data-title="${Drupal.checkPlain(parentName)}">
-                 ${parentHeaderHTML}
-                 ${getTermsSuggestionsHTML(childName)}
-               </div>`;
+-                ${parentHeaderHTML}
+-                ${getTermsSuggestionsHTML(childName)}
+-              </div>`;
++          return entries
++            .map((entry) => {
++              if (!entry.items) {
++                return renderBranch(entry);
                }
-               // Filter out items that are parents with children
-               const filteredChildName = childName.filter(
+-              // Filter out items that are parents with children
+-              const filteredChildName = childName.filter(
 -                (item) => !parentNamesWithChildren.has(item.label),
-+                (item) => !parentIdsWithChildren.has(String(item.entity_id)),
-               );
-               return getTermsSuggestionsHTML(filteredChildName);
+-              );
+-              return getTermsSuggestionsHTML(filteredChildName);
++              const path = Drupal.checkPlain(entry.path);
++              return `<div class="tagify__dropdown__itemsGroup" role="group" aria-label="${path}" data-title="${path}">
++                <span class="dropdown_group">${path}</span>
++                ${entry.items.map(renderBranch).join('')}
++              </div>`;
              })
-@@ -415,6 +425,7 @@
+             .join('');
+         };
+@@ -415,6 +413,7 @@
                  value: current.entity_id,
                  entity_id: current.entity_id,
                  parent_name: current.parent_name,
