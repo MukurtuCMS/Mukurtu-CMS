@@ -58,7 +58,7 @@ class VocabularyPageController extends ControllerBase {
       '#description' => $taxonomy_vocabulary->getDescription(),
       '#items' => $tools ? [] : $items,
       '#groups' => $tools ? $this->groupByLetter($items) : [],
-      '#attached' => $tools ? ['library' => ['mukurtu_taxonomy/vocabulary-page']] : [],
+      '#attached' => ['library' => ['mukurtu_taxonomy/vocabulary-page']],
       '#cache' => [
         'contexts' => ['languages:language_content', 'languages:language_interface', 'user.permissions'],
         'tags' => array_merge($taxonomy_vocabulary->getCacheTags(), ['taxonomy_term_list:' . $taxonomy_vocabulary->id()]),

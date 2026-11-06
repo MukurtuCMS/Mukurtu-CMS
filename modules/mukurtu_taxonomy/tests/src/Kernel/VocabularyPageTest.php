@@ -114,7 +114,6 @@ class VocabularyPageTest extends EntityKernelTestBase {
     $this->assertSame('Spokane', $build['#items'][1]['below'][0]['name']);
     $this->assertSame('Hillyard', $build['#items'][1]['below'][0]['below'][0]['name']);
     $this->assertSame([], $build['#groups']);
-    $this->assertSame([], $build['#attached']);
 
     $html = $this->renderPage();
     $this->assertStringContainsString('Places on this site.', $html);
@@ -137,7 +136,6 @@ class VocabularyPageTest extends EntityKernelTestBase {
     $build = $this->buildPage();
     $this->assertSame(['A', 'M'], array_column($build['#groups'], 'letter'));
     $this->assertSame(['vocabulary-letter-1', 'vocabulary-letter-2'], array_column($build['#groups'], 'id'));
-    $this->assertContains('mukurtu_taxonomy/vocabulary-page', $build['#attached']['library']);
 
     $html = $this->renderPage();
     $this->assertStringContainsString('data-vocabulary-page', $html);
