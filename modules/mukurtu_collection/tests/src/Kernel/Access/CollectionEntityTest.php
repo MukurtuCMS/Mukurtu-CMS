@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_collection\Kernel\Access;
 
 use PHPUnit\Framework\Attributes\Group;
 use Drupal\mukurtu_collection\Controller\MukurtuAddItemToCollectionController;
+use Drupal\mukurtu_collection\Controller\PersonalCollectionAddItemController;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
@@ -379,6 +380,55 @@ class CollectionEntityTest extends ProtocolAwareEntityTestBase {
     $otherUser = $this->createUser();
     $access = $controller->access($otherUser, $thing);
     $this->assertFalse($access->isAllowed());
+  }
+
+  /**
+   * Test that the "add to collection" pages need view access to the item.
+   *
+   * Both pages show the item's title, so someone who can't see the item
+   * mustn't reach them.
+   */
+  public function testAddItemPagesNeedViewAccess() {
+    NodeType::create([
+      'type' => 'digital_heritage',
+      'name' => 'Digital Heritage',
+    ])->save();
+
+    $strict = Protocol::create([
+      'name' => 'Strict',
+      'field_communities' => [$this->community->id()],
+      'field_access_mode' => 'strict',
+    ]);
+    $strict->save();
+
+    $item = Node::create([
+      'title' => $this->randomString(),
+      'type' => 'digital_heritage',
+      'status' => TRUE,
+      'uid' => $this->currentUser->id(),
+    ]);
+    $item->setSharingSetting('any');
+    $item->setProtocols([$strict]);
+    $item->save();
+
+    $collectionController = new MukurtuAddItemToCollectionController();
+    $personalController = new PersonalCollectionAddItemController();
+
+    // Can create collections and personal collections, but isn't a member of
+    // the item's protocol.
+    $outsider = $this->createUser(['add personal collection entities']);
+    $this->protocol->addMember($outsider, ['protocol_steward']);
+    $this->assertFalse($item->access('view', $outsider));
+    $this->assertFalse($collectionController->access($outsider, $item)->isAllowed());
+    $this->assertFalse($personalController->access($outsider, $item)->isAllowed());
+
+    // The same, but a member of the item's protocol.
+    $member = $this->createUser(['add personal collection entities']);
+    $this->protocol->addMember($member, ['protocol_steward']);
+    $strict->addMember($member);
+    $this->assertTrue($item->access('view', $member));
+    $this->assertTrue($collectionController->access($member, $item)->isAllowed());
+    $this->assertTrue($personalController->access($member, $item)->isAllowed());
   }
 
 }

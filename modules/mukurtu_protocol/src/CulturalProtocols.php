@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_protocol;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\mukurtu_protocol\Entity\ProtocolInterface;
@@ -120,6 +122,41 @@ class CulturalProtocols {
       }
     }
     return FALSE;
+  }
+
+  /**
+   * Combines each protocol's OG answer for an update or delete operation.
+   *
+   * Permission in any one of the account's member protocols is enough, for
+   * both 'any' and 'all' sharing. The sharing setting decides who can see the
+   * item, which callers check first with isProtocolSetMember(). Once the
+   * account can see it, a steward of any of its protocols can edit it, and a
+   * contributor can edit their own item.
+   *
+   * Requiring permission in every protocol for 'all' sharing would lock out
+   * stewards: everyone is a virtual member of an open protocol, usually with
+   * no role in it, and a steward of one strict protocol is often a plain
+   * member of the others.
+   *
+   * @param string $operation
+   *   The operation, 'update' or 'delete'.
+   * @param \Drupal\mukurtu_protocol\CulturalProtocolControlledInterface $entity
+   *   The entity under protocol control.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The account to check.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The combined result. Neutral means no protocol granted the operation.
+   */
+  public static function protocolOperationAccess(string $operation, CulturalProtocolControlledInterface $entity, AccountInterface $account): AccessResultInterface {
+    /** @var \Drupal\og\OgAccessInterface $ogAccess */
+    $ogAccess = \Drupal::service('og.access');
+    // Start from neutral(), the identity for orIf().
+    $result = AccessResult::neutral();
+    foreach ($entity->getMemberProtocols($account) as $protocol) {
+      $result = $result->orIf($ogAccess->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
+    }
+    return $result;
   }
 
   public static function getAccountGrantIds(AccountInterface $account) {
