@@ -60,12 +60,13 @@ const fixture = (groups: string) => `<!doctype html>
   </div>
 </body></html>`;
 
+const card = (heading: string, nested = '') =>
+  `<section data-vocabulary-group><h2><a href="#" data-vocabulary-card-term>${heading}</a></h2>${nested}</section>`;
+
 const NESTED = `
-  <section data-vocabulary-group><h2>A</h2>${list(term('Alaska'))}</section>
-  <section data-vocabulary-group><h2>O</h2>${list(term("O'Brien County", list(term('Town'))))}</section>
-  <section data-vocabulary-group><h2>W</h2>${list(
-    term('Washington', list(term('Spokane', list(term('Hillyard'))), term('Seattle'))),
-  )}</section>`;
+  ${card('Alaska')}
+  ${card("O'Brien County", list(term('Town', list(term('Street')))))}
+  ${card('Washington', list(term('Spokane', list(term('Hillyard'))), term('Seattle')))}`;
 
 const FLAT = `<section data-vocabulary-group><h2>A</h2>${list(term('Ants'), term('Élan'))}</section>`;
 
@@ -77,25 +78,25 @@ async function load(page: Page, groups: string) {
 }
 
 const visibleTerms = (page: Page) =>
-  page.locator('[data-vocabulary-term-name]:visible').allTextContents();
+  page.locator('[data-vocabulary-card-term]:visible, [data-vocabulary-term-name]:visible').allTextContents();
 
 test.describe('Vocabulary page script', () => {
-  test('parents start closed, and a button opens one level', async ({ page }) => {
+  test('cards stay open, and nested parents start closed', async ({ page }) => {
     await load(page, NESTED);
-    expect(await visibleTerms(page)).toEqual(['Alaska', "O'Brien County", 'Washington']);
+    expect(await visibleTerms(page)).toEqual(['Alaska', "O'Brien County", 'Town', 'Washington', 'Spokane', 'Seattle']);
 
-    const washington = page.getByRole('button', { name: 'Show terms under Washington' });
-    await expect(washington).toHaveAttribute('aria-expanded', 'false');
-    await washington.click();
+    const spokane = page.getByRole('button', { name: 'Show terms under Spokane' });
+    await expect(spokane).toHaveAttribute('aria-expanded', 'false');
+    await spokane.click();
 
-    expect(await visibleTerms(page)).toEqual(['Alaska', "O'Brien County", 'Washington', 'Spokane', 'Seattle']);
-    const open = page.getByRole('button', { name: 'Hide terms under Washington' });
+    expect(await visibleTerms(page)).toContain('Hillyard');
+    const open = page.getByRole('button', { name: 'Hide terms under Spokane' });
     await expect(open).toHaveAttribute('aria-expanded', 'true');
     await expect(open).toBeFocused();
   });
 
   test('button names show plain text, not escaped text', async ({ page }) => {
-    await load(page, NESTED);
+    await load(page, `<section data-vocabulary-group><h2>O</h2>${list(term("O'Brien County", list(term('Town'))))}</section>`);
     await expect(page.getByRole('button', { name: "Show terms under O'Brien County" })).toBeVisible();
   });
 
@@ -104,31 +105,39 @@ test.describe('Vocabulary page script', () => {
     await page.getByRole('button', { name: 'Expand all' }).click();
     expect(await visibleTerms(page)).toContain('Hillyard');
     await page.getByRole('button', { name: 'Collapse all' }).click();
-    expect(await visibleTerms(page)).toEqual(['Alaska', "O'Brien County", 'Washington']);
+    expect(await visibleTerms(page)).not.toContain('Hillyard');
+    expect(await visibleTerms(page)).toContain('Spokane');
   });
 
   test('filtering opens matching branches, and clearing restores them', async ({ page }) => {
     await load(page, NESTED);
-    await page.getByRole('button', { name: 'Show terms under Washington' }).click();
+    await page.getByRole('button', { name: 'Show terms under Town' }).click();
 
     await page.getByLabel('Filter terms').fill('hill');
     expect(await visibleTerms(page)).toEqual(['Washington', 'Spokane', 'Hillyard']);
-    await expect(page.locator('[data-vocabulary-status]')).toHaveText('1 of 7 terms matches.');
+    await expect(page.locator('[data-vocabulary-status]')).toHaveText('1 of 8 terms matches.');
     await expect(page.getByRole('button', { name: 'Expand all' })).toBeHidden();
     await expect(page.locator('[data-vocabulary-letters]')).toBeHidden();
     await expect(page.locator('.vocabulary-page__toggle:visible')).toHaveCount(0);
 
     await page.getByLabel('Filter terms').fill('');
-    expect(await visibleTerms(page)).toEqual(['Alaska', "O'Brien County", 'Washington', 'Spokane', 'Seattle']);
+    expect(await visibleTerms(page)).toEqual(['Alaska', "O'Brien County", 'Town', 'Street', 'Washington', 'Spokane', 'Seattle']);
     await expect(page.locator('[data-vocabulary-status]')).toBeEmpty();
     await expect(page.getByRole('button', { name: 'Expand all' })).toBeVisible();
   });
 
-  test('no empty nested list stays exposed when only a parent matches', async ({ page }) => {
+  test('a card heading can match by itself, with no empty list exposed', async ({ page }) => {
     await load(page, NESTED);
     await page.getByLabel('Filter terms').fill('washington');
     expect(await visibleTerms(page)).toEqual(['Washington']);
+    await expect(page.locator('[data-vocabulary-status]')).toHaveText('1 of 8 terms matches.');
     await expect(page.locator('ul:visible:not(:has(li:visible))')).toHaveCount(0);
+  });
+
+  test('a card with no list of its own still filters', async ({ page }) => {
+    await load(page, NESTED);
+    await page.getByLabel('Filter terms').fill('alaska');
+    expect(await visibleTerms(page)).toEqual(['Alaska']);
   });
 
   test('a flat vocabulary has no expand controls, and accents are ignored', async ({ page }) => {
@@ -140,10 +149,10 @@ test.describe('Vocabulary page script', () => {
     expect(await visibleTerms(page)).toEqual(['Élan']);
   });
 
-  test('a query with no matches hides every group', async ({ page }) => {
+  test('a query with no matches hides every card', async ({ page }) => {
     await load(page, NESTED);
     await page.getByLabel('Filter terms').fill('zzz');
     await expect(page.locator('[data-vocabulary-group]:visible')).toHaveCount(0);
-    await expect(page.locator('[data-vocabulary-status]')).toHaveText('0 of 7 terms match.');
+    await expect(page.locator('[data-vocabulary-status]')).toHaveText('0 of 8 terms match.');
   });
 });

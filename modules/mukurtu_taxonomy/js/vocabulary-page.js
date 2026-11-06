@@ -97,7 +97,7 @@
         const status = page.querySelector('[data-vocabulary-status]');
         const letters = page.querySelector('[data-vocabulary-letters]');
         const groups = page.querySelectorAll('[data-vocabulary-group]');
-        const total = page.querySelectorAll('[data-vocabulary-term]').length;
+        const total = page.querySelectorAll('[data-vocabulary-term], [data-vocabulary-card-term]').length;
 
         const branches = Array.from(page.querySelectorAll('[data-vocabulary-term]'))
           .filter(function (term) { return term.querySelector(':scope > ul'); })
@@ -133,7 +133,15 @@
           const query = normalize(input.value.trim());
           let matches = 0;
           groups.forEach(function (group) {
-            const groupMatches = filterList(group.querySelector('ul'), query);
+            const list = group.querySelector(':scope > ul');
+            const heading = group.querySelector('[data-vocabulary-card-term]');
+            let groupMatches = list ? filterList(list, query) : 0;
+            if (list) {
+              list.hidden = groupMatches === 0;
+            }
+            if (heading && normalize(heading.textContent).includes(query)) {
+              groupMatches++;
+            }
             group.hidden = groupMatches === 0;
             matches += groupMatches;
           });

@@ -5,10 +5,12 @@
  *
  * Available variables:
  * - description: The vocabulary's description.
- * - items: Nested term items, on a short vocabulary. Each has a name, url and
- *   below.
- * - groups: On a long vocabulary, top-level items by first letter. Each has a
- *   letter, id and items.
+ * - items: Term items, on a short, mostly flat vocabulary. Each has a name, url
+ *   and below.
+ * - groups: Cards of terms. Each has a heading, url, id and items. The url is
+ *   set when the heading is a term.
+ * - letters: Links to the first card for each letter. Each has a letter and id.
+ * - tools: Whether the filter and letter links show.
  *
  * @see \Drupal\mukurtu_taxonomy\Controller\VocabularyPageController
  */
@@ -30,12 +32,12 @@
   </ul>
 {% endmacro %}
 
-<div class="vocabulary-page taxonomy-term-page"{% if groups %} data-vocabulary-page{% endif %}>
+<div class="vocabulary-page taxonomy-term-page"{% if tools %} data-vocabulary-page{% endif %}>
   {% if description %}
     <p class="vocabulary-page__description">{{ description }}</p>
   {% endif %}
 
-  {% if groups %}
+  {% if tools %}
     {# The script shows this, as the filter can't work without it. #}
     <div class="vocabulary-page__filter" data-vocabulary-filter hidden>
       <label for="vocabulary-filter">{{ 'Filter terms'|t }}</label>
@@ -43,18 +45,33 @@
     </div>
     <p class="vocabulary-page__status" role="status" data-vocabulary-status></p>
     <nav class="vocabulary-page__letters" aria-label="{{ 'Jump to a letter'|t }}" data-vocabulary-letters>
-      {% for group in groups %}
-        <a href="#{{ group.id }}">{{ group.letter }}</a>
+      {% for link in letters %}
+        <a href="#{{ link.id }}">{{ link.letter }}</a>
       {% endfor %}
     </nav>
-    {% for group in groups %}
-      <section class="vocabulary-page__group" aria-labelledby="{{ group.id }}" data-vocabulary-group>
-        <h2 id="{{ group.id }}">{{ group.letter }}</h2>
-        {{ vocabulary.terms(group.items) }}
-      </section>
-    {% endfor %}
+  {% endif %}
+
+  {% if groups %}
+    <div class="vocabulary-page__cards">
+      {% for group in groups %}
+        <section class="vocabulary-page__card" aria-labelledby="{{ group.id }}" data-vocabulary-group>
+          <h2 id="{{ group.id }}">
+            {%- if group.url -%}
+              <a href="{{ group.url }}" data-vocabulary-card-term>{{ group.heading }}</a>
+            {%- else -%}
+              {{ group.heading }}
+            {%- endif -%}
+          </h2>
+          {% if group.items %}
+            {{ vocabulary.terms(group.items) }}
+          {% endif %}
+        </section>
+      {% endfor %}
+    </div>
   {% elseif items %}
-    {{ vocabulary.terms(items) }}
+    <div class="vocabulary-page__columns">
+      {{ vocabulary.terms(items) }}
+    </div>
   {% else %}
     <p>{{ 'This vocabulary has no terms yet.'|t }}</p>
   {% endif %}
