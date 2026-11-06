@@ -385,7 +385,8 @@ The tag is checked out, so the image is built from that tag's `Dockerfile` and c
 predates the `Dockerfile` cannot be built. The workflow refuses a tag that is not a release tag
 (`v4.0.5`, `4.x-dev`, `4.0.5-r0`) and a release that GitHub marks as a pre-release but whose tag
 has no pre-release suffix (tags are derived from the version alone, so it would take `latest`).
-Nothing else starts it: no push, pull request or timer.
+Nothing else starts it directly: no push, pull request or timer. `docker-edge.yml` starts a
+development build by hand each week (see [Development images](#development-images)).
 
 **How an image is built, tested and pushed.** Each architecture builds on a runner of that
 architecture (`amd64` and `arm64`; no emulation), in one job:
@@ -409,8 +410,14 @@ release tags and need no attention.
 To try the image before a release, run the workflow by hand with `dev` ticked and `ref` set to a
 branch, tag or commit. It builds and tests exactly as above and publishes
 `4.x-dev-<first 7 characters of the commit>` (never rebuilt) and `edge` (moved to the latest
-development build). It never touches `4.0`, `4`, or `latest`. Nothing builds a development image
-by itself.
+development build). It never touches `4.0`, `4`, or `latest`.
+
+`.github/workflows/docker-edge.yml` does this for `main` every Monday, so `edge` is never more than
+a week old, and a Mukurtu change that breaks the image shows up before release day. If the build
+fails, it opens an issue, or comments on the one already open.
+
+`.github/workflows/docker-test.yml` runs the image tests on any pull request that changes the
+image files. It builds amd64 only and pushes nothing. Both architectures run in the weekly build.
 
 ### Tags
 
