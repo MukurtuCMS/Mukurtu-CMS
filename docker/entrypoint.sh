@@ -99,7 +99,7 @@ log "database is reachable"
 state=$(php "$LIB/db.php" state)
 case "$state" in
   installed)
-    log "existing installation found"
+    log "found something"
     if [ "$MUKURTU_RUN_UPDATES" = true ]; then
       # Show what is about to run, so the log says what an upgrade changed. There is no
       # backup step: take one before upgrading (see "Upgrades and backups" in docs/docker.md).
