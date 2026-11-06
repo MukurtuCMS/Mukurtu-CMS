@@ -34,10 +34,13 @@ function overlay(mid: number): string {
   return `
     <div class="mukurtu-content-warnings" data-mid="${mid}" tabindex="-1">
       <p id="${id}-title" class="mukurtu-content-warnings__title">Media content warnings</p>
+      <p class="mukurtu-content-warnings__card-hint">Access item to view</p>
       <ul id="${id}" class="mukurtu-content-warnings__list" role="list">
         ${WARNINGS.map((w) => `<li><div class="mukurtu-content-warning">${w}</div></li>`).join('')}
       </ul>
-      <button type="button" class="mukurtu-content-warnings__dismiss" aria-describedby="${id}-title ${id}">Show media</button>
+      <div class="mukurtu-content-warnings__actions">
+        <button type="button" class="mukurtu-content-warnings__dismiss" aria-describedby="${id}-title ${id}">Show media</button>
+      </div>
     </div>`;
 }
 
@@ -115,19 +118,102 @@ test('Long warnings scroll from the top on a phone instead of clipping', async (
   expect(metrics.firstLineInside, 'the first warning starts inside the overlay').toBe(true);
 });
 
-// Mirrors a browse card: the media sits in a link hidden from AT, and the
-// card's title link is the one keyboard users reach.
+// Mirrors _card-media.html.twig for warned media: no link around the media,
+// and the item URL handed to the overlay. The card's title link follows.
 const CARD = `
-  <a href="/node/1" aria-hidden="true" tabindex="-1">
-    <div class="media" style="inline-size: 296px; block-size: 197px">${overlay(4)}</div>
-  </a>
-  <a href="/node/1">Card title</a>`;
+  <article>
+    <div class="card-media--content-warning" data-mukurtu-card-url="#item">
+      <div class="media" style="inline-size: 203px; block-size: 135px">${overlay(4)}</div>
+    </div>
+    <h2><a href="#item">Card title</a></h2>
+  </article>`;
 
-test('A warning inside a card link adds no Tab stop', async ({ page }) => {
+// Media some other template still wraps in a link hidden from AT.
+const LINKED_CARD = `
+  <a href="#item" aria-hidden="true" tabindex="-1">
+    <div class="media" style="inline-size: 203px; block-size: 135px">${overlay(6)}</div>
+  </a>
+  <a href="#item">Card title</a>`;
+
+test('A card shows the title, a link to the item, and Show media last', async ({ page }) => {
   await load(page, CARD);
+  const warning = page.locator('.mukurtu-content-warnings');
+  const link = page.getByRole('link', { name: 'Access item to view' });
+  const button = page.getByRole('button', { name: 'Show media' });
+  await expect(page.getByText('Media content warnings')).toBeVisible();
+  await expect(link).toHaveAttribute('href', '#item');
+  // Every card's link has the same text, so the card's title describes it.
+  await expect(link).toHaveAccessibleDescription('Card title');
+  await expect(button).toBeVisible();
+  await expect(page.getByText(WARNINGS[0])).toBeHidden();
+  const fits = await warning.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+  expect(fits, 'the card fits the smallest card').toBe(true);
+  const linkBox = (await link.boundingBox())!;
+  const buttonBox = (await button.boundingBox())!;
+  expect(buttonBox.y, 'Show media comes after the link').toBeGreaterThan(linkBox.y);
+  // Screen readers still hear every warning with the button.
+  await expect(button).toHaveAccessibleDescription(new RegExp(WARNINGS[1].slice(0, 30)));
+});
+
+test('A card link opens the item without revealing the media', async ({ page }) => {
+  await load(page, CARD);
+  await page.getByRole('link', { name: 'Access item to view' }).click();
+  await expect(page).toHaveURL(/#item$/);
+  await expect(page.locator('.mukurtu-content-warnings')).not.toHaveClass(/dismissed/);
+});
+
+test('Show media on a card reveals the media in place', async ({ page }) => {
+  await load(page, CARD);
+  await page.getByRole('button', { name: 'Show media' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.mukurtu-content-warnings')).toHaveClass(/dismissed/);
+  await expect(page).not.toHaveURL(/#item$/);
+});
+
+test('Media still inside a link shows the title and hint, and adds no Tab stop', async ({ page }) => {
+  await load(page, LINKED_CARD);
+  await expect(page.getByText('Access item to view')).toBeVisible();
+  await expect(page.locator('.mukurtu-content-warnings__dismiss')).toBeHidden();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Card title' })).toBeFocused();
-  await expect(page.locator('.mukurtu-content-warnings__dismiss')).toHaveAttribute('tabindex', '-1');
+  await page.getByText('Access item to view').click();
+  await expect(page).toHaveURL(/#item$/);
+});
+
+test('Outside cards, the card hint stays hidden', async ({ page }) => {
+  await load(page, VIDEO);
+  await expect(page.getByText('Access item to view')).toBeHidden();
+});
+
+test('The button stays in view while long warnings scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await load(page, VIDEO);
+  const warning = page.locator('.mukurtu-content-warnings');
+  await expect(warning).toHaveClass(/mukurtu-content-warnings--scrolls/);
+  const inView = async () => warning.evaluate((el) => {
+    const o = el.getBoundingClientRect();
+    const b = el.querySelector('button')!.getBoundingClientRect();
+    return b.top >= o.top && b.bottom <= o.bottom + 1;
+  });
+  expect(await inView(), 'button in view at the top of the text').toBe(true);
+  await warning.evaluate((el) => { el.scrollTop = el.scrollHeight; });
+  expect(await inView(), 'button in view at the end of the text').toBe(true);
+});
+
+test('The band follows text that grows inside an overlay of the same size', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await load(page, `<div class="media" style="inline-size: 843px; block-size: 562px">${overlay(7)}</div>`);
+  const warning = page.locator('.mukurtu-content-warnings');
+  await expect(warning).not.toHaveClass(/mukurtu-content-warnings--scrolls/);
+  // As when a web font swaps in, or text-only zoom: the overlay keeps its size.
+  await page.locator('.mukurtu-content-warnings__list').evaluate((el) => { el.style.fontSize = '5rem'; });
+  await expect(warning).toHaveClass(/mukurtu-content-warnings--scrolls/);
+});
+
+test('Warnings that fit have no scrolling band', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await load(page, `<div class="media" style="inline-size: 843px; block-size: 562px">${overlay(5)}</div>`);
+  await expect(page.locator('.mukurtu-content-warnings')).not.toHaveClass(/mukurtu-content-warnings--scrolls/);
 });
 
 test('Thumbnails keep the scrim but have no Tab stop', async ({ page }) => {
