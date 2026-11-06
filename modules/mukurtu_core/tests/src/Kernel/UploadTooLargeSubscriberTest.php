@@ -71,9 +71,22 @@ class UploadTooLargeSubscriberTest extends KernelTestBase {
     $this->assertSame('mukurtuResetRefusedUpload', $reset['command']);
     $this->assertSame('This file is too large to upload. The maximum file size is 2 MB.', $reset['message']);
 
-    // A library on this response reloads drupal.js, which replaces the global
-    // Drupal object. AnnounceCommand does that.
     $this->assertEmpty($response->getAttachments()['library'] ?? []);
+  }
+
+  /**
+   * Tests that a library added by a theme's messages is dropped.
+   *
+   * A library on this response reloads drupal.js, which replaces the global
+   * Drupal object.
+   */
+  public function testThemeLibrariesAreDropped(): void {
+    $this->container->get('theme_installer')->install(['olivero']);
+    $this->container->get('theme.manager')->setActiveTheme($this->container->get('theme.initialization')->initTheme('olivero'));
+
+    $event = $this->dispatch(new BrokenPostRequestException(2097152), [FormBuilderInterface::AJAX_FORM_REQUEST => 1]);
+
+    $this->assertEmpty($event->getResponse()->getAttachments()['library'] ?? []);
   }
 
   /**

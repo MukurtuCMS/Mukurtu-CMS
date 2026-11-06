@@ -53,12 +53,14 @@ class UploadTooLargeSubscriber implements EventSubscriberInterface {
     ]);
     $this->messenger->addError($message);
     $response = new AjaxResponse(NULL, 200);
-    // This request has an empty POST, so Drupal can't tell which libraries the
-    // page already has, and any library added to this response is sent again
-    // with everything it depends on. That reloads drupal.js, which replaces
-    // the global Drupal object, so this needs commands that attach nothing.
     $response->addCommand(new ResetRefusedUploadCommand((string) $message));
     $response->addCommand(new PrependCommand(NULL, ['#type' => 'status_messages']));
+    // This request has an empty POST, so Drupal can't tell which libraries the
+    // page already has, and any library on this response is sent again with
+    // everything it depends on. That reloads drupal.js, which replaces the
+    // global Drupal object. Themes can add libraries to status messages, so
+    // this response has to drop them, and the page has to load what it needs.
+    $response->setAttachments([]);
     $event->allowCustomResponseCode();
     $event->setResponse($response);
   }
