@@ -949,3 +949,30 @@ function mukurtu_core_update_40224(): string {
     ? (string) t('Only administrators and Mukurtu Managers can now see content revision history.')
     : (string) t('Content revision history is already limited to administrators and Mukurtu Managers; nothing to change.');
 }
+
+/**
+ * Add the character palette setting, turned off.
+ */
+function mukurtu_core_update_40225(): string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // #2560: a site-wide setting, off by default, shows a palette for typing
+  // the characters site managers list on its settings page. config/install
+  // covers new sites; this adds the same to existing ones.
+  $done = [];
+
+  $settings = \Drupal::configFactory()->getEditable('mukurtu_core.character_palette');
+  if ($settings->isNew()) {
+    $settings->set('enabled', FALSE)->set('groups', [])->save();
+    $done[] = 'added the character palette setting (off)';
+  }
+
+  $manager = Role::load('mukurtu_manager');
+  if ($manager && !$manager->hasPermission('administer mukurtu character palette')) {
+    $manager->grantPermission('administer mukurtu character palette')->save();
+    $done[] = 'let Mukurtu Managers set up the palette';
+  }
+
+  return $done === [] ? 'The character palette was already set up; nothing to change.' : ucfirst(implode('; ', $done)) . '.';
+}

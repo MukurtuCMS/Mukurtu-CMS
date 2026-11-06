@@ -26,6 +26,7 @@ test.describe('Reflow (admin)', () => {
     '/admin',
     '/admin/structure',
     '/admin/import',
+    '/admin/config/mukurtu/character-palette',
     '/admin/config/mukurtu/content-warnings',
     '/admin/config/mukurtu/submissions',
     '/admin/import-templates/add',

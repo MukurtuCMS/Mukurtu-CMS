@@ -159,6 +159,20 @@ entity_reference_role_tagify:
     - core/once
     - core/sortable
 
+character_palette_settings:
+  version: 1.x
+  js:
+    js/character-palette-settings.js: {}
+  css:
+    component:
+      css/character-palette-settings.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.tabledrag
+    - core/jquery
+    - core/once
+
 visitors-country-map:
   version: 1.x
   js:
