@@ -494,10 +494,15 @@
         const needed = focused.bottom - area.top + 8;
         const before = window.scrollY;
         if (focused.top - needed >= 0) {
-          window.scrollBy(0, needed);
-        }
-        if (window.scrollY !== before) {
-          return;
+          // Instant, even in a theme with smooth scrolling: the result is
+          // read straight away.
+          window.scrollBy({top: needed, behavior: 'instant'});
+          if (focusRect().top !== focused.top) {
+            return;
+          }
+          // Something fixed to the screen doesn't move with the page, and
+          // the scroll this causes would land back here and repeat.
+          window.scrollTo({top: before, behavior: 'instant'});
         }
         // The panel is anchored at its bottom, so a shorter one clears the
         // focus above it.
@@ -514,6 +519,13 @@
     document.addEventListener('selectionchange', getOutOfTheWay);
     window.addEventListener('scroll', getOutOfTheWay, {capture: true, passive: true});
     window.addEventListener('resize', getOutOfTheWay, {passive: true});
+
+    // Whether something such as a modal dialog sits over the palette. Going
+    // there would put focus behind it, out of sight.
+    function covered() {
+      const box = button.getBoundingClientRect();
+      return !button.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2));
+    }
 
     // Back to the field people were typing in, closing the panel unless
     // it's kept open. With no field yet, back to the button.
@@ -586,7 +598,7 @@
     if (pin.checked) {
       open(false);
     }
-    return {button: button, panel: panel, open: open, returnToField: returnToField};
+    return {button: button, panel: panel, open: open, covered: covered, returnToField: returnToField};
   }
 
   // The field people were last typing in is where characters go.
@@ -615,7 +627,9 @@
       palette.returnToField();
       return;
     }
-    palette.open(true);
+    if (!palette.covered()) {
+      palette.open(true);
+    }
   });
 
   /**

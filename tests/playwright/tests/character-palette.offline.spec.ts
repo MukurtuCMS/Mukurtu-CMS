@@ -165,6 +165,17 @@ async function addRealTagify(page: Page, closedList = false): Promise<void> {
   }, closedList);
 }
 
+// A full-page dialog at the bottom of Klaro's z-index range (999 to 1001).
+// Earlier in the page, so a tie would go to the palette.
+async function addDialog(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const dialog = document.createElement('div');
+    dialog.id = 'consent';
+    dialog.style.cssText = 'position:fixed;inset:0;z-index:999;background:#fff';
+    document.body.prepend(dialog);
+  });
+}
+
 const corner = (page: Page) => page.getByRole('button', { name: 'Character palette' });
 const panel = (page: Page) => page.locator('#mukurtu-character-palette');
 
@@ -429,13 +440,7 @@ test.describe('Character palette', () => {
   test('stays under the cookie consent dialog', async ({ page }) => {
     await load(page);
     await corner(page).click();
-    // Earlier in the page, so a tie at Klaro's z-index would go to the palette.
-    await page.evaluate(() => {
-      const dialog = document.createElement('div');
-      dialog.id = 'consent';
-      dialog.style.cssText = 'position:fixed;inset:0;z-index:1000;background:#fff';
-      document.body.prepend(dialog);
-    });
+    await addDialog(page);
 
     for (const element of [panel(page), corner(page)]) {
       const box = await element.boundingBox();
@@ -445,6 +450,55 @@ test.describe('Character palette', () => {
       );
       expect(onTop).toBe('consent');
     }
+  });
+
+  test('the shortcut leaves focus alone while a dialog covers the palette', async ({ page }) => {
+    await load(page);
+    await page.locator('#term').focus();
+    await addDialog(page);
+
+    await page.keyboard.press('Control+Shift+Space');
+    await expect(page.locator('#term')).toBeFocused();
+    await expect(panel(page)).toBeHidden();
+  });
+
+  test('scrolls a field out from under the panel, even with smooth scrolling', async ({ page }) => {
+    await load(page);
+    await page.addStyleTag({ content: 'html { scroll-behavior: smooth; }' });
+    await corner(page).click();
+    await panel(page).getByLabel('Keep open').check();
+    const scrolled = await page.evaluate(() => {
+      document.body.style.minBlockSize = '5000px';
+      const field = document.getElementById('term') as HTMLElement;
+      field.style.cssText = 'position:absolute;right:3rem;top:2000px';
+      const area = document.getElementById('mukurtu-character-palette')!.getBoundingClientRect();
+      const offset = 2000 - area.top - 20;
+      document.documentElement.style.scrollBehavior = 'auto';
+      window.scrollTo(0, offset);
+      document.documentElement.style.scrollBehavior = 'smooth';
+      return offset;
+    });
+
+    await page.locator('#term').focus();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrolled);
+    await expect(panel(page)).toBeVisible();
+    const field = (await page.locator('#term').boundingBox())!;
+    const area = (await panel(page).boundingBox())!;
+    expect(field.y + field.height).toBeLessThanOrEqual(area.y);
+  });
+
+  test('doesn\'t scroll the page away when focus is fixed under the panel', async ({ page }) => {
+    await load(page);
+    await corner(page).click();
+    await panel(page).getByLabel('Keep open').check();
+    await page.evaluate(() => {
+      document.body.style.minBlockSize = '5000px';
+      window.scrollTo(0, 600);
+    });
+
+    await page.locator('#under').focus();
+    await expect(panel(page)).toBeHidden();
+    expect(await page.evaluate(() => window.scrollY)).toBe(600);
   });
 
   test('switches language and remembers it', async ({ page }) => {
