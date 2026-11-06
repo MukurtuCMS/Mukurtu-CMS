@@ -156,3 +156,4 @@ Code contributions and feedback are welcome, and can be submitted in [our issues
 ## License
 
 Mukurtu CMS is licensed under the [GNU General Public License v3 or later](LICENSE.txt).
+
