@@ -86,6 +86,7 @@
         "drupal/turnstile": "^1.2",
         "drupal/turnstile_protect": "^1.0",
         "drupal/twig_tweak": "^3.2",
+        "drupal/views_bulk_edit": "^3.0",
         "drupal/views_bulk_operations": "^4.4",
         "drupal/visitors": "^2.0",
         "drush/drush": "^13",
