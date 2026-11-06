@@ -1150,3 +1150,25 @@ function mukurtu_update_40040(): string {
     ? (string) t('Added the bulk edit media page.')
     : (string) t('The bulk edit media page is already installed; nothing to change.');
 }
+
+/**
+ * Add one-by-one editing to the bulk edit pages.
+ */
+function mukurtu_update_40041(): string {
+  $path = 'display.default.display_options.fields.views_bulk_operations_bulk_form.selected_actions';
+  $added = FALSE;
+  foreach (['views.view.mukurtu_bulk_edit_content', 'views.view.mukurtu_bulk_edit_media'] as $name) {
+    $config = \Drupal::configFactory()->getEditable($name);
+    $actions = $config->get($path);
+    // Add only where missing, keeping any site changes.
+    if (!is_array($actions) || in_array('mukurtu_edit_items_grid_action', array_column($actions, 'action_id'), TRUE)) {
+      continue;
+    }
+    $actions[$actions ? max(array_keys($actions)) + 1 : 0] = ['action_id' => 'mukurtu_edit_items_grid_action'];
+    $config->set($path, $actions)->save();
+    $added = TRUE;
+  }
+  return $added
+    ? (string) t('Added one-by-one editing to the bulk edit pages.')
+    : (string) t('The bulk edit pages already have one-by-one editing; nothing to change.');
+}
