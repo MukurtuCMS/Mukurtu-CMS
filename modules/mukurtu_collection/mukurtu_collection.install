@@ -5,6 +5,10 @@
  * Install, update and uninstall functions for the mukurtu_collection module.
  */
 
+use Drupal\mukurtu_collection\CollectionOrder;
+use Drupal\search_api\Entity\Index;
+use Drupal\user\Entity\Role;
+
 /**
  * Implements hook_install().
  */
@@ -41,5 +45,110 @@ function mukurtu_collection_update_40028() {
   // mukurtu_collection does not depend on mukurtu_search.
   if (function_exists('mukurtu_search_enable_ignore_character_processor')) {
     mukurtu_search_enable_ignore_character_processor('mukurtu_collection_index');
+  }
+}
+
+/**
+ * Adds the collection display weight field and processor to an index.
+ *
+ * Does nothing if the index doesn't exist or already has the field.
+ *
+ * @param string $index_id
+ *   The search index ID.
+ */
+function mukurtu_collection_add_display_weight_to_index(string $index_id): void {
+  $index = Index::load($index_id);
+  if (!$index || $index->getField(CollectionOrder::FIELD_NAME)) {
+    return;
+  }
+  if (!$index->isValidProcessor('mukurtu_collection_display_weight')) {
+    $index->addProcessor(\Drupal::service('search_api.plugin_helper')
+      ->createProcessorPlugin($index, 'mukurtu_collection_display_weight'));
+  }
+  $index->addField(\Drupal::service('search_api.fields_helper')
+    ->createField($index, CollectionOrder::FIELD_NAME, [
+      'label' => 'Collection display weight',
+      'datasource_id' => 'entity:node',
+      'property_path' => CollectionOrder::FIELD_NAME,
+      'type' => 'integer',
+    ]));
+  $index->save();
+}
+
+/**
+ * Adds an ascending collection display weight sort to a view.
+ *
+ * The sort goes before $before, or first if $before is NULL. Does nothing if
+ * the view doesn't exist or already sorts on the weight.
+ *
+ * @param string $view_id
+ *   The view ID.
+ * @param string $table
+ *   The view's Search API index table.
+ * @param string|null $before
+ *   The ID of the sort to insert the weight sort in front of.
+ */
+function mukurtu_collection_add_display_weight_sort(string $view_id, string $table, ?string $before = NULL): void {
+  $config = \Drupal::configFactory()->getEditable("views.view.$view_id");
+  if ($config->isNew()) {
+    return;
+  }
+  $key = 'display.default.display_options.sorts';
+  $sorts = $config->get($key) ?? [];
+  if (isset($sorts[CollectionOrder::FIELD_NAME])) {
+    return;
+  }
+
+  $weight_sort = [
+    CollectionOrder::FIELD_NAME => [
+      'id' => CollectionOrder::FIELD_NAME,
+      'table' => $table,
+      'field' => CollectionOrder::FIELD_NAME,
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'plugin_id' => 'search_api',
+      'order' => 'ASC',
+      'expose' => [
+        'label' => '',
+        'field_identifier' => '',
+      ],
+      'exposed' => FALSE,
+    ],
+  ];
+  $position = $before === NULL ? 0 : array_search($before, array_keys($sorts), TRUE);
+  if ($position === FALSE) {
+    $position = 0;
+  }
+  $sorts = array_slice($sorts, 0, $position, TRUE) + $weight_sort + array_slice($sorts, $position, NULL, TRUE);
+  $config->set($key, $sorts)->save();
+}
+
+/**
+ * Adds manual ordering for the Collections page.
+ *
+ * Adds the collection order settings, indexes a display weight for each
+ * collection, sorts the Collections page on it, and lets Mukurtu Managers
+ * set the order at Dashboard > Collection order. The page stays alphabetical
+ * until someone chooses a custom order.
+ */
+function mukurtu_collection_update_40029() {
+  $config = \Drupal::configFactory()->getEditable(CollectionOrder::CONFIG_NAME);
+  if ($config->isNew()) {
+    $config
+      ->set('sort_mode', CollectionOrder::MODE_ALPHABETICAL)
+      ->set('order', [])
+      ->save();
+  }
+
+  mukurtu_collection_add_display_weight_to_index('mukurtu_collection_index');
+  // mukurtu_browse ships this view, but it sorts on mukurtu_collection's
+  // index, so it is updated here to keep the field and the sort together.
+  mukurtu_collection_add_display_weight_sort('mukurtu_browse_collections', 'search_api_index_mukurtu_collection_index', 'title');
+
+  $role = Role::load('mukurtu_manager');
+  if ($role) {
+    $role->grantPermission('administer collection order');
+    $role->save();
   }
 }

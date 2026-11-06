@@ -240,16 +240,31 @@ class BulkProtocolActionsTest extends ProtocolAwareEntityTestBase {
    * Losing an open protocol is reported as "no longer visible to everyone".
    */
   public function testOpenProtocolNotice(): void {
-    // "All" needs edit permission in every protocol, and membership of an
-    // open protocol carries no role, so the editor loses edit access too.
-    $this->assertSame([
-      'A+O any: you will no longer be able to edit it.',
-      'A+O any: will no longer be visible to everyone.',
-    ], $this->notices('mukurtu_change_sharing_action', ['sharing' => 'all'], $this->item(['A', 'O'], 'any')));
+    // The editor can still see the item and steward Protocol A, so they keep
+    // edit access (#2515).
+    $this->assertSame(
+      ['A+O any: will no longer be visible to everyone.'],
+      $this->notices('mukurtu_change_sharing_action', ['sharing' => 'all'], $this->item(['A', 'O'], 'any')),
+    );
     $this->assertSame(
       ['O all: will no longer be visible to everyone.'],
       $this->notices('mukurtu_add_protocol_action', ['protocol' => (int) $this->p['A']->id()], $this->item(['O'], 'all')),
     );
+  }
+
+  /**
+   * Losing the only protocol you steward, but not view access, is reported.
+   */
+  public function testEditLossNotice(): void {
+    $member = $this->createUser();
+    $this->p['A']->addMember($member, ['protocol_steward']);
+    $this->p['B']->addMember($member);
+    $node = $this->item(['A', 'B'], 'any');
+    $this->assertTrue($node->access('update', $member));
+
+    $notices = $this->action('mukurtu_remove_protocol_action', ['protocol' => (int) $this->p['A']->id()])->lossNotices($node, $member);
+
+    $this->assertSame('A+B any: you will no longer be able to edit it.', (string) $notices[0]);
   }
 
   /**
