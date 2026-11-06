@@ -451,6 +451,25 @@ in either stops that architecture, and the `publish` job does not run unless bot
 The Composer build stage's `composer audit --no-dev` additionally fails the build on a Drupal
 advisory before the image is assembled.
 
+### Watching the published image
+
+The checks above run only when an image is built, but advisories keep arriving afterwards, and a
+Docker site can't run `composer update` to apply them because the code in the image is read-only.
+So `.github/workflows/docker-watch.yml` checks the newest published image every day:
+
+- It runs `composer audit` on the `composer.lock` inside the image, using the image's own
+  `composer.json`, so `config.audit.ignore` applies.
+- It runs Trivy on the image, for fixable high and critical findings. Trivy reads `.trivyignore`.
+- If either finds something, it opens one issue, titled with the image version. When the findings
+  change it updates that issue and comments, so the change notifies people. It stays quiet when
+  they don't.
+
+It builds and publishes nothing. A person reads the issue, decides, and releases an
+[image revision](releasing.md#releasing-an-image-revision), then closes it.
+
+To check a particular tag, run the workflow by hand and name it. Before the first image is
+published, the job finds nothing to check and passes.
+
 ### Supply chain and how fixes reach users
 
 - **Pinned bases and actions.** Base images are pinned by version and digest; GitHub Actions by
