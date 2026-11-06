@@ -1822,6 +1822,17 @@ a .mukurtu-content-warnings__actions {
   min-block-size: 0;
   overflow: hidden;
 }
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail .media,
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail .field,
+.field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail .field__item,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail .media,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail .field,
+.field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail .field__item,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail .media,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail .field,
+.featured-carousel .featured-item__media .media--audio .media__thumbnail .field__item {
+  block-size: 100%;
+}
 .field--name-field-featured-content .featured-item__media .media--audio .media__thumbnail img,
 .field--name-field-all-related-content .field__items .featured-item__media .media--audio .media__thumbnail img,
 .featured-carousel .featured-item__media .media--audio .media__thumbnail img {
@@ -2292,6 +2303,123 @@ label.form-required::after,
   .horizontal-card {
     grid-template-columns: var(--grid-9col);
   }
+}
+.horizontal-card__media .media--teaser-featured.media--audio {
+  aspect-ratio: 4/3;
+  block-size: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  overflow: hidden;
+  background: var(--brand-secondary-accent);
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  min-block-size: 0;
+  overflow: hidden;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail .media,
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail .field,
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail .field__item {
+  block-size: 100%;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail img {
+  block-size: 100%;
+  inline-size: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail .media__audio-fallback {
+  block-size: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background: var(--brand-secondary-accent);
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail .media__audio-fallback img {
+  block-size: auto;
+  max-block-size: 100%;
+  inline-size: auto;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable {
+  position: relative;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button {
+  position: absolute;
+  inset: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button::before {
+  content: "";
+  display: block;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  position: absolute;
+  -webkit-transition: background 0.15s;
+  transition: background 0.15s;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button:hover::before, .horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button:focus-visible::before {
+  background: rgba(0, 0, 0, 0.85);
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: -6px;
+  -webkit-box-shadow: inset 0 0 0 3px #ffffff;
+          box-shadow: inset 0 0 0 3px #ffffff;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button svg {
+  fill: white;
+  position: relative;
+  z-index: 1;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button .audio-play-button__icon--pause {
+  display: none;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--play {
+  display: none;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--pause {
+  display: block;
+}
+.horizontal-card__media .media--teaser-featured.media--audio .media__audio-source {
+  block-size: 0;
+  overflow: hidden;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+.horizontal-card__media .media--teaser-featured.media--audio {
+  block-size: auto;
+  -webkit-margin-after: var(--v-space-5xs);
+          margin-block-end: var(--v-space-5xs);
 }
 .horizontal-card__media {
   grid-column: 1/span 1;
@@ -5543,6 +5671,123 @@ body.is-fixed {
   margin-block: 0;
   font-size: var(--card-font-size);
   font-weight: var(--text-bold);
+}
+.vertical-card__media .media--teaser-featured.media--audio {
+  aspect-ratio: 4/3;
+  block-size: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  overflow: hidden;
+  background: var(--brand-secondary-accent);
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  min-block-size: 0;
+  overflow: hidden;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail .media,
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail .field,
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail .field__item {
+  block-size: 100%;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail img {
+  block-size: 100%;
+  inline-size: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail .media__audio-fallback {
+  block-size: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background: var(--brand-secondary-accent);
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail .media__audio-fallback img {
+  block-size: auto;
+  max-block-size: 100%;
+  inline-size: auto;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable {
+  position: relative;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button {
+  position: absolute;
+  inset: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button::before {
+  content: "";
+  display: block;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  position: absolute;
+  -webkit-transition: background 0.15s;
+  transition: background 0.15s;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button:hover::before, .vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button:focus-visible::before {
+  background: rgba(0, 0, 0, 0.85);
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: -6px;
+  -webkit-box-shadow: inset 0 0 0 3px #ffffff;
+          box-shadow: inset 0 0 0 3px #ffffff;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button svg {
+  fill: white;
+  position: relative;
+  z-index: 1;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button .audio-play-button__icon--pause {
+  display: none;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--play {
+  display: none;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__thumbnail--playable .audio-play-button.is-playing .audio-play-button__icon--pause {
+  display: block;
+}
+.vertical-card__media .media--teaser-featured.media--audio .media__audio-source {
+  block-size: 0;
+  overflow: hidden;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+.vertical-card__media .media--teaser-featured.media--audio {
+  block-size: auto;
+  -webkit-margin-after: var(--v-space-5xs);
+          margin-block-end: var(--v-space-5xs);
 }
 .vertical-card__media .media--remote_video,
 .vertical-card__media .media--soundcloud {
