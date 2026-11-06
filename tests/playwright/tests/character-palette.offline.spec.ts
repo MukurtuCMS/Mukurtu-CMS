@@ -131,10 +131,11 @@ async function load(page: Page, groups = GROUPS, platform = 'Linux x86_64'): Pro
 
 // Adds a field run by the real Tagify library, for behavior a stand-in can't
 // show: Tagify keeps its own idea of whether it has focus.
-async function addRealTagify(page: Page): Promise<void> {
+async function addRealTagify(page: Page, closedList = false): Promise<void> {
   await page.addStyleTag({ path: path.join(TAGIFY_DIR, 'tagify.css') });
   await page.addScriptTag({ path: path.join(TAGIFY_DIR, 'tagify.js') });
-  await page.evaluate(() => {
+  await page.addScriptTag({ path: path.join(MODULE_DIR, 'js/mukurtu-tagify-override.js') });
+  await page.evaluate((enforceWhitelist) => {
     const input = document.createElement('input');
     input.id = 'real';
     input.className = 'tagify-widget';
@@ -142,13 +143,16 @@ async function addRealTagify(page: Page): Promise<void> {
     document.body.prepend(input);
     const tagify = new (window as any).Tagify(input, {
       whitelist: [],
-      enforceWhitelist: false,
+      enforceWhitelist,
       addTagOn: ['blur', 'tab', 'enter'],
       dropdown: { enabled: 1, highlightFirst: true },
     });
-    // As mukurtu-tagify-override.js does, so commas can be part of a term.
-    // With its default delimiters, Tagify makes a tag out of a new line.
-    tagify.settings.delimiters = null;
+    // Commas can be part of a term, so this turns delimiters off. With
+    // them on, Tagify makes a tag out of a new line.
+    (window as any).Drupal.behaviors.mukurtuTagifyOverride.attach(document);
+    tagify.on('dropdown:show', () => {
+      (window as any).suggested = tagify.state.dropdown.query;
+    });
     // Suggestions arrive later, as they do from the Tagify module's fetch.
     tagify.on('input', (event: any) => {
       const { value } = event.detail;
@@ -158,7 +162,7 @@ async function addRealTagify(page: Page): Promise<void> {
       }, 200);
     });
     (window as any).Drupal.behaviors.mukurtuCharacterPalette.attach(document);
-  });
+  }, closedList);
 }
 
 const corner = (page: Page) => page.getByRole('button', { name: 'Character palette' });
@@ -352,14 +356,26 @@ test.describe('Character palette', () => {
     await expect(box).toBeFocused();
     // Suggestions for the finished text being open is what took Enter away
     // from Tagify.
-    await page.waitForFunction(() => {
-      const real = document.getElementById('real') as any;
-      return real.__tagify.state.dropdown.visible === 'helloḵ';
-    });
+    await page.waitForFunction(() => (window as any).suggested === 'helloḵ');
 
     await page.keyboard.press('Enter');
     await expect(page.locator('tags .tagify__tag')).toHaveCount(1);
     await expect(page.locator('tags .tagify__tag')).toContainText('helloḵ');
+    await expect(box).toHaveText('');
+  });
+
+  test('Enter takes the suggestion in a closed list after a mouse insert', async ({ page }) => {
+    await load(page);
+    await addRealTagify(page, true);
+    const box = page.locator('tags .tagify__input').first();
+    await box.click();
+    await page.keyboard.type('hello');
+    await corner(page).click();
+    await panel(page).getByRole('button', { name: 'k underbar' }).click();
+    await page.waitForFunction(() => (window as any).suggested === 'helloḵ');
+
+    await page.keyboard.press('Enter');
+    await expect(page.locator('tags .tagify__tag')).toHaveCount(1);
     await expect(box).toHaveText('');
   });
 

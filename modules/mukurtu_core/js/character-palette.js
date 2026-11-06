@@ -257,7 +257,13 @@
       tagify.on('dropdown:show', function () {
         if (!target.hasFocus()) {
           tagify.dropdown.hide();
+          return;
         }
+        // Tagify only listens for keys when suggestions open from closed,
+        // and a palette click closes them. If new ones arrive right after,
+        // nothing handles Enter and the browser adds a new line. Listening
+        // twice is safe: it's the same function each time.
+        tagify.dropdown.events.binding.call(tagify);
       });
     }
 
