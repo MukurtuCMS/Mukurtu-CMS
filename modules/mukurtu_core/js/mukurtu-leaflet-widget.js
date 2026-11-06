@@ -105,9 +105,25 @@
       // Move the location-description input's onblur handler to a
       // delegated listener (CSP-friendlier than an inline attribute, and
       // avoids re-attaching it for every marker).
-      $(map.getContainer()).on('focusout', '.mukurtu-leaflet-description-field', function () {
+      $(map.getContainer()).on('focusout', '.mukurtu-leaflet-description-field', function (event) {
+        // The character palette (#2560) sits outside the popup, but moving
+        // to it isn't leaving the field.
+        if (event.relatedTarget && event.relatedTarget.closest('.mukurtu-character-palette, .mukurtu-character-palette__toggle')) {
+          return;
+        }
         const popupId = $(this).attr('id').replace('location-popup-', '');
         Drupal.mukurtuSetLocationDescription(containerId, popupId);
+      });
+
+      // The character palette types into the field while focus is on its own
+      // buttons, and the popup may be closed without focus ever coming back,
+      // so keep the description current as it changes. Without closing the
+      // popup, which the focusout handler above does.
+      $(map.getContainer()).on('input', '.mukurtu-leaflet-description-field', function () {
+        const layer = Drupal.Leaflet[containerId].lMap._layers[$(this).attr('id').replace('location-popup-', '')];
+        if (layer && layer.feature) {
+          layer.feature.properties['location_description'] = this.value;
+        }
       });
 
       /* Mukurtu accessibility additions end. */
@@ -158,6 +174,13 @@
         const locationDescription = event.popup._source.feature.properties['location_description'] ?? '';
         const $input = $('#location-popup-' + event.popup._source._leaflet_id);
         $input.val(locationDescription);
+        // The popup's markup is rebuilt each time it opens, so the character
+        // palette (#2560) registers the new input here, before focus moves
+        // into it, so it counts as the field last typed in.
+        if (Drupal.behaviors.mukurtuCharacterPalette) {
+          $input.attr('data-mukurtu-character-palette', '');
+          Drupal.behaviors.mukurtuCharacterPalette.attach(event.popup._contentNode);
+        }
         // Move focus into the popup for keyboard users - Leaflet opens it
         // without moving focus off the marker.
         $input.trigger('focus');
