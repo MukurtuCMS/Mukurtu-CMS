@@ -61,6 +61,12 @@ class UploadTooLargeSubscriberTest extends KernelTestBase {
     $commands = json_encode($response->getCommands());
     $this->assertStringContainsString('This file is too large to upload. The maximum file size is 2 MB.', $commands);
     $this->assertStringNotContainsString('unrecoverable', $commands);
+
+    // Screen readers get the same message.
+    $announcements = array_values(array_filter($response->getCommands(), fn(array $command) => $command['command'] === 'announce'));
+    $this->assertCount(1, $announcements);
+    $this->assertSame('This file is too large to upload. The maximum file size is 2 MB.', $announcements[0]['text']);
+    $this->assertSame('assertive', $announcements[0]['priority']);
   }
 
   /**

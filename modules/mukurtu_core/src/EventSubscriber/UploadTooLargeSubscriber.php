@@ -3,6 +3,7 @@
 namespace Drupal\mukurtu_core\EventSubscriber;
 
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\PrependCommand;
 use Drupal\Core\Form\Exception\BrokenPostRequestException;
 use Drupal\Core\Form\FormBuilderInterface;
@@ -47,11 +48,15 @@ class UploadTooLargeSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    $this->messenger->addError($this->t('This file is too large to upload. The maximum file size is @size.', [
+    $message = $this->t('This file is too large to upload. The maximum file size is @size.', [
       '@size' => ByteSizeMarkup::create((int) $exception->getSize()),
-    ]));
+    ]);
+    $this->messenger->addError($message);
     $response = new AjaxResponse(NULL, 200);
     $response->addCommand(new PrependCommand(NULL, ['#type' => 'status_messages']));
+    // Screen readers aren't told about the message above, because it isn't
+    // added to a live region.
+    $response->addCommand(new AnnounceCommand((string) $message, AnnounceCommand::PRIORITY_ASSERTIVE));
     $event->allowCustomResponseCode();
     $event->setResponse($response);
   }
