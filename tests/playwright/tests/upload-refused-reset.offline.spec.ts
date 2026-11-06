@@ -29,13 +29,15 @@ const FIXTURE = `
 
 test.beforeEach(async ({ page }) => {
   await page.setContent(FIXTURE);
-  await page.addScriptTag({ content: '
-    window.__announced = [];
-    window.Drupal = {
-      AjaxCommands: function () {},
-      announce: (text, priority) => window.__announced.push([text, priority]),
-    };
-  ' });
+  await page.addScriptTag({
+    content: `
+      window.__announced = [];
+      window.Drupal = {
+        AjaxCommands: function () {},
+        announce: (text, priority) => window.__announced.push([text, priority]),
+      };
+    `,
+  });
   await page.addScriptTag({ content: COMMAND });
   const file = { name: 'too-large.mp4', mimeType: 'video/mp4', buffer: Buffer.from('video') };
   await page.locator('#video').setInputFiles(file);
