@@ -20,10 +20,12 @@
 }
 
 /* One button in a corner of the page, above the cookie settings button.
- * Round, and well above the 24 by 24 pixel minimum (WCAG 2.5.8). */
+ * Round, and well above the 24 by 24 pixel minimum (WCAG 2.5.8).
+ * Below Klaro's z-index range (999 to 1001), so a kept-open panel never
+ * covers the cookie consent controls. */
 .mukurtu-character-palette__toggle {
   position: fixed;
-  z-index: 1000;
+  z-index: 998;
   inset-block-end: 5rem;
   inset-inline-end: 1rem;
   display: inline-flex;
@@ -66,7 +68,7 @@
  * than climbing over the page's sticky header and Save button. */
 .mukurtu-character-palette {
   position: fixed;
-  z-index: 1000;
+  z-index: 998;
   inset-block-end: 8.5rem;
   inset-inline-end: 1rem;
   max-inline-size: min(34rem, calc(100vw - 2rem));

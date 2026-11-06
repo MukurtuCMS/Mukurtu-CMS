@@ -426,6 +426,27 @@ test.describe('Character palette', () => {
     await expect(panel(page)).toBeHidden();
   });
 
+  test('stays under the cookie consent dialog', async ({ page }) => {
+    await load(page);
+    await corner(page).click();
+    // Earlier in the page, so a tie at Klaro's z-index would go to the palette.
+    await page.evaluate(() => {
+      const dialog = document.createElement('div');
+      dialog.id = 'consent';
+      dialog.style.cssText = 'position:fixed;inset:0;z-index:1000;background:#fff';
+      document.body.prepend(dialog);
+    });
+
+    for (const element of [panel(page), corner(page)]) {
+      const box = await element.boundingBox();
+      const onTop = await page.evaluate(
+        ([x, y]) => document.elementFromPoint(x, y)?.id,
+        [box!.x + box!.width / 2, box!.y + box!.height / 2],
+      );
+      expect(onTop).toBe('consent');
+    }
+  });
+
   test('switches language and remembers it', async ({ page }) => {
     await load(page);
     await corner(page).click();
