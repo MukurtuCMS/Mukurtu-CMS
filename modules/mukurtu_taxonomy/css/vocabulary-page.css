@@ -10,6 +10,7 @@
 }
 
 .vocabulary-page__list li {
+  list-style: none;
   padding-block: 0.2rem;
 }
 
