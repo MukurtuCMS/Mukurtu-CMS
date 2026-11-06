@@ -6,9 +6,11 @@
  * the characters site managers listed on the Character palette settings
  * page, and each character goes into whichever marked field had focus last:
  * a text field, a rich text editor or a Tagify box. Ctrl+Shift+Space jumps
- * from a field to the panel and back, and Escape goes back with the caret
- * where it was. The panel never stays over whatever has focus, even when
- * kept open. "Keep open" leaves the panel up while people type.
+ * from a field to the panel and back (Option+Shift+Space on a Mac, where
+ * macOS keeps the other for switching input sources), and Escape goes back
+ * with the caret where it was. The panel never stays over whatever has focus,
+ * even when kept open. "Keep open" leaves the panel up while people type, and
+ * opens it again on the next page.
  *
  * Mouse and touch insertion keep focus in the field, so the caret stays put
  * and a phone keyboard stays open.
@@ -29,7 +31,7 @@
 
   const PIN_KEY = 'mukurtu.characterPalette.pinned';
   const LANGUAGE_KEY = 'mukurtu.characterPalette.language';
-  const SHORTCUT = 'Ctrl+Shift+Space';
+  const IS_MAC = /^(Mac|iPhone|iPad|iPod)/.test(navigator.platform);
 
   /**
    * Drupal.t() escapes @ placeholders for HTML. Text set through
@@ -58,6 +60,17 @@
     catch (e) {
       // Nothing to remember it in.
     }
+  }
+
+  /**
+   * Whether a key press is the palette's shortcut.
+   *
+   * Goes by the physical key: Option can make event.key "Unidentified".
+   */
+  function isShortcut(event) {
+    const modifier = IS_MAC ? event.altKey : event.ctrlKey;
+    const otherModifier = IS_MAC ? event.ctrlKey : event.altKey;
+    return event.code === 'Space' && event.shiftKey && modifier && !otherModifier && !event.metaKey;
   }
 
   /**
@@ -162,6 +175,17 @@
 
       hasFocus() {
         return target.contains(document.activeElement);
+      },
+
+      // Tagify decides it lost focus on any click outside its box, even a
+      // palette click that left focus there. Then, with suggestions open,
+      // nothing handles Enter and the browser adds a new line to the box.
+      restoreTagifyFocus() {
+        const tagify = tagifyFor(input);
+        if (tagify && target.hasFocus()) {
+          tagify.state.hasFocus = Date.now();
+          tagify.toggleFocusClass(true);
+        }
       },
 
       focus() {
@@ -281,6 +305,8 @@
    * Builds the page's palette: the corner button and its panel.
    */
   function buildPalette(groups) {
+    const shortcut = IS_MAC ? Drupal.t('Option+Shift+Space') : Drupal.t('Ctrl+Shift+Space');
+
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'mukurtu-character-palette__toggle';
@@ -291,7 +317,7 @@
     icon.textContent = 'Á̱';
     button.appendChild(icon);
     button.setAttribute('aria-label', Drupal.t('Character palette'));
-    button.title = plain(Drupal.t('Character palette (@shortcut)', {'@shortcut': SHORTCUT}));
+    button.title = plain(Drupal.t('Character palette (@shortcut)', {'@shortcut': shortcut}));
     button.setAttribute('aria-expanded', 'false');
     button.setAttribute('aria-controls', 'mukurtu-character-palette');
 
@@ -300,7 +326,7 @@
     // Hidden, so reading through the page doesn't meet it on its own. A
     // description reference still reads hidden text.
     description.hidden = true;
-    description.textContent = plain(Drupal.t('Inserts characters into the field you were last typing in. Shortcut: @shortcut. Press Escape to go back to the field.', {'@shortcut': SHORTCUT}));
+    description.textContent = plain(Drupal.t('Inserts characters into the field you were last typing in. Shortcut: @shortcut. Press Escape to go back to the field.', {'@shortcut': shortcut}));
     button.setAttribute('aria-describedby', description.id);
 
     const panel = document.createElement('div');
@@ -391,6 +417,11 @@
       element.addEventListener('pointerdown', function (event) {
         if (current && current.hasFocus() && event.target.closest('button')) {
           event.preventDefault();
+        }
+      });
+      element.addEventListener('click', function () {
+        if (current) {
+          current.restoreTagifyFocus();
         }
       });
     });
@@ -545,6 +576,10 @@
     });
 
     document.body.append(button, description, panel);
+    // Kept open from the last page. Focus stays where the page put it.
+    if (pin.checked) {
+      open(false);
+    }
     return {button: button, panel: panel, open: open, returnToField: returnToField};
   }
 
@@ -564,9 +599,9 @@
     }
   });
 
-  // Ctrl+Shift+Space: from a field to the palette, and back again.
+  // The shortcut: from a field to the palette, and back again.
   document.addEventListener('keydown', function (event) {
-    if (!palette || event.code !== 'Space' || !event.ctrlKey || !event.shiftKey || event.altKey || event.metaKey) {
+    if (!palette || !isShortcut(event)) {
       return;
     }
     event.preventDefault();

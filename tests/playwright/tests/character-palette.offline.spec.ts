@@ -9,9 +9,14 @@ import path = require('path');
  * stand-in CKEditor and Tagify instances, and the module's real
  * character-palette.js and CSS. Which inputs get the palette is decided
  * server side and covered by CharacterPaletteTest.
+ *
+ * Simulated key presses never reach the operating system, so these tests
+ * can't show that a shortcut is free on a real machine. That has to be tried
+ * by hand: macOS keeps Ctrl+Shift+Space for itself, and only real keys show it.
  */
 
 const MODULE_DIR = path.join(__dirname, '../../../modules/mukurtu_core');
+const TAGIFY_DIR = path.join(__dirname, '../../../libraries/tagify/dist');
 const ORIGIN = 'http://palette.test';
 
 const GROUPS = [
@@ -110,13 +115,50 @@ function fixture(groups: typeof GROUPS): string {
 </body></html>`;
 }
 
-async function load(page: Page, groups = GROUPS): Promise<void> {
+// The platform is set so the shortcut under test doesn't depend on the
+// machine running the suite.
+async function load(page: Page, groups = GROUPS, platform = 'Linux x86_64'): Promise<void> {
+  await page.addInitScript((value) => {
+    Object.defineProperty(navigator, 'platform', { get: () => value, configurable: true });
+  }, platform);
   await page.unrouteAll();
   await page.route(`${ORIGIN}/**`, (route) => route.fulfill({ contentType: 'text/html; charset=utf-8', body: fixture(groups) }));
   await page.goto(`${ORIGIN}/`);
   await page.addStyleTag({ path: path.join(MODULE_DIR, 'css/character-palette.css') });
   await page.addScriptTag({ path: path.join(MODULE_DIR, 'js/character-palette.js') });
   await page.evaluate(() => (window as any).Drupal.behaviors.mukurtuCharacterPalette.attach(document));
+}
+
+// Adds a field run by the real Tagify library, for behavior a stand-in can't
+// show: Tagify keeps its own idea of whether it has focus.
+async function addRealTagify(page: Page): Promise<void> {
+  await page.addStyleTag({ path: path.join(TAGIFY_DIR, 'tagify.css') });
+  await page.addScriptTag({ path: path.join(TAGIFY_DIR, 'tagify.js') });
+  await page.evaluate(() => {
+    const input = document.createElement('input');
+    input.id = 'real';
+    input.className = 'tagify-widget';
+    input.setAttribute('data-mukurtu-character-palette', '');
+    document.body.prepend(input);
+    const tagify = new (window as any).Tagify(input, {
+      whitelist: [],
+      enforceWhitelist: false,
+      addTagOn: ['blur', 'tab', 'enter'],
+      dropdown: { enabled: 1, highlightFirst: true },
+    });
+    // As mukurtu-tagify-override.js does, so commas can be part of a term.
+    // With its default delimiters, Tagify makes a tag out of a new line.
+    tagify.settings.delimiters = null;
+    // Suggestions arrive later, as they do from the Tagify module's fetch.
+    tagify.on('input', (event: any) => {
+      const { value } = event.detail;
+      window.setTimeout(() => {
+        tagify.whitelist = ['helloḵ'];
+        tagify.dropdown.show(value);
+      }, 200);
+    });
+    (window as any).Drupal.behaviors.mukurtuCharacterPalette.attach(document);
+  });
 }
 
 const corner = (page: Page) => page.getByRole('button', { name: 'Character palette' });
@@ -296,6 +338,76 @@ test.describe('Character palette', () => {
 
     await page.locator('#plain').focus();
     expect(await page.evaluate(() => (window as any).tagged)).toEqual(['aḵb']);
+  });
+
+  test('Enter makes a tag after a mouse insert into a real Tagify box', async ({ page }) => {
+    await load(page);
+    await addRealTagify(page);
+    const box = page.locator('tags .tagify__input').first();
+    await box.click();
+    await page.keyboard.type('hello');
+    await corner(page).click();
+    await panel(page).getByRole('button', { name: 'k underbar' }).click();
+    await expect(box).toHaveText('helloḵ');
+    await expect(box).toBeFocused();
+    // Suggestions for the finished text being open is what took Enter away
+    // from Tagify.
+    await page.waitForFunction(() => {
+      const real = document.getElementById('real') as any;
+      return real.__tagify.state.dropdown.visible === 'helloḵ';
+    });
+
+    await page.keyboard.press('Enter');
+    await expect(page.locator('tags .tagify__tag')).toHaveCount(1);
+    await expect(page.locator('tags .tagify__tag')).toContainText('helloḵ');
+    await expect(box).toHaveText('');
+  });
+
+  test('uses Option+Shift+Space on a Mac, where macOS keeps Ctrl+Shift+Space', async ({ page }) => {
+    await load(page, GROUPS, 'MacIntel');
+    await expect(corner(page)).toHaveAttribute('title', 'Character palette (Option+Shift+Space)');
+    await expect(corner(page)).toHaveAccessibleDescription('Inserts characters into the field you were last typing in. Shortcut: Option+Shift+Space. Press Escape to go back to the field.');
+
+    const term = page.locator('#term');
+    await term.focus();
+    await page.keyboard.press('Control+Shift+Space');
+    await expect(panel(page)).toBeHidden();
+
+    await page.keyboard.press('Alt+Shift+Space');
+    await expect(panel(page).getByRole('button', { name: 'x underbar ejective' })).toBeFocused();
+    await page.keyboard.press('Alt+Shift+Space');
+    await expect(term).toBeFocused();
+    await expect(term).toHaveValue('');
+  });
+
+  test('ignores Option+Shift+Space off a Mac', async ({ page }) => {
+    await load(page);
+    await page.locator('#term').focus();
+    await page.keyboard.press('Alt+Shift+Space');
+    await expect(panel(page)).toBeHidden();
+  });
+
+  test('reopens on the next page when kept open, without taking focus', async ({ page }) => {
+    await load(page);
+    await corner(page).click();
+    await panel(page).getByLabel('Keep open').check();
+
+    await load(page);
+    await expect(panel(page)).toBeVisible();
+    await expect(corner(page)).toHaveAttribute('aria-expanded', 'true');
+    await expect(panel(page).getByLabel('Keep open')).toBeChecked();
+    expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
+
+    // Still never stays over the focus.
+    await page.locator('#under').focus();
+    await expect(panel(page)).toBeHidden();
+
+    // Unchecked, it stays closed.
+    await page.locator('#term').focus();
+    await corner(page).click();
+    await panel(page).getByLabel('Keep open').uncheck();
+    await load(page);
+    await expect(panel(page)).toBeHidden();
   });
 
   test('switches language and remembers it', async ({ page }) => {
