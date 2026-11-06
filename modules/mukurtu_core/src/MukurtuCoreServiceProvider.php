@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_core;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
+use Drupal\mukurtu_core\Routing\AdminThemePathsAdminContext;
 use Drupal\mukurtu_core\Service\DbIpFallbackGeoIpService;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -34,6 +35,22 @@ class MukurtuCoreServiceProvider extends ServiceProviderBase {
       ->setDecoratedService('visitors_geoip.lookup')
       ->addArgument(new Reference('mukurtu_core.dbip_geoip_fallback.inner'))
       ->addArgument(new Reference('mukurtu_core.dbip_locator'));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function alter(ContainerBuilder $container) {
+    // Admin Theme treats an empty "Exclude" path list as matching every page,
+    // which turns the administration theme off site-wide. Swap in a version
+    // that treats empty lists as matching nothing. This runs in alter(), not
+    // register(), so Admin Theme's own definition is always present. Changing
+    // only the class keeps Admin Theme's arguments and its decoration of
+    // router.admin_context as they are.
+    if ($container->hasDefinition('admin_theme.admin_context')) {
+      $container->getDefinition('admin_theme.admin_context')
+        ->setClass(AdminThemePathsAdminContext::class);
+    }
   }
 
 }
