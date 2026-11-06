@@ -92,6 +92,13 @@ button beside them, and while filtering hides the buttons. */
   position: relative;
 }
 
+/* WCAG 1.4.10: pull nested lists back, so the indent above doesn't add up and
+push deep terms off a 320px screen. */
+.vocabulary-page--collapsible .vocabulary-page__list .vocabulary-page__list {
+  margin-inline-start: -1rem;
+  padding-inline-start: 0.25rem;
+}
+
 .vocabulary-page__toggle {
   background: none;
   border: 1px solid currentcolor;
@@ -107,6 +114,12 @@ button beside them, and while filtering hides the buttons. */
   padding: 0;
   position: absolute;
   width: 1.75rem;
+}
+
+/* The theme underlines buttons here, which turns + into a plus-minus sign. */
+.vocabulary-page__toggle:hover,
+.vocabulary-page__toggle:focus {
+  text-decoration: none;
 }
 
 .vocabulary-page__group {
