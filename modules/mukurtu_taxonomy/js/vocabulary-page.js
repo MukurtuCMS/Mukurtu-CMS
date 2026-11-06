@@ -61,6 +61,9 @@
     branch.button.addEventListener('click', function () {
       branch.open = !branch.open;
       showBranch(branch);
+      // Opening a branch rebalances the columns, which can move the card, and
+      // focus has to stay in view (WCAG 2.4.11).
+      branch.button.scrollIntoView({block: 'nearest'});
     });
     term.prepend(branch.button);
     showBranch(branch);

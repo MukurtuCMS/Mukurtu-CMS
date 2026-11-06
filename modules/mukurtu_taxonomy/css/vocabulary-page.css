@@ -112,6 +112,7 @@ push deep terms off a 320px screen. */
   line-height: 1;
   padding: 0;
   position: absolute;
+  scroll-margin-block: 6rem;
   width: 1.75rem;
 }
 
@@ -144,6 +145,12 @@ push deep terms off a 320px screen. */
   margin-block: 0 0.25rem;
   overflow-wrap: anywhere;
   scroll-margin-block-start: 6rem;
+}
+
+/* WCAG 1.4.3: headings this size need 4.5:1, which the theme's lighter heading
+link color doesn't reach on every palette. */
+.vocabulary-page__card h2 a {
+  color: var(--brand-primary-dark);
 }
 
 .vocabulary-page__columns {
