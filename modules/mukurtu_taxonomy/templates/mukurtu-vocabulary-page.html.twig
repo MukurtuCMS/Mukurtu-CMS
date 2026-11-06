@@ -17,7 +17,8 @@
 
 {% macro terms(items) %}
   {% import _self as vocabulary %}
-  <ul class="vocabulary-page__list">
+  {# Safari drops list semantics when bullets are removed, unless role is set. #}
+  <ul class="vocabulary-page__list" role="list">
     {% for item in items %}
       <li data-vocabulary-term>
         <a href="{{ item.url }}" data-vocabulary-term-name>{{ item.name }}</a>
