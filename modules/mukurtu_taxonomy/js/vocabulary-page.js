@@ -23,6 +23,10 @@
       const name = term.querySelector(':scope > [data-vocabulary-term-name]').textContent;
       const nested = term.querySelector(':scope > ul');
       const nestedMatches = nested ? filterList(nested, query) : 0;
+      if (nested) {
+        // An empty list is invalid for assistive technology.
+        nested.hidden = nestedMatches === 0;
+      }
       const isMatch = normalize(name).includes(query);
       term.hidden = !isMatch && nestedMatches === 0;
       matches += nestedMatches + (isMatch ? 1 : 0);

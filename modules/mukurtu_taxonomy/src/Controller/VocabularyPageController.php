@@ -50,7 +50,11 @@ class VocabularyPageController extends ControllerBase {
       $this->entityTypeManager()->getStorage('taxonomy_term')->loadTree($taxonomy_vocabulary->id(), 0, NULL, TRUE),
       fn ($term) => $term->access('view'),
     );
-    $items = $this->buildItems($terms);
+    $by_parent = [];
+    foreach ($terms as $term) {
+      $by_parent[(int) reset($term->parents)][] = $term;
+    }
+    $items = $this->buildItems($by_parent);
     $tools = count($terms) >= static::TOOLS_MINIMUM;
 
     return [
@@ -69,8 +73,8 @@ class VocabularyPageController extends ControllerBase {
   /**
    * Builds the nested list items.
    *
-   * @param \Drupal\taxonomy\TermInterface[] $terms
-   *   A vocabulary's terms, from loadTree().
+   * @param array $by_parent
+   *   A vocabulary's terms, keyed by the ID of their parent.
    * @param int $parent
    *   The ID of the term whose children to build.
    *
@@ -78,17 +82,14 @@ class VocabularyPageController extends ControllerBase {
    *   Items with a name, url and below, ordered by weight, then by translated
    *   name, because loadTree() orders names in the default language.
    */
-  protected function buildItems(array $terms, int $parent = 0): array {
+  protected function buildItems(array $by_parent, int $parent = 0): array {
     $items = [];
-    foreach ($terms as $term) {
-      if ((int) reset($term->parents) !== $parent) {
-        continue;
-      }
+    foreach ($by_parent[$parent] ?? [] as $term) {
       $items[] = [
         'name' => (string) $this->entityTranslationResolver->translate($term)->label(),
         'url' => $term->toUrl()->toString(),
         'weight' => (int) $term->getWeight(),
-        'below' => $this->buildItems($terms, (int) $term->id()),
+        'below' => $this->buildItems($by_parent, (int) $term->id()),
       ];
     }
     usort($items, fn ($a, $b) => [$a['weight'], mb_strtolower($a['name'])] <=> [$b['weight'], mb_strtolower($b['name'])]);
