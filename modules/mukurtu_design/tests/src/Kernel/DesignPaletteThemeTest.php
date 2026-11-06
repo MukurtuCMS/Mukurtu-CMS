@@ -56,6 +56,23 @@ class DesignPaletteThemeTest extends KernelTestBase {
     $this->assertNotEmpty(array_filter($libraries, fn ($library) => str_starts_with($library, 'mukurtu_v4/palette.')));
   }
 
+  /**
+   * Hooks share one attachments array, so this one must not drop their tags.
+   *
+   * The character palette's settings tag was lost this way, so saving those
+   * settings left cached public pages without the palette.
+   */
+  public function testPaletteKeepsCacheMetadataFromEarlierHooks(): void {
+    $this->config('system.theme')->set('default', 'mukurtu_v4')->save();
+    $this->setActiveTheme('mukurtu_v4');
+
+    $attachments = ['#cache' => ['tags' => ['config:from_an_earlier_hook']]];
+    \Drupal::classResolver(DesignPalette::class)->enablePalette($attachments);
+
+    $this->assertContains('config:from_an_earlier_hook', $attachments['#cache']['tags']);
+    $this->assertContains('config:' . DesignPalette::SETTINGS, $attachments['#cache']['tags']);
+  }
+
   public function testPaletteNotAttachedWhenActiveThemeIsNotDefault(): void {
     $this->config('system.theme')->set('default', 'mukurtu_v4')->save();
     $this->setActiveTheme('gin');
