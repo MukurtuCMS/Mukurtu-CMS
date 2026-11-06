@@ -257,6 +257,7 @@ jobs:
             tests/playwright/test-results/a11y/
             tests/playwright/test-results/a11y-extra/
             tests/playwright/test-results/report.json
+            tests/playwright/test-results/default-content-*/error-context.md
           if-no-files-found: warn
           retention-days: 30
 
@@ -390,5 +391,6 @@ jobs:
             tests/playwright/test-results/a11y/
             tests/playwright/test-results/a11y-extra/
             tests/playwright/test-results/report.json
+            tests/playwright/test-results/default-content-*/error-context.md
           if-no-files-found: warn
           retention-days: 30
