@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_taxonomy\Kernel;
 
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Http\Exception\CacheableNotFoundHttpException;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
@@ -22,6 +23,8 @@ use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\TermInterface;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use Drupal\views\Entity\View;
+use Drupal\views\Views;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -294,6 +297,52 @@ class TermVisibilityTest extends KernelTestBase {
       $this->assertContains('user.node_grants:view', $e->getCacheContexts());
       $this->assertContains('node_list', $e->getCacheTags());
     }
+  }
+
+  /**
+   * A term's ID doesn't redirect to its alias, which contains its name.
+   */
+  public function testTermPathDoesNotRedirectToItsAlias(): void {
+    $route = $this->container->get('router.route_provider')->getRouteByName('entity.taxonomy_term.canonical');
+    $this->assertTrue($route->getDefault('_disable_route_normalizer'));
+  }
+
+  /**
+   * The shipped Categories view only lists terms the visitor can see.
+   */
+  public function testCategoriesView(): void {
+    Vocabulary::create(['vid' => 'category', 'name' => 'Category'])->save();
+    $category = function (string $name, Protocol $protocol): int {
+      $term = Term::create(['vid' => 'category', 'name' => $name, 'parent' => 0]);
+      $term->save();
+      $this->tag($term, $protocol);
+      return (int) $term->id();
+    };
+    $public = $category('Public', $this->open);
+    $sensitive = $category('Sensitive', $this->strict);
+
+    $path = $this->container->get('extension.list.module')->getPath('mukurtu_core');
+    $values = Yaml::decode(file_get_contents("$path/config/install/views.view.mukurtu_categories.yml"));
+    unset($values['dependencies']);
+    View::create($values)->save();
+
+    $tids = function (AccountInterface $account): array {
+      $this->container->get('current_user')->setAccount($account);
+      $this->container->set('mukurtu_core.term_visibility', NULL);
+      $view = Views::getView('mukurtu_categories');
+      $view->setDisplay('default');
+      $view->display_handler->setOption('pager', ['type' => 'none']);
+      $view->preExecute();
+      $view->execute();
+      return array_map(fn ($row) => (int) $row->tid, $view->result);
+    };
+    $this->assertSame([$public], $tids(User::getAnonymousUser()));
+    $this->assertEqualsCanonicalizing([$public, $sensitive], $tids($this->member));
+
+    $filter = Views::getView('mukurtu_categories');
+    $filter->setDisplay('default');
+    $filter->initHandlers();
+    $this->assertContains('user.node_grants:view', $filter->filter['mukurtu_visible_terms']->getCacheContexts());
   }
 
   /**

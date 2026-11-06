@@ -966,6 +966,8 @@ function mukurtu_core_update_40227(): string {
     'core.entity_view_display.community.community.default' => ['field_community_type'],
     'core.entity_view_display.community.community.full' => ['field_community_type'],
     'core.entity_view_display.media.audio.audio_for_dictionary_teaser' => ['field_contributor'],
+    'core.entity_view_display.media.audio.audio_for_dictionary_word' => ['field_contributor'],
+    'core.entity_view_display.media.audio.default' => ['field_contributor'],
     'core.entity_view_display.paragraph.dictionary_word_entry.default' => ['field_contributor', 'field_word_type'],
     'core.entity_view_display.paragraph.dictionary_word_entry.preview' => ['field_contributor'],
     'core.entity_view_display.paragraph.related_person.default' => ['field_relationship_type'],
