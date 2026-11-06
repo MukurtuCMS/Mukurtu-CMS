@@ -1,0 +1,12 @@
+# Keep the build context small. The profile itself (modules, themes, config,
+# recipes, patches, libraries) is the part the image needs.
+.git
+.github
+.tugboat
+.vscode
+docs
+tests
+node_modules
+**/node_modules
+# Example Compose files and their documentation: not part of the image.
+examples

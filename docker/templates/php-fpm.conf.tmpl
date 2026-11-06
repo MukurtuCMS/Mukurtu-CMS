@@ -1,0 +1,42 @@
+; Rendered by render-config.sh from MUKURTU_* environment variables.
+; Do not edit: changes are lost at the next start.
+
+[global]
+error_log = /proc/self/fd/2
+daemonize = no
+
+; Page requests. Sized for many idle sites on one host: with pm = ondemand no
+; PHP worker exists until a request arrives.
+[www]
+listen = @@MUKURTU_RUN_DIR@@/www.sock
+listen.mode = 0660
+pm = @@MUKURTU_FPM_PM@@
+pm.max_children = @@MUKURTU_FPM_MAX_CHILDREN@@
+@@MUKURTU_FPM_PM_SETTINGS@@
+pm.max_requests = @@MUKURTU_FPM_MAX_REQUESTS@@
+request_terminate_timeout = @@MUKURTU_PHP_MAX_EXECUTION_TIME@@s
+ping.path = /ping
+ping.response = pong
+; Settings are read from the environment by settings.php.
+clear_env = no
+env[MUKURTU_POOL] = www
+catch_workers_output = yes
+decorate_workers_output = no
+
+; Private file downloads (/system/files/*). Drupal streams these through PHP, so
+; each one holds a worker for as long as the client takes to download it. A
+; separate, capped pool stops a few large downloads from starving page requests.
+[files]
+listen = @@MUKURTU_RUN_DIR@@/files.sock
+listen.mode = 0660
+pm = ondemand
+pm.max_children = @@MUKURTU_FPM_FILES_MAX_CHILDREN@@
+pm.process_idle_timeout = @@MUKURTU_FPM_PROCESS_IDLE_TIMEOUT@@
+pm.max_requests = @@MUKURTU_FPM_MAX_REQUESTS@@
+; A download can legitimately take longer than a page request, and
+; max_execution_time (CPU time) still applies.
+request_terminate_timeout = 0
+clear_env = no
+env[MUKURTU_POOL] = files
+catch_workers_output = yes
+decorate_workers_output = no

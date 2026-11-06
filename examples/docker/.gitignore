@@ -1,0 +1,4 @@
+# Written by the generate-secrets.sh scripts: real passwords and your settings.
+# Never commit these.
+.env
+secrets/

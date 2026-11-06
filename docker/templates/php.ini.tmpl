@@ -1,0 +1,47 @@
+; Rendered by render-config.sh from MUKURTU_* environment variables.
+; Do not edit: changes are lost at the next start.
+
+; --- Resources -------------------------------------------------------------
+memory_limit = @@MUKURTU_PHP_MEMORY_LIMIT@@
+max_execution_time = @@MUKURTU_PHP_MAX_EXECUTION_TIME@@
+max_input_vars = @@MUKURTU_PHP_MAX_INPUT_VARS@@
+upload_max_filesize = @@MUKURTU_UPLOAD_MAX@@
+post_max_size = @@MUKURTU_UPLOAD_MAX@@
+sys_temp_dir = @@MUKURTU_FILE_TEMP_PATH@@
+upload_tmp_dir = @@MUKURTU_FILE_TEMP_PATH@@
+date.timezone = @@MUKURTU_PHP_TIMEZONE@@
+
+; --- Hardening -------------------------------------------------------------
+expose_php = Off
+display_errors = Off
+display_startup_errors = Off
+html_errors = Off
+log_errors = On
+cgi.fix_pathinfo = 0
+zend.assertions = -1
+zend.exception_ignore_args = On
+allow_url_include = Off
+session.use_strict_mode = 1
+session.use_only_cookies = 1
+session.cookie_httponly = 1
+session.cookie_samesite = Lax
+; exec() is deliberately not disabled: Mukurtu runs ffmpeg and poppler with it.
+
+; --- Performance -----------------------------------------------------------
+realpath_cache_size = 4096K
+realpath_cache_ttl = 600
+opcache.enable = 1
+opcache.enable_cli = 0
+opcache.memory_consumption = @@MUKURTU_OPCACHE_MEMORY@@
+opcache.interned_strings_buffer = 16
+opcache.max_accelerated_files = @@MUKURTU_OPCACHE_MAX_FILES@@
+; The image is immutable, so PHP never needs to re-stat source files.
+opcache.validate_timestamps = 0
+; Drupal reads attributes and annotations from doc comments.
+opcache.save_comments = 1
+opcache.jit = 0
+opcache.jit_buffer_size = 0
+apc.enabled = 1
+apc.enable_cli = 0
+apc.shm_size = @@MUKURTU_APCU_MEMORY@@
+@@MUKURTU_PHP_MAIL_SETTINGS@@
