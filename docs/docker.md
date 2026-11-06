@@ -590,7 +590,8 @@ warmed, request the home page once after starting.
 | The first page after a start takes several seconds and the log warns about `max_children` | Normal on a cold start; see [Reading the start-up log](#reading-the-start-up-log). |
 | `mail was not sent: MUKURTU_SMTP_HOST is not set` | Mukurtu tried to send mail. Set up [Mail](#mail). |
 | Pages answer `400 Bad Request` | The `Host` header is not in `MUKURTU_TRUSTED_HOSTS`. |
-| Uploads fail without a message | Check `MUKURTU_UPLOAD_MAX`, and the limits of the reverse proxy in front. |
+| An upload says "file likely exceeded the maximum file size" | The file is over `MUKURTU_UPLOAD_MAX`. Raise it, or use a smaller file. |
+| An upload says "Oops, something went wrong" | A reverse proxy in front has a lower limit than `MUKURTU_UPLOAD_MAX`. Raise the proxy's limit. |
 | A video upload kills the container | Out of memory: `ffmpeg` is outside PHP's limit. Raise the container's memory limit; see [Sizing memory](#sizing-memory). |
 | The container shows `unhealthy` right after the first start | A fresh install takes a few minutes. The health check allows ten minutes before it counts failures. |
 | Large downloads make other private downloads wait | The private file pool is full. Raise `MUKURTU_FPM_FILES_MAX_CHILDREN`. |

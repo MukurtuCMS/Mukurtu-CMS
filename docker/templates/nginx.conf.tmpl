@@ -84,6 +84,10 @@ http {
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
+    # An upload over the limit: let Drupal say so, in the site's language. nginx's own
+    # 413 page is HTML, which Drupal's AJAX upload can only report as a generic error.
+    error_page 413 = @upload_too_large;
+
     # Health probe for the container: answered by php-fpm's ping handler, which
     # does not bootstrap Drupal, so it is cheap and does not touch the database.
     location = /healthz {
@@ -166,6 +170,19 @@ http {
 
     location @rewrite {
       rewrite ^ /index.php;
+    }
+
+    # The request without its upload. Drupal treats an AJAX form post with no data as one
+    # that was too large, and answers with its own message.
+    location @upload_too_large {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+      fastcgi_param SCRIPT_NAME /index.php;
+      fastcgi_param HTTP_PROXY "";
+      fastcgi_param CONTENT_LENGTH "";
+      fastcgi_pass_request_body off;
+      fastcgi_hide_header X-Content-Type-Options;
+      fastcgi_pass php_www;
     }
   }
 }

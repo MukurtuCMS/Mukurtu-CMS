@@ -26,6 +26,7 @@ header('X-Pool: ' . getenv('MUKURTU_POOL'));
 header('X-Content-Type-Options: nosniff');   // Drupal sets this itself
 if (str_contains($_SERVER['REQUEST_URI'] ?? '', 'bigpage')) { echo str_repeat('x', 6000000); }
 if (str_contains($_SERVER['REQUEST_URI'] ?? '', 'slow')) { sleep(8); }
+if (str_contains($_SERVER['REQUEST_URI'] ?? '', 'toolarge')) { echo $_SERVER['REQUEST_METHOD'] . ' body=' . strlen(file_get_contents('php://input')) . ' '; }
 echo 'index ' . ($_SERVER['REQUEST_URI'] ?? '') . ' script=' . ($_SERVER['SCRIPT_FILENAME'] ?? '');
 PHP
 echo '<?php echo "EXECUTED";' >"$STUB/sites/default/files/x.php"
@@ -111,6 +112,16 @@ echo "uploads are buffered in the upload temp area, not in the small run directo
 docker exec "$NAME" sh -c 'head -c 20000000 /dev/zero > /tmp/upload.bin'
 upload="$(docker exec "$NAME" curl -s -o /dev/null -w '%{http_code}' --max-time 20 --data-binary @/tmp/upload.bin http://127.0.0.1:8080/index.php)"
 assert_eq "200" "$upload" "a 20 MB upload succeeds although the run directory holds only 4 MB"
+
+echo "an upload over the limit reaches Drupal without its body, so Drupal can explain it"
+# nginx's own 413 page is HTML, which Drupal's AJAX upload reports as "Oops, something went
+# wrong". Drupal answers an empty AJAX form post with its file size message instead.
+docker exec "$NAME" sh -c 'head -c 110000000 /dev/zero > /tmp/upload.bin'
+too_large="$(docker exec "$NAME" curl -s -w ' status=%{http_code}' --max-time 20 --data-binary @/tmp/upload.bin 'http://127.0.0.1:8080/toolarge?ajax_form=1')"
+docker exec "$NAME" rm -f /tmp/upload.bin
+assert_contains "$too_large" "status=200" "an upload over the limit gets Drupal's answer, not nginx's 413"
+assert_contains "$too_large" "POST body=0" "PHP sees the post without its body"
+assert_contains "$too_large" "ajax_form=1" "the query string that marks an AJAX form survives"
 
 echo "headers are not sent twice, large pages stay in memory, and login tokens are not logged"
 count_header() { grep -ci "^$2:" <<<"$1" || true; }
