@@ -117,7 +117,14 @@ them in production. The full tagging and publishing rules are in
 
 ## Settings (environment variables)
 
-Every setting is an environment variable. Nothing is edited inside the container.
+Every setting is an environment variable. Nothing is edited inside the container,
+and changing a setting needs no rebuild: run `docker compose up -d`, and the
+container restarts with the new value.
+
+In the Compose examples, a setting reaches the container only if it's listed under
+`environment:` in `docker-compose.yml`. Adding one to `.env` isn't enough, unless
+`.env.example` already lists it.
+
 In the tables, **Required** means the container refuses to start without it, and a
 blank default means "not set".
 
@@ -189,7 +196,23 @@ Compose files use (`READ-COMMITTED`, row-based logging, `max_allowed_packet`).
 | --- | --- | --- |
 | `MUKURTU_FILE_TEMP_PATH` | `/tmp` | Where uploads are written before Drupal moves them into place. An upload is held here twice while it is processed (nginx buffers it, then PHP receives a copy), so size this for **twice** the largest upload. What backs this directory is your choice: a **tmpfs** is fast but counts against the container's memory limit, while a **size-capped volume** uses disk. The directory must be writable by uid 1000. |
 | `MUKURTU_CONFIG_SYNC_DIR` | `/var/www/files/private/config-sync` | Drupal's configuration sync directory. Keep it outside the web root; the default is in the private volume. |
-| `MUKURTU_UPLOAD_MAX` | `100M` | Largest upload. Sets PHP's `upload_max_filesize` and `post_max_size` and nginx's `client_max_body_size` together. Also reverse proxies have limits of their own (nginx's default is 1M): raise theirs too. |
+| `MUKURTU_UPLOAD_MAX` | `100M` | Largest upload. Sets PHP's `upload_max_filesize` and `post_max_size` and nginx's `client_max_body_size` together. Reverse proxies have limits of their own (nginx's default is 1M), so raise theirs too. See [Raising the upload limit](#raising-the-upload-limit). |
+
+### Raising the upload limit
+
+A larger upload needs more temporary space and memory, so change these settings
+together. In the Compose examples, all three are in `.env`:
+
+| Largest upload | `MUKURTU_UPLOAD_MAX` | `MUKURTU_TMP_SIZE` | `MUKURTU_MEM_LIMIT` |
+| --- | --- | --- | --- |
+| 100 MB (default) | `100M` | `256m` | `1g` |
+| 500 MB | `500M` | `1g` | `2g` |
+| 1 GB | `1G` | `2g` | `3g` |
+
+`MUKURTU_TMP_SIZE` and `MUKURTU_MEM_LIMIT` belong to the Compose examples, not the
+image: they set the size of the `/tmp` tmpfs and the container's memory limit. If
+you don't use the examples, set those in your own deployment. The memory values
+are estimates; see [Sizing memory](#sizing-memory).
 
 ### Cron
 
@@ -348,7 +371,8 @@ The last row is the one that surprises people. Mukurtu runs `ffmpeg` (video
 thumbnails) and `pdftoppm` (PDF thumbnails) *inside the upload request*. Their
 memory belongs to the container, not to the PHP process, so a container memory
 limit sized only for PHP can be exceeded and the container killed in the middle of
-an upload. Leave headroom: the Compose examples give each site **1 GB**.
+an upload. Leave headroom: the Compose examples give each site **1 GB**
+(`MUKURTU_MEM_LIMIT`).
 
 **Measured** on a freshly installed site (details and conditions in
 [docker-build.md](docker-build.md#measured-footprint)): about **90 MB** when idle,
@@ -590,7 +614,7 @@ warmed, request the home page once after starting.
 | The first page after a start takes several seconds and the log warns about `max_children` | Normal on a cold start; see [Reading the start-up log](#reading-the-start-up-log). |
 | `mail was not sent: MUKURTU_SMTP_HOST is not set` | Mukurtu tried to send mail. Set up [Mail](#mail). |
 | Pages answer `400 Bad Request` | The `Host` header is not in `MUKURTU_TRUSTED_HOSTS`. |
-| An upload says "file likely exceeded the maximum file size" | The file is over `MUKURTU_UPLOAD_MAX`. Raise it, or use a smaller file. |
+| An upload says the file is too large | The file is over `MUKURTU_UPLOAD_MAX`. Use a smaller file, or see [Raising the upload limit](#raising-the-upload-limit). |
 | An upload says "Oops, something went wrong" | A reverse proxy in front has a lower limit than `MUKURTU_UPLOAD_MAX`. Raise the proxy's limit. |
 | A video upload kills the container | Out of memory: `ffmpeg` is outside PHP's limit. Raise the container's memory limit; see [Sizing memory](#sizing-memory). |
 | The container shows `unhealthy` right after the first start | A fresh install takes a few minutes. The health check allows ten minutes before it counts failures. |

@@ -359,7 +359,7 @@ Caddy, each answering only on its own name).
 | --- | --- |
 | `read_only: true` | The code cannot be modified at run time, even by a compromised process; the only writable places are the two file volumes and two tmpfs mounts. |
 | `cap_drop: [ALL]`, `no-new-privileges` | The process needs no capabilities, and cannot gain privilege through setuid binaries. |
-| `mem_limit: 1g` per site | A ceiling so one site cannot take the host's memory, with headroom for `ffmpeg`/`pdftoppm` (see "Measured footprint"). |
+| `mem_limit` of 1 GB per site (`MUKURTU_MEM_LIMIT`) | A ceiling so one site cannot take the host's memory, with headroom for `ffmpeg`/`pdftoppm` (see "Measured footprint"). |
 | `tmpfs: /tmp` with a `size` | Where uploads land first (`MUKURTU_FILE_TEMP_PATH`); the size cap bounds the worst case. For large video uploads use a size-capped volume instead. |
 | `tmpfs: /run` | Where the rendered configuration goes, so nothing else needs to be writable. |
 | `*_FILE` secrets | Passwords are mounted as files and never appear in `docker inspect`. |

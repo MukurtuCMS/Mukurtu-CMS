@@ -244,6 +244,18 @@ for f in "$REPO_ROOT"/examples/docker/*/docker-compose.yml; do
   [[ "$image" =~ ^mariadb:[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] && pass "$(basename "$(dirname "$f")"): MariaDB is pinned to a series ($image), not a moving major tag" || fail "$(basename "$(dirname "$f")"): MariaDB is pinned to a series (got '$image')"
 done
 
+echo "examples: the upload limit can be set in .env"
+for site in single-site multi-tenant; do
+  dir="$REPO_ROOT/examples/docker/$site"
+  for name in MUKURTU_UPLOAD_MAX MUKURTU_TMP_SIZE MUKURTU_MEM_LIMIT; do
+    if grep -q "^$name=" "$dir/.env.example" && grep -q "\${$name:-" "$dir/docker-compose.yml"; then
+      pass "$site: $name in .env reaches docker-compose.yml"
+    else
+      fail "$site: $name in .env reaches docker-compose.yml"
+    fi
+  done
+done
+
 echo "docs: docs/docker-build.md has a section for every part of the image"
 for heading in "${REQUIRED_SECTIONS[@]}"; do
   if grep -qxF "## $heading" "$DOC"; then
