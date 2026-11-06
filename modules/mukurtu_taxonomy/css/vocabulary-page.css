@@ -73,6 +73,42 @@ message may not be announced (WCAG 4.1.3). */
   display: none;
 }
 
+.vocabulary-page__expand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block-end: 1.5rem;
+}
+
+.vocabulary-page__expand[hidden],
+.vocabulary-page__toggle[hidden] {
+  display: none;
+}
+
+/* Every term keeps this indent, so names stay lined up with or without a
+button beside them, and while filtering hides the buttons. */
+.vocabulary-page--collapsible .vocabulary-page__list li {
+  padding-inline-start: 2.25rem;
+  position: relative;
+}
+
+.vocabulary-page__toggle {
+  background: none;
+  border: 1px solid currentcolor;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  height: 1.75rem;
+  inset-block-start: 0.2rem;
+  inset-inline-start: 0;
+  line-height: 1;
+  padding: 0;
+  position: absolute;
+  width: 1.75rem;
+}
+
 .vocabulary-page__group {
   margin-block-end: 1.5rem;
 }
