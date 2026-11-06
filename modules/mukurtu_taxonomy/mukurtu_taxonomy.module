@@ -28,6 +28,8 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
         'description' => '',
         'items' => [],
         'groups' => [],
+        'letters' => [],
+        'tools' => FALSE,
       ],
     ],
     'taxonomy_records' => [

@@ -101,45 +101,84 @@ class VocabularyPageTest extends EntityKernelTestBase {
   }
 
   /**
-   * A short vocabulary is a plain nested list with no tools.
+   * A short, mostly flat vocabulary is a plain list with no tools.
    */
-  public function testShortVocabularyIsAPlainTree(): void {
+  public function testShortFlatVocabularyIsAPlainList(): void {
+    $this->createTerm('Montana');
+    $this->createTerm('Alaska', NULL);
+
+    $build = $this->buildPage();
+    $this->assertSame(['Alaska', 'Montana'], array_column($build['#items'], 'name'));
+    $this->assertSame([], $build['#groups']);
+    $this->assertFalse($build['#tools']);
+
+    $html = $this->renderPage();
+    $this->assertStringContainsString('Places on this site.', $html);
+    $this->assertStringNotContainsString('data-vocabulary-page', $html);
+    $this->assertStringNotContainsString('Filter terms', $html);
+  }
+
+  /**
+   * A mostly nested vocabulary gets a card per top-level term, at any size.
+   */
+  public function testMostlyNestedVocabularyGetsParentCards(): void {
     $washington = $this->createTerm('Washington');
     $spokane = $this->createTerm('Spokane', $washington);
     $this->createTerm('Hillyard', $spokane);
     $this->createTerm('Alaska');
 
     $build = $this->buildPage();
-    $this->assertSame(['Alaska', 'Washington'], array_column($build['#items'], 'name'));
-    $this->assertSame('Spokane', $build['#items'][1]['below'][0]['name']);
-    $this->assertSame('Hillyard', $build['#items'][1]['below'][0]['below'][0]['name']);
-    $this->assertSame([], $build['#groups']);
+    $this->assertSame(['Alaska', 'Washington'], array_column($build['#groups'], 'heading'));
+    $this->assertSame([], $build['#items']);
+    $this->assertSame('Spokane', $build['#groups'][1]['items'][0]['name']);
+    $this->assertSame('Hillyard', $build['#groups'][1]['items'][0]['below'][0]['name']);
+    $this->assertNotNull($build['#groups'][1]['url']);
+    $this->assertFalse($build['#tools']);
 
     $html = $this->renderPage();
-    $this->assertStringContainsString('Places on this site.', $html);
+    $this->assertStringContainsString('data-vocabulary-card-term', $html);
     $this->assertStringContainsString('Hillyard', $html);
-    $this->assertStringNotContainsString('data-vocabulary-page', $html);
-    $this->assertStringNotContainsString('Filter terms', $html);
   }
 
   /**
-   * The tools start at exactly TOOLS_MINIMUM terms, counting nested terms.
+   * A long, mostly flat vocabulary gets letter cards, keeping its few nested terms.
    */
-  public function testToolsStartAtTheMinimum(): void {
-    $parent = $this->createTerm('Alaska');
-    for ($i = 2; $i < VocabularyPageController::TOOLS_MINIMUM; $i++) {
-      $this->createTerm("Term $i", $parent);
-    }
-    $this->assertSame([], $this->buildPage()['#groups']);
-
+  public function testLongFlatVocabularyGetsLetterCards(): void {
     $this->createTerm('Montana');
+    $parent = $this->createTerm('Alaska');
+    $this->createTerm('Sitka', $parent);
+    for ($i = 4; $i < VocabularyPageController::TOOLS_MINIMUM; $i++) {
+      $this->createTerm("Term $i");
+    }
+    $this->assertFalse($this->buildPage()['#tools']);
+
+    $this->createTerm('Oregon');
     $build = $this->buildPage();
-    $this->assertSame(['A', 'M'], array_column($build['#groups'], 'letter'));
-    $this->assertSame(['vocabulary-letter-1', 'vocabulary-letter-2'], array_column($build['#groups'], 'id'));
+    $this->assertTrue($build['#tools']);
+    $this->assertSame(['A', 'M', 'O', 'T'], array_column($build['#groups'], 'heading'));
+    $this->assertNull($build['#groups'][0]['url']);
+    $this->assertSame('Sitka', $build['#groups'][0]['items'][0]['below'][0]['name']);
 
     $html = $this->renderPage();
     $this->assertStringContainsString('data-vocabulary-page', $html);
-    $this->assertStringContainsString('href="#vocabulary-letter-2"', $html);
+    $this->assertStringContainsString('href="#vocabulary-group-2"', $html);
+  }
+
+  /**
+   * Letters link to the first card for that letter, on parent cards too.
+   */
+  public function testLettersOnParentCards(): void {
+    $alaska = $this->createTerm('Alaska');
+    $this->createTerm('Arizona');
+    $montana = $this->createTerm('Montana');
+    for ($i = 3; $i < VocabularyPageController::TOOLS_MINIMUM; $i++) {
+      $this->createTerm("Town $i", $i % 2 ? $alaska : $montana);
+    }
+
+    $this->assertSame([
+      ['letter' => 'A', 'id' => 'vocabulary-group-1'],
+      ['letter' => 'M', 'id' => 'vocabulary-group-3'],
+    ], $this->buildPage()['#letters']);
   }
 
   /**
