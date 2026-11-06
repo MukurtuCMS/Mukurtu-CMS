@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormState;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\media\Entity\MediaType;
 use Drupal\mukurtu_core\BulkEdit\BulkEditColumns;
 use Drupal\mukurtu_core\Form\BulkEditColumnsForm;
 use Drupal\mukurtu_core\Hook\BulkEditHooks;
@@ -98,6 +99,46 @@ class BulkEditColumnsTest extends KernelTestBase {
    */
   public function testTypes(): void {
     $this->assertSame(['digital_heritage', 'place'], array_keys($this->columns->types()));
+  }
+
+  /**
+   * The media page lists media types, with Published as its Status column.
+   */
+  public function testMediaPage(): void {
+    $this->installEntitySchema('media');
+    // Created in a different order from the service's tab order on purpose.
+    foreach (['image' => 'Image', 'audio' => 'Audio'] as $id => $label) {
+      MediaType::create([
+        'id' => $id,
+        'label' => $label,
+        'source' => $id === 'image' ? 'image' : 'audio_file',
+        'source_configuration' => ['source_field' => "field_media_$id"],
+      ])->save();
+    }
+    $media = $this->container->get('mukurtu_core.bulk_edit_media_columns');
+
+    $this->assertSame('media', $media->entityTypeId());
+    $this->assertSame('view.mukurtu_bulk_edit_media.page', $media->route());
+    $this->assertSame(['audio', 'image'], array_keys($media->types()));
+    $this->assertSame(
+      [
+        'langcode' => 'Translation language',
+        'protocols' => 'Cultural Protocols',
+        'sharing' => 'Sharing Setting',
+        'community' => 'Community',
+        'status' => 'Status',
+        'changed' => 'Updated',
+      ],
+      array_map('strval', $media->available('image')),
+    );
+
+    // A media type's choice is kept apart from content's.
+    $editor = User::create(['name' => 'editor']);
+    $editor->save();
+    $media->save('image', $editor, ['changed']);
+    $this->assertSame(['changed'], $media->selected('image', $editor));
+    $this->assertSame(['changed'], $this->container->get('user.data')->get('mukurtu_core', (int) $editor->id(), 'bulk_edit_columns.media.image'));
+    $this->assertNull($this->container->get('user.data')->get('mukurtu_core', (int) $editor->id(), 'bulk_edit_columns.image'));
   }
 
   /**
@@ -287,7 +328,7 @@ class BulkEditColumnsTest extends KernelTestBase {
       $view->method('removeHandler')->willReturnCallback(function ($display_id, $handler_type, $id) use (&$removed) {
         $removed[] = $id;
       });
-      _mukurtu_core_bulk_edit_pre_view($view, 'page', [$type]);
+      _mukurtu_core_bulk_edit_pre_view($this->columns, $view, 'page', [$type]);
       return $removed;
     };
 

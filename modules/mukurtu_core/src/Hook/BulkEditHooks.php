@@ -33,9 +33,10 @@ class BulkEditHooks {
   }
 
   /**
-   * Implements hook_form_FORM_ID_alter() for the bulk edit page.
+   * Implements hook_form_FORM_ID_alter() for the bulk edit pages.
    */
   #[Hook('form_views_form_mukurtu_bulk_edit_content_page_alter')]
+  #[Hook('form_views_form_mukurtu_bulk_edit_media_page_alter')]
   public function bulkEditFormAlter(array &$form, FormStateInterface $form_state): void {
     $this->disableViewOnlyRows($form, $form_state);
     $this->capSelectionList($form);

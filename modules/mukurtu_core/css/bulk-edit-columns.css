@@ -41,3 +41,15 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Media whose protocols come from its parent item: the bulk protocol actions
+   skip it. Secondary text, still at text contrast, with the reason below. */
+.mukurtu-bulk-edit-synced {
+  color: var(--gin-color-text-light, #545560);
+}
+
+.mukurtu-bulk-edit-synced__note {
+  display: block;
+  font-size: 0.875em;
+  font-style: italic;
+}

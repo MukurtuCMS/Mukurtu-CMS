@@ -171,3 +171,10 @@ mukurtu_core.bulk_edit:
   menu_name: dashboard-content
   route_name: mukurtu_core.bulk_edit
   weight: 0
+mukurtu_core.bulk_edit_media:
+  title: 'Bulk edit media'
+  description: 'Change many media assets of one type at once.'
+  parent: mukurtu_dashboard
+  menu_name: dashboard-media
+  route_name: mukurtu_core.bulk_edit_media
+  weight: 0

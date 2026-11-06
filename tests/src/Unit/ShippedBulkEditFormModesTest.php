@@ -41,7 +41,24 @@ class ShippedBulkEditFormModesTest extends UnitTestCase {
     'field_child_collections',
     'field_words',
     'field_mukurtu_community_records',
+    // Media: its name, the media file itself, and protocol sync.
+    'name',
+    'field_sync_protocols',
+    'field_protocol_parent',
+    'field_media_audio_file',
+    'field_media_document',
+    'field_media_external_embed',
+    'field_media_image',
+    'field_media_oembed_video',
+    'field_media_soundcloud',
+    'field_media_video_file',
+    'field_media_video_tracks',
   ];
+
+  /**
+   * Dependencies that Drupal core ships rather than Mukurtu.
+   */
+  private const CORE_CONFIG = ['image.style.thumbnail'];
 
   /**
    * Widgets that must never appear in a bulk_edit form.
@@ -49,7 +66,7 @@ class ShippedBulkEditFormModesTest extends UnitTestCase {
   private const EXCLUDED_WIDGETS = ['paragraphs', 'entity_reference_paragraphs', 'comment_default'];
 
   /**
-   * Each content type's bulk_edit form and the module that ships it.
+   * Each content and media type's bulk_edit form and the module that ships it.
    */
   public static function formProvider(): \Generator {
     yield 'digital heritage' => ['modules/mukurtu_digital_heritage', 'digital_heritage'];
@@ -58,21 +75,24 @@ class ShippedBulkEditFormModesTest extends UnitTestCase {
     yield 'collection' => ['modules/mukurtu_collection', 'collection'];
     yield 'person' => ['modules/mukurtu_person', 'person'];
     yield 'place' => ['modules/mukurtu_place', 'place'];
+    foreach (['audio', 'document', 'external_embed', 'image', 'remote_video', 'soundcloud', 'video'] as $type) {
+      yield "$type media" => ['modules/mukurtu_media', $type, 'media'];
+    }
   }
 
   /**
    * The form exists, is enabled, and leaves out the excluded components.
    */
   #[DataProvider('formProvider')]
-  public function testBulkEditForm(string $module, string $type): void {
+  public function testBulkEditForm(string $module, string $type, string $entity_type = 'node'): void {
     $root = dirname(__DIR__, 3);
-    $path = "$root/$module/config/install/core.entity_form_display.node.$type.bulk_edit.yml";
+    $path = "$root/$module/config/install/core.entity_form_display.$entity_type.$type.bulk_edit.yml";
     $this->assertFileExists($path);
     $display = Yaml::parseFile($path);
 
     $this->assertTrue($display['status']);
     $this->assertSame('bulk_edit', $display['mode']);
-    $this->assertContains('core.entity_form_mode.node.bulk_edit', $display['dependencies']['config']);
+    $this->assertContains("core.entity_form_mode.$entity_type.bulk_edit", $display['dependencies']['config']);
     $this->assertNotEmpty($display['content']);
     foreach ($display['content'] as $name => $component) {
       $this->assertNotContains($name, self::EXCLUDED, "$type's bulk_edit form offers $name.");
@@ -82,19 +102,21 @@ class ShippedBulkEditFormModesTest extends UnitTestCase {
     $this->assertArrayNotHasKey('field_group', $display['third_party_settings'] ?? [], "$type's bulk_edit form has field groups.");
 
     // A dependency nothing ships stops the site from installing.
-    foreach ($display['dependencies']['config'] ?? [] as $dependency) {
+    foreach (array_diff($display['dependencies']['config'] ?? [], self::CORE_CONFIG) as $dependency) {
       $this->assertNotEmpty(glob("$root/{config,modules/*/config}/install/$dependency.yml", GLOB_BRACE), "$type's bulk_edit form depends on $dependency, which no module ships.");
     }
   }
 
   /**
-   * The form mode itself ships with mukurtu_core.
+   * The form modes ship with mukurtu_core (content) and mukurtu_media.
    */
   public function testFormModeShips(): void {
     $root = dirname(__DIR__, 3);
-    $mode = Yaml::parseFile("$root/modules/mukurtu_core/config/install/core.entity_form_mode.node.bulk_edit.yml");
-    $this->assertSame('node.bulk_edit', $mode['id']);
-    $this->assertSame('node', $mode['targetEntityType']);
+    foreach (['node' => 'mukurtu_core', 'media' => 'mukurtu_media'] as $entity_type => $module) {
+      $mode = Yaml::parseFile("$root/modules/$module/config/install/core.entity_form_mode.$entity_type.bulk_edit.yml");
+      $this->assertSame("$entity_type.bulk_edit", $mode['id']);
+      $this->assertSame($entity_type, $mode['targetEntityType']);
+    }
   }
 
 }

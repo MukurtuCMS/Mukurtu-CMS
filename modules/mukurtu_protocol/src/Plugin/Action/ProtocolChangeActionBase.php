@@ -7,6 +7,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
@@ -103,7 +104,9 @@ abstract class ProtocolChangeActionBase extends ViewsBulkOperationsActionBase im
     // Skips and failures name the item; VBO groups results by message, so
     // successes still add up to one line.
     $label = $this->label($entity);
-    $skip = $this->change($entity);
+    // Protocol sync would overwrite the change the next time the parent item
+    // is saved.
+    $skip = $this->isSynced($entity) ? $this->t('Synced from its parent item') : $this->change($entity);
     if ($skip) {
       return $this->result($this->t('@item: @reason', ['@item' => $label, '@reason' => $skip]), 'warning');
     }
@@ -168,7 +171,7 @@ abstract class ProtocolChangeActionBase extends ViewsBulkOperationsActionBase im
    */
   public function lossNotices(CulturalProtocolControlledInterface $item, AccountInterface $account): array {
     $after = clone $item;
-    if ($this->change($after)) {
+    if ($this->isSynced($item) || $this->change($after)) {
       return [];
     }
 
@@ -214,7 +217,19 @@ abstract class ProtocolChangeActionBase extends ViewsBulkOperationsActionBase im
    * on save, so protocol set membership stands in for them here.
    */
   protected function canView(CulturalProtocolControlledInterface $item, AccountInterface $account): bool {
-    return $account->hasPermission('bypass node access') || $item->isProtocolSetMember($account);
+    $bypass = $item->getEntityTypeId() === 'node'
+      ? 'bypass node access'
+      : $this->entityTypeManager->getDefinition($item->getEntityTypeId())->getAdminPermission();
+    return ($bypass && $account->hasPermission($bypass)) || $item->isProtocolSetMember($account);
+  }
+
+  /**
+   * Whether the item is media that takes its protocols from its parent item.
+   */
+  protected function isSynced(EntityInterface $item): bool {
+    return $item instanceof FieldableEntityInterface
+      && $item->hasField('field_sync_protocols')
+      && (bool) $item->get('field_sync_protocols')->value;
   }
 
   /**

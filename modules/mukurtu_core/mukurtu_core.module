@@ -1456,14 +1456,20 @@ function mukurtu_core_views_data_alter(array &$data)
     ];
   }
 
+  // The bulk edit pages for content and media.
+  foreach (['node_field_data', 'media_field_data'] as $table) {
+    if (isset($data[$table])) {
+      $data[$table]['mukurtu_bulk_edit_column'] = [
+        'title' => t('Bulk edit column'),
+        'help' => t('One column of the bulk edit page, chosen by the editor.'),
+        'field' => [
+          'id' => 'mukurtu_bulk_edit_column',
+        ],
+      ];
+    }
+  }
+
   if (isset($data['node_field_data'])) {
-    $data['node_field_data']['mukurtu_bulk_edit_column'] = [
-      'title' => t('Bulk edit column'),
-      'help' => t('One column of the bulk edit page, chosen by the editor.'),
-      'field' => [
-        'id' => 'mukurtu_bulk_edit_column',
-      ],
-    ];
     $data['node_field_data']['mukurtu_row_actions'] = [
       'title' => t('Row actions'),
       'field' => [
@@ -1762,8 +1768,8 @@ function mukurtu_core_warn_on_missing_email(array $form, FormStateInterface $for
  * already set up its handlers, and late additions are never instantiated.
  */
 function mukurtu_core_views_pre_view(ViewExecutable $view, $display_id, array &$args) {
-  if ($view->id() === BulkEditColumns::VIEW_ID) {
-    _mukurtu_core_bulk_edit_pre_view($view, $display_id, $args);
+  if ($columns = _mukurtu_core_bulk_edit_columns($view->id())) {
+    _mukurtu_core_bulk_edit_pre_view($columns, $view, $display_id, $args);
   }
 }
 
@@ -1771,30 +1777,40 @@ function mukurtu_core_views_pre_view(ViewExecutable $view, $display_id, array &$
  * Implements hook_views_pre_render().
  */
 function mukurtu_core_views_pre_render(ViewExecutable $view) {
-  if ($view->id() !== BulkEditColumns::VIEW_ID) {
+  $columns = _mukurtu_core_bulk_edit_columns($view->id());
+  if (!$columns) {
     return;
   }
-  $types = \Drupal::service('mukurtu_core.bulk_edit_columns')->types();
+  $types = $columns->types();
   $type = $types[$view->args[0] ?? ''] ?? NULL;
   if ($type) {
     $view->setTitle((string) t('Bulk edit @type', ['@type' => \Drupal::service('entity.repository')->getTranslationFromContext($type)->label()]));
     // Its own form above the table, apart from the filters.
-    $view->attachment_before[] = \Drupal::formBuilder()->getForm(\Drupal\mukurtu_core\Form\BulkEditColumnsForm::class, $type->id());
+    $view->attachment_before[] = \Drupal::formBuilder()->getForm(\Drupal\mukurtu_core\Form\BulkEditColumnsForm::class, $type->id(), $columns->entityTypeId());
   }
 }
 
 /**
- * Adds the editor's chosen columns to the bulk edit page.
+ * Returns the columns service of a bulk edit page's view, if it is one.
+ */
+function _mukurtu_core_bulk_edit_columns(string $view_id): ?BulkEditColumns {
+  return match ($view_id) {
+    BulkEditColumns::VIEW_ID => \Drupal::service('mukurtu_core.bulk_edit_columns'),
+    BulkEditColumns::MEDIA_VIEW_ID => \Drupal::service('mukurtu_core.bulk_edit_media_columns'),
+    default => NULL,
+  };
+}
+
+/**
+ * Adds the editor's chosen columns to a bulk edit page.
  *
- * The page's path carries the content type. Only types listed in
- * BulkEditColumns::TYPES have a page. Editors choose the columns in the
+ * The page's path carries the content or media type. Only the types its
+ * columns service lists have a page. Editors choose the columns in the
  * "Columns" panel above the table.
  *
  * @see \Drupal\mukurtu_core\Form\BulkEditColumnsForm
  */
-function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_id, array $args): void {
-  /** @var \Drupal\mukurtu_core\BulkEdit\BulkEditColumns $columns */
-  $columns = \Drupal::service('mukurtu_core.bulk_edit_columns');
+function _mukurtu_core_bulk_edit_pre_view(BulkEditColumns $columns, ViewExecutable $view, string $display_id, array $args): void {
   $type = $args[0] ?? NULL;
   $types = $columns->types();
   if (!$type || !isset($types[$type])) {
@@ -1805,6 +1821,19 @@ function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_
 
   // The columns depend on the editor's saved choice.
   $view->element['#cache']['contexts'][] = 'user';
+
+  $available = $columns->available($type);
+  $table = \Drupal::entityTypeManager()->getDefinition($columns->entityTypeId())->getDataTable();
+  foreach ($columns->selected($type, $account) as $column) {
+    $view->addHandler($display_id, 'field', $table, 'mukurtu_bulk_edit_column', [
+      'column' => $column,
+      'label' => (string) $available[$column],
+    ], "mukurtu_bulk_edit_$column");
+  }
+
+  if ($columns->entityTypeId() !== 'node') {
+    return;
+  }
 
   // Community records and multipage items are switched on per content type
   // in their settings. Only offer their filters where they're on.
@@ -1825,13 +1854,5 @@ function _mukurtu_core_bulk_edit_pre_view(ViewExecutable $view, string $display_
   if ($type !== 'dictionary_word') {
     $view->removeHandler($display_id, 'filter', 'field_dictionary_word_language_target_id');
     $view->removeHandler($display_id, 'filter', 'in_word_list');
-  }
-
-  $available = $columns->available($type);
-  foreach ($columns->selected($type, $account) as $column) {
-    $view->addHandler($display_id, 'field', 'node_field_data', 'mukurtu_bulk_edit_column', [
-      'column' => $column,
-      'label' => (string) $available[$column],
-    ], "mukurtu_bulk_edit_$column");
   }
 }

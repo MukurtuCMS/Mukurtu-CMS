@@ -13,7 +13,7 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledInterface;
   id: 'mukurtu_remove_protocol_action',
   label: new TranslatableMarkup('Remove Cultural Protocol'),
   confirm_form_route_name: 'views_bulk_operations.confirm',
-  type: 'node',
+  type: '',
 )]
 class MukurtuRemoveProtocolAction extends MukurtuAddProtocolAction {
 

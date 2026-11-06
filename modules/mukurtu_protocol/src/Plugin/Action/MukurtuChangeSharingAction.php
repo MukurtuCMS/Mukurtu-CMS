@@ -15,7 +15,7 @@ use Drupal\mukurtu_protocol\CulturalProtocols;
   id: 'mukurtu_change_sharing_action',
   label: new TranslatableMarkup('Change Sharing Setting'),
   confirm_form_route_name: 'views_bulk_operations.confirm',
-  type: 'node',
+  type: '',
 )]
 class MukurtuChangeSharingAction extends ProtocolChangeActionBase {
 
