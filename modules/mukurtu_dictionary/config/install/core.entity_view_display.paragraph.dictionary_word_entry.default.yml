@@ -23,7 +23,7 @@ content:
     type: mukurtu_entity_reference_role_label
     label: above
     settings:
-      link: true
+      link: false
     third_party_settings: {  }
     weight: 10
     region: content
@@ -103,7 +103,7 @@ content:
     type: entity_reference_label
     label: above
     settings:
-      link: true
+      link: false
     third_party_settings: {  }
     weight: 4
     region: content

@@ -646,6 +646,14 @@ views.filter.mukurtu_media_tag_filter:
   type: views.filter.in_operator
   label: 'Media tag filter'
 
+views.filter.mukurtu_visible_terms:
+  type: views_filter
+  label: 'Visible terms filter'
+  mapping:
+    vocabulary:
+      type: string
+      label: 'Vocabulary'
+
 views_bulk_operations.action_config.mukurtu_change_moderation_state_action:
   type: views_bulk_operations_action_config
   label: 'Change moderation state action preconfiguration'
