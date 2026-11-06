@@ -1,0 +1,69 @@
+/**
+ * @file
+ * Styles for long vocabulary pages' filter and letter links, and term lists.
+ */
+
+.vocabulary-page__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.vocabulary-page__list li {
+  padding-block: 0.2rem;
+}
+
+.vocabulary-page__list .vocabulary-page__list {
+  border-inline-start: 2px solid currentcolor;
+  margin-block-start: 0.2rem;
+  margin-inline-start: 0.5rem;
+  padding-inline-start: 1rem;
+}
+
+.vocabulary-page__filter {
+  margin-block-end: 1rem;
+  max-width: 24rem;
+}
+
+.vocabulary-page__filter label {
+  display: block;
+}
+
+.vocabulary-page__filter input {
+  width: 100%;
+}
+
+.vocabulary-page__status:empty {
+  display: none;
+}
+
+.vocabulary-page__letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  margin-block-end: 1.5rem;
+}
+
+/* WCAG 2.5.8: single letters are small targets, so give them a 24px minimum. */
+.vocabulary-page__letters a {
+  display: inline-block;
+  font-weight: 700;
+  min-height: 24px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.vocabulary-page__letters[hidden],
+.vocabulary-page__group[hidden],
+.vocabulary-page__filter[hidden],
+.vocabulary-page__list li[hidden] {
+  display: none;
+}
+
+.vocabulary-page__group {
+  margin-block-end: 1.5rem;
+}
+
+.vocabulary-page__group h2 {
+  scroll-margin-block-start: 6rem;
+}
