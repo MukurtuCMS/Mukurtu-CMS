@@ -57,6 +57,14 @@ for bad in "4.x-dev" "v4.0.5" "4.0" "4.0.5-r0" "4.0.5-r01" "4.0.5 full" "4.0.5 s
   if "$TAGS" $bad >/dev/null 2>&1; then fail "rejects: '$bad'"; else pass "rejects: '$bad'"; fi
 done
 
+echo "workflow: the weekly build and the pull request test"
+edge="$(cat "$REPO_ROOT/.github/workflows/docker-edge.yml")"
+assert_contains "$edge" "-f dev=true" "weekly build: only ever a development build"
+assert_contains "$edge" "-f ref=main" "weekly build: builds main"
+pr_test="$(cat "$REPO_ROOT/.github/workflows/docker-test.yml")"
+assert_contains "$pr_test" "push: false" "pull request test: pushes nothing"
+assert_not_contains "$pr_test" "packages: write" "pull request test: can't write packages"
+
 echo "workflow: file"
 if [[ ! -f "$WORKFLOW" ]]; then
   fail "docker-publish.yml exists"; finish; exit 1

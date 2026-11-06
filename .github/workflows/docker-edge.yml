@@ -1,0 +1,69 @@
+name: Weekly Docker image from main
+
+# Starts a development build of main through docker-publish.yml, which builds, tests and
+# scans both architectures and publishes `edge`. It catches Mukurtu changes that break the
+# image, and keeps a current image to test against. If it fails, this opens an issue: a
+# failed scheduled run otherwise notifies almost nobody.
+
+on:
+  schedule:
+    - cron: "41 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  edge:
+    name: Build edge from main
+    runs-on: ubuntu-26.04
+    timeout-minutes: 240
+    permissions:
+      actions: write
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Start the build
+        id: start
+        run: |
+          set -euo pipefail
+          started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          gh workflow run docker-publish.yml --repo "$REPO" --ref main -f ref=main -f dev=true
+          for _ in $(seq 1 30); do
+            sleep 10
+            id="$(gh run list --repo "$REPO" --workflow docker-publish.yml --event workflow_dispatch \
+              --created ">=$started" --limit 1 --json databaseId --jq '.[0].databaseId // empty')"
+            if [[ -n "$id" ]]; then
+              echo "id=$id" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "::error::The build did not start."
+          exit 1
+
+      - name: Wait for it
+        env:
+          RUN_ID: ${{ steps.start.outputs.id }}
+        run: gh run watch "$RUN_ID" --repo "$REPO" --exit-status --interval 60 >/dev/null
+
+      - name: Report a failure
+        if: failure()
+        env:
+          RUN_ID: ${{ steps.start.outputs.id }}
+          THIS_RUN: ${{ github.run_id }}
+          SERVER: ${{ github.server_url }}
+        run: |
+          set -euo pipefail
+          title="Weekly container image build from main failed"
+          url="$SERVER/$REPO/actions/runs/${RUN_ID:-$THIS_RUN}"
+          body="The weekly build failed: $url. A recent change to main may have broken the image, so the next release's image could fail too."
+          number="$(gh issue list --repo "$REPO" --state open --search "\"$title\" in:title" \
+            --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty")"
+          if [[ -z "$number" ]]; then
+            gh issue create --repo "$REPO" --title "$title" --label "packaging and deployment" --body "$body"
+          else
+            gh issue comment "$number" --repo "$REPO" --body "$body"
+          fi
