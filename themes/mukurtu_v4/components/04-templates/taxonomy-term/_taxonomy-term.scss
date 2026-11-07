@@ -111,12 +111,12 @@
       gap: var(--v-space-2xs);
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
+  }
+}
 
-    // One column fewer beside the panel.
-    .taxonomy-term-layout--panel & {
-      @include include-media.media('>=xl') {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
+// One column fewer beside the panel.
+.taxonomy-term-layout--panel .grid:has(.views-row) .views-element-container > div {
+  @include include-media.media('>=xl') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

@@ -10204,8 +10204,9 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
 @media (min-width: 80rem) {
-  .taxonomy-term-layout--panel .taxonomy-term-page .grid:has(.views-row) .views-element-container > div {
+  .taxonomy-term-layout--panel .grid:has(.views-row) .views-element-container > div {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
