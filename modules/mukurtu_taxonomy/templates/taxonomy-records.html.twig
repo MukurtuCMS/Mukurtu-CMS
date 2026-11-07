@@ -1,8 +1,29 @@
+{% set has_panel = nested_terms or sibling_terms %}
 <div class="taxonomy-term-page">
-  {% if parent_term %}
-    <p class="taxonomy-term-parent">{{ parent_term }}</p>
+  <div class="taxonomy-term-layout{{ has_panel ? ' taxonomy-term-layout--panel' }}">
+  {# First in the page so it stays above the content on a small screen. #}
+  {% if has_panel %}
+    <aside class="taxonomy-term-panel" aria-labelledby="taxonomy-term-panel-heading">
+      {% if nested_terms %}
+        <h2 id="taxonomy-term-panel-heading" class="taxonomy-term-panel__heading">{{ 'Narrower terms'|t }}</h2>
+        <ul class="taxonomy-term-panel__list">
+          {% for nested_term in nested_terms %}
+            <li>{{ link(nested_term.name, nested_term.url) }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if sibling_terms %}
+        <h2{% if not nested_terms %} id="taxonomy-term-panel-heading"{% endif %} class="taxonomy-term-panel__heading">{{ sibling_terms.heading }}</h2>
+        <ul class="taxonomy-term-panel__list">
+          {% for sibling_term in sibling_terms.terms %}
+            <li>{{ link(sibling_term.name, sibling_term.url) }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </aside>
   {% endif %}
 
+  <div class="taxonomy-term-main">
   {% if term_description %}
     <div class="taxonomy-term-description">{{ term_description }}</div>
   {% endif %}
@@ -37,20 +58,12 @@
   </div>
   {% endif %}
 
-  {% if nested_terms %}
-    <section class="taxonomy-nested-terms" aria-labelledby="taxonomy-nested-terms-heading">
-      <h2 id="taxonomy-nested-terms-heading" class="taxonomy-nested-terms__heading">{{ 'Nested terms'|t }}</h2>
-      <ul class="taxonomy-nested-terms__list">
-        {% for nested_term in nested_terms %}
-          <li>{{ link(nested_term.name, nested_term.url) }}</li>
-        {% endfor %}
-      </ul>
-    </section>
-  {% endif %}
-
   {% if referenced_content is not empty %}
-    <div class="referenced-content grid{% if term_description %} referenced-content--divided{% endif %}" aria-label="{{ 'Referenced content'|t }}">
+    <h2 class="taxonomy-term-main__heading">{{ 'Content'|t }}</h2>
+    <div class="referenced-content grid" aria-label="{{ 'Referenced content'|t }}">
       {{ referenced_content }}
     </div>
   {% endif %}
+  </div>
+  </div>
 </div>
