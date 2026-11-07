@@ -1,4 +1,7 @@
 {% set has_panel = nested_terms or sibling_terms %}
+{% if has_panel %}
+  {{ attach_library('mukurtu_taxonomy/term-panel') }}
+{% endif %}
 <div class="taxonomy-term-page">
   <div class="taxonomy-term-layout{{ has_panel ? ' taxonomy-term-layout--panel' }}">
   {# First in the page so it stays above the content on a small screen. #}
@@ -13,7 +16,7 @@
         </ul>
       {% endif %}
       {% if sibling_terms %}
-        <h2{% if not nested_terms %} id="taxonomy-term-panel-heading"{% endif %} class="taxonomy-term-panel__heading">{{ sibling_terms.heading }}</h2>
+        <h2 id="{{ nested_terms ? 'taxonomy-term-siblings-heading' : 'taxonomy-term-panel-heading' }}" class="taxonomy-term-panel__heading">{{ sibling_terms.heading }}</h2>
         <ul class="taxonomy-term-panel__list">
           {% for sibling_term in sibling_terms.terms %}
             <li>{{ link(sibling_term.name, sibling_term.url) }}</li>

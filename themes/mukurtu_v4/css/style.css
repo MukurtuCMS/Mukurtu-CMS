@@ -10164,10 +10164,30 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   list-style: none;
   padding-block: 0.125rem;
 }
+.taxonomy-term-panel__list li[hidden] {
+  display: none;
+}
 .taxonomy-term-panel__list a {
   overflow-wrap: anywhere;
 }
 .taxonomy-term-panel__list:last-child {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+
+.taxonomy-term-panel__more {
+  background: none;
+  border: 0;
+  color: var(--brand-primary-dark);
+  cursor: pointer;
+  font: inherit;
+  -webkit-margin-after: var(--v-space-2xs);
+          margin-block-end: var(--v-space-2xs);
+  min-height: 24px;
+  padding: 0;
+  text-decoration: underline;
+}
+.taxonomy-term-panel__more:last-child {
   -webkit-margin-after: 0;
           margin-block-end: 0;
 }
