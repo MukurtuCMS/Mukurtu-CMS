@@ -193,10 +193,10 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
         'id' => 0,
         'quantity' => 9,
         'tags' => [
-          'next' => $this->t('Next ›'),
-          'previous' => $this->t('‹ Previous'),
-          'first' => $this->t('« First'),
-          'last' => $this->t('Last »'),
+          'next' => (string) $this->t('Next ›'),
+          'previous' => (string) $this->t('‹ Previous'),
+          'first' => (string) $this->t('« First'),
+          'last' => (string) $this->t('Last »'),
         ],
       ],
     ]);

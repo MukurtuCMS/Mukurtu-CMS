@@ -10146,6 +10146,7 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   font-size: 1.125rem;
   font-weight: 700;
   margin-block: 0 0.25rem;
+  overflow-wrap: anywhere;
 }
 .taxonomy-term-panel__heading:has(em) {
   font-weight: 400;
