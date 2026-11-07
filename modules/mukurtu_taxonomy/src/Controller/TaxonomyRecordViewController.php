@@ -183,6 +183,23 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       'type' => 'entity:node',
       'options' => ['view_mode' => 'grid_browse'],
     ]);
+    // The same numbered pager as the browse pages. Twelve items fills every row
+    // in the three- and four-column layouts.
+    $view->display_handler->overrideOption('pager', [
+      'type' => 'full',
+      'options' => [
+        'offset' => 0,
+        'items_per_page' => 12,
+        'id' => 0,
+        'quantity' => 9,
+        'tags' => [
+          'next' => $this->t('Next ›'),
+          'previous' => $this->t('‹ Previous'),
+          'first' => $this->t('« First'),
+          'last' => $this->t('Last »'),
+        ],
+      ],
+    ]);
     // The listing includes content tagged with terms nested under this one,
     // so moving a term changes it (#2521). Views caches the listing apart
     // from this page, under the view's own tags, which a term move doesn't

@@ -141,3 +141,34 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+// The pager is part of the view, so it's a cell of the content grid unless it
+// spans the row. These match the browse pages' pager.
+.taxonomy-term-main .pager {
+  grid-column: 1 / -1;
+  margin-block-start: var(--v-space-s);
+
+  &__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-4xxs);
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__item {
+    font-weight: var(--text-bold);
+    list-style: none;
+
+    a {
+      padding: var(--v-space-5xs);
+    }
+  }
+
+  .is-active a {
+    border-block-end: 5px solid var(--brand-secondary);
+    color: var(--brand-text-color);
+    text-decoration: none;
+  }
+}
