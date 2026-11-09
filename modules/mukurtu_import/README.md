@@ -12,3 +12,11 @@ We have extended many of Migrate's classes. Migrate has a few different assumpti
 There is a Mukurtu CMS specific plugin annotation `MukurtuImportFieldProcess`. Plugins of this type are responsible for generating the field level migrate process plugin chain to handle fields of the type specified in the annotation. This module provides these plugins for all the field types used in Mukurtu CMS. New plugins can be added in this module or a separate module to add support for new field types or to override the existing handling (e.g., if a specific site wanted to change the default behavior for a field type).
 
 The other key Mukurtu CMS specific element of import is the `mukurtu_import_strategy` configuration entity (`MukurtuImportStrategy`). This entity encapsulates all the import settings per migrate source (which is a CSV file, typically). Usage of this entity can be seen in `CustomStrategyFromFileForm`.
+
+## Spreadsheet uploads
+Metadata files can be CSV, XLSX, or ODS. `SpreadsheetConverter` (service `mukurtu_import.spreadsheet_converter`) turns each XLSX or ODS workbook into one UTF-8 CSV file per sheet when the upload form is submitted, then deletes the workbook. Every later step, including import strategies and the `migrate_source_csv` source plugin, only ever sees CSV files.
+
+- Each visible sheet with a header row (its first non-empty row) becomes a CSV file named `<workbook> - <sheet>.csv`. A workbook with one such sheet keeps its own name. Hidden sheets and sheets with no header row are skipped.
+- Cells become the text you'd expect in a CSV: whole numbers have no `.0`, dates are ISO 8601 (`2024-03-14`, or `2024-03-14T09:30:00` with a time), booleans are `1` or `0`, and formulas give their last computed value. Text cells, including IDs with leading zeros, are unchanged.
+- A workbook may have at most `SpreadsheetConverter::MAX_SHEETS` sheets and `SpreadsheetConverter::MAX_ROWS` data rows, since conversion runs within one request.
+- Legacy `.xls` and macro-enabled `.xlsm` files aren't accepted.

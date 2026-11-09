@@ -8,12 +8,29 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\file\Element\ManagedFile;
 use Drupal\Core\Link;
+use Drupal\mukurtu_import\SpreadsheetConversionException;
+use Drupal\mukurtu_import\SpreadsheetConverter;
 use Exception;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a Mukurtu Import form.
  */
 class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInterface {
+
+  /**
+   * Converts uploaded workbooks to CSV.
+   */
+  protected SpreadsheetConverter $spreadsheetConverter;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    $instance = parent::create($container);
+    $instance->spreadsheetConverter = $container->get('mukurtu_import.spreadsheet_converter');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -46,13 +63,13 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $form['metadata_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Metadata Files'),
-      '#description' => $this->t('Add your metadata files (e.g., CSV) here. You will configure how they are imported in the next step.'),
+      '#description' => $this->t('Add your metadata files (CSV, XLSX, or ODS) here. Each sheet in a workbook is imported as a separate file. You will configure how they are imported in the next step.'),
       '#process' => [[static::class, 'processManagedFile']],
       '#multiple' => TRUE,
       '#default_value' => $this->getMetadataFiles(),
       '#upload_location' => $this->getMetadataUploadLocation(),
       '#upload_validators' => [
-        'FileExtension' => ['extensions' => 'csv'],
+        'FileExtension' => ['extensions' => 'csv ' . implode(' ', SpreadsheetConverter::EXTENSIONS)],
       ],
       '#attributes' => [
         'name' => 'import_file_upload',
@@ -136,8 +153,18 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
         return;
       }
 
+      // Workbooks are converted to CSV on submit. Read them through once now
+      // so a bad file is reported before anything is written.
+      if ($this->spreadsheetConverter->isSpreadsheet($file)) {
+        try {
+          $this->spreadsheetConverter->validate($file);
+        }
+        catch (SpreadsheetConversionException $e) {
+          $form_state->setError($form['metadata_files'], $e->getUserMessage());
+        }
+      }
       // For CSV files, check if we can read the headers.
-      if ($file->getMimeType() == 'text/csv') {
+      elseif ($file->getMimeType() == 'text/csv') {
         try {
           $this->getCSVHeaders($file);
         }
@@ -152,8 +179,12 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
+    $metadataFiles = $this->convertSpreadsheets($form_state->getValue('metadata_files') ?? []);
+    if ($metadataFiles === NULL) {
+      return;
+    }
+
     // Add a default weight for any new metadata files.
-    $metadataFiles = $form_state->getValue('metadata_files');
     $metadataFileWeights = $this->getMetadataFileWeights();
     foreach ($metadataFiles as $fid ) {
       if (!in_array($fid, $metadataFileWeights)) {
@@ -163,6 +194,42 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     $this->setMetadataFileWeights($metadataFileWeights);
 
     $form_state->setRedirect('mukurtu_import.import_files');
+  }
+
+  /**
+   * Replaces each uploaded workbook with one CSV file per sheet.
+   *
+   * @param array $fids
+   *   The uploaded metadata file IDs.
+   *
+   * @return array|null
+   *   The metadata file IDs with workbooks swapped for their CSV files, or
+   *   NULL if a workbook could not be converted.
+   */
+  protected function convertSpreadsheets(array $fids): ?array {
+    $storage = $this->entityTypeManager->getStorage('file');
+    $result = [];
+    foreach ($fids as $fid) {
+      /** @var \Drupal\file\FileInterface|null $file */
+      $file = $storage->load($fid);
+      if (!$file || !$this->spreadsheetConverter->isSpreadsheet($file)) {
+        $result[] = $fid;
+        continue;
+      }
+      try {
+        $csvFiles = $this->spreadsheetConverter->convert($file, $this->getMetadataUploadLocation());
+      }
+      catch (SpreadsheetConversionException $e) {
+        $this->messenger()->addError($e->getUserMessage());
+        return NULL;
+      }
+      foreach ($csvFiles as $csvFile) {
+        $result[] = $csvFile->id();
+      }
+      // The workbook would otherwise be listed as a metadata file too.
+      $file->delete();
+    }
+    return $result;
   }
 
   /**

@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\Plugin\MukurtuExporter;
 use Drupal\mukurtu_export\Attribute\MukurtuExporter;
 use Drupal\mukurtu_export\ExportItemIdentity;
 use Drupal\mukurtu_export\Plugin\ExporterBase;
+use Drupal\mukurtu_export\SpreadsheetWorkbookWriter;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
@@ -14,6 +15,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Exception;
+use League\Csv\Bom;
 
 /**
  * Plugin implementation of MukurtuExporter for CSV.
@@ -137,6 +139,17 @@ class CSV extends ExporterBase {
     $default_settings_id = $settings['settings_id'] ?? NULL;
     $form['export_settings']['#default_value'] = $default_settings_id && in_array($default_settings_id, $option_keys) ? $default_settings_id : reset($option_keys);
 
+    $form['export_format'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('File format'),
+      '#options' => [
+        'csv' => $this->t('CSV (one file per type)'),
+        'xlsx' => $this->t('Excel workbook (.xlsx)'),
+        'ods' => $this->t('OpenDocument spreadsheet (.ods)'),
+      ],
+      '#default_value' => static::getFormat($settings),
+    ];
+
     $form['settings_actions'] = [
       '#type' => 'actions',
     ];
@@ -162,7 +175,22 @@ class CSV extends ExporterBase {
   public function getSettings(array &$form, FormStateInterface $form_state) {
     $settings = [];
     $settings['settings_id'] = $form_state->getValue('export_settings');
+    $settings['format'] = static::getFormat(['format' => $form_state->getValue('export_format')]);
     return $settings;
+  }
+
+  /**
+   * The output file format from the export settings.
+   *
+   * @param array $settings
+   *   The exporter settings.
+   *
+   * @return string
+   *   'csv', or one of SpreadsheetWorkbookWriter::FORMATS.
+   */
+  public static function getFormat(array $settings): string {
+    $format = $settings['format'] ?? 'csv';
+    return in_array($format, SpreadsheetWorkbookWriter::FORMATS, TRUE) ? $format : 'csv';
   }
 
   /**
@@ -295,6 +323,14 @@ class CSV extends ExporterBase {
     if ($output && !isset($context['results']['headers_written'][$entity_type_id][$bundle])) {
 
       $headers = $context['sandbox']['config']->getHeaders($entity_type_id, $bundle);
+
+      // A byte order mark tells Excel the file is UTF-8; without one it
+      // guesses the legacy Windows encoding and garbles non-English text.
+      // The importer strips it again. Workbook exports convert these files
+      // instead of shipping them, so they don't need one.
+      if (static::getFormat($context['results']['settings'] ?? []) === 'csv') {
+        fwrite($output, Bom::Utf8->value);
+      }
 
       fputcsv($output, $headers, $context['results']['csv']['separator'], $context['results']['csv']['enclosure'], $context['results']['csv']['escape']);
       $context['results']['headers_written'][$entity_type_id][$bundle] = TRUE;
