@@ -85,11 +85,23 @@
       }
     }
 
+    // Keeps an option scrolled to with the arrow keys clear of the pinned
+    // "See all results" option, however many lines that option wraps to.
+    function clearPinnedOption() {
+      const pinned = list.querySelector(".mukurtu-search-suggest__option--all");
+      list.style.scrollPaddingBlockEnd = pinned ? `${pinned.offsetHeight}px` : "";
+    }
+
+    function layout() {
+      fitToScreen();
+      clearPinnedOption();
+    }
+
     function open() {
       list.hidden = false;
       input.setAttribute("aria-expanded", "true");
       input.setAttribute(PAUSE_AUTO_SUBMIT, "");
-      fitToScreen();
+      layout();
     }
 
     function close() {
@@ -336,6 +348,12 @@
       if (resumeOnKeyup && event.key === "Escape") {
         resumeOnKeyup = false;
         setTimeout(resumeAutoSubmit);
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (!list.hidden) {
+        layout();
       }
     });
 

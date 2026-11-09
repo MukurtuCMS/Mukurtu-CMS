@@ -5655,9 +5655,8 @@ body.is-fixed {
 .header-search .mukurtu-search-suggest__list {
   inset-inline: auto 0;
   inline-size: min(24rem, 100vw - 2rem);
-  /* Keeps an option scrolled to with the arrow keys clear of the pinned
-   * "See all results" option. */
-  scroll-padding-block-end: 3rem;
+  /* search-suggest.js sets scroll-padding-block-end from the pinned "See
+   * all results" option's height, so options scrolled to stay clear of it. */
 }
 
 .vertical-card {

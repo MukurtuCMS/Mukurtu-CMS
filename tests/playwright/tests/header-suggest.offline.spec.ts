@@ -88,7 +88,7 @@ async function openFixture(page: Page) {
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify(ANSWERS[q] ?? { groups: [], all_url: '/browse' }),
+      body: JSON.stringify(ANSWERS[q] ?? (q.startsWith('many') ? ANSWERS.many : { groups: [], all_url: '/browse' })),
     });
   });
   // Any page an option opens, and the form's own target.
@@ -225,4 +225,27 @@ test('"See all results" stays in view while a long list scrolls', async ({ page 
   const f = (await footer.boundingBox())!;
   expect(a.y + a.height).toBeLessThanOrEqual(f.y + 1);
   expect(await inList(footer)).toBe(true);
+});
+
+test('no option hides behind "See all results" when it wraps onto several lines', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await openFixture(page);
+  const input = box(page);
+  // The footer repeats what was typed, so a long search wraps it.
+  await input.fill('many');
+  await input.pressSequentially(' buffalo buffalo buffalo buffalo buffalo');
+  await expect(list(page)).toBeVisible();
+
+  const footer = list(page).locator('.mukurtu-search-suggest__option--all');
+  const footerBox = (await footer.boundingBox())!;
+  expect(footerBox.height).toBeGreaterThan(60);
+
+  const count = await list(page).getByRole('option').count();
+  for (let i = 0; i < count - 1; i++) {
+    await input.press('ArrowDown');
+    const active = page.locator(`#${await input.getAttribute('aria-activedescendant')}`);
+    const a = (await active.boundingBox())!;
+    const f = (await footer.boundingBox())!;
+    expect(a.y + a.height, `${await active.textContent()} is behind the footer`).toBeLessThanOrEqual(f.y + 1);
+  }
 });
