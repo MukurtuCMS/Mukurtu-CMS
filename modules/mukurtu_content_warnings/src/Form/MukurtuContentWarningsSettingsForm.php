@@ -55,21 +55,11 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     return $options;
   }
 
-  // Method to get all media tag taxonomy terms.
-  protected function getTerms() {
-    $query = \Drupal::entityQuery('taxonomy_term')
-      ->condition('vid', 'media_tag')
-      ->accessCheck(FALSE);
-    $tids = $query->execute();
-
-    $terms = [];
-    foreach ($tids as $tid) {
-      $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tid);
-      if ($term) {
-        $terms[$tid] = $term->getName();
-      }
-    }
-    return $terms;
+  /**
+   * Gets the media tags as options, in tree order and translated.
+   */
+  protected function getTerms(): array {
+    return \Drupal::service('mukurtu_core.term_path_options')->getOptions('media_tag');
   }
 
   /**
@@ -191,7 +181,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       $form['taxonomy_warnings'][$i]['term'] = [
         '#type' => 'select',
         '#title' => $this->t('Term'),
-        '#description' => $this->t('Select the media tag attached to the media that will trigger the warning.'),
+        '#description' => $this->t('Select the media tag attached to the media that will trigger the warning. The warning also applies to media tagged with any term nested under this one.'),
         '#options' => $availableTerms,
         '#empty_option' => $this->t('Select a term'),
         '#default_value' => $id,
