@@ -121,7 +121,7 @@ class ExportResultsForm extends ExportBaseForm {
             'intro' => [
               '#type' => 'html_tag',
               '#tag' => 'p',
-              '#value' => $this->t('Some values are longer than the 32,767 characters an Excel cell can hold. If you open this spreadsheet in Excel, these fields will be truncated, and their data will be lost on save. See <a href=":url">File Formats and Spreadsheet Tools</a> for recommended spreadsheet tools.', [
+              '#value' => $this->t('Some values are longer than the 32,767 characters an Excel cell can hold. If you open these files in Excel, these fields will be truncated, and their data will be lost on save. See <a href=":url">File Formats and Spreadsheet Tools</a> for recommended spreadsheet tools.', [
                 ':url' => 'https://docs.mukurtu.org/roundtrip/RoundtripFormatting/',
               ]),
             ],
