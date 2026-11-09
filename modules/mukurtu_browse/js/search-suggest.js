@@ -167,6 +167,11 @@
     });
 
     input.addEventListener("keydown", (event) => {
+      // Keys that build a character in an input method editor, such as Enter
+      // confirming a word, belong to the editor, not the list.
+      if (event.isComposing || event.keyCode === 229) {
+        return;
+      }
       const open = !list.hidden;
       switch (event.key) {
         case "ArrowDown":

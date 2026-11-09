@@ -235,6 +235,21 @@ test('old suggestions do not come back after deleting below three letters', asyn
   await expect(input).toHaveAttribute('aria-expanded', 'false');
 });
 
+test('Enter that finishes a character in an input method does not pick or search', async ({ page }) => {
+  await openFixture(page);
+  const input = box(page);
+  await input.pressSequentially('buf');
+  await expect(list(page)).toBeVisible();
+  await input.press('ArrowDown');
+
+  await input.evaluate((el) => el.dispatchEvent(new KeyboardEvent('keydown', {
+    key: 'Enter', keyCode: 229, isComposing: true, bubbles: true, cancelable: true,
+  })));
+  await expect(input).toHaveValue('buf');
+  await expect(list(page)).toBeVisible();
+  expect(await submitted(page)).toEqual([]);
+});
+
 test('clicking a suggestion searches for it', async ({ page }) => {
   await openFixture(page);
   await box(page).pressSequentially('bas');
