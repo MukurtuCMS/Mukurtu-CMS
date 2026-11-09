@@ -145,6 +145,15 @@ reset-refused-upload:
     - core/drupal.ajax
     - core/drupal.announce
 
+focus-file-field:
+  version: 1.x
+  js:
+    js/focus-file-field.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.ajax
+    - core/tabbable
+
 ajax-row-table-status:
   version: 1.x
   js:
