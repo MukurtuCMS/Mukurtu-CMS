@@ -1521,6 +1521,17 @@ body.consent-popup-opened .klaro_toggle_dialog {
   min-block-size: 12rem;
 }
 
+.media--audio:has(> .field--name-field-media-audio-file):has(> .mukurtu-content-warnings:not(.dismissed)) > :not(.mukurtu-content-warnings) {
+  display: none;
+}
+.media--audio:has(> .field--name-field-media-audio-file):has(> .mukurtu-content-warnings:not(.dismissed)) > .mukurtu-content-warnings {
+  position: relative;
+  inset: auto;
+  -ms-flex-item-align: stretch;
+      align-self: stretch;
+  overflow-y: visible;
+}
+
 .mukurtu-content-warnings {
   position: absolute;
   inset: 0;

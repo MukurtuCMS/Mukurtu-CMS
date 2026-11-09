@@ -216,6 +216,40 @@ test('Warnings that fit have no scrolling band', async ({ page }) => {
   await expect(page.locator('.mukurtu-content-warnings')).not.toHaveClass(/mukurtu-content-warnings--scrolls/);
 });
 
+// Mirrors media--audio--audio-for-dictionary-teaser.html.twig, as /dictionary
+// shows it: a bare player, one line tall.
+const AUDIO = `
+  <div class="media media--audio">
+    ${overlay(8)}
+    <div class="field field--name-field-media-audio-file"><div class="field__item"><audio controls></audio></div></div>
+    <span class="media-asset--name">recording.mp3</span>
+  </div>`;
+
+test('A bare audio player grows to show every warning and the button', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await load(page, AUDIO);
+  const warning = page.locator('.mukurtu-content-warnings');
+  for (const text of WARNINGS) {
+    await expect(page.getByText(text)).toBeVisible();
+  }
+  const fits = await warning.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+  expect(fits, 'nothing to scroll').toBe(true);
+  await expect(warning).not.toHaveClass(/mukurtu-content-warnings--scrolls/);
+  await expect(page.locator('audio')).toBeHidden();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Show media' })).toBeFocused();
+});
+
+test('Show media on a bare audio player reveals the player and focuses it', async ({ page }) => {
+  await load(page, AUDIO);
+  await page.getByRole('button', { name: 'Show media' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.mukurtu-content-warnings')).toBeHidden();
+  await expect(page.locator('audio')).toBeVisible();
+  await expect(page.locator('audio')).toBeFocused();
+  await expect(page.getByText('recording.mp3')).toBeVisible();
+});
+
 test('Thumbnails keep the scrim but have no Tab stop', async ({ page }) => {
   await load(page, THUMBNAIL);
   await expect(page.locator('.mukurtu-content-warnings')).toBeVisible();

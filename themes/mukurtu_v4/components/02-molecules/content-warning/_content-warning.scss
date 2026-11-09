@@ -11,6 +11,25 @@
   min-block-size: 12rem;
 }
 
+// A bare audio player (dictionary teasers and word pages, audio on cards) is
+// one line tall, too short for the warnings and the button. Until the
+// warning is dismissed, put the overlay in the flow so it grows to fit, and
+// hide the player and its details, which it would cover anyway. Players
+// drawn over an image (teaser_featured, media_assets) wrap the audio field,
+// so this skips them.
+.media--audio:has(> .field--name-field-media-audio-file):has(> .mukurtu-content-warnings:not(.dismissed)) {
+  > :not(.mukurtu-content-warnings) {
+    display: none;
+  }
+
+  > .mukurtu-content-warnings {
+    position: relative;
+    inset: auto;
+    align-self: stretch;
+    overflow-y: visible;
+  }
+}
+
 .mukurtu-content-warnings {
   position: absolute;
   inset: 0;
