@@ -10,6 +10,8 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\mukurtu_browse\Service\HeaderSuggestionBuilder;
+use Drupal\search_api\SearchApiException;
+use Drupal\search_api_autocomplete\SearchApiAutocompleteException;
 use Drupal\search_api_autocomplete\SearchInterface;
 use Drupal\search_api_autocomplete\Utility\AutocompleteHelperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -106,15 +108,23 @@ class SearchSuggestController extends ControllerBase {
       return new JsonResponse(['groups' => [], 'all_url' => NULL]);
     }
 
-    $query = $search->createQuery($keys, [
-      'display' => $page['display'],
-      'filter' => 'search_api_fulltext',
-    ]);
     $all_url = Url::fromRoute($page['route'], [], ['query' => ['search_api_fulltext' => $keys]]);
+    try {
+      $query = $search->createQuery($keys, [
+        'display' => $page['display'],
+        'filter' => 'search_api_fulltext',
+      ]);
+      $groups = $this->builder->build($query, $keys, $page['link_groups']);
+    }
+    catch (SearchApiException | SearchApiAutocompleteException $e) {
+      // Suggestions are a convenience; the search itself still works.
+      $this->getLogger('mukurtu_browse')->error('Header search suggestions failed: @message', ['@message' => $e->getMessage()]);
+      $groups = [];
+    }
 
     // Not cached: results depend on the visitor's protocol access.
     return new JsonResponse([
-      'groups' => $this->builder->build($query, $keys, $page['link_groups']),
+      'groups' => $groups,
       'all_url' => $all_url->toString(TRUE)->getGeneratedUrl(),
     ]);
   }
