@@ -176,7 +176,11 @@ RUN adduser -D -u 1000 -h /home/mukurtu mukurtu
 # PHP process cannot rewrite the site. Only the two file volumes are writable.
 COPY --from=build /app /var/www/html
 
+# The PHP base image leaves /var/www/html itself world-writable (mode 1777), which
+# would let PHP create files next to the code when the container isn't read_only.
 RUN set -eux; \
+    chown root:root /var/www/html; \
+    chmod 755 /var/www/html; \
     mkdir -p /var/www/files/public /var/www/files/private; \
     chown mukurtu:mukurtu /var/www/files/public /var/www/files/private; \
     rm -rf /var/www/html/web/sites/default/files; \
