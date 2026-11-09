@@ -6,8 +6,11 @@ namespace Drupal\Tests\mukurtu_export\Kernel;
 
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_export\BatchExportExecutable;
 use Drupal\mukurtu_export\ExportItemIdentity;
+use Drupal\mukurtu_export\Form\ExportResultsForm;
 use Drupal\mukurtu_export\Plugin\MukurtuExporter\CSV;
 use Drupal\mukurtu_export\SpreadsheetWorkbookWriter;
 use Drupal\node\Entity\Node;
@@ -25,6 +28,7 @@ use PHPUnit\Framework\Attributes\Group;
 #[CoversClass(SpreadsheetWorkbookWriter::class)]
 #[CoversClass(BatchExportExecutable::class)]
 #[CoversClass(CSV::class)]
+#[CoversClass(ExportResultsForm::class)]
 #[Group('mukurtu_export')]
 class SpreadsheetExportTest extends CsvExportFieldTestBase {
 
@@ -199,18 +203,116 @@ class SpreadsheetExportTest extends CsvExportFieldTestBase {
   }
 
   /**
-   * Exports the test node and returns the batch context.
+   * Values too long for Excel are noted by field, in every format.
    */
-  protected function exportNode(string $format): array {
-    $key = ExportItemIdentity::encode($this->node->id(), NULL);
+  #[DataProvider('allFormatProvider')]
+  public function testOverlongValuesAreRecorded(string $format): void {
+    $node = $this->createNodeWithNotes('Long notes', str_repeat('x', SpreadsheetWorkbookWriter::XLSX_MAX_CELL_LENGTH + 1));
+    $short = $this->createNodeWithNotes('Short notes', 'fine');
+
+    $context = $this->exportNode($format, [$node, $short]);
+
+    $this->assertSame(['Notes' => ['count' => 1, 'labels' => ['Long notes']]], $context['results']['overlong']);
+  }
+
+  /**
+   * All formats.
+   */
+  public static function allFormatProvider(): array {
+    return ['csv' => ['csv'], 'xlsx' => ['xlsx'], 'ods' => ['ods']];
+  }
+
+  /**
+   * Exports with no long values record nothing.
+   */
+  public function testShortValuesAreNotRecorded(): void {
+    $context = $this->exportNode('csv', [$this->createNodeWithNotes('Short notes', 'fine')]);
+    $this->assertArrayNotHasKey('overlong', $context['results']);
+  }
+
+  /**
+   * The results page names the field and the first few items.
+   */
+  public function testResultsPageWarnsAboutOverlongValues(): void {
+    $long = str_repeat('x', SpreadsheetWorkbookWriter::XLSX_MAX_CELL_LENGTH + 1);
+    $nodes = [];
+    for ($i = 1; $i <= CSV::OVERLONG_LABELS_SHOWN + 1; $i++) {
+      $nodes[] = $this->createNodeWithNotes("Item $i", $long);
+    }
+    $context = $this->exportNode('csv', $nodes);
+    $this->assertSame(CSV::OVERLONG_LABELS_SHOWN + 1, $context['results']['overlong']['Notes']['count']);
+    $this->assertCount(CSV::OVERLONG_LABELS_SHOWN, $context['results']['overlong']['Notes']['labels']);
+
+    $_SESSION['mukurtu_export'] = ['results' => $context['results'], 'download_fid' => NULL];
+    $form = $this->container->get('form_builder')->getForm(ExportResultsForm::class);
+    $html = (string) $this->container->get('renderer')->renderInIsolation($form['overlong']);
+
+    $this->assertStringContainsString('Some values are longer than the 32,767 characters an Excel cell can hold.', $html);
+    $this->assertStringContainsString('<a href="https://docs.mukurtu.org/roundtrip/RoundtripFormatting/">File Formats and Spreadsheet Tools</a>', $html);
+    $this->assertStringContainsString('Notes: Item 1, Item 2, Item 3, Item 4, Item 5, and 1 more', $html);
+    unset($_SESSION['mukurtu_export']);
+  }
+
+  /**
+   * The results page has no warning when nothing is too long.
+   */
+  public function testResultsPageHasNoWarningForShortValues(): void {
+    $_SESSION['mukurtu_export'] = ['results' => $this->exportNode('csv')['results'], 'download_fid' => NULL];
+    $form = $this->container->get('form_builder')->getForm(ExportResultsForm::class);
+    $this->assertArrayNotHasKey('overlong', $form);
+    unset($_SESSION['mukurtu_export']);
+  }
+
+  /**
+   * Creates a node with a long text Notes field mapped for export.
+   */
+  protected function createNodeWithNotes(string $title, string $notes): Node {
+    if (!FieldStorageConfig::loadByName('node', 'field_notes')) {
+      FieldStorageConfig::create([
+        'field_name' => 'field_notes',
+        'entity_type' => 'node',
+        'type' => 'string_long',
+      ])->save();
+      FieldConfig::create([
+        'field_name' => 'field_notes',
+        'entity_type' => 'node',
+        'bundle' => 'protocol_aware_content',
+        'label' => 'Notes',
+      ])->save();
+      $this->export_config->set('entity_fields_export_list', [
+        'node__protocol_aware_content' => ['title' => 'Title', 'field_notes' => 'Notes'],
+      ])->save();
+    }
+    $node = Node::create([
+      'title' => $title,
+      'type' => 'protocol_aware_content',
+      'status' => TRUE,
+      'uid' => $this->currentUser->id(),
+      'field_notes' => $notes,
+    ]);
+    $node->setSharingSetting('any');
+    $node->setProtocols([$this->protocol]);
+    $node->save();
+    return $node;
+  }
+
+  /**
+   * Exports nodes (the test node by default) and returns the batch context.
+   */
+  protected function exportNode(string $format, ?array $nodes = NULL): array {
+    $keys = [];
+    foreach ($nodes ?? [$this->node] as $node) {
+      $key = ExportItemIdentity::encode($node->id(), NULL);
+      $keys[$key] = $key;
+    }
     $context = $this->workbookContext($format, []);
     $context['sandbox'] = [
       'config' => $this->export_config,
-      'batch' => ['entity_type_id' => 'node', 'entities' => [$key]],
+      'batch' => ['entity_type_id' => 'node', 'entities' => array_values($keys)],
     ];
     $context['results'] += [
       'config_id' => $this->export_config->id(),
-      'entities' => ['node' => [$key => $key]],
+      'entities' => ['node' => $keys],
       'exported_entities' => [],
       'exported_entities_count' => 0,
       'shallow_entity_ids' => [],

@@ -26,6 +26,12 @@ use League\Csv\Bom;
   description: new TranslatableMarkup('Export to CSV.'),
 )]
 class CSV extends ExporterBase {
+
+  /**
+   * How many items to name for each field with values too long for Excel.
+   */
+  public const OVERLONG_LABELS_SHOWN = 5;
+
   /**
    * Entity IDs of the shipped default CSV export settings, in the order
    * they should be listed ahead of any other site-wide settings.
@@ -382,6 +388,7 @@ class CSV extends ExporterBase {
 
         // Export the entity.
         $result = static::class::export($entity, $context);
+        static::recordOverlongValues($entity, $result, $context);
 
         // Write out.
         fputcsv($output, $result, $context['results']['csv']['separator'], $context['results']['csv']['enclosure'], $context['results']['csv']['escape']);
@@ -422,6 +429,35 @@ class CSV extends ExporterBase {
     // We are done exporting if there are no more entities in the export list.
     if (!empty($context['results']['entities'])) {
       $context['finished'] = 0;
+    }
+  }
+
+  /**
+   * Notes values in a row too long for an Excel cell.
+   *
+   * Excel cuts such values short when it opens any export, so the results
+   * page lists them by field. Large map locations are the usual cause.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The exported entity, in the language it was exported in.
+   * @param array $row
+   *   The exported values, in header order.
+   * @param array $context
+   *   The batch context. Fills $context['results']['overlong'], keyed by
+   *   column header, with a 'count' of items and the first few item
+   *   'labels'.
+   */
+  protected static function recordOverlongValues(EntityInterface $entity, array $row, array &$context): void {
+    $headers = array_values($context['sandbox']['config']->getHeaders($entity->getEntityTypeId(), $entity->bundle()));
+    foreach (array_values($row) as $index => $value) {
+      if (mb_strlen((string) $value) <= SpreadsheetWorkbookWriter::XLSX_MAX_CELL_LENGTH) {
+        continue;
+      }
+      $header = (string) ($headers[$index] ?? $index);
+      $context['results']['overlong'][$header]['count'] = ($context['results']['overlong'][$header]['count'] ?? 0) + 1;
+      if (count($context['results']['overlong'][$header]['labels'] ?? []) < static::OVERLONG_LABELS_SHOWN) {
+        $context['results']['overlong'][$header]['labels'][] = (string) $entity->label();
+      }
     }
   }
 
