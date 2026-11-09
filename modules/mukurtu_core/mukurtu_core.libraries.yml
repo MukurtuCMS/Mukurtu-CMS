@@ -136,6 +136,15 @@ modal-click-guard-ready:
   dependencies:
     - core/drupal
 
+reset-refused-upload:
+  version: 1.x
+  js:
+    js/reset-refused-upload.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.ajax
+    - core/drupal.announce
+
 ajax-row-table-status:
   version: 1.x
   js:
