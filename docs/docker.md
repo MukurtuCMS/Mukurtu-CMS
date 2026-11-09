@@ -490,7 +490,9 @@ A contributed module can go in `custom/modules` too, if it doesn't need Composer
 libraries: download it from Drupal.org and unpack it there. To check, open the
 module's `composer.json`. If its `require` section lists only `drupal/` packages, or
 the module has no `composer.json`, it works from the folder. Otherwise, use a
-[site image](#a-site-image).
+[site image](#a-site-image). If you put one in the folder anyway,
+`drush pm:install --yes` answers Drupal's warning about the missing library for you
+and turns the module on without it, so the module won't work.
 
 Keep in mind:
 
