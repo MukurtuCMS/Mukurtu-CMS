@@ -21,11 +21,14 @@ COPY composer-packages.txt /tmp/composer-packages.txt
 # at the versions the release shipped with. The local-dev repository points at
 # a folder that is only there while the official image is built.
 RUN set -eu; \
-    packages=$(grep -v '^[[:space:]]*\(#\|$\)' /tmp/composer-packages.txt || true); \
-    if [ -n "$packages" ]; then \
+    packages=$(sed 's/#.*//' /tmp/composer-packages.txt); \
+    if [ -n "$(printf '%s' "$packages" | tr -d '[:space:]')" ]; then \
       composer config --unset repositories.local-dev; \
       composer require --no-progress --update-no-dev --optimize-autoloader --minimal-changes $packages; \
     fi
 
+# The whole code folder is copied, not only what Composer changed. Copying only
+# vendor and web/modules/contrib would save about 70 MB, but a package that
+# installs anywhere else (web/libraries, drush, recipes) would be left out.
 FROM mukurtu
 COPY --from=build --chown=0:0 /var/www/html /var/www/html

@@ -21,7 +21,7 @@ fi
 
 echo "site image: build with drupal/address"
 cp -r "$REPO_ROOT/examples/docker/site-image/." "$WORK/"
-echo "drupal/address" >> "$WORK/composer-packages.txt"
+echo "drupal/address  # a comment after a package is ignored" >> "$WORK/composer-packages.txt"
 # Packagist and Drupal.org sometimes fail a download; one such failure must not fail a release.
 built=false
 for attempt in 1 2 3; do

@@ -362,6 +362,8 @@ assert_eq "200" "$(ext_code /hello-site)" "a mounted custom module can be turned
 assert_contains "$(sql "select data from config where name='core.extension'")" "hello_theme" "a mounted sub-theme can be turned on"
 docker rm -f "$EXT_SITE" >/dev/null
 
+# An info file among the uploaded files must not count as the module's code.
+docker run --rm --user 1000 --entrypoint sh "${SITE_VOLUMES[@]}" "$FULL" -c 'printf "name: Fake\ntype: module\n" > /var/www/files/public/hello_site.info.yml'
 extension_before="$(sql "select data from config where name='core.extension'")"
 updates_before="$(sql "select count(*) from key_value where collection='system.schema'")"
 out="$(run_to_exit "$FULL" "${COMMON_ENV[@]}" "${SITE_VOLUMES[@]}")"
@@ -374,6 +376,16 @@ assert_eq "$extension_before" "$(sql "select data from config where name='core.e
 assert_eq "$updates_before" "$(sql "select count(*) from key_value where collection='system.schema'")" "missing code: the schema records are unchanged"
 out="$(run_to_exit "$FULL" "${COMMON_ENV[@]}" "${SITE_VOLUMES[@]}" -e MUKURTU_RUN_UPDATES=false)"
 assert_contains "$out" "module hello_site" "missing code: the check also runs with MUKURTU_RUN_UPDATES=false"
+
+# A release that removed a module on purpose lists it in the profile, and its update
+# hook takes it out of core.extension. The check must not stop that release.
+REMOVED_IMAGE="mukurtu-test:removed-$RUN_ID"
+printf 'FROM %s\nUSER root\nRUN sed -i "s/^mukurtu_removed_extensions: \\[\\]$/mukurtu_removed_extensions: [hello_site]/" /var/www/html/web/profiles/mukurtu/mukurtu.info.yml && grep -q "^mukurtu_removed_extensions: \\[hello_site\\]$" /var/www/html/web/profiles/mukurtu/mukurtu.info.yml\nUSER mukurtu\n' "$FULL" \
+  | docker build -q -t "$REMOVED_IMAGE" - >/dev/null 2>&1 && pass "an image that lists hello_site as removed builds" || fail "an image that lists hello_site as removed builds"
+out="$(run_to_exit "$REMOVED_IMAGE" "${COMMON_ENV[@]}" "${SITE_VOLUMES[@]}")"
+assert_not_contains "$out" "module hello_site" "a module the profile lists as removed doesn't stop the start"
+assert_contains "$out" "theme hello_theme" "the other missing theme still stops it"
+docker rmi -f "$REMOVED_IMAGE" >/dev/null 2>&1
 
 if ext_up "${MOUNTS[@]}"; then pass "with the code back, the site starts again"; else fail "with the code back, the site starts again"; docker logs "$EXT_SITE" 2>&1 | tail -20; fi
 assert_eq "200" "$(ext_code /hello-site)" "with the code back, the custom module's page works again"
