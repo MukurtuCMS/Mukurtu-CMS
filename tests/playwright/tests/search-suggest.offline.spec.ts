@@ -13,7 +13,9 @@ import path = require('path');
  *
  * Better Exposed Filters' auto-submit is stood in for by a few lines that
  * keep the parts the script depends on: a 500ms keyup debounce, the keys it
- * ignores, and skipping inputs with data-bef-auto-submit-exclude.
+ * ignores, and skipping inputs with data-bef-auto-submit-exclude. Mukurtu's
+ * form-disable-enter-submit.js, which stops Enter submitting the views
+ * exposed forms, is stood in for the same way.
  */
 
 const REPO = path.join(__dirname, '../../..');
@@ -60,6 +62,11 @@ const BEF_STUB = `
         }
         window.__autoSubmits++;
       }, 500);
+    });
+    input.form.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+      }
     });
     input.form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -187,6 +194,47 @@ test('arrow keys move through the list and Enter searches for the word', async (
   expect(await submitted(page)).toEqual(['bufflehead']);
 });
 
+test('typing after moving through the list searches for what was typed', async ({ page }) => {
+  await openFixture(page);
+  const input = box(page);
+  await input.pressSequentially('buf');
+  await expect(list(page)).toBeVisible();
+  await input.press('ArrowDown');
+  await expect(input).toHaveAttribute('aria-activedescendant');
+
+  // Checked at once, before the next request could replace the list.
+  await input.press('z');
+  expect(await input.getAttribute('aria-activedescendant')).toBeNull();
+  await input.press('Enter');
+  expect(await submitted(page)).toEqual(['bufz']);
+});
+
+test('Enter with no suggestion highlighted searches for what was typed', async ({ page }) => {
+  await openFixture(page);
+  const input = box(page);
+  await input.pressSequentially('buf');
+  await expect(list(page)).toBeVisible();
+
+  await input.press('Enter');
+  await expect(list(page)).toBeHidden();
+  expect(await submitted(page)).toEqual(['buf']);
+});
+
+test('old suggestions do not come back after deleting below three letters', async ({ page }) => {
+  await openFixture(page);
+  const input = box(page);
+  await input.pressSequentially('buf');
+  await expect(list(page)).toBeVisible();
+
+  await input.press('Backspace');
+  await input.press('Backspace');
+  await expect(list(page)).toBeHidden();
+  await input.press('ArrowDown');
+  await expect(list(page)).toBeHidden();
+  await expect(list(page).getByRole('option')).toHaveCount(0);
+  await expect(input).toHaveAttribute('aria-expanded', 'false');
+});
+
 test('clicking a suggestion searches for it', async ({ page }) => {
   await openFixture(page);
   await box(page).pressSequentially('bas');
@@ -206,6 +254,8 @@ test('Escape closes the list, then clears the box', async ({ page }) => {
   await input.press('Escape');
   await expect(list(page)).toBeHidden();
   await expect(input).toHaveValue('buf');
+  // Closing the list lets the search run on its own again.
+  await expect.poll(() => autoSubmits(page), { timeout: 2000 }).toBe(1);
 
   await input.press('Escape');
   await expect(input).toHaveValue('');

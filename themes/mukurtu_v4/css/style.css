@@ -5610,6 +5610,9 @@ body.is-fixed {
 }
 @media (forced-colors: active) {
   .mukurtu-search-suggest__option[aria-selected=true] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
     outline: 2px solid Highlight;
   }
 }

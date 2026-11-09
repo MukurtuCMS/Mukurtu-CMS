@@ -36,6 +36,7 @@
     let activeIndex = -1;
     let timer = null;
     let controller = null;
+    let resumeOnKeyup = false;
 
     function setActive(index) {
       options.forEach((option, i) => {
@@ -55,6 +56,13 @@
       input.setAttribute("aria-expanded", "false");
       setActive(-1);
       input.removeAttribute(PAUSE_AUTO_SUBMIT);
+    }
+
+    // Better Exposed Filters ignores the keys that close the list, and its
+    // timer was held while the list was open. A neutral keyup restarts it, so
+    // the search runs on its own as it did before suggestions.
+    function resumeAutoSubmit() {
+      input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
     }
 
     function cancelRequest() {
@@ -131,9 +139,7 @@
       if (!words.length) {
         close();
         Drupal.announce(Drupal.t("No suggestions."));
-        // Auto-submit was held while this request ran; restart its timer so
-        // a search with nothing to suggest still runs as it did before.
-        input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
+        resumeAutoSubmit();
         return;
       }
       list.hidden = false;
@@ -147,8 +153,12 @@
 
     input.addEventListener("input", () => {
       cancelRequest();
+      // The highlighted word no longer matches what was typed.
+      setActive(-1);
       const keys = input.value.trim();
       if (keys.length < minLength) {
+        options = [];
+        list.replaceChildren();
         close();
         return;
       }
@@ -185,9 +195,13 @@
             event.preventDefault();
             pick(options[activeIndex]);
           }
-          else {
+          else if (input.value.trim()) {
+            // Mukurtu blocks Enter from submitting forms with several fields,
+            // so search for what was typed here.
+            event.preventDefault();
             cancelRequest();
             close();
+            submit();
           }
           break;
 
@@ -198,6 +212,7 @@
             event.stopPropagation();
             cancelRequest();
             close();
+            resumeOnKeyup = true;
           }
           else if (input.value) {
             event.preventDefault();
@@ -214,6 +229,15 @@
 
         default:
           break;
+      }
+    });
+
+    // Waits for the Escape keyup to pass, so Better Exposed Filters doesn't
+    // see that ignored key last and drop the restarted timer.
+    input.addEventListener("keyup", (event) => {
+      if (resumeOnKeyup && event.key === "Escape") {
+        resumeOnKeyup = false;
+        setTimeout(resumeAutoSubmit);
       }
     });
 
