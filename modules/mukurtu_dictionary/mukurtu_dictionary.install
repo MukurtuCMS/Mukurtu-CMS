@@ -133,3 +133,35 @@ function mukurtu_dictionary_update_40048() {
     ])->save();
   }
 }
+
+/**
+ * Let the dictionary's Keywords, Language and Word type facets show nesting.
+ */
+function mukurtu_dictionary_update_40049(array &$sandbox): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // As in mukurtu_browse_update_40024(), the facets move from term names to
+  // term ID fields so they can nest (#2522), and words are reindexed here.
+  // Numbered 40049 because 40048 is the paragraph summaries update (#2590).
+  $indexed = \Drupal::service('mukurtu_search.nested_term_facets')->updateShippedFacets(
+    $sandbox,
+    \Drupal::service('extension.list.module')->getPath('mukurtu_dictionary') . '/config/install',
+    'mukurtu_dictionary_index',
+    ['keyword_tid', 'language_tid', 'word_type_tid'],
+    [
+      'mukurtu_dictionary' => [
+        'facets_keyword' => ['facets_keyword', 'facets_keyword_tid'],
+        'facets_language' => ['facets_language', 'facets_language_tid'],
+        'facets_word_type' => ['facets_word_type', 'facets_word_type_tid'],
+      ],
+    ],
+  );
+  if ($indexed === NULL) {
+    return NULL;
+  }
+  return (string) \Drupal::translation()->formatPlural($indexed,
+    'The dictionary Keywords, Language and Word type facets now show nested terms. Reindexed 1 item.',
+    'The dictionary Keywords, Language and Word type facets now show nested terms. Reindexed @count items.'
+  );
+}

@@ -438,7 +438,7 @@ display:
         facets_name:
           id: facets_name
           table: search_api_index_mukurtu_default_content_index
-          field: facets_name
+          field: facets_category_tid
           relationship: none
           group_type: group
           admin_label: ''
@@ -483,6 +483,11 @@ display:
             min_count: 1
             show_numbers: true
             processor_configs:
+              translate_entity:
+                processor_id: translate_entity
+                weights:
+                  build: 5
+                settings: {  }
               list_item:
                 processor_id: list_item
                 weights:
@@ -791,7 +796,7 @@ display:
         facets_name_1:
           id: facets_name_1
           table: search_api_index_mukurtu_default_content_index
-          field: facets_name_1
+          field: facets_keywords_tid
           relationship: none
           group_type: group
           admin_label: ''
@@ -836,6 +841,11 @@ display:
             min_count: 1
             show_numbers: true
             processor_configs:
+              translate_entity:
+                processor_id: translate_entity
+                weights:
+                  build: 5
+                settings: {  }
               hierarchy_processor:
                 processor_id: hierarchy_processor
                 weights:
