@@ -558,3 +558,43 @@ function mukurtu_taxonomy_entity_bundle_field_info_alter(&$fields, EntityTypeInt
   }
 }
 
+
+/**
+ * Implements hook_options_list_alter().
+ *
+ * Removes core's depth dashes from term checkboxes and radios, which show
+ * nesting as groups instead (#2523). Select lists keep the dashes, since
+ * their options can't nest.
+ *
+ * @see \Drupal\mukurtu_taxonomy\NestedTermOptions
+ */
+function mukurtu_taxonomy_options_list_alter(array &$options, array $context) {
+  $definition = $context['fieldDefinition'] ?? NULL;
+  if (!$definition || $definition->getSetting('target_type') !== 'taxonomy_term' || !($context['widget'] ?? NULL) instanceof \Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsButtonsWidget) {
+    return;
+  }
+  $vids = array_keys($definition->getSetting('handler_settings')['target_bundles'] ?? []);
+  $options = \Drupal\mukurtu_taxonomy\NestedTermOptions::removeDashes($options, \Drupal\mukurtu_taxonomy\NestedTermOptions::getTree($vids));
+}
+
+/**
+ * Implements hook_field_widget_single_element_WIDGET_TYPE_form_alter().
+ *
+ * Groups nested terms in term checkboxes and radios (#2523).
+ *
+ * @see \Drupal\mukurtu_taxonomy\NestedTermOptions::processElement()
+ */
+function mukurtu_taxonomy_field_widget_single_element_options_buttons_form_alter(array &$element, \Drupal\Core\Form\FormStateInterface $form_state, array $context) {
+  $definition = $context['items']->getFieldDefinition();
+  if ($definition->getSetting('target_type') !== 'taxonomy_term' || empty($element['#type'])) {
+    return;
+  }
+  $vids = array_keys($definition->getSetting('handler_settings')['target_bundles'] ?? []);
+  $element['#mukurtu_term_tree'] = \Drupal\mukurtu_taxonomy\NestedTermOptions::getTree($vids);
+  // Setting #process replaces the element type's own callbacks, which make
+  // the checkboxes and radios, so keep those and run after them.
+  $element['#process'] = array_merge(
+    $element['#process'] ?? \Drupal::service('element_info')->getInfoProperty($element['#type'], '#process', []),
+    [[\Drupal\mukurtu_taxonomy\NestedTermOptions::class, 'processElement']],
+  );
+}

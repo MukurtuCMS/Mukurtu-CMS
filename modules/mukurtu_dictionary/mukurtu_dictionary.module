@@ -360,21 +360,25 @@ function mukurtu_dictionary_add_word_to_list_dialog_ajax(array &$form, FormState
   return mukurtu_core_modal_form_ajax_response($form, $form_state, fn ($nodeId) => '[data-quick-action-trigger="word-list-' . $nodeId . '"]');
 }
 
-// Helper method to pull dictionary language field options from config.
+/**
+ * Limits the dictionary word Language options to the site's chosen languages.
+ *
+ * Core's options are filtered rather than replaced, so they keep their names
+ * in the current language, their order, and any nesting (#2523).
+ */
 function mukurtu_dictionary_language_field_config_helper(&$form, FormStateInterface $form_state) {
   $config = \Drupal::config('mukurtu_dictionary_languages.settings');
   $allowedLanguages = $config->get('available_languages');
-  $languageOptions = [];
-  if ($allowedLanguages) {
-    foreach ($allowedLanguages as $tid => $value) {
-      $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($tid);
-      if ($term) {
-        $languageOptions[$tid] = $term->getName();
-      }
+  if ($allowedLanguages && isset($form['field_dictionary_word_language']['widget']['#options'])) {
+    $options = $form['field_dictionary_word_language']['widget']['#options'];
+    $languageOptions = array_intersect_key($options, array_flip(array_keys($allowedLanguages)));
+    // Keep the "N/A" choice core offers on an optional field.
+    if (isset($options['_none'])) {
+      $languageOptions = ['_none' => $options['_none']] + $languageOptions;
     }
     // If there's only one language on the site, select it automatically.
     if (count($allowedLanguages) == 1) {
-      $form['field_dictionary_word_language']['widget']['#default_value'] = array_key_first($languageOptions);
+      $form['field_dictionary_word_language']['widget']['#default_value'] = array_key_first(array_diff_key($languageOptions, ['_none' => TRUE]));
     }
     $form['field_dictionary_word_language']['widget']['#options'] = $languageOptions;
   }

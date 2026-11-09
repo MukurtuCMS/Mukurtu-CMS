@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d855cf5f0328d970f63fbe839d54e305",
+    "content-hash": "0bc9190ebc87e6dbf66d1238835ef456",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -5603,22 +5603,23 @@
         },
         {
             "name": "drupal/tagify",
-            "version": "2.0.2",
+            "version": "2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/tagify.git",
-                "reference": "2.0.2"
+                "reference": "2.0.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/tagify-2.0.2.zip",
-                "reference": "2.0.2",
-                "shasum": "4e8adc37dcfa52516b1d6471268c106ae94de19f"
+                "url": "https://ftp.drupal.org/files/projects/tagify-2.0.5.zip",
+                "reference": "2.0.5",
+                "shasum": "5dd3553190e29c21848435903452785ae8600b83"
             },
             "require": {
                 "drupal/core": "^10.3 || ^11 || ^12"
             },
             "require-dev": {
+                "drupal/ai": "1.6.x-dev",
                 "drupal/better_exposed_filters": "^7.1",
                 "drupal/facets": "^2.0",
                 "drupal/iconify_icons": "*",
@@ -5629,8 +5630,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.0.2",
-                    "datestamp": "1781686703",
+                    "version": "2.0.5",
+                    "datestamp": "1791555707",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
