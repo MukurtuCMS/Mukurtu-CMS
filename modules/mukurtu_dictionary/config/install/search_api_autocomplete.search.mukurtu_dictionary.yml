@@ -13,7 +13,7 @@ suggester_settings:
   server:
     fields:
       - title
-      - dictionary_suggest_text
+      - dictionary_fulltext
 suggester_weights:
   server: 0
 suggester_limits: {  }

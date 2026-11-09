@@ -137,30 +137,10 @@ function mukurtu_search_update_40011() {
   $module_list = \Drupal::service('extension.list.module');
   $entity_type_manager = \Drupal::entityTypeManager();
 
-  // Dictionary suggestions only complete terms, translations and alternate
-  // spellings, so they need a fulltext field holding just those.
-  $dictionary_source = new FileStorage($module_list->getPath('mukurtu_dictionary') . '/config/install');
-  $index = Index::load('mukurtu_dictionary_index');
-  if ($index && !$index->getField('dictionary_suggest_text')) {
-    $settings = $dictionary_source->read('search_api.index.mukurtu_dictionary_index')['field_settings']['dictionary_suggest_text'];
-    $field = \Drupal::getContainer()->get('search_api.fields_helper')->createField($index, 'dictionary_suggest_text', $settings);
-    $index->addField($field);
-    $index->save();
-    $index->reindex();
-
-    // The dictionary search box matches every fulltext field unless told
-    // otherwise. Keep it matching what it matched before the new field.
-    $view = \Drupal::configFactory()->getEditable('views.view.mukurtu_dictionary');
-    $path = 'display.default.display_options.filters.search_api_fulltext.fields';
-    if (!$view->isNew() && $view->get('display.default.display_options.filters.search_api_fulltext') && empty($view->get($path))) {
-      $view->set($path, ['dictionary_fulltext', 'title'])->save();
-    }
-  }
-
   $sources = [
     'mukurtu_browse' => new FileStorage($module_list->getPath('mukurtu_browse') . '/config/install'),
     'mukurtu_digital_heritage_browse' => new FileStorage($module_list->getPath('mukurtu_browse') . '/config/install'),
-    'mukurtu_dictionary' => $dictionary_source,
+    'mukurtu_dictionary' => new FileStorage($module_list->getPath('mukurtu_dictionary') . '/config/install'),
   ];
   $search_storage = $entity_type_manager->getStorage('search_api_autocomplete_search');
   $view_storage = $entity_type_manager->getStorage('view');

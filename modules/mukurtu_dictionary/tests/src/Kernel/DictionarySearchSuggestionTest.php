@@ -64,12 +64,6 @@ class DictionarySearchSuggestionTest extends DictionaryTestBase {
     Server::create($server)->save();
 
     $shipped_fields = $dictionary_config->read('search_api.index.mukurtu_dictionary_index')['field_settings'];
-    $definition = [
-      'label' => 'Definition',
-      'datasource_id' => 'entity:node',
-      'property_path' => 'field_definition',
-      'type' => 'text',
-    ];
     Index::create([
       'id' => 'dictionary_suggestion_test',
       'name' => 'Dictionary suggestion test index',
@@ -87,10 +81,7 @@ class DictionarySearchSuggestionTest extends DictionaryTestBase {
       ],
       'field_settings' => [
         'title' => $shipped_fields['title'],
-        'dictionary_suggest_text' => $shipped_fields['dictionary_suggest_text'],
-        // Indexed but not suggested, so words that appear only in a
-        // definition must not show up.
-        'definition' => $definition,
+        'dictionary_fulltext' => $shipped_fields['dictionary_fulltext'],
       ],
       'options' => ['index_directly' => FALSE],
     ])->save();
@@ -161,12 +152,12 @@ class DictionarySearchSuggestionTest extends DictionaryTestBase {
   }
 
   /**
-   * Terms, translations and alternate spellings are suggested, not definitions.
+   * Words come from the term and from every field the dictionary searches.
    */
   public function testSuggestedFields(): void {
     $this->assertSame(['openhead'], $this->suggest($this->outsider, 'openh'));
     $this->assertSame(['quokkaland'], $this->suggest($this->outsider, 'quo'));
-    $this->assertSame([], $this->suggest($this->outsider, 'zir'));
+    $this->assertSame(['zirconium'], $this->suggest($this->outsider, 'zir'));
   }
 
 }
