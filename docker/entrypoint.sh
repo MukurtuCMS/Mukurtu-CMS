@@ -100,6 +100,13 @@ state=$(php "$LIB/db.php" state)
 case "$state" in
   installed)
     log "existing installation found"
+    # An enabled module or theme whose code is gone (an unmounted folder, or a site
+    # image that wasn't rebuilt) breaks the site, and database updates would run
+    # without it. Stop before anything changes.
+    missing=$(php "$LIB/db.php" missing) || die "could not check the site's modules and themes against the code in the container"
+    if [ -n "$missing" ]; then
+      die "the site has modules or themes turned on whose code isn't in the container: $(printf '%s' "$missing" | tr '\n' ',' | sed 's/,/, /g'). Nothing was changed. Put the code back in the custom folders or the site image (see \"Adding modules and themes\" in docs/docker.md), then start the container again."
+    fi
     if [ "$MUKURTU_RUN_UPDATES" = true ]; then
       # Show what is about to run, so the log says what an upgrade changed. There is no
       # backup step: take one before upgrading (see "Upgrades and backups" in docs/docker.md).
