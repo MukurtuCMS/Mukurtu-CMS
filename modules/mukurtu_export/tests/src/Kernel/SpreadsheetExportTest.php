@@ -130,7 +130,7 @@ class SpreadsheetExportTest extends CsvExportFieldTestBase {
 
     BatchExportExecutable::buildWorkbook($context);
 
-    $this->assertTrue($context['results']['workbook_fallback']);
+    $this->assertSame(SpreadsheetWorkbookWriter::TOO_LONG, $context['results']['workbook_fallback']);
     $this->assertSame([$csv], $context['results']['deliverables']['metadata']);
     $this->assertFileDoesNotExist("{$this->basepath}/export.xlsx");
 
@@ -138,6 +138,25 @@ class SpreadsheetExportTest extends CsvExportFieldTestBase {
     $warnings = $this->container->get('messenger')->messagesByType(MessengerInterface::TYPE_WARNING);
     $this->assertCount(1, $warnings);
     $this->assertSame('Some values are too long for an Excel workbook, so this export contains CSV files instead.', (string) $warnings[0]);
+  }
+
+  /**
+   * A workbook that can't be written keeps the CSV files and warns.
+   */
+  public function testWriteFailureFallsBackToCsv(): void {
+    $missing = ['uri' => "{$this->basepath}/Missing.csv", 'entryname' => 'Missing.csv'];
+    $context = $this->workbookContext('ods', [$missing]);
+
+    BatchExportExecutable::buildWorkbook($context);
+
+    $this->assertSame(SpreadsheetWorkbookWriter::FAILED, $context['results']['workbook_fallback']);
+    $this->assertSame([$missing], $context['results']['deliverables']['metadata']);
+    $this->assertFileDoesNotExist("{$this->basepath}/export.ods");
+
+    BatchExportExecutable::batchFinishedExport(TRUE, $context['results'], []);
+    $warnings = $this->container->get('messenger')->messagesByType(MessengerInterface::TYPE_WARNING);
+    $this->assertCount(1, $warnings);
+    $this->assertSame('The workbook could not be created, so this export contains CSV files instead.', (string) $warnings[0]);
   }
 
   /**

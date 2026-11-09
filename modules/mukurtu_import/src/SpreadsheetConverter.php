@@ -44,12 +44,24 @@ class SpreadsheetConverter {
   public const MAX_SHEETS = 100;
 
   /**
-   * The most data rows a single workbook may contain, across all sheets.
+   * The most rows a single workbook may contain, across all sheets.
+   *
+   * Header rows don't count. Blank rows do, because they still have to be
+   * read.
    *
    * Conversion runs inside one form submission, so this keeps a hostile or
    * accidental huge workbook from tying up a PHP worker.
    */
   public const MAX_ROWS = 50000;
+
+  /**
+   * The most bytes a workbook's contents may unzip to.
+   *
+   * Blank rows and cells are cheap to compress but still have to be parsed,
+   * and the row limit only counts rows with data in them. This caps the
+   * total work regardless of what the workbook holds.
+   */
+  public const MAX_UNCOMPRESSED_BYTES = 256 * 1024 * 1024;
 
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
@@ -176,9 +188,12 @@ class SpreadsheetConverter {
     $usableSheets = 0;
 
     try {
+      if ($this->uncompressedSize($path) > static::MAX_UNCOMPRESSED_BYTES) {
+        throw new SpreadsheetConversionException($limitError);
+      }
       $reader->open($path);
       foreach ($reader->getSheetIterator() as $sheet) {
-        if (++$sheetCount > self::MAX_SHEETS) {
+        if (++$sheetCount > static::MAX_SHEETS) {
           throw new SpreadsheetConversionException($limitError);
         }
         if ($sheet instanceof SheetWithVisibilityInterface && !$sheet->isVisible()) {
@@ -217,7 +232,9 @@ class SpreadsheetConverter {
    * @param \OpenSpout\Reader\SheetInterface $sheet
    *   The sheet.
    * @param int $rowCount
-   *   Running count of data rows across the workbook.
+   *   Running count of rows read across the workbook, not counting header
+   *   rows. Rows that turn out to be blank count too, since they still had
+   *   to be read.
    * @param \Drupal\Core\StringTranslation\TranslatableMarkup $limitError
    *   The message to throw when the row limit is passed.
    *
@@ -236,6 +253,7 @@ class SpreadsheetConverter {
           array_pop($values);
         }
         if ($values === []) {
+          $this->countRow($rowCount, $limitError);
           continue;
         }
         $width = count($values);
@@ -243,15 +261,47 @@ class SpreadsheetConverter {
         continue;
       }
 
+      $this->countRow($rowCount, $limitError);
       $values = array_slice(array_pad($values, $width, ''), 0, $width);
       if (implode('', $values) === '') {
         continue;
       }
-      if (++$rowCount > self::MAX_ROWS) {
-        throw new SpreadsheetConversionException($limitError);
-      }
       yield $values;
     }
+  }
+
+  /**
+   * Adds one row to the running count, enforcing the row limit.
+   *
+   * @throws \Drupal\mukurtu_import\SpreadsheetConversionException
+   */
+  protected function countRow(int &$rowCount, TranslatableMarkup $limitError): void {
+    if (++$rowCount > static::MAX_ROWS) {
+      throw new SpreadsheetConversionException($limitError);
+    }
+  }
+
+  /**
+   * The total size of a zip file's contents once unzipped, in bytes.
+   *
+   * @throws \RuntimeException
+   *   If the file isn't a zip file.
+   */
+  protected function uncompressedSize(string $path): int {
+    $zip = new \ZipArchive();
+    if ($zip->open($path, \ZipArchive::RDONLY) !== TRUE) {
+      throw new \RuntimeException('Not a zip file.');
+    }
+    $total = 0;
+    try {
+      for ($i = 0; $i < $zip->numFiles; $i++) {
+        $total += (int) ($zip->statIndex($i)['size'] ?? 0);
+      }
+    }
+    finally {
+      $zip->close();
+    }
+    return $total;
   }
 
   /**

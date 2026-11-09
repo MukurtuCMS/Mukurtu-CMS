@@ -18,5 +18,6 @@ Metadata files can be CSV, XLSX, or ODS. `SpreadsheetConverter` (service `mukurt
 
 - Each visible sheet with a header row (its first non-empty row) becomes a CSV file named `<workbook> - <sheet>.csv`. A workbook with one such sheet keeps its own name. Hidden sheets and sheets with no header row are skipped.
 - Cells become the text you'd expect in a CSV: whole numbers have no `.0`, dates are ISO 8601 (`2024-03-14`, or `2024-03-14T09:30:00` with a time), booleans are `1` or `0`, and formulas give their last computed value. Text cells, including IDs with leading zeros, are unchanged.
-- A workbook may have at most `SpreadsheetConverter::MAX_SHEETS` sheets and `SpreadsheetConverter::MAX_ROWS` data rows, since conversion runs within one request.
+- A workbook may have at most `SpreadsheetConverter::MAX_SHEETS` sheets, `SpreadsheetConverter::MAX_ROWS` rows not counting headers, and `SpreadsheetConverter::MAX_UNCOMPRESSED_BYTES` of unzipped contents, since conversion runs within one request.
+- If several workbooks are uploaded together and one can't be converted, none are: every workbook stays as uploaded and the error is shown.
 - Legacy `.xls` and macro-enabled `.xlsm` files aren't accepted.

@@ -37,6 +37,21 @@ class SpreadsheetWorkbookWriter {
    */
   protected const MAX_SHEET_NAME_LENGTH = 31;
 
+  /**
+   * Result of write(): the workbook was written.
+   */
+  public const WRITTEN = 'written';
+
+  /**
+   * Result of write(): a value is too long for an XLSX cell.
+   */
+  public const TOO_LONG = 'too_long';
+
+  /**
+   * Result of write(): writing failed for another reason, which is logged.
+   */
+  public const FAILED = 'failed';
+
   public function __construct(
     protected FileSystemInterface $fileSystem,
     protected LoggerInterface $logger,
@@ -56,14 +71,15 @@ class SpreadsheetWorkbookWriter {
    *   The 'separator', 'enclosure', and 'escape' the CSV files were written
    *   with.
    *
-   * @return bool
-   *   TRUE if the workbook was written. FALSE if writing failed, in which
-   *   case the error is logged and nothing is left at $destination. Check
-   *   hasOverlongValue() first for XLSX; an over-long value fails the write.
+   * @return string
+   *   self::WRITTEN, self::TOO_LONG if a value is over Excel's cell limit,
+   *   or self::FAILED if writing failed for another reason, which is
+   *   logged. Unless the workbook was written, nothing is left at
+   *   $destination.
    */
-  public function write(array $csvFiles, string $format, string $destination, array $csvSettings): bool {
+  public function write(array $csvFiles, string $format, string $destination, array $csvSettings): string {
     if (!in_array($format, self::FORMATS, TRUE)) {
-      return FALSE;
+      return self::FAILED;
     }
 
     // Workbooks are zip files, which need a local path to write. Build the
@@ -71,10 +87,11 @@ class SpreadsheetWorkbookWriter {
     $path = tempnam(sys_get_temp_dir(), 'mukurtu_export_');
     if ($path === FALSE) {
       $this->logger->error('Unable to create a temporary file for the export workbook.');
-      return FALSE;
+      return self::FAILED;
     }
 
     $writer = $format === 'ods' ? new OdsWriter() : new XlsxWriter();
+    $tooLong = FALSE;
     try {
       $writer->openToFile($path);
       $usedNames = [];
@@ -84,6 +101,12 @@ class SpreadsheetWorkbookWriter {
         }
         $writer->getCurrentSheet()->setName($this->sheetName($csvFile['entryname'] ?? '', $usedNames));
         foreach ($this->readCsv($csvFile['uri'], $csvSettings) as $record) {
+          // ODS has no cell length limit. Checking here, rather than in a
+          // separate pass, reads each CSV file only once.
+          if ($format === 'xlsx' && $this->hasOverlongValue($record)) {
+            $tooLong = TRUE;
+            throw new \LengthException('A value is too long for an XLSX cell.');
+          }
           // Every value is written as text so IDs, dates, and numbers come
           // back exactly as exported instead of being reformatted.
           $writer->addRow(new Row(array_map(fn ($value) => new StringCell((string) $value, NULL), $record)));
@@ -93,7 +116,9 @@ class SpreadsheetWorkbookWriter {
       $this->fileSystem->move($path, $destination, FileExists::Replace);
     }
     catch (\Throwable $e) {
-      $this->logger->error('Unable to write the export workbook: @message', ['@message' => $e->getMessage()]);
+      if (!$tooLong) {
+        $this->logger->error('Unable to write the export workbook: @message', ['@message' => $e->getMessage()]);
+      }
       try {
         $writer->close();
       }
@@ -101,27 +126,18 @@ class SpreadsheetWorkbookWriter {
         // The writer may already be closed; the file is deleted below.
       }
       @unlink($path);
-      return FALSE;
+      return $tooLong ? self::TOO_LONG : self::FAILED;
     }
-    return TRUE;
+    return self::WRITTEN;
   }
 
   /**
-   * Whether any CSV value is too long for an XLSX cell.
-   *
-   * @param array $csvFiles
-   *   Export deliverables, each with a 'uri'.
-   * @param array $csvSettings
-   *   The 'separator', 'enclosure', and 'escape' the CSV files use.
+   * Whether any value in a CSV record is too long for an XLSX cell.
    */
-  public function hasOverlongValue(array $csvFiles, array $csvSettings): bool {
-    foreach ($csvFiles as $csvFile) {
-      foreach ($this->readCsv($csvFile['uri'], $csvSettings) as $record) {
-        foreach ($record as $value) {
-          if (mb_strlen((string) $value) > self::XLSX_MAX_CELL_LENGTH) {
-            return TRUE;
-          }
-        }
+  protected function hasOverlongValue(array $record): bool {
+    foreach ($record as $value) {
+      if (mb_strlen((string) $value) > self::XLSX_MAX_CELL_LENGTH) {
+        return TRUE;
       }
     }
     return FALSE;

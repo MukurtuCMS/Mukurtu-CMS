@@ -202,6 +202,9 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
    * @param array $fids
    *   The uploaded metadata file IDs.
    *
+   * All or nothing: if any workbook fails, the CSV files already made from
+   * the others are deleted and every workbook stays as uploaded.
+   *
    * @return array|null
    *   The metadata file IDs with workbooks swapped for their CSV files, or
    *   NULL if a workbook could not be converted.
@@ -209,6 +212,8 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
   protected function convertSpreadsheets(array $fids): ?array {
     $storage = $this->entityTypeManager->getStorage('file');
     $result = [];
+    $workbooks = [];
+    $created = [];
     foreach ($fids as $fid) {
       /** @var \Drupal\file\FileInterface|null $file */
       $file = $storage->load($fid);
@@ -220,14 +225,21 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
         $csvFiles = $this->spreadsheetConverter->convert($file, $this->getMetadataUploadLocation());
       }
       catch (SpreadsheetConversionException $e) {
+        foreach ($created as $csvFile) {
+          $csvFile->delete();
+        }
         $this->messenger()->addError($e->getUserMessage());
         return NULL;
       }
       foreach ($csvFiles as $csvFile) {
+        $created[] = $csvFile;
         $result[] = $csvFile->id();
       }
-      // The workbook would otherwise be listed as a metadata file too.
-      $file->delete();
+      $workbooks[] = $file;
+    }
+    // The workbooks would otherwise be listed as metadata files too.
+    foreach ($workbooks as $workbook) {
+      $workbook->delete();
     }
     return $result;
   }

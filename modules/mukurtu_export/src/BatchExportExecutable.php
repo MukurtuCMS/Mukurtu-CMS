@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_export;
 
+use Drupal\Component\Utility\Environment;
 use Drupal\mukurtu_export\Plugin\MukurtuExporter\CSV;
 use ZipArchive;
 use Exception;
@@ -78,8 +79,8 @@ class BatchExportExecutable implements MukurtuExportExecutableInterface
    *
    * Runs after every entity is exported, because a workbook can't be
    * appended to across batch requests the way a CSV file can. If the data
-   * doesn't fit the format, the CSV files are packaged instead and the user
-   * is warned.
+   * doesn't fit the format, or the workbook can't be written, the CSV files
+   * are packaged instead and the user is warned.
    *
    * @param mixed $context
    *   The batch context.
@@ -92,19 +93,22 @@ class BatchExportExecutable implements MukurtuExportExecutableInterface
       return;
     }
 
+    // The whole workbook is written in this one request, so give a large
+    // export the time it needs.
+    Environment::setTimeLimit(0);
+
     $destination = "{$context['results']['basepath']}/export.$format";
     /** @var \Drupal\mukurtu_export\SpreadsheetWorkbookWriter $writer */
     $writer = \Drupal::service('mukurtu_export.workbook_writer');
-    $csvSettings = $context['results']['csv'] ?? [];
-    if ($format === 'xlsx' && $writer->hasOverlongValue($csvFiles, $csvSettings)) {
-      $context['results']['workbook_fallback'] = TRUE;
-      return;
-    }
-    // If writing fails the error is logged and the CSV files are packaged.
-    if ($writer->write($csvFiles, $format, $destination, $csvSettings)) {
+    $result = $writer->write($csvFiles, $format, $destination, $context['results']['csv'] ?? []);
+    if ($result === SpreadsheetWorkbookWriter::WRITTEN) {
       $context['results']['deliverables']['metadata'] = [
         ['uri' => $destination, 'entryname' => basename($destination)],
       ];
+    }
+    else {
+      // The CSV files are packaged instead; batchFinishedExport() says why.
+      $context['results']['workbook_fallback'] = $result;
     }
   }
 
@@ -182,8 +186,12 @@ class BatchExportExecutable implements MukurtuExportExecutableInterface
   public static function batchFinishedExport(bool $success, array $results, array $operations): void
   {
     $_SESSION['mukurtu_export']['results'] = $results;
-    if (!empty($results['workbook_fallback'])) {
+    $fallback = $results['workbook_fallback'] ?? NULL;
+    if ($fallback === SpreadsheetWorkbookWriter::TOO_LONG) {
       \Drupal::messenger()->addWarning(t('Some values are too long for an Excel workbook, so this export contains CSV files instead.'));
+    }
+    elseif ($fallback) {
+      \Drupal::messenger()->addWarning(t('The workbook could not be created, so this export contains CSV files instead.'));
     }
     $_SESSION['mukurtu_export']['download_fid'] = $results['download_fid'] ?? NULL;
   }

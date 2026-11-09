@@ -19,3 +19,4 @@ The `CSV` exporter has a "File format" setting: CSV (the default), XLSX, or ODS.
 - CSV files start with a UTF-8 byte order mark, so Excel opens them with the right encoding. The importer strips it again.
 - For XLSX and ODS, the batch still writes CSV files, because a CSV can be appended to across batch requests and a workbook can't. The `BatchExportExecutable::buildWorkbook()` step then uses `SpreadsheetWorkbookWriter` (service `mukurtu_export.workbook_writer`) to combine them into one workbook, with one sheet per CSV file. Every value is written as text, so the workbook imports back unchanged.
 - Excel cells hold at most 32,767 characters. If any value is longer, an XLSX export ships the CSV files instead and warns the user. ODS has no such limit.
+- If the workbook can't be written for any other reason, the error is logged and the export ships the CSV files with a warning.

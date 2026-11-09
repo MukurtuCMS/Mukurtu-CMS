@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_import\Kernel;
 
 use Drupal\Core\File\FileExists;
 use Drupal\Core\Form\FormState;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -147,6 +148,47 @@ class SpreadsheetImportTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Workbooks that unzip to more than the size limit are refused unread.
+   *
+   * Blank rows compress to almost nothing, so this is what stops a workbook
+   * padded with them from being parsed at length.
+   */
+  public function testUncompressedSizeLimit(): void {
+    $workbook = $this->createXlsx('padded', ['Sheet1' => [['title'], ['x']]]);
+    $this->converter->validate($workbook);
+
+    $converter = new class(
+      $this->container->get('entity_type.manager'),
+      $this->container->get('file_system'),
+    ) extends SpreadsheetConverter {
+      public const MAX_UNCOMPRESSED_BYTES = 100;
+    };
+    try {
+      $converter->validate($workbook);
+      $this->fail('A workbook over the size limit should be rejected.');
+    }
+    catch (SpreadsheetConversionException $e) {
+      $this->assertSame('Spreadsheet %file has too many sheets or rows to import.', $e->getUserMessage()->getUntranslatedString());
+    }
+  }
+
+  /**
+   * Rows with no data inside the header's columns still count to the limit.
+   */
+  public function testRowsOutsideHeaderColumnsCount(): void {
+    $converter = new class(
+      $this->container->get('entity_type.manager'),
+      $this->container->get('file_system'),
+    ) extends SpreadsheetConverter {
+      public const MAX_ROWS = 2;
+    };
+    $workbook = $this->createXlsx('offside', ['Sheet1' => [['title'], ['a'], ['', 'b'], ['', 'c']]]);
+
+    $this->expectException(SpreadsheetConversionException::class);
+    $converter->validate($workbook);
+  }
+
+  /**
    * Workbooks over the sheet limit are refused.
    */
   public function testSheetLimit(): void {
@@ -265,6 +307,34 @@ class SpreadsheetImportTest extends MukurtuImportTestBase {
     $this->assertCount(1, $errors);
     $this->assertStringContainsString('broken.ods', (string) reset($errors));
     $this->assertSame([(int) $file->id()], array_map('intval', array_values($form_object->getMetadataFiles())));
+  }
+
+  /**
+   * If one workbook fails to convert, none of the others are converted.
+   */
+  public function testUploadFormConvertsAllWorkbooksOrNone(): void {
+    $form_object = ImportFileUploadForm::create($this->container);
+    $directory = $form_object->getMetadataUploadLocation();
+    $good = $this->createXlsx('good', ['People' => [['name'], ['Ana']]], $directory);
+    file_put_contents($directory . 'broken.ods', 'not a workbook');
+    $broken = File::create(['uri' => $directory . 'broken.ods', 'status' => 1]);
+    $broken->save();
+
+    // Submit without validating, as if the second workbook broke between
+    // the two steps.
+    $form_state = new FormState();
+    $form_state->setValue('metadata_files', [$good->id(), $broken->id()]);
+    $form = $this->buildUploadForm($form_object, $form_state);
+    $form_object->submitForm($form, $form_state);
+
+    $errors = $this->container->get('messenger')->messagesByType(MessengerInterface::TYPE_ERROR);
+    $this->assertCount(1, $errors);
+    $this->assertStringContainsString('broken.ods', (string) $errors[0]);
+    $this->assertNotNull(File::load($good->id()), 'The workbook that converted is kept.');
+    $this->assertFileDoesNotExist($directory . 'good.csv');
+    $ids = array_map('intval', array_values($form_object->getMetadataFiles()));
+    sort($ids);
+    $this->assertSame([(int) $good->id(), (int) $broken->id()], $ids);
   }
 
   /**
