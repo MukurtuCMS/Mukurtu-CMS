@@ -61,6 +61,10 @@ services:
       # Uploaded files. Back these up together with the database.
       - public:/var/www/files/public
       - private:/var/www/files/private
+      # Your own modules and themes, read-only (see "Adding modules and themes"
+      # in docs/docker.md). Back these folders up too.
+      - ./custom/modules:/var/www/html/web/modules/custom:ro
+      - ./custom/themes:/var/www/html/web/themes/custom:ro
     # Hardening. The image keeps its code read-only, so the only writable places
     # are the two volumes above and these two tmpfs mounts.
     read_only: true

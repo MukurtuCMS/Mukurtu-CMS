@@ -5,11 +5,15 @@
 # How to run it: README.md. Settings: docs/docker.md ("Hosting many sites").
 #
 # To add a site:
-#   1. Copy the site_b block and its two volumes; give it a new name and settings.
+#   1. Copy the site_b block and its two volumes; give it a new name and settings, and
+#      point its custom folders at custom/<new name>.
 #   2. Add its database and user to the db_init config below (that script only runs on the
 #      database's first start; for an existing database, create them by hand).
 #   3. Add three lines for its domain to the caddyfile config below.
 #   4. Add its variables to .env, and run: docker compose up -d
+#
+# Each site has its own read-only folders for its own modules and themes, under
+# custom/<site> (see "Adding modules and themes" in docs/docker.md).
 #
 # The passwords are plain environment variables here to keep the example short. For
 # production prefer the *_FILE secret form shown in ../single-site: environment variables
@@ -107,6 +111,8 @@ services:
     volumes:
       - site_a_public:/var/www/files/public
       - site_a_private:/var/www/files/private
+      - ./custom/site_a/modules:/var/www/html/web/modules/custom:ro
+      - ./custom/site_a/themes:/var/www/html/web/themes/custom:ro
     tmpfs:
       - /tmp:size=${MUKURTU_TMP_SIZE:-256m},mode=1777
       - /run:size=16m,mode=1777
@@ -125,6 +131,8 @@ services:
     volumes:
       - site_b_public:/var/www/files/public
       - site_b_private:/var/www/files/private
+      - ./custom/site_b/modules:/var/www/html/web/modules/custom:ro
+      - ./custom/site_b/themes:/var/www/html/web/themes/custom:ro
     tmpfs:
       - /tmp:size=${MUKURTU_TMP_SIZE:-256m},mode=1777
       - /run:size=16m,mode=1777
