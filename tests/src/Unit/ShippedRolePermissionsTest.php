@@ -166,6 +166,31 @@ class ShippedRolePermissionsTest extends UnitTestCase {
   }
 
   /**
+   * Everyone who can use a search box gets its word suggestions.
+   *
+   * The 40011 update in mukurtu_search grants these on existing sites.
+   */
+  public static function searchSuggestionPermissionProvider(): \Generator {
+    foreach (['anonymous', 'authenticated'] as $role) {
+      foreach (['mukurtu_browse', 'mukurtu_dictionary', 'mukurtu_digital_heritage_browse'] as $search) {
+        yield "$role $search" => [$role, "use search_api_autocomplete for $search"];
+      }
+    }
+  }
+
+  /**
+   * A role holds the permission to get suggestions from a search box.
+   */
+  #[DataProvider('searchSuggestionPermissionProvider')]
+  public function testRoleGetsSearchSuggestions(string $role, string $permission): void {
+    $this->assertContains(
+      $permission,
+      self::effectivePermissions($role),
+      "The $role role does not hold '$permission' on a fresh install, so its search box would get no suggestions."
+    );
+  }
+
+  /**
    * Revision history is for administrators and Mukurtu Managers.
    */
   public function testAuthenticatedCannotViewRevisionHistory(): void {

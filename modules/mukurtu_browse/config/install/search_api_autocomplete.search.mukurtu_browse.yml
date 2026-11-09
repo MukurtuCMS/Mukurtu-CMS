@@ -1,0 +1,32 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.index.mukurtu_default_content_index
+    - views.view.mukurtu_browse
+  module:
+    - views
+id: mukurtu_browse
+label: Browse
+index_id: mukurtu_default_content_index
+suggester_settings:
+  server:
+    fields: {  }
+suggester_weights:
+  server: 0
+suggester_limits: {  }
+search_settings:
+  'views:mukurtu_browse':
+    displays:
+      default: false
+      selected:
+        - mukurtu_browse_block
+        - mukurtu_browse_block_grid
+        - mukurtu_browse_block_map
+options:
+  limit: 10
+  min_length: 3
+  show_count: false
+  delay: 0
+  submit_button_selector: ':submit'
+  autosubmit: true

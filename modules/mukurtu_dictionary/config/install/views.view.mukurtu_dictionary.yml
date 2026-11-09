@@ -453,7 +453,9 @@ display:
             group_items: {  }
           parse_mode: terms
           min_length: null
-          fields: {  }
+          fields:
+            - dictionary_fulltext
+            - title
         facets_language:
           id: facets_language
           table: search_api_index_mukurtu_dictionary_index

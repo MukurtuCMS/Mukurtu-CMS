@@ -73,6 +73,18 @@ field_settings:
         - 'entity:node/field_word_type:entity:name'
         - 'entity:node/field_additional_word_entries:entity:field_word_type:entity:name'
         - 'entity:node/field_location:entity:name'
+  dictionary_suggest_text:
+    label: 'Dictionary Suggestion Words'
+    property_path: aggregated_field
+    type: text
+    configuration:
+      type: union
+      fields:
+        - 'entity:node/field_additional_word_entries:entity:field_alternate_spelling'
+        - 'entity:node/field_additional_word_entries:entity:field_translation'
+        - 'entity:node/field_additional_word_entries:entity:field_word_entry_term'
+        - 'entity:node/field_alternate_spelling'
+        - 'entity:node/field_translation'
   field_glossary_entry:
     label: 'Glossary Entry'
     datasource_id: 'entity:node'

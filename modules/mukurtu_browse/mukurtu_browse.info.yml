@@ -31,5 +31,6 @@ dependencies:
   - 'paragraphs:paragraphs'
   - 'search_api:search_api'
   - 'search_api:search_api_db'
+  - 'search_api_autocomplete:search_api_autocomplete'
   - 'search_api_glossary:search_api_glossary'
 version: 4.x-dev
