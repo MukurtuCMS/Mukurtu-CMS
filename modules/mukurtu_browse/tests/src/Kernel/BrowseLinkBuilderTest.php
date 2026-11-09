@@ -52,7 +52,7 @@ class BrowseLinkBuilderTest extends KernelTestBase {
     // since extension discovery scans the codebase, not just enabled
     // modules.
     $install_path = \Drupal::service('extension.list.module')->getPath('mukurtu_solr') . '/config/install/';
-    foreach (['browse_solr_community', 'digital_heritage_browse_solr_category'] as $facet_id) {
+    foreach (['browse_solr_community', 'browse_solr_content_type', 'digital_heritage_browse_solr_category'] as $facet_id) {
       $data = Yaml::parseFile($install_path . "facets.facet.$facet_id.yml");
       Facet::create($data)->save();
     }
@@ -136,6 +136,30 @@ class BrowseLinkBuilderTest extends KernelTestBase {
     Facet::load('browse_solr_community')->delete();
     $url = $this->builder->getCommunityBrowseUrl('California City');
     $this->assertSame([], $this->getQuery($url));
+  }
+
+  /**
+   * The header search links each content type's group to Browse.
+   */
+  public function testTypeUrlOnDbBackend(): void {
+    $this->setBackend('db');
+    $url = $this->builder->getTypeBrowseUrl('dictionary_word', 'buffalo & bison');
+    $this->assertStringContainsString('/browse', $url->toString());
+    $query = $this->getQuery($url);
+    $this->assertSame(['dictionary_word' => 'dictionary_word'], $query['type'] ?? NULL);
+    $this->assertSame('buffalo & bison', $query['search_api_fulltext'] ?? NULL);
+  }
+
+  /**
+   * On Solr, the content type goes through its facet's URL alias.
+   */
+  public function testTypeUrlOnSolrBackend(): void {
+    $this->setBackend('solr');
+    $url = $this->builder->getTypeBrowseUrl('dictionary_word', 'buffalo');
+    $query = $this->getQuery($url);
+    $alias = Facet::load('browse_solr_content_type')->getUrlAlias();
+    $this->assertSame(["$alias:dictionary_word"], $query['f'] ?? NULL);
+    $this->assertSame('buffalo', $query['search_api_fulltext'] ?? NULL);
   }
 
 }

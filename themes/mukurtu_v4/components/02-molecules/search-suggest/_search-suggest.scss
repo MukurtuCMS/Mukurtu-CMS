@@ -60,3 +60,46 @@
     }
   }
 }
+
+/* ---- Items grouped by content type (the header search) ---- */
+
+.mukurtu-search-suggest__group {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  & + & {
+    border-block-start: 1px solid var(--brand-light);
+  }
+}
+
+.mukurtu-search-suggest__heading {
+  padding-block: var(--v-space-6xs) 0;
+  padding-inline: var(--v-space-5xs);
+  font-size: var(--font-size-s);
+  font-weight: 700;
+}
+
+.mukurtu-search-suggest__option--more,
+.mukurtu-search-suggest__option--all {
+  text-decoration: underline;
+}
+
+/* Stays in view at the bottom of the list while the groups scroll. */
+.mukurtu-search-suggest__option--all {
+  position: sticky;
+  inset-block-end: calc(-1 * var(--v-space-6xs));
+  border-block-start: 1px solid var(--brand-primary-dark);
+  background: var(--color-white);
+  font-weight: 700;
+}
+
+/* The header box is narrow, so the list is wider than the box and lines up
+ * with its end, where the box sits in the header. */
+.header-search .mukurtu-search-suggest__list {
+  inset-inline: auto 0;
+  inline-size: min(24rem, calc(100vw - 2rem));
+  /* Keeps an option scrolled to with the arrow keys clear of the pinned
+   * "See all results" option. */
+  scroll-padding-block-end: 3rem;
+}

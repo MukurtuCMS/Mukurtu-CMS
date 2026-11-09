@@ -71,6 +71,21 @@ class ShippedSearchSuggestionConfigTest extends UnitTestCase {
   }
 
   /**
+   * The index filters out items the viewer can't see.
+   *
+   * Word suggestions and the header's item counts rely on this processor;
+   * only the header's item list checks each item again.
+   */
+  #[DataProvider('searchProvider')]
+  public function testIndexChecksAccess(string $id, string $module): void {
+    $search = $this->shipped("modules/$module/config/install/search_api_autocomplete.search.$id.yml");
+    $index_module = $search['index_id'] === 'mukurtu_dictionary_index' ? 'mukurtu_dictionary' : 'mukurtu_browse';
+    $index = $this->shipped("modules/$index_module/config/install/search_api.index.{$search['index_id']}.yml");
+
+    $this->assertArrayHasKey('content_access', $index['processor_settings'], "{$search['index_id']} must check content access.");
+  }
+
+  /**
    * Suggestions are built from the view's query, so it must check access.
    *
    * With bypass_access on, Search API skips the content_access processor and
