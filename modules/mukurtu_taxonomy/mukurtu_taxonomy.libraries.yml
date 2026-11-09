@@ -10,3 +10,14 @@ term-panel:
   dependencies:
     - core/drupal
     - core/once
+
+vocabulary-page:
+  css:
+    component:
+      css/vocabulary-page.css: {}
+  js:
+    js/vocabulary-page.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.debounce
+    - core/once
