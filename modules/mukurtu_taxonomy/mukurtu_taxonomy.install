@@ -1,4 +1,13 @@
 <?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for Mukurtu Taxonomy.
+ */
+
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Config\FileStorage;
+
 /**
  * Implements hook_update_last_removed().
  *
@@ -13,4 +22,44 @@
  */
 function mukurtu_taxonomy_update_last_removed(): int {
   return 40021;
+}
+
+/**
+ * Include content tagged with nested terms on parent term pages.
+ */
+function mukurtu_taxonomy_update_40022(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // The term page view now takes its term through core's "with depth"
+  // argument, so a parent's page lists content tagged with any term nested
+  // under it (#2521). The sorts and the published filter move from
+  // taxonomy_index to node_field_data, since with the depth argument each
+  // taxonomy_index handler would add its own join and list content more than
+  // once. config/install ships the result for new sites. A site whose view no
+  // longer has the shipped term argument has changed it on purpose, so it's
+  // left alone.
+  $view = \Drupal::configFactory()->getEditable('views.view.taxonomy_term');
+  $options = 'display.default.display_options';
+  $arguments = $view->get("$options.arguments") ?? [];
+  if ($view->isNew() || array_keys($arguments) !== ['tid'] || ($arguments['tid']['plugin_id'] ?? NULL) !== 'taxonomy_index_tid') {
+    return NULL;
+  }
+
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_taxonomy');
+  $shipped = (new FileStorage($module_path . '/config/install'))->read('views.view.taxonomy_term');
+  $shipped_options = $shipped['display']['default']['display_options'];
+
+  $view->set("$options.arguments", $shipped_options['arguments']);
+  foreach (['sorts.sticky', 'sorts.created', 'filters.status'] as $handler) {
+    if (($view->get("$options.$handler.table") ?? NULL) === 'taxonomy_index') {
+      $view->set("$options.$handler", NestedArray::getValue($shipped_options, explode('.', $handler)));
+    }
+  }
+  if ($view->get("$options.header.entity_taxonomy_term.target") === '{{ raw_arguments.tid }}') {
+    $view->set("$options.header.entity_taxonomy_term.target", '{{ raw_arguments.term_node_tid_depth }}');
+  }
+  $view->save();
+
+  return (string) t('Term pages now include content tagged with the terms nested under them.');
 }
