@@ -124,6 +124,22 @@ check_services() { # check_services <name> <service names...>
 [[ -d "$WORK/single-site" ]] && check_services single-site mukurtu
 [[ -d "$WORK/multi-tenant" ]] && check_services multi-tenant site_a site_b
 
+echo "examples: each site mounts its own custom folders, read-only"
+# custom_mount <name> <service> <target>: print "<source> <read_only>" for the bind mount at <target>.
+custom_mount() {
+  compose_json "$1" | jq -r --arg s "$2" --arg t "$3" \
+    '.services[$s].volumes[]? | select(.type == "bind" and .target == $t) | "\(.source) \(.read_only // false)"'
+}
+for spec in "minimal mukurtu custom" "single-site mukurtu custom" "multi-tenant site_a custom/site_a" "multi-tenant site_b custom/site_b"; do
+  read -r name svc folder <<<"$spec"
+  [[ -d "$WORK/$name" ]] || continue
+  for kind in modules themes; do
+    assert_eq "$WORK/$name/$folder/$kind true" "$(custom_mount "$name" "$svc" "/var/www/html/web/$kind/custom")" "$name: $svc mounts $folder/$kind read-only at web/$kind/custom"
+    [[ -d "$EX/$name/$folder/$kind" ]] && pass "$name: $folder/$kind exists in the example" || fail "$name: $folder/$kind exists in the example"
+  done
+done
+[[ -d "$WORK/minimal" ]] && assert_eq "true" "$(compose_json minimal | jq -r '.services.mukurtu.read_only')" "minimal: mukurtu is read_only"
+
 echo "examples: MariaDB is configured the way Drupal asks"
 for name in minimal single-site multi-tenant; do
   [[ -d "$WORK/$name" ]] || continue
@@ -189,6 +205,10 @@ if [[ -d "$WORK/multi-tenant" ]]; then
   code_via_caddy() { curl -sk --max-time 20 -o /dev/null -w '%{http_code}' --resolve "$1:8443:127.0.0.1" "https://$1:8443$2"; }
   # Starting can fail for reasons outside the example (a registry that refuses a pull),
   # so try a few times, and keep the output to show if it never works.
+  # A module in site A's custom folder only. It must reach site A and not site B.
+  mkdir -p "$WORK/multi-tenant/custom/site_a/modules/hello_site_a"
+  printf 'name: Hello site A\ntype: module\ncore_version_requirement: ^11\n' > "$WORK/multi-tenant/custom/site_a/modules/hello_site_a/hello_site_a.info.yml"
+  chmod -R a+rX "$WORK/multi-tenant/custom"
   up_out=""
   for attempt in 1 2 3; do
     up_out="$(dc multi-tenant up -d 2>&1)" && break
@@ -218,6 +238,9 @@ if [[ -d "$WORK/multi-tenant" ]]; then
     assert_contains "$bindings" "8443" "the proxy does publish its HTTPS port"
     password_a="$(grep -E '^SITE_A_DB_PASSWORD=' "$WORK/multi-tenant/.env" | cut -d= -f2-)"
     assert_eq "denied" "$(dc multi-tenant exec -T db sh -c "mariadb -usite_a -p'$password_a' -e 'use site_b' 2>&1 | grep -q 'Access denied' && echo denied")" "site A's database user cannot open site B's database"
+    dc multi-tenant exec -T site_a drush pm:install hello_site_a --yes >/dev/null 2>&1
+    assert_contains "$(dc multi-tenant exec -T site_a drush pm:list --status=enabled --format=list 2>/dev/null)" "hello_site_a" "a module in custom/site_a can be turned on in site A"
+    assert_not_contains "$(dc multi-tenant exec -T site_b drush pm:list --format=list 2>/dev/null)" "hello_site_a" "site B doesn't see site A's custom module"
   else
     fail "both sites install and answer through Caddy"
     echo "--- compose up:"; echo "$up_out" | tail -20
