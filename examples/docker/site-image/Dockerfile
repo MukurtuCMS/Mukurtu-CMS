@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
-# A site's own image: the official Mukurtu image plus contributed modules from
-# Composer and your own code. Use this when a module needs Composer libraries;
-# otherwise the read-only folders in the other examples are simpler. Rebuild it
-# for every Mukurtu update. How to use it: README.md.
+# A site's own image: the official Mukurtu image plus contributed modules that
+# need Composer libraries. Your own modules and themes stay in the examples'
+# custom folders. Rebuild this image for every Mukurtu update. How to use it:
+# README.md.
 
 # Required: the exact Mukurtu release to build on, for example
-#   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.8-r1 -t my-site:4.0.8-r1-1 .
+#   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.8-r1 -t my-mukurtu:4.0.8-r1 .
 ARG MUKURTU_IMAGE
 FROM ${MUKURTU_IMAGE:?MUKURTU_IMAGE_is_required} AS mukurtu
 
@@ -29,5 +29,3 @@ RUN set -eu; \
 
 FROM mukurtu
 COPY --from=build --chown=0:0 /var/www/html /var/www/html
-COPY --chown=0:0 custom/modules /var/www/html/web/modules/custom
-COPY --chown=0:0 custom/themes /var/www/html/web/themes/custom

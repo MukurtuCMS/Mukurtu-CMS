@@ -59,7 +59,7 @@ if (($argv[1] ?? '') === 'missing') {
   // Every NAME.info.yml under the web root, wherever Drupal would look for it.
   // Folders Drupal's own discovery skips are skipped here too.
   $found = [];
-  $root = getenv('MUKURTU_WEB_ROOT') ?: '/var/www/html/web';
+  $root = '/var/www/html/web';
   $skip = ['node_modules', 'bower_components', 'vendor', 'files'];
   $directories = new RecursiveCallbackFilterIterator(
     new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS),

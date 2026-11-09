@@ -434,6 +434,108 @@ The image already sets these Drupal settings, which you can override the same wa
 - `deployment_identifier` is derived from the image's `composer.lock`, so caches
   of asset URLs are invalidated when you upgrade.
 
+## Adding modules and themes
+
+The image comes with Mukurtu and everything it needs. You can add custom modules,
+contributed modules from Drupal.org, and sub-themes of Mukurtu's theme in one of two
+ways:
+
+| Way | Use it for | When you update Mukurtu |
+| --- | --- | --- |
+| [Custom folders](#custom-folders) | Custom modules, sub-themes, and contributed modules that don't need Composer libraries. | Change the image version, as usual. |
+| [A site image](#a-site-image) | Contributed modules that need Composer libraries. | Rebuild your site image on the new version. |
+
+You can use both at once. The configuration and content you create with these
+modules are kept in the database and the file volumes, so they're kept through an
+update either way.
+
+The code isn't in the database, though, so it has to be there every time the container
+starts. If a module or theme that's turned on is missing, the container stops before it
+changes anything, and the log names what's missing:
+
+```
+ERROR: the site has modules or themes turned on whose code isn't in the container: module my_module. Nothing was changed. Put the code back in the custom folders or the site image (see "Adding modules and themes" in docs/docker.md), then start the container again.
+```
+
+Put the code back and start the container again. To remove a module for good,
+uninstall it in Drupal first, then delete its code.
+
+### Custom folders
+
+Each Compose example has a `custom` folder that is mounted, read-only, into the site:
+
+| Folder next to `docker-compose.yml` | Folder in the site |
+| --- | --- |
+| `custom/modules` | `web/modules/custom` |
+| `custom/themes` | `web/themes/custom` |
+
+In the multi-tenant example, each site has its own pair, such as `custom/site_a/modules`.
+
+To add a module or theme:
+
+1. Put its folder in `custom/modules` or `custom/themes`. For example, a module
+   named `my_module` goes in `custom/modules/my_module`, with
+   `my_module.info.yml` directly inside it.
+2. Make sure the container can read the files. It runs as uid 1000, so give everyone
+   read access: `chmod -R a+rX custom`.
+3. Restart the container: `docker compose restart mukurtu`.
+4. Turn the module on in **Extend**, or with
+   `docker compose exec mukurtu drush pm:install my_module`. Turn a theme on in
+   **Appearance**.
+
+Restart the container after every change to the code. The site keeps compiled PHP in
+memory, and rebuilding Drupal's caches doesn't clear it.
+
+A contributed module can go in `custom/modules` too, if it doesn't need Composer
+libraries: download it from Drupal.org and unpack it there. To check, open the
+module's `composer.json`. If its `require` section lists only `drupal/` packages, or
+the module has no `composer.json`, it works from the folder. Otherwise, use a
+[site image](#a-site-image).
+
+Keep in mind:
+
+- Back up the `custom` folder with the database and the volumes.
+- Security updates for contributed modules in these folders are yours to watch. Check
+  each module's page on Drupal.org, and replace the folder when a security release
+  comes out.
+- The code can't be changed from inside the container, so add and update modules
+  in these folders, not through Drupal.
+
+### A site image
+
+Some contributed modules need PHP libraries that Composer installs into the image.
+Those can't go in the custom folders. Instead, build your own image on top of the
+official one, with
+[`examples/docker/site-image`](../examples/docker/site-image):
+
+1. Copy the `site-image` folder next to your Compose example.
+2. List the modules in its `composer-packages.txt`, one per line, such as
+   `drupal/address`.
+3. Build it on the exact Mukurtu version you run, and give it a name of your own:
+
+   ```
+   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.8-r1 -t my-mukurtu:4.0.8-r1 .
+   ```
+
+4. Set `MUKURTU_IMAGE=my-mukurtu:4.0.8-r1` in your example's `.env` (in the
+   minimal example, change the `image:` line), and run `docker compose up -d`.
+5. Turn the modules on in **Extend**.
+
+Keep your own modules and themes in the custom folders; the site image only adds
+Composer packages, which go in `web/modules/contrib` and `vendor`.
+
+**To update Mukurtu**, build the site image again on the new version, with a new
+name, then change `MUKURTU_IMAGE` and run `docker compose up -d`, as in
+[Upgrades and backups](#upgrades-and-backups). Each build installs the newest
+release of your listed modules that works with that Mukurtu version, so a rebuild
+also picks up their security updates. Composer leaves the packages that Mukurtu
+already includes alone, unless a module you added needs a different version; the
+build log lists every package it installs or changes.
+
+In testing, a site image with two modules was about 170 MB larger than the official
+one. You build it yourself, so it's yours to keep current. Build it on a computer with internet access; the build
+downloads the packages from Drupal.org and Packagist.
+
 ## Mail
 
 The container includes a small mail relay (`msmtp`). Set `MUKURTU_SMTP_HOST`
@@ -451,7 +553,8 @@ not arrive.
 downgraded. If the upgrade fails, or you want to go back, the backup is the only
 way. The steps for a backup are below.
 
-**Upgrade** by changing the image tag and recreating the container:
+**Upgrade** by changing the image tag and recreating the container. If you use a
+[site image](#a-site-image), build it on the new version first, and use its name:
 
 ```
 # edit MUKURTU_IMAGE in .env to the new version, then
@@ -476,6 +579,7 @@ site first for a consistent copy: `docker compose stop mukurtu`):
    (or `docker compose exec mukurtu drush sql:dump > mukurtu.sql`).
 2. The `public` volume.
 3. The `private` volume.
+4. The `custom` folder, if you have [added modules or themes](#custom-folders).
 
 Keep `MUKURTU_HASH_SALT` with the backup if you set it explicitly.
 
@@ -609,6 +713,7 @@ warmed, request the home page once after starting.
 | `ERROR: database <host>:<port> not reachable after <n>s (last error: ...)` | The database did not accept connections. Check the host name, the network, and the credentials; the last error is included. Raise `MUKURTU_DB_WAIT_TIMEOUT` if it is merely slow. |
 | `ERROR: database <name> contains tables but not a complete Drupal installation` | The container refuses to install over unknown data. Empty the database, or restore a backup. |
 | `ERROR: MUKURTU_ADMIN_PASSWORD is required` | The database is empty and `MUKURTU_AUTO_INSTALL` is `true`; give the first administrator a password, or set `MUKURTU_AUTO_INSTALL=false`. |
+| `ERROR: the site has modules or themes turned on whose code isn't in the container` | Put the code back in the custom folders or the site image. See [Adding modules and themes](#adding-modules-and-themes). |
 | `ERROR: <path> is not writable by uid 1000` | A volume or `MUKURTU_FILE_TEMP_PATH` cannot be written. See [Volumes and permissions](#volumes-and-permissions). |
 | `WARNING: MUKURTU_SMTP_HOST is not set` | The site cannot send mail. See [Mail](#mail). |
 | The first page after a start takes several seconds and the log warns about `max_children` | Normal on a cold start; see [Reading the start-up log](#reading-the-start-up-log). |
