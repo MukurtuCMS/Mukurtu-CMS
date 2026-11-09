@@ -85,26 +85,21 @@ class ShippedSearchSuggestionConfigTest extends UnitTestCase {
   }
 
   /**
-   * Dictionary words come from terms, translations and alternate spellings.
+   * Dictionary words come from every field the dictionary search box matches.
    */
   public function testDictionarySuggestionSources(): void {
     $search = $this->shipped('modules/mukurtu_dictionary/config/install/search_api_autocomplete.search.mukurtu_dictionary.yml');
-    $this->assertSame(['title', 'dictionary_suggest_text'], $search['suggester_settings']['server']['fields']);
+    $suggested = $search['suggester_settings']['server']['fields'];
+    sort($suggested);
 
-    $index = $this->shipped('modules/mukurtu_dictionary/config/install/search_api.index.mukurtu_dictionary_index.yml');
-    $sources = $index['field_settings']['dictionary_suggest_text']['configuration']['fields'];
-    sort($sources);
-    $this->assertSame([
-      'entity:node/field_additional_word_entries:entity:field_alternate_spelling',
-      'entity:node/field_additional_word_entries:entity:field_translation',
-      'entity:node/field_additional_word_entries:entity:field_word_entry_term',
-      'entity:node/field_alternate_spelling',
-      'entity:node/field_translation',
-    ], $sources);
-
-    // The new field must not change what the dictionary search box matches.
+    // With no fields set, the search box matches every fulltext field.
     $view = $this->shipped('modules/mukurtu_dictionary/config/install/views.view.mukurtu_dictionary.yml');
-    $this->assertSame(['dictionary_fulltext', 'title'], $view['display']['default']['display_options']['filters']['search_api_fulltext']['fields']);
+    $this->assertEmpty($view['display']['default']['display_options']['filters']['search_api_fulltext']['fields']);
+    $index = $this->shipped('modules/mukurtu_dictionary/config/install/search_api.index.mukurtu_dictionary_index.yml');
+    $fulltext = array_keys(array_filter($index['field_settings'], fn ($field) => $field['type'] === 'text'));
+    sort($fulltext);
+
+    $this->assertSame($fulltext, $suggested);
   }
 
 }
