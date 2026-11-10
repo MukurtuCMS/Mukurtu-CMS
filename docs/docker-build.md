@@ -58,7 +58,8 @@ and the CI workflow use the same convention.
 - **Dependencies are resolved at build time.** The template ships no `composer.lock`, so two
   builds of the same tag can contain different Drupal and contributed-module patch releases.
   The resolved lock is kept in the image (`/var/www/html/composer.lock`) and as a workflow
-  artifact, so what shipped is always recorded.
+  artifact, so what shipped is always recorded. An image revision is the exception: see
+  [Image revisions keep their dependencies](#image-revisions-keep-their-dependencies).
 - **Advisories fail the build.** `composer audit --no-dev` runs in the stage. Advisories the
   profile already triaged (`config.audit.ignore` in its `composer.json`) are copied across,
   because Composer only honours that setting in the *root* project. Abandoned packages are
@@ -457,6 +458,37 @@ in either stops that architecture, and the `publish` job does not run unless bot
 
 The Composer build stage's `composer audit --no-dev` additionally fails the build on a Drupal
 advisory before the image is assembled.
+
+### Image revisions keep their dependencies
+
+A release resolves its dependencies fresh, but a revision must not, because a fresh resolve
+weeks later can fail. That has happened: tags before 4.0.8 no longer build, because
+`drupal/migrate_source_csv` 3.10.0 already contains the fix our patch made, so the patch fails
+to apply. A revision is also meant to change only the fix it ships.
+
+So the workflow builds a revision from the image it revises:
+
+1. `compute-tags.sh --previous` lists the earlier images of that release, newest first, and the
+   workflow takes the first one that exists. For `4.0.5-r2` that is `4.0.5-r1`, then `4.0.5`.
+2. That image replaces the `Dockerfile`'s empty `lock-seed` stage, and the build copies its
+   `composer.lock` and `patches.lock.json`.
+3. `composer install` installs exactly those versions.
+4. `composer audit` lists the packages with an advisory, and `composer update --minimal-changes`
+   updates only those, moving anything else only if the fix requires it. If Drupal core is
+   listed, all four `drupal/core*` packages move together. This is how a revision picks up a
+   Drupal security release.
+5. The strict `composer audit` then runs as usual, so a revision still can't publish with a
+   fixable advisory.
+
+Three things follow from this:
+
+- **The images must stay public and in the registry.** If no earlier image can be read, the
+  workflow warns and the revision resolves fresh, which is also what the first image of a release
+  with no published image does.
+- **A revision can't move to a new template.** The seeded lock belongs to the old root
+  `composer.json`, so a new `MUKURTU_TEMPLATE_VERSION` waits for the next Mukurtu release.
+- **Patches can still fail on an updated package.** If a security update changes a file one of our
+  patches touches, the build fails and the patch needs fixing on the revision branch.
 
 ### Watching the published image
 

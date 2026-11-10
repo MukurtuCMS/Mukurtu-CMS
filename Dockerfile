@@ -58,6 +58,15 @@ RUN set -eux; \
 FROM composer:2.10.3@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac AS composer
 
 # ---------------------------------------------------------------------------
+# lock-seed: empty by default. An image revision replaces this stage with the image
+# it revises (--build-context lock-seed=docker-image://...), so that the build can
+# start from that image's lock files. See docs/docker-build.md, "Image revisions keep
+# their dependencies".
+# ---------------------------------------------------------------------------
+FROM scratch AS lock-seed
+WORKDIR /var/www/html
+
+# ---------------------------------------------------------------------------
 # build: the Composer project. mukurtu-template is the skeleton (Drupal core,
 # scaffold, plugin allow-list, install paths); this checkout replaces the
 # Packagist copy of the profile, so the image holds exactly the tagged code.
@@ -80,6 +89,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
 COPY --exclude=Dockerfile --exclude=.dockerignore --exclude=docker --exclude=scripts/docker \
      . /src/mukurtu
 
+# Nothing is copied unless the build was given a seed image.
+COPY --from=lock-seed /var/www/html/composer.lock* /var/www/html/patches.lock.json* /seed/
+
 WORKDIR /app
 
 # A path repository takes its version from git, which is absent here, so the
@@ -87,12 +99,20 @@ WORKDIR /app
 # placeholder 4.9999.9999 stands for "the 4.x checkout being built" (the same
 # convention .tugboat/config.yml uses). Composer treats a path repository as
 # canonical, so Packagist is never consulted for the profile.
+#
+# A release resolves its dependencies fresh. A revision installs exactly what the image
+# it revises had, so a contrib release since then cannot break it or change it.
 RUN set -eux; \
     composer create-project "mukurtu/mukurtu-template:${MUKURTU_TEMPLATE_VERSION}" /app \
       --no-install --no-dev --no-progress --no-scripts; \
     composer config repositories.local-dev \
       '{"type":"path","url":"/src/mukurtu","options":{"symlink":false,"versions":{"mukurtu/mukurtu":"4.9999.9999"}}}'; \
-    composer update --no-dev --no-progress --optimize-autoloader
+    if [ -f /seed/composer.lock ]; then \
+      cp /seed/composer.lock /seed/patches.lock.json /app/; \
+      composer install --no-dev --no-progress --optimize-autoloader; \
+    else \
+      composer update --no-dev --no-progress --optimize-autoloader; \
+    fi
 
 # Note: no --classmap-authoritative. Drupal registers the namespaces of core and
 # of every module with the class loader at run time; an authoritative class map
@@ -108,6 +128,14 @@ ARG COMPOSER_AUDIT_FLAGS=
 RUN set -eux; \
     ignore="$(php -r 'echo json_encode((object) (json_decode(file_get_contents("/src/mukurtu/composer.json"), true)["config"]["audit"]["ignore"] ?? []));')"; \
     composer config --json audit.ignore "$ignore"; \
+    if [ -f /seed/composer.lock ]; then \
+      advised="$(composer audit --no-dev --abandoned=ignore --format=json $COMPOSER_AUDIT_FLAGS \
+        | php -r '$p = array_keys(json_decode(stream_get_contents(STDIN), true)["advisories"] ?? []); if (preg_grep("#^drupal/core(-|$)#", $p)) { $p = array_merge(preg_grep("#^drupal/core(-|$)#", $p, PREG_GREP_INVERT), ["drupal/core", "drupal/core-recommended", "drupal/core-composer-scaffold", "drupal/core-project-message"]); } echo implode(" ", $p);' \
+        || true)"; \
+      if [ -n "$advised" ]; then \
+        composer update $advised --with-all-dependencies --minimal-changes --no-dev --no-progress --optimize-autoloader; \
+      fi; \
+    fi; \
     composer audit --no-dev --abandoned=report $COMPOSER_AUDIT_FLAGS
 
 # Drop what the running site never reads: version-control metadata and test

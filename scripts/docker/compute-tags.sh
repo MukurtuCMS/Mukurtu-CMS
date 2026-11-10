@@ -4,6 +4,8 @@
 #   compute-tags.sh [--existing FILE|-] <tag>   print the tags to publish
 #   compute-tags.sh --kind <tag>                            print stable, revision or prerelease
 #   compute-tags.sh --dev <commit>                          print the tags of a development build
+#   compute-tags.sh --previous <revision>                   print the tags a revision could
+#                                                           replace, newest first
 #
 # Three kinds of release tag exist:
 #
@@ -59,6 +61,17 @@ if [[ "${1:-}" == "--dev" ]]; then
   short="${2:0:7}"
   echo "4.x-dev-${short,,}"
   echo "edge"
+  exit 0
+fi
+
+if [[ "${1:-}" == "--previous" ]]; then
+  if [[ $# -ne 2 ]] || ! parse "$2" || [[ "$KIND" != revision ]]; then
+    echo "ERROR: --previous needs an image revision such as 4.0.5-r1: '${2:-}'" >&2
+    exit 1
+  fi
+  base="${MAJOR}.${MINOR}.${PATCH}"
+  for ((n = REV - 1; n >= 1; n--)); do echo "$base-r$n"; done
+  echo "$base"
   exit 0
 fi
 
