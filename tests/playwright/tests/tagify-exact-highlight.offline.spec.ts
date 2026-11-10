@@ -9,7 +9,8 @@ import path = require('path');
  *
  * Runs the real Tagify library and override file, with the dropdown settings
  * copied from the Tagify module's js/tagify.js (vendor/ isn't installed in
- * the offline job). Drupal and once() are stubbed.
+ * the offline job). Like the module, suggestions load 250ms after typing
+ * stops and carry the typed text as "input". Drupal is stubbed.
  */
 
 const ROOT = path.join(__dirname, '../../..');
@@ -22,7 +23,7 @@ const TERMS = [
   { value: '2', label: 'Mary Jones', entity_id: '2' },
 ];
 
-async function setUp(page: Page, autocreate: boolean): Promise<void> {
+async function setUp(page: Page, autocreate: boolean, terms = TERMS): Promise<void> {
   const classes = autocreate ? 'tagify-widget tagify--autocreate' : 'tagify-widget';
   await page.setContent(`<!DOCTYPE html><html><head><title>Tagify fixture</title></head><body>
     <label for="people">People</label>
@@ -42,7 +43,7 @@ async function setUp(page: Page, autocreate: boolean): Promise<void> {
   await page.evaluate(({ terms, autocreate }) => {
     const input = document.getElementById('people') as HTMLInputElement;
     // @ts-ignore Tagify is the global from tagify.js.
-    new Tagify(input, {
+    const tagify = new Tagify(input, {
       dropdown: {
         enabled: 1,
         highlightFirst: true,
@@ -51,21 +52,38 @@ async function setUp(page: Page, autocreate: boolean): Promise<void> {
         searchKeys: ['label', 'input'],
         mapValueTo: 'label',
       },
-      whitelist: terms,
+      whitelist: [],
       tagTextProp: 'label',
       editTags: false,
       pasteAsTags: false,
       enforceWhitelist: !autocreate,
       skipInvalid: autocreate,
     });
+    // Stands in for the module's debounced fetch of matching terms.
+    let timer: number | undefined;
+    tagify.on('input', (event: any) => {
+      const value = event.detail?.value ?? '';
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const typed = value.toLowerCase();
+        tagify.whitelist = terms
+          .filter((term) => term.label.toLowerCase().includes(typed))
+          .map((term) => ({ ...term, input: tagify.state.inputText }));
+        tagify.loading(false).dropdown.show(value);
+      }, 250);
+    });
     (window as any).Drupal.behaviors.mukurtuTagifyOverride.attach(document);
-  }, { terms: TERMS, autocreate });
+  }, { terms, autocreate });
 }
 
 async function typeName(page: Page, name: string): Promise<void> {
   await page.locator('.tagify__input').click();
+  const shown = page.evaluate(() => new Promise<void>((resolve) => {
+    (document.getElementById('people') as any).__tagify.on('dropdown:show', () => resolve());
+  }));
   await page.keyboard.type(name);
-  await expect(page.locator('.tagify__dropdown')).toBeVisible();
+  await shown;
+  await expect(page.locator('.tagify__dropdown__item').first()).toBeVisible();
 }
 
 function tags(page: Page): Promise<{ label: string, entity_id?: string }[]> {
@@ -103,11 +121,40 @@ test.describe('Field that can create terms', () => {
     expect(await tags(page)).toEqual([{ label: 'Mary Jane Smith', entity_id: '1' }]);
   });
 
+  test('Up Arrow on the first suggestion goes back to the typed name', async ({ page }) => {
+    await typeName(page, 'Mary');
+    await page.keyboard.press('ArrowDown');
+    await expect(active(page)).toHaveText('Mary Jane Smith');
+    await page.keyboard.press('ArrowUp');
+    await expect(active(page)).toHaveCount(0);
+    await page.keyboard.press('Enter');
+    expect(await tags(page)).toEqual([{ label: 'Mary', entity_id: undefined }]);
+  });
+
+  test('Down Arrow on the last suggestion goes back to the typed name', async ({ page }) => {
+    await typeName(page, 'Mary');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await expect(active(page)).toHaveText('Mary Jones');
+    await page.keyboard.press('ArrowDown');
+    await expect(active(page)).toHaveCount(0);
+    await page.keyboard.press('ArrowDown');
+    await expect(active(page)).toHaveText('Mary Jane Smith');
+  });
+
   test('Clicking still picks a suggestion', async ({ page }) => {
     await typeName(page, 'Mary');
     await page.locator('.tagify__dropdown__item', { hasText: 'Mary Jones' }).click();
     expect(await tags(page)).toEqual([{ label: 'Mary Jones', entity_id: '2' }]);
   });
+});
+
+test('Enter creates a name when the only suggestion is longer', async ({ page }) => {
+  await setUp(page, true, [{ value: '2', label: 'mary jane', entity_id: '2' }]);
+  await typeName(page, 'mary');
+  await expect(active(page)).toHaveCount(0);
+  await page.keyboard.press('Enter');
+  expect(await tags(page)).toEqual([{ label: 'mary', entity_id: undefined }]);
 });
 
 test('A field that cannot create terms still highlights the first suggestion', async ({ page }) => {
