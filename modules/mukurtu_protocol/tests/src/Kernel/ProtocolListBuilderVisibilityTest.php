@@ -127,6 +127,23 @@ class ProtocolListBuilderVisibilityTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * A community with no visible protocols says so instead of a blank cell.
+   */
+  public function testEmptyProtocolCellHasPlaceholder(): void {
+    $public = $this->createCommunity('Public Community', 'public');
+    $this->createProtocol('Strict Protocol', $public, 'strict');
+    $this->setOrganization([$public->id() => 0]);
+
+    $this->setCurrentUser($this->viewer);
+    $definition = \Drupal::entityTypeManager()->getDefinition('protocol');
+    $build = ProtocolListBuilder::createInstance(\Drupal::getContainer(), $definition)->render();
+    $rendered = (string) \Drupal::service('renderer')->renderInIsolation($build);
+
+    $this->assertStringContainsString('No protocols available', $rendered);
+    $this->assertStringNotContainsString('Strict Protocol', $rendered);
+  }
+
+  /**
    * A member who isn't a community manager sees their community.
    */
   public function testMemberSeesCommunityWithNoVisibleProtocols(): void {

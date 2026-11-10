@@ -208,8 +208,10 @@ class ProtocolListBuilder extends EntityListBuilder {
    *   The protocols to list.
    */
   protected function buildProtocolList(array $protocols) {
+    // Say so instead of leaving the cell blank, which screen readers announce
+    // as "blank" and which looks the same as missing data.
     if (empty($protocols)) {
-      return [];
+      return ['#markup' => $this->t('No protocols available')];
     }
 
     $items = [];
