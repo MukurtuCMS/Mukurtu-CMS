@@ -1,0 +1,6 @@
+term-panel:
+  js:
+    js/term-panel.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

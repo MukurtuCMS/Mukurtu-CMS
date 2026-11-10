@@ -11,7 +11,6 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
@@ -184,6 +183,23 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       'type' => 'entity:node',
       'options' => ['view_mode' => 'grid_browse'],
     ]);
+    // The same numbered pager as the browse pages. Twelve items fills every row
+    // in the three- and four-column layouts.
+    $view->display_handler->overrideOption('pager', [
+      'type' => 'full',
+      'options' => [
+        'offset' => 0,
+        'items_per_page' => 12,
+        'id' => 0,
+        'quantity' => 9,
+        'tags' => [
+          'next' => (string) $this->t('Next ›'),
+          'previous' => (string) $this->t('‹ Previous'),
+          'first' => (string) $this->t('« First'),
+          'last' => (string) $this->t('Last »'),
+        ],
+      ],
+    ]);
     // The listing includes content tagged with terms nested under this one,
     // so moving a term changes it (#2521). Views caches the listing apart
     // from this page, under the view's own tags, which a term move doesn't
@@ -202,7 +218,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       '#referenced_content' => $referencedContent,
       '#term_description' => $this->getTermDescription($taxonomy_term),
       '#nested_terms' => $this->getNestedTerms($taxonomy_term, $cache),
-      '#parent_term' => $this->getParentTermNote($taxonomy_term, $cache),
+      '#sibling_terms' => $this->getSiblingTerms($taxonomy_term, $cache),
       '#attached' => [
         'library' => [
           'field_group/element.horizontal_tabs',
@@ -237,17 +253,17 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   }
 
   /**
-   * Gets a line linking to the term this one is nested under, if any.
+   * Gets the other terms under the same parent, in the vocabulary's order.
    *
    * @param \Drupal\taxonomy\TermInterface $term
    *   The term.
    * @param \Drupal\Core\Cache\CacheableMetadata $cache
-   *   Collects the cacheability of the line.
+   *   Collects the cacheability of the list.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
-   *   The line, or NULL for a top-level term.
+   * @return array|null
+   *   A heading naming the parent, and the terms, or NULL if there are none.
    */
-  protected function getParentTermNote(TermInterface $term, CacheableMetadata $cache): ?TranslatableMarkup {
+  protected function getSiblingTerms(TermInterface $term, CacheableMetadata $cache): ?array {
     $parent = $term->get('parent')->entity;
     if (!$parent instanceof TermInterface) {
       return NULL;
@@ -255,14 +271,21 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     $access = $parent->access('view', NULL, TRUE);
     $cache->addCacheableDependency($access);
     $cache->addCacheableDependency($parent);
-    $cache->addCacheContexts(['languages:language_content']);
     if (!$access->isAllowed()) {
       return NULL;
     }
-    return $this->t('Nested under <a href=":url">@parent</a>', [
-      ':url' => $parent->toUrl()->toString(),
-      '@parent' => $this->translationResolver->translate($parent)->label(),
-    ]);
+    $terms = array_values(array_filter(
+      $this->getNestedTerms($parent, $cache),
+      fn ($sibling) => $sibling['id'] !== (int) $term->id(),
+    ));
+    if (!$terms) {
+      return NULL;
+    }
+    return [
+      // The placeholder marks the name, so the theme can set it apart.
+      'heading' => $this->t('Also in %term', ['%term' => $this->translationResolver->translate($parent)->label()]),
+      'terms' => $terms,
+    ];
   }
 
   /**
@@ -289,6 +312,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
         continue;
       }
       $nested[] = [
+        'id' => (int) $child->id(),
         'name' => $this->translationResolver->translate($child)->label(),
         'url' => $child->toUrl(),
       ];
