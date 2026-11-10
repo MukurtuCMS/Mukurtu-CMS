@@ -78,6 +78,9 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $bundle_keys = array_keys($bundle_options);
     $form['bundle'] = [
       '#type' => 'radios',
+      // With no type to choose, there's no sub-type to choose either, and
+      // the type can't change to redraw this.
+      '#access' => !empty($form['entity_type_id']['#options']),
       '#title' => $this->t('Sub-type'),
       '#options' => $bundle_options,
       '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle() ?? reset($bundle_keys),

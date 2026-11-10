@@ -11,6 +11,7 @@ use Drupal\file\FileInterface;
 use Drupal\migrate\MigrateMessage;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\Form\CustomStrategyFromFileForm;
+use Drupal\mukurtu_import\Form\ImportFileSummaryForm;
 use Drupal\mukurtu_import\ImportBatchExecutable;
 use Drupal\mukurtu_import\ParagraphImportAccess;
 use Drupal\node\Entity\Node;
@@ -170,9 +171,40 @@ class ImportParagraphAccessTest extends MukurtuImportTestBase {
    * Gets the entity type options on the mapping form.
    */
   protected function entityTypeOptions(): array {
+    return $this->mappingForm()['entity_type_id']['#options'];
+  }
+
+  /**
+   * Builds the mapping form for a new file.
+   */
+  protected function mappingForm(): array {
     $file = $this->createCsvFile([['Text'], ['Imported text']]);
-    $form = CustomStrategyFromFileForm::create($this->container)->buildForm([], new FormState(), $file);
-    return $form['entity_type_id']['#options'];
+    return CustomStrategyFromFileForm::create($this->container)->buildForm([], new FormState(), $file);
+  }
+
+  /**
+   * Gets the saved templates offered for a file, by label.
+   */
+  protected function templateOptions(): array {
+    $file = $this->createCsvFile([['Text', 'Title'], ['Imported text', 'Title']]);
+    foreach (['paragraph' => 'simple_paragraph', 'node' => 'protocol_aware_content'] as $entity_type_id => $bundle) {
+      $strategy = MukurtuImportStrategy::create([
+        'id' => $entity_type_id . '_template',
+        'label' => "$entity_type_id template",
+        'uid' => $this->currentUser->id(),
+        'configuration' => [],
+      ]);
+      $strategy->setTargetEntityTypeId($entity_type_id);
+      $strategy->setTargetBundle($bundle);
+      $strategy->setMapping([
+        ['target' => 'field_paragraph_text', 'source' => 'Text'],
+        ['target' => 'title', 'source' => 'Title'],
+      ]);
+      $strategy->save();
+    }
+    $form = ImportFileSummaryForm::create($this->container);
+    $method = new \ReflectionMethod($form, 'getImportConfigOptions');
+    return array_map('strval', $method->invoke($form, $file->id()));
   }
 
   /**
@@ -180,6 +212,8 @@ class ImportParagraphAccessTest extends MukurtuImportTestBase {
    */
   public function testContentCreatorCanImportParagraphs(): void {
     $this->assertArrayHasKey('paragraph', $this->entityTypeOptions());
+    $this->assertTrue($this->mappingForm()['bundle']['#access']);
+    $this->assertEqualsCanonicalizing(['custom', 'node_template', 'paragraph_template'], array_keys($this->templateOptions()));
     $this->assertSame(1, $this->importParagraph());
     $this->assertSame([], iterator_to_array($this->lastMigration->getIdMap()->getMessages()));
   }
@@ -210,6 +244,10 @@ class ImportParagraphAccessTest extends MukurtuImportTestBase {
     $this->switchToNonCreator();
 
     $this->assertArrayNotHasKey('paragraph', $this->entityTypeOptions(), 'Paragraphs are not offered as an import type.');
+    $this->assertSame(['custom'], array_keys($this->templateOptions()), 'Templates for types the user cannot import are not offered.');
+    $form = $this->mappingForm();
+    $this->assertSame([], $form['entity_type_id']['#options']);
+    $this->assertFalse($form['bundle']['#access'], 'No sub-type, not even base fields only, is offered without a type.');
     // A saved paragraph template must not get around the form.
     $this->assertSame(0, $this->importParagraph());
     $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());

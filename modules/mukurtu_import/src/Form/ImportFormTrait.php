@@ -86,14 +86,16 @@ trait ImportFormTrait {
     }
 
     $options = [];
-    if (count($bundle_info[$entity_type_id]) > 1) {
-      $options = [-1 => $this->t('None: Base Fields Only')];
-    }
-
     foreach ($bundle_info[$entity_type_id] as $bundle => $info) {
       if ($this->userCanCreateEntity($entity_type_id, $bundle)) {
         $options[$bundle] = $info['label'] ?? $bundle;
       }
+    }
+
+    // Base fields only is a choice among sub-types, so it isn't offered when
+    // the user can't create any of them.
+    if ($options && count($bundle_info[$entity_type_id]) > 1) {
+      $options = [-1 => $this->t('None: Base Fields Only')] + $options;
     }
     return $options;
   }

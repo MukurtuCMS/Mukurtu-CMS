@@ -95,6 +95,9 @@ class MukurtuImportStrategyForm extends EntityForm {
     $bundle = $form_state->getValue('target_bundle') ?? $this->entity->get('target_bundle') ?? reset($bundle_keys);
     $form['target_bundle'] = [
       '#type' => 'radios',
+      // With no type to choose, there's no sub-type to choose either, and
+      // the type can't change to redraw this.
+      '#access' => !empty($form['target_entity_type_id']['#options']),
       '#title' => $this->t('Sub-type'),
       '#options' => $bundle_options,
       '#default_value' => $bundle,
