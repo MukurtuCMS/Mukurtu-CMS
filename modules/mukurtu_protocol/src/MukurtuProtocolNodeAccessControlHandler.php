@@ -142,34 +142,10 @@ class MukurtuProtocolNodeAccessControlHandler extends NodeAccessControlHandler {
             ->addCacheTags(["user:{$account->id()}"]);
         }
 
-        // Ask each member OG group about specific permissions.
-        $ogAccessService = \Drupal::service('og.access');
-        $protocols = $entity->getMemberProtocols($account);
-
-        // For 'all' sharing, the user must have update/delete permission in
-        // EVERY protocol (use andIf, starting from allowed() as the identity).
-        // A protocol steward in one protocol and a mere member in another is
-        // not enough — they need sufficient permission across all of them.
-        //
-        // For 'any' sharing, the user's most-privileged role across any single
-        // member protocol is sufficient (use orIf, starting from neutral()).
-        //
-        // Note: getMemberProtocols() includes open protocols as virtual members
-        // even without explicit OG membership. For 'all' sharing this is fine:
-        // userAccessGroupContentEntityOperation returns neutral() for a virtual
-        // member with no OG role, so andIf(neutral()) correctly denies access.
-        if ($entity->getSharingSetting() === 'all') {
-          $result = AccessResult::allowed();
-          foreach ($protocols as $protocol) {
-            $result = $result->andIf($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
-          }
-        }
-        else {
-          $result = AccessResult::neutral();
-          foreach ($protocols as $protocol) {
-            $result = $result->orIf($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
-          }
-        }
+        // The account can see the item, so permission in any one of its member
+        // protocols is enough, for 'all' sharing too (see
+        // protocolOperationAccess()).
+        $result = CulturalProtocols::protocolOperationAccess($operation, $entity, $account);
 
         // Protocols are very opinionated, neutral is not good enough for
         // update/delete, allowed is required.

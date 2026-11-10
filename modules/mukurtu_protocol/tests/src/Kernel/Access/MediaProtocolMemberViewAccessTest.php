@@ -316,6 +316,54 @@ class MediaProtocolMemberViewAccessTest extends KernelTestBase {
   }
 
   /**
+   * 'all' sharing needs edit permission in only one protocol (#2515).
+   *
+   * The sharing setting decides who can see the item. Once the account can
+   * see it, a steward of any of its protocols can edit it.
+   */
+  public function testAllSharingEditNeedsPermissionInOneProtocol(): void {
+    $this->createProtocolRole('protocol_steward', 'Protocol Steward', [
+      'update any test media',
+      'delete any test media',
+    ]);
+
+    $owner = $this->createUser();
+    $strictProtocol = $this->createProtocol('strict');
+    $openProtocol = $this->createProtocol('open');
+    $openProtocol2 = $this->createProtocol('open');
+    $mixed = $this->createProtocolMedia([$strictProtocol, $openProtocol], 'all', TRUE, (int) $owner->id());
+    $allOpen = $this->createProtocolMedia([$openProtocol, $openProtocol2], 'all', TRUE, (int) $owner->id());
+
+    $strictSteward = $this->createUser();
+    $strictProtocol->addMember($strictSteward, ['protocol_steward']);
+    $this->assertTrue($mixed->access('update', $strictSteward, TRUE)->isAllowed());
+    $this->assertTrue($mixed->access('delete', $strictSteward, TRUE)->isAllowed());
+
+    $strictMember = $this->createUser();
+    $strictProtocol->addMember($strictMember);
+    $this->assertTrue($mixed->access('update', $strictMember, TRUE)->isForbidden());
+
+    // A steward of the open protocol who is a member of the strict one.
+    $strictMemberOpenSteward = $this->createUser();
+    $strictProtocol->addMember($strictMemberOpenSteward);
+    $openProtocol->addMember($strictMemberOpenSteward, ['protocol_steward']);
+    $this->assertTrue($mixed->access('update', $strictMemberOpenSteward, TRUE)->isAllowed());
+
+    // A steward of the open protocol who can't see the item.
+    $openStewardOnly = $this->createUser();
+    $openProtocol->addMember($openStewardOnly, ['protocol_steward']);
+    $this->assertTrue($mixed->access('update', $openStewardOnly, TRUE)->isForbidden());
+
+    $openSteward = $this->createUser();
+    $openProtocol->addMember($openSteward, ['protocol_steward']);
+    $this->assertTrue($allOpen->access('update', $openSteward, TRUE)->isAllowed());
+
+    $openMember = $this->createUser();
+    $openProtocol->addMember($openMember);
+    $this->assertTrue($allOpen->access('update', $openMember, TRUE)->isForbidden());
+  }
+
+  /**
    * Directly covers the reviewer's concern: a public node can still have
    * an individually protocol-gated media asset alongside a public one.
    * Per-media protocol gating (checked before this fix's changed branch
