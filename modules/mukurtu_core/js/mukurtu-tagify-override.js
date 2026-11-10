@@ -125,7 +125,9 @@
       const up = event.key === 'ArrowUp' || event.key === 'Up';
       const down = event.key === 'ArrowDown' || event.key === 'Down';
       const active = instance.state.ddItemElm;
-      if ((!up && !down) || !active || !instance.DOM.dropdown.isConnected) {
+      // Leave arrow keys alone while they choose characters in an IME.
+      if ((!up && !down) || event.isComposing || !active
+        || !instance.DOM.dropdown.isConnected) {
         return;
       }
       const options = instance.dropdown.getAllSuggestionsRefs();

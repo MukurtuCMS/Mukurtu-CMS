@@ -142,6 +142,17 @@ test.describe('Field that can create terms', () => {
     await expect(active(page)).toHaveText('Mary Jane Smith');
   });
 
+  test('Arrow keys during IME composition are left to Tagify', async ({ page }) => {
+    await typeName(page, 'Mary');
+    await page.keyboard.press('ArrowDown');
+    await expect(active(page)).toHaveText('Mary Jane Smith');
+    await page.locator('.tagify__input').dispatchEvent('keydown', {
+      key: 'ArrowUp', isComposing: true, bubbles: true, cancelable: true,
+    });
+    // Tagify's own handler wraps round to the last suggestion.
+    await expect(active(page)).toHaveText('Mary Jones');
+  });
+
   test('Clicking still picks a suggestion', async ({ page }) => {
     await typeName(page, 'Mary');
     await page.locator('.tagify__dropdown__item', { hasText: 'Mary Jones' }).click();
