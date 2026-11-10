@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_import\ParagraphImportAccess;
 
 /**
  * Provides shared helper methods for import forms.
@@ -237,6 +238,12 @@ trait ImportFormTrait {
     // narrowly scoped import permission.
     if ($entity_type_id === 'user') {
       return $account->hasPermission('import mukurtu users');
+    }
+
+    // New paragraphs pass create access for anyone, so they need the right
+    // to create the content they belong on.
+    if ($entity_type_id === 'paragraph' && !ParagraphImportAccess::canCreateHost($this->entityTypeManager, $this->entityBundleInfo, $account)) {
+      return FALSE;
     }
 
     return $this->entityTypeManager->getAccessControlHandler($entity_type_id)->createAccess($bundle, $account);
