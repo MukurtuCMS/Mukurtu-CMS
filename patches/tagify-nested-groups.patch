@@ -1,8 +1,8 @@
 diff --git a/css/tagify.css b/css/tagify.css
-index 1c53c01..d95fe70 100644
+index 1c53c01..8075594 100644
 --- a/css/tagify.css
 +++ b/css/tagify.css
-@@ -392,8 +392,33 @@ select.tagify-select-widget {
+@@ -392,8 +392,35 @@ select.tagify-select-widget {
    height: 30px;
  }
  
@@ -13,21 +13,23 @@ index 1c53c01..d95fe70 100644
 +  font-size: 0.85em;
 +}
 +
-+/* A path can be long, so let its tag wrap rather than hide the term's name. */
++/* A path can be long, so let its tag wrap rather than hide the term's name.
++   Not while Tagify shrinks a removed tag to nothing, or its text wraps a
++   letter per line and the field grows until it has gone. */
 +
-+.tagify__tag:has(.tagify__tag-text-parent) {
++.tagify__tag:not(.tagify__tag--hide):has(.tagify__tag-text-parent) {
 +  --tag-inset-shadow-size: 100vmax;
 +  height: auto;
 +  min-height: 32px;
 +}
 +
-+.tagify__tag:has(.tagify__tag-text-parent) > div {
++.tagify__tag:not(.tagify__tag--hide):has(.tagify__tag-text-parent) > div {
 +  min-width: 0;
 +  white-space: normal;
 +}
 +
-+.tagify__tag .tagify__tag-text:has(.tagify__tag-text-parent),
-+.tagify__tag .tagify__tag-text-with-entity-id:has(.tagify__tag-text-parent) {
++.tagify__tag:not(.tagify__tag--hide) .tagify__tag-text:has(.tagify__tag-text-parent),
++.tagify__tag:not(.tagify__tag--hide) .tagify__tag-text-with-entity-id:has(.tagify__tag-text-parent) {
 +  white-space: normal !important;
 +  overflow-wrap: anywhere;
 +}
@@ -37,7 +39,7 @@ index 1c53c01..d95fe70 100644
  }
  
  .tagify__tag-text .tagify__tag-text-child {
-@@ -402,6 +427,10 @@ select.tagify-select-widget {
+@@ -402,6 +429,10 @@ select.tagify-select-widget {
  
  /* Group suggestions */
  
