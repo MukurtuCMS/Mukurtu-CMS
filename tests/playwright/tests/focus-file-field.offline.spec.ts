@@ -47,6 +47,7 @@ test.beforeEach(async ({ page }) => {
   await page.addScriptTag({
     content: `
       window.Drupal = { AjaxCommands: function () {} };
+      window.jQuery = (el) => ({ data: (key, value) => { el.dataset.jqueryData = key + '=' + value; } });
       window.tabbable = {
         tabbable: (container) => [...container.querySelectorAll('a[href], button, input, select, summary, textarea')]
           .filter((el) => !el.disabled && el.getClientRects().length > 0),
@@ -56,10 +57,16 @@ test.beforeEach(async ({ page }) => {
   await page.addScriptTag({ content: COMMAND });
 });
 
+// The button that sent the request, already removed from the page.
 const run = (page, selector: string) => page.evaluate(
-  (selector) => Drupal.AjaxCommands.prototype.mukurtuFocusFileField({}, { selector }),
+  (selector) => {
+    window.sender = document.createElement('input');
+    Drupal.AjaxCommands.prototype.mukurtuFocusFileField({ element: window.sender }, { selector });
+  },
   selector,
 );
+
+const refocusDisabled = (page) => page.evaluate(() => window.sender.dataset.jqueryData === 'disable-refocus=true');
 
 const focusedId = (page) => page.evaluate(() => document.activeElement?.id || document.activeElement?.tagName);
 
@@ -77,12 +84,21 @@ test('moves focus to the file just added, not its drag handle', async ({ page })
   expect(await focusedId(page)).toBe('new-link');
 });
 
+test("stops core moving focus on to the button's replacement", async ({ page }) => {
+  // In a field with several files, the file that moves up after a removal
+  // takes the removed button's data-drupal-selector, which core refocuses.
+  await run(page, '#tracks-ajax-wrapper');
+
+  expect(await refocusDisabled(page)).toBe(true);
+});
+
 test('leaves focus alone when it is still on the page', async ({ page }) => {
   await page.locator('#before').focus();
 
   await run(page, '#ajax-wrapper--video');
 
   expect(await focusedId(page)).toBe('before');
+  expect(await refocusDisabled(page)).toBe(false);
 });
 
 test('does nothing when the wrapper is missing or has nothing to focus', async ({ page }) => {

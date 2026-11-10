@@ -3,7 +3,7 @@
  * Keeps keyboard focus in a file field after an upload or removal.
  */
 
-((Drupal, tabbable) => {
+(($, Drupal, tabbable) => {
   /**
    * Moves focus back into the file field that sent the request.
    *
@@ -40,6 +40,12 @@
     const [first] = tabbable.tabbable(container);
     if (first) {
       first.focus();
+      // Stop core refocusing the button that sent the request. In a field
+      // with several files, the file that moves up takes that button's
+      // data-drupal-selector, so core would move focus to its Remove button.
+      if (ajax.element) {
+        $(ajax.element).data('disable-refocus', true);
+      }
     }
   };
-})(Drupal, window.tabbable);
+})(jQuery, Drupal, window.tabbable);

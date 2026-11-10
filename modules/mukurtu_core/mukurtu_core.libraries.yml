@@ -151,6 +151,7 @@ focus-file-field:
     js/focus-file-field.js: {}
   dependencies:
     - core/drupal
+    - core/jquery
     - core/drupal.ajax
     - core/tabbable
 
