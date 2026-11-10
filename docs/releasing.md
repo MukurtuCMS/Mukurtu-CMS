@@ -173,10 +173,10 @@ To release one:
 
 ## Who looks after the image
 
-- **Owner:** to be decided in #2618. The owner checks each publish run, merges
-  Dependabot's `docker` pull requests, and publishes an [image
-  revision](#releasing-an-image-revision) when the advisory watch
-  (`.github/workflows/docker-watch.yml`) opens an issue.
+- **Owner:** the Mukurtu CMS development team, who maintain this repository. The
+  team checks each publish run, merges Dependabot's `docker` pull requests, and
+  publishes an [image revision](#releasing-an-image-revision) when the advisory
+  watch (`.github/workflows/docker-watch.yml`) opens an issue.
 - **Response time:** to be decided in #2618. Proposed: an image revision within 2
   days for a critical advisory.
 
