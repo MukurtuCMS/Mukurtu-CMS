@@ -15,3 +15,7 @@ services:
     class: Drupal\mukurtu_search\EventSubscriber\GatheringProcessorsSubscriber
     tags:
       - { name: event_subscriber }
+
+  mukurtu_search.nested_term_facets:
+    class: Drupal\mukurtu_search\NestedTermFacets
+    arguments: ['@entity_type.manager', '@search_api.fields_helper']

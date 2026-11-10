@@ -507,6 +507,9 @@ function mukurtu_browse_preprocess_block(&$variables) {
   $toggle['#weight'] = $is_dictionary ? 100 : -5;
   $variables['content']['search_collapse_toggle'] = $toggle;
 
+  // Checking a facet reloads the page; keep focus on it (#2522).
+  $variables['#attached']['library'][] = 'mukurtu_browse/facet-focus';
+
   // On the dictionary page, inject a separator and the list/map view toggle.
   if ($is_dictionary) {
     $variables['content']['facets_group_separator'] = [
