@@ -167,6 +167,16 @@ class ImportFileSummaryForm extends ImportBaseForm {
         if (!$config instanceof MukurtuImportStrategyInterface || !$config->applies($file)) {
           continue;
         }
+        // Only offer templates for types the user can import, as the type
+        // options on the mapping form do.
+        $entity_type_id = (string) $config->getTargetEntityTypeId();
+        $bundle = $config->getTargetBundle();
+        $can_import = $bundle && (string) $bundle !== '-1'
+          ? $this->userCanCreateEntity($entity_type_id, $bundle)
+          : $this->userCanCreateAnyBundleForEntityType($entity_type_id);
+        if (!$can_import) {
+          continue;
+        }
         $options[$config_id] = $config->getLabel();
       }
     }

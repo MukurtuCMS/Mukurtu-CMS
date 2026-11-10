@@ -93,19 +93,10 @@ class MukurtuProtocolMediaAccessControlHandler extends MediaAccessControlHandler
 
       case 'update':
       case 'delete':
-        // Ask each member OG group about specific permissions.
-        $ogAccessService = \Drupal::service('og.access');
-        $protocols = $entity->getMemberProtocols($account);
-
-        // Our initial result needs to be "allowed" for all, "neutral" for any.
-        // Check the truth tables on AccessResult orIf/andIf for why.
-        $result = ($entity->getSharingSetting() == 'all') ? AccessResult::allowed() : AccessResult::neutral();
-        $modeFn = ($entity->getSharingSetting() == 'any') ? 'orIf' : 'andIf';
-
-        // Check each protocol.
-        foreach ($protocols as $protocol) {
-          $result = $result->{$modeFn}($ogAccessService->userAccessGroupContentEntityOperation($operation, $protocol, $entity, $account));
-        }
+        // The account can see the item, so permission in any one of its member
+        // protocols is enough, for 'all' sharing too (see
+        // protocolOperationAccess()).
+        $result = CulturalProtocols::protocolOperationAccess($operation, $entity, $account);
 
         // Protocols are very opinionated, neutral is not good enough for
         // update/delete, allowed is required.
