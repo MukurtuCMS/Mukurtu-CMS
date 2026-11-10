@@ -84,7 +84,9 @@ them from drifting apart again.
    architectures, runs the test suite against it, scans it, and pushes it to
    `ghcr.io/mukurtucms/mukurtu`. Check that the run succeeded. If the release was
    created by a workflow using `GITHUB_TOKEN`, the event does not fire; run the
-   workflow by hand with the tag in `ref` (leave `dev` unticked). After a new
+   workflow by hand with the tag in `ref` (leave `dev` unticked). If it stops at
+   `composer audit`, see [If `composer audit` stops the
+   image](#if-composer-audit-stops-the-image). After a new
    `mukurtu-template` release, update the `ARG MUKURTU_TEMPLATE_VERSION` default
    in the `Dockerfile` (in the next release, or as an [image
    revision](#releasing-an-image-revision)). See [docker-build.md](docker-build.md),
@@ -168,6 +170,42 @@ To release one:
    (`4.0.4-r1` after `4.0.5`) never pulls `latest` backwards. `4.0.5` itself never changes.
 6. **Make sure the same fix is on `main`** (merging Dependabot's pull request does it),
    so the next Mukurtu release has it too.
+
+## Who looks after the image
+
+- **Owner:** the Mukurtu CMS development team, who maintain this repository. The
+  team checks each publish run, merges Dependabot's `docker` pull requests, and
+  publishes an [image revision](#releasing-an-image-revision) when the advisory
+  watch (`.github/workflows/docker-watch.yml`) opens an issue.
+- **Response time:** to be decided in #2618. Proposed: an image revision within 2
+  days for a critical advisory.
+
+Sites running the image can't update Drupal themselves, because the code is
+read-only. Until a revision is published, they stay exposed.
+
+## If `composer audit` stops the image
+
+The publish workflow runs a strict `composer audit` and doesn't push an image with
+an open advisory. The Mukurtu release itself is already published by then; only the
+image is missing. The job log names the package and the advisory.
+
+The image is built from the tag, so a change on `main` doesn't help the failed
+build. Either way, the image ships later as `-r1`:
+
+- **A fixed version is out.** Publish an [image
+  revision](#releasing-an-image-revision) of the release; its build installs the
+  fixed version. If Mukurtu's `composer.json` keeps the package below that version,
+  change the constraint on `main` first, then cherry-pick it onto the revision's
+  branch.
+- **No fixed version yet.** Wait for one, then do the above. Don't add the advisory
+  to the ignore list just to get the image out.
+- **The advisory doesn't affect Mukurtu.** Add it to `config.audit.ignore` in
+  `composer.json`, with a note saying why, as the existing entry does. Merge that
+  to `main`, then cherry-pick it onto the image revision's branch.
+
+If the job says Drupal's advisory service couldn't be reached, that's not an
+advisory. Run the workflow again by hand with the tag in `ref` and **Go on if
+Drupal's security-advisory service is down** ticked; the Trivy scan still runs.
 
 ## Releasing alongside mukurtu-template
 
