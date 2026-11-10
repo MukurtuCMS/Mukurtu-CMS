@@ -5,6 +5,7 @@
 - [ ] If this PR fixes something the conformance report cites, I have updated that row in [`docs/accessibility/acr/mukurtu-acr.yaml`](../docs/accessibility/acr/mukurtu-acr.yaml). A note still describing a fixed defect understates the product, which nobody reports.
 - [ ] I have recompiled SCSS if required.
 - [ ] I have updated or created CI/CD tests, if required.
+- [ ] If this PR changes what the site needs from its server (a PHP extension, a program run with `exec()`, the PHP or Drupal version, or a `settings.php` requirement), I have updated the `Dockerfile` or `docker/settings.php` to match.
 - [ ] I have updated from `main` and resolved any merge conflicts.
 - [ ] If this PR's base branch is not `main`, I understand it needs to be retargeted once that base branch's own PR merges (see [docs/stacked-prs.md](../docs/stacked-prs.md)).
 - [ ] I have verified that all expected checks pass.
