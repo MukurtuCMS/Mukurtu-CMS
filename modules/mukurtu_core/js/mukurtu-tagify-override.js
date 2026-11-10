@@ -62,7 +62,39 @@
         }
       }, true);
     }
+    if (instance.DOM.originalInput?.classList.contains('tagify--autocreate')) {
+      highlightExactMatchOnly(instance);
+    }
     instance.__mukurtuPatched = true;
+  }
+
+  /**
+   * Compares names the way Tagify does: trimmed and ignoring case.
+   */
+  function sameName(a, b) {
+    return String(a ?? '').trim().toLowerCase() === String(b ?? '').trim().toLowerCase();
+  }
+
+  /**
+   * Highlight the first suggestion only when it matches the typed name.
+   *
+   * Tagify highlights the first suggestion, so on a field that can create
+   * terms, typing "Mary Jane" and pressing Enter added "Mary Jane Smith"
+   * instead of creating "Mary Jane" (#2661). With nothing highlighted, Enter
+   * adds the typed name, and Tagify still matches a name typed in full to
+   * its existing term. Arrow keys and clicks still pick any suggestion.
+   */
+  function highlightExactMatchOnly(instance) {
+    const { show } = instance.dropdown;
+    instance.dropdown.show = (...args) => {
+      const result = show(...args);
+      const typed = args[0] === undefined ? instance.state.inputText : args[0];
+      const data = instance.state.ddItemData;
+      if (data && !sameName(data.label ?? data.value, typed)) {
+        instance.dropdown.highlightOption();
+      }
+      return result;
+    };
   }
 
   /**
