@@ -9,6 +9,7 @@ use Drupal\mukurtu_protocol\Entity\CommunityInterface;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_protocol\ProtocolListBuilder;
 use Drupal\user\Entity\Role;
+use Drupal\user\UserInterface;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -21,6 +22,11 @@ use PHPUnit\Framework\Attributes\Group;
 class ProtocolListBuilderVisibilityTest extends ProtocolAwareEntityTestBase {
 
   /**
+   * The non-admin user who views the list.
+   */
+  protected UserInterface $viewer;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -29,6 +35,11 @@ class ProtocolListBuilderVisibilityTest extends ProtocolAwareEntityTestBase {
     Role::load('authenticated')
       ->grantPermission('view published community entities')
       ->save();
+
+    // The base class's current user is uid 1, which bypasses access checks,
+    // so the list is viewed as a second user. Communities stay owned by uid 1,
+    // because OG makes a group's owner a member.
+    $this->viewer = $this->createUser();
   }
 
   /**
@@ -82,6 +93,7 @@ class ProtocolListBuilderVisibilityTest extends ProtocolAwareEntityTestBase {
    *   The depth of each community row, keyed by the rendered label.
    */
   protected function communityRows(): array {
+    $this->setCurrentUser($this->viewer);
     $definition = \Drupal::entityTypeManager()->getDefinition('protocol');
     $build = ProtocolListBuilder::createInstance(\Drupal::getContainer(), $definition)->render();
 
@@ -121,7 +133,7 @@ class ProtocolListBuilderVisibilityTest extends ProtocolAwareEntityTestBase {
     $community = $this->createCommunity('Member Community', 'community-only');
     $this->createProtocol('Strict Protocol', $community, 'strict');
     $this->setOrganization([$community->id() => 0]);
-    $community->addMember($this->currentUser);
+    $community->addMember($this->viewer);
 
     $this->assertArrayHasKey('Member Community', $this->communityRows());
   }
