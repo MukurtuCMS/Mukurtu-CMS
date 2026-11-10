@@ -291,4 +291,27 @@ class ImportTemplateExportConsistencyTest extends KernelTestBase {
     }
   }
 
+  /**
+   * Every template splits multiple values the way every exporter joins them.
+   *
+   * The taxonomy templates used "||" while export wrote ";", so an export
+   * didn't import back with its own template (#2520).
+   */
+  public function testTemplatesUseTheExportDelimiter(): void {
+    $export_storage = new FileStorage(\Drupal::service('extension.list.module')->getPath('mukurtu_export') . '/config/install');
+    $exporter_ids = $export_storage->listAll('mukurtu_export.csv_exporter.');
+    $this->assertNotEmpty($exporter_ids);
+    $delimiters = [];
+    foreach ($exporter_ids as $exporter_id) {
+      $delimiters[] = $export_storage->read($exporter_id)['multivalue_delimiter'];
+    }
+    $this->assertSame([';'], array_values(array_unique($delimiters)));
+
+    $import_storage = new FileStorage(\Drupal::service('extension.list.module')->getPath('mukurtu_import') . '/config/install');
+    foreach (array_keys(self::TEMPLATE_BUNDLES) as $template_id) {
+      $config = $import_storage->read("mukurtu_import.mukurtu_import_strategy.{$template_id}");
+      $this->assertSame(';', $config['config']['multivalue_delimiter'] ?? ';', $template_id);
+    }
+  }
+
 }
