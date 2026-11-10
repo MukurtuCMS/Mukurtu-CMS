@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Plugin\migrate\destination;
 
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -17,6 +18,7 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
 use Drupal\migrate\Plugin\migrate\destination\EntityContentBase;
 use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
+use Drupal\mukurtu_import\ParagraphImportAccess;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\media\MediaInterface;
 use Drupal\migrate\Row;
@@ -202,6 +204,12 @@ class ProtocolAwareEntityContent extends EntityContentBase {
 
       // Check entity access for the current user.
       $access = $entity->access($operation, $this->currentUser, TRUE);
+      // A new paragraph passes create access for anyone, because it has no
+      // parent yet. It needs the right to create the content it belongs on.
+      if ($was_new && $entity->getEntityTypeId() === 'paragraph'
+        && !ParagraphImportAccess::canCreateHost($this->entityTypeManager, $this->entityTypeBundleInfo, $this->currentUser)) {
+        $access = AccessResult::forbidden();
+      }
       if (!$access->isAllowed()) {
         $reason = $access->getReason();
         throw new MigrateException(

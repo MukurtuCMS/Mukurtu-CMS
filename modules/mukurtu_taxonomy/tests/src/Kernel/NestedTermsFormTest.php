@@ -230,7 +230,9 @@ class NestedTermsFormTest extends EntityKernelTestBase {
 
     $form_object = $this->container->get('entity_type.manager')->getFormObject('taxonomy_vocabulary', 'overview')->setEntity($vocabulary);
     $form = $this->container->get('form_builder')->getForm($form_object, $vocabulary);
-    $this->assertFalse($form['flat']['#access']);
+    // flat_taxonomy 2.0.3 and later don't add the checkbox here at all, and
+    // earlier versions add it for the vocabulary form changes to hide.
+    $this->assertFalse(isset($form['flat']) && ($form['flat']['#access'] ?? TRUE));
     $this->assertNotContains('mukurtu_taxonomy_vocabulary_flat_submit', $form['actions']['submit']['#submit'] ?? []);
 
     $form_state = (new FormState())

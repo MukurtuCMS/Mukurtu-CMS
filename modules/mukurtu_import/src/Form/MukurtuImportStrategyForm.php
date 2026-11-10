@@ -92,9 +92,12 @@ class MukurtuImportStrategyForm extends EntityForm {
     $entity_type_id = $form_state->getValue('target_entity_type_id') ?? $this->entity->get('target_entity_type_id') ?? 'node';
     $bundle_options = $this->getBundleOptions($entity_type_id);
     $bundle_keys = array_keys($bundle_options);
-    $bundle = $form_state->getValue('target_bundle') ?? $this->entity->get('target_bundle') ?? reset($bundle_keys);
+    $bundle = $form_state->getValue('target_bundle') ?? $this->entity->get('target_bundle') ?? (reset($bundle_keys) ?: NULL);
     $form['target_bundle'] = [
       '#type' => 'radios',
+      // With no type to choose, there's no sub-type to choose either, and
+      // the type can't change to redraw this.
+      '#access' => !empty($form['target_entity_type_id']['#options']),
       '#title' => $this->t('Sub-type'),
       '#options' => $bundle_options,
       '#default_value' => $bundle,
@@ -390,7 +393,7 @@ class MukurtuImportStrategyForm extends EntityForm {
     // Update the bundle radios.
     $form['target_bundle']['#options'] = $this->getBundleOptions($form_state->getValue('target_entity_type_id'));
     $optionKeys = array_keys($form['target_bundle']['#options']);
-    $default = reset($optionKeys);
+    $default = reset($optionKeys) ?: NULL;
     $form['target_bundle']['#default_value'] = $default;
     $form['target_bundle']['#value'] = $default;
     $form_state->setValue('target_bundle', $default);
