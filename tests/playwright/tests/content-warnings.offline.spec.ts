@@ -236,6 +236,8 @@ test('A bare audio player grows to show every warning and the button', async ({ 
   expect(fits, 'nothing to scroll').toBe(true);
   await expect(warning).not.toHaveClass(/mukurtu-content-warnings--scrolls/);
   await expect(page.locator('audio')).toBeHidden();
+  // Nothing behind it to darken, so it gets the solid dark panel.
+  await expect(warning).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.9)');
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Show media' })).toBeFocused();
 });
@@ -248,6 +250,46 @@ test('Show media on a bare audio player reveals the player and focuses it', asyn
   await expect(page.locator('audio')).toBeVisible();
   await expect(page.locator('audio')).toBeFocused();
   await expect(page.getByText('recording.mp3')).toBeVisible();
+});
+
+// Mirrors node--dictionary-word--teaser.html.twig, as /dictionary shows a
+// warned thumbnail: the card wrapper, inside the teaser's article.
+const TEASER_THUMBNAIL = `
+  <article class="dictionary-word__teaser">
+    <h2 class="dictionary-word__teaser-word"><a href="#word">aloha</a></h2>
+    <div class="dictionary-word__teaser-media">
+      <div class="field field--name-field-recording">
+        <div class="media media--audio">
+          <div class="field field--name-field-media-audio-file"><audio controls></audio></div>
+        </div>
+      </div>
+      <div class="dictionary-word__teaser-thumbnail">
+        <div class="card-media--content-warning" data-mukurtu-card-url="#word">
+          <div class="media media--image">
+            ${overlay(9)}
+            <img alt="" width="250" height="166" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>`;
+
+test('A dictionary teaser thumbnail gets the card overlay', async ({ page }) => {
+  // Side by side with the recording, a phone left the thumbnail a third of
+  // the row, too small for the card overlay. It stacks there instead.
+  await page.setViewportSize({ width: 320, height: 640 });
+  await load(page, TEASER_THUMBNAIL);
+  const warning = page.locator('.mukurtu-content-warnings');
+  const link = page.getByRole('link', { name: 'Access item to view' });
+  await expect(warning).toHaveClass(/mukurtu-content-warnings--card/);
+  await expect(link).toHaveAttribute('href', '#word');
+  await expect(link).toHaveAccessibleDescription('aloha');
+  await expect(page.getByText(WARNINGS[0])).toBeHidden();
+  const fits = await warning.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+  expect(fits, 'the card fits the thumbnail').toBe(true);
+  await page.getByRole('button', { name: 'Show media' }).click();
+  await expect(warning).toHaveClass(/dismissed/);
+  await expect(page).not.toHaveURL(/#word$/);
 });
 
 test('Thumbnails keep the scrim but have no Tab stop', async ({ page }) => {

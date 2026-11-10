@@ -69,7 +69,8 @@
  */
 #}
 
-{% set has_thumbnail = content.field_thumbnail|render is not empty %}
+{% set thumbnail_markup = content.field_thumbnail|render %}
+{% set has_thumbnail = thumbnail_markup is not empty %}
 {% set has_translation = content.field_translation|render is not empty %}
 {% set has_recording = content.field_recording|render is not empty %}
 {% set has_word_entry_recording = content.field_word_entry.0['#paragraph'].field_recording is not empty %}
@@ -98,7 +99,16 @@
       {{ content.field_recording }}
       {% if has_thumbnail %}
       <div class="dictionary-word__teaser-thumbnail">
-        {{ content.field_thumbnail }}
+        {# The thumbnail is too small for its warnings, so a warned one gets
+           the card overlay: content-warnings.js links it to the word, whose
+           page shows every warning. See _card-media.html.twig. #}
+        {% if 'mukurtu-content-warnings' in thumbnail_markup ~ '' %}
+        <div class="card-media--content-warning" data-mukurtu-card-url="{{ url }}">
+          {{ thumbnail_markup }}
+        </div>
+        {% else %}
+        {{ thumbnail_markup }}
+        {% endif %}
       </div>
       {% endif %}
     </div>

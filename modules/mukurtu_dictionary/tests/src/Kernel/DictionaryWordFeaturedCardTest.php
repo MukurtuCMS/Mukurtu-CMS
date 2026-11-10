@@ -293,6 +293,34 @@ class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
   }
 
   /**
+   * A warned thumbnail on a /dictionary teaser gets the card overlay (#1301).
+   */
+  public function testTeaserWrapsWarnedThumbnail(): void {
+    // The teaser includes an icon from the active theme's directory.
+    $theme = $this->container->get('theme.initialization')->initTheme('mukurtu_v4');
+    $this->container->get('theme.manager')->setActiveTheme($theme);
+    $context = [
+      'content_attributes' => new Attribute(),
+      'title_attributes' => new Attribute(),
+      'title_prefix' => [],
+      'title_suffix' => [],
+      'label' => 'aloha',
+      'url' => '/dictionary-word/aloha',
+    ];
+
+    $warned = ['#markup' => '<div class="media"><div class="mukurtu-content-warnings">Warning</div>THUMBNAIL</div>'];
+    $html = $this->renderTemplate('content/node--dictionary-word--teaser.html.twig', $context + ['content' => ['field_thumbnail' => $warned]]);
+    $this->assertMatchesRegularExpression('#<div class="card-media--content-warning" data-mukurtu-card-url="/dictionary-word/aloha">\s*<div class="media"><div class="mukurtu-content-warnings">#', $html);
+
+    $plain = ['#markup' => '<div class="media">THUMBNAIL</div>'];
+    $html = $this->renderTemplate('content/node--dictionary-word--teaser.html.twig', $context + ['content' => ['field_thumbnail' => $plain]]);
+    $this->assertStringContainsString('THUMBNAIL', $html);
+    $this->assertStringNotContainsString('card-media--content-warning', $html);
+    // Unwarned thumbnails stay unlinked, as before.
+    $this->assertMatchesRegularExpression('#<div class="dictionary-word__teaser-thumbnail">\s*<div class="media">THUMBNAIL#', $html);
+  }
+
+  /**
    * Renders a theme template with the given variables.
    */
   private function renderTemplate(string $path, array $context): string {

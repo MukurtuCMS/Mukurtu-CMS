@@ -27,6 +27,13 @@
     inset: auto;
     align-self: stretch;
     overflow-y: visible;
+
+    // Nothing sits behind it to darken or blur, so the usual scrim would read
+    // as light gray on the page. Use the no-blur fallback's dark panel, so it
+    // looks like the overlays on images and video.
+    background-color: rgba(0 0 0 / 90%);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
