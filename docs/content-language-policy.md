@@ -39,6 +39,16 @@ If the view only lists/renders entities without sorting or filtering on translat
 
 Implemented once, in `mukurtu_core` via `hook_preprocess_node()` (`NotYetTranslatedIndicatorHooks`), rather than per content type or per view. It fires whenever the node being rendered has no translation into the current content language, and adds the indicator to `title_suffix` under the `mukurtu_not_yet_translated` key. Card templates print it with the rest of `title_suffix`. Full-page templates print it separately at the top of the main column, using `title_suffix|without('mukurtu_not_yet_translated')` where `title_suffix` used to go. Don't duplicate this per view or per row template.
 
+### Nested terms
+
+When a vocabulary allows nested terms (#2519), views that list content by term should usually include content tagged with the terms nested under it (#2521).
+
+- **Plain-entity views:** use core's "Has taxonomy term ID (with depth)" argument or filter (`taxonomy_index_tid_depth` on `node_field_data.term_node_tid_depth`) with `depth: 10`, rather than `taxonomy_index_tid`. The depth handlers join `taxonomy_index` themselves.
+  - Put other sorts and filters on `node_field_data`, not `taxonomy_index`. Each `taxonomy_index` handler adds its own join, which lists content once per tagged term.
+  - The `default_langcode = 1` filter and `rendering_language` from the recipe above still apply unchanged.
+- **Term names:** render the names of nested terms, such as the list on a term page, through `mukurtu_core.entity_translation_resolver`, and add the `languages:language_content` cache context. Term names are translatable, so `->label()` on a loaded term shows the original language.
+- **Cache tags:** a page whose results depend on how terms are nested needs the vocabulary's `taxonomy_term_list:<vid>` cache tag, so moving a term refreshes it.
+
 ## Exemptions
 
 Admin-only views that intentionally list content across all languages for editorial/management purposes (not visitor-facing browse/search) may skip this policy. Document the reason in `ViewLanguageFallbackCoverageTest::EXEMPTIONS` (below) — not as a YAML comment, since a normal Drupal config export/import cycle strips comments from `.yml` files and they won't survive it.
