@@ -43,9 +43,12 @@ html:not(.gin--dark-mode) :is([data-drupal-messages], .mukurtu-super-admin-warni
 removes, leaving form fields with only a small border change. This file also
 loads on the public theme, which has its own focus styles, so
 data-gin-layout-density limits this to pages in Gin. Gin clears the outline
-with :is(#extra-specificity-hack), so this needs !important. */
+with :is(#extra-specificity-hack), so this needs !important. Links in
+messages are included because Gin gives links outline: none, which left them
+with no focus indicator at all in forced colors (#2657). */
 @media (forced-colors: active) {
-  [data-gin-layout-density] :is(.form-element, .form-boolean, .button, .tagify__input):focus-visible {
+  [data-gin-layout-density] :is(.form-element, .form-boolean, .button, .tagify__input):focus-visible,
+  [data-gin-layout-density] :is([data-drupal-messages], .mukurtu-super-admin-warning-wrapper) a:focus-visible {
     outline: 2px solid Highlight !important;
     outline-offset: 2px;
   }

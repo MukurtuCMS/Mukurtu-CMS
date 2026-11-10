@@ -98,6 +98,27 @@ test.describe('Focus visible (admin)', () => {
     await expect(field).toHaveCSS('outline-style', 'solid');
   });
 
+  // Gin gives links outline: none and draws focus as a box-shadow, so a link
+  // in a message had no focus indicator in forced colors (#2657). The message
+  // is injected so the test doesn't depend on which messages a page shows.
+  test('Focus visible: links in messages keep an outline in forced colors', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/admin/config/system/site-information');
+    await page.evaluate(() => {
+      const wrapper = document.createElement('div');
+      wrapper.setAttribute('data-drupal-messages', '');
+      wrapper.innerHTML =
+        '<div class="messages messages--warning"><a href="#" id="pw-message-link">Message link</a></div>';
+      document.querySelector('main')?.prepend(wrapper);
+    });
+    const link = page.locator('#pw-message-link');
+    await link.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(link).toBeFocused();
+    await expect(link).toHaveCSS('outline-style', 'solid');
+  });
+
   // The outline is limited by this attribute, because the public theme draws
   // its own focus ring and a second one would double it.
   test('Focus visible: public pages are outside the forced colors outline', async ({ page }) => {
