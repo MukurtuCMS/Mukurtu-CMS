@@ -12,6 +12,8 @@ on:
       - docker/**
       - scripts/docker/**
       - examples/docker/**
+      # The startup check reads mukurtu_removed_extensions from it.
+      - mukurtu.info.yml
       - .github/workflows/docker-*.yml
 
 permissions:
