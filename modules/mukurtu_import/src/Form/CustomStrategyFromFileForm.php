@@ -254,6 +254,8 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
       ];
       $form['mappings'][$delta]['target'] = [
         '#type' => 'select',
+        '#title' => $this->t('Target field for @column', ['@column' => $header]),
+        '#title_display' => 'invisible',
         '#options' => $this->buildTargetOptions($entity_type_id, $bundle),
         '#default_value' => $this->importConfig->getMappedTarget($header) ?? $this->getAutoMappedTarget($header, $entity_type_id, $bundle, $this->importConfig ? $this->importConfig->getMapping() : []),
         '#prefix' => "<div id=\"edit-mappings-{$delta}-target-options\">",
