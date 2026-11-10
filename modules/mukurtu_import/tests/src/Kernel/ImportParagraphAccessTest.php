@@ -248,6 +248,12 @@ class ImportParagraphAccessTest extends MukurtuImportTestBase {
     $form = $this->mappingForm();
     $this->assertSame([], $form['entity_type_id']['#options']);
     $this->assertFalse($form['bundle']['#access'], 'No sub-type, not even base fields only, is offered without a type.');
+
+    // The template form defaults to content, which this user can't create.
+    $template_form = $this->container->get('entity.form_builder')
+      ->getForm(MukurtuImportStrategy::create(['uid' => $this->currentUser->id()]), 'add');
+    $this->assertSame([], $template_form['target_entity_type_id']['#options']);
+    $this->assertFalse($template_form['target_bundle']['#access']);
     // A saved paragraph template must not get around the form.
     $this->assertSame(0, $this->importParagraph());
     $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());

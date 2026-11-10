@@ -171,7 +171,7 @@ class ImportFileSummaryForm extends ImportBaseForm {
         // options on the mapping form do.
         $entity_type_id = (string) $config->getTargetEntityTypeId();
         $bundle = $config->getTargetBundle();
-        $can_import = $bundle && $bundle !== '-1'
+        $can_import = $bundle && (string) $bundle !== '-1'
           ? $this->userCanCreateEntity($entity_type_id, $bundle)
           : $this->userCanCreateAnyBundleForEntityType($entity_type_id);
         if (!$can_import) {
