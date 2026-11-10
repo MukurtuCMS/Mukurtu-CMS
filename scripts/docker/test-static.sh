@@ -57,6 +57,30 @@ for bad in "4.x-dev" "v4.0.5" "4.0" "4.0.5-r0" "4.0.5-r01" "4.0.5 full" "4.0.5 s
   if "$TAGS" $bad >/dev/null 2>&1; then fail "rejects: '$bad'"; else pass "rejects: '$bad'"; fi
 done
 
+echo "advisory watch: the report"
+REPORT="$REPO_ROOT/scripts/docker/watch-report.py"
+fixtures="$(mktemp -d)"
+echo '{"advisories":[]}' > "$fixtures/clean-audit.json"
+echo '{"Results":[{"Target":"x"}]}' > "$fixtures/clean-trivy.json"
+cat > "$fixtures/audit.json" <<'JSON'
+{"advisories":{"drupal/core":[{"advisoryId":"SA-CORE-2026-014","title":"Remote code | execution","link":"https://example.org/sa"}],
+"symfony/yaml":{"0":{"advisoryId":"PKSA-abc","title":"Parser","link":""}}}}
+JSON
+cat > "$fixtures/trivy.json" <<'JSON'
+{"Results":[{"Vulnerabilities":[{"VulnerabilityID":"CVE-2026-1","PkgName":"musl","Severity":"HIGH","InstalledVersion":"1","FixedVersion":"2"}]}]}
+JSON
+assert_eq "" "$(python3 "$REPORT" "$fixtures/clean-audit.json" "$fixtures/clean-trivy.json" image:1)" "report: clean scans print nothing"
+report="$(python3 "$REPORT" "$fixtures/audit.json" "$fixtures/trivy.json" image:1)"
+assert_contains "$report" "image:1" "report: names the image"
+assert_contains "$report" "[SA-CORE-2026-014](https://example.org/sa)" "report: links a Composer advisory"
+assert_contains "$report" "Remote code \\| execution" "report: a pipe can't break the table"
+assert_contains "$report" "PKSA-abc" "report: reads an advisory list Composer returned as an object"
+assert_contains "$report" "CVE-2026-1" "report: includes the image scan"
+assert_eq "$report" "$(python3 "$REPORT" "$fixtures/audit.json" "$fixtures/trivy.json" image:1)" "report: the same findings give the same text"
+composer_only="$(python3 "$REPORT" "$fixtures/audit.json" "$fixtures/clean-trivy.json" image:1)"
+assert_not_contains "$composer_only" "Image scan" "report: leaves out an empty section"
+rm -rf "$fixtures"
+
 echo "workflow: file"
 if [[ ! -f "$WORKFLOW" ]]; then
   fail "docker-publish.yml exists"; finish; exit 1
