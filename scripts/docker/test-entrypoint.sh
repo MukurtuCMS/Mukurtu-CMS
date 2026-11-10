@@ -301,6 +301,96 @@ if [[ "$mail_json" != *"admin@example.org"* || "$mail_latest" != *"Return-Path: 
 fi
 docker rm -f "$NEW_SITE" "$DB2" "$MAIL" >/dev/null 2>&1
 
+echo "entrypoint: mounted modules and themes, and the missing-code check"
+# A custom module and a sub-theme, mounted read-only into the folders docs/docker.md
+# names, turned on, then left out on the next start. The site from the fresh install
+# is stopped, so its database and volumes are reused.
+EXT="$(mktemp -d)"
+CLEANUP_DIRS+=("$EXT")
+mkdir -p "$EXT/modules/hello_site/src/Controller" "$EXT/themes/hello_theme"
+cat > "$EXT/modules/hello_site/hello_site.info.yml" <<'EOF'
+name: Hello site
+type: module
+core_version_requirement: ^11
+EOF
+cat > "$EXT/modules/hello_site/hello_site.routing.yml" <<'EOF'
+hello_site.page:
+  path: /hello-site
+  defaults:
+    _controller: \Drupal\hello_site\Controller\HelloController::page
+  requirements:
+    _access: 'TRUE'
+EOF
+cat > "$EXT/modules/hello_site/src/Controller/HelloController.php" <<'EOF'
+<?php
+
+namespace Drupal\hello_site\Controller;
+
+class HelloController {
+  public function page() {
+    return ['#markup' => 'hello-site-probe'];
+  }
+}
+EOF
+cat > "$EXT/themes/hello_theme/hello_theme.info.yml" <<'EOF'
+name: Hello theme
+type: theme
+base theme: mukurtu_v4
+core_version_requirement: ^11
+EOF
+chmod -R a+rX "$EXT"
+MOUNTS=(-v "$EXT/modules:/var/www/html/web/modules/custom:ro" -v "$EXT/themes:/var/www/html/web/themes/custom:ro")
+SITE_VOLUMES=(-v "$SITE_PRIV:/var/www/files/private" -v "$SITE_PUB:/var/www/files/public")
+EXT_SITE="mukurtu-test-ext-$RUN_ID"
+CLEANUP_CONTAINERS+=("$EXT_SITE")
+ext_up() { # ext_up <docker run args...>: start the site on the fresh install's data, wait for the login page
+  docker rm -f "$EXT_SITE" >/dev/null 2>&1
+  docker run -d --name "$EXT_SITE" --network "$NET" "${COMMON_ENV[@]}" "${SITE_VOLUMES[@]}" "$@" "$FULL" >/dev/null
+  for _ in $(seq 1 120); do
+    [[ "$(docker inspect -f '{{.State.Running}}' "$EXT_SITE")" == true ]] || return 1
+    docker exec "$EXT_SITE" curl -sf -H 'Host: test.example.org' -o /dev/null http://127.0.0.1:8080/user/login 2>/dev/null && return 0
+    sleep 2
+  done
+  return 1
+}
+ext_code() { docker exec "$EXT_SITE" curl -s -o /dev/null -w '%{http_code}' --max-time 20 -H 'Host: test.example.org' "http://127.0.0.1:8080$1"; }
+
+if ext_up "${MOUNTS[@]}"; then pass "the site starts with the custom folders mounted"; else fail "the site starts with the custom folders mounted"; docker logs "$EXT_SITE" 2>&1 | tail -20; fi
+docker exec "$EXT_SITE" drush pm:install hello_site --yes >/dev/null 2>&1
+docker exec "$EXT_SITE" drush theme:install hello_theme --yes >/dev/null 2>&1
+assert_eq "200" "$(ext_code /hello-site)" "a mounted custom module can be turned on, and its page works"
+assert_contains "$(sql "select data from config where name='core.extension'")" "hello_theme" "a mounted sub-theme can be turned on"
+docker rm -f "$EXT_SITE" >/dev/null
+
+# An info file among the uploaded files must not count as the module's code.
+docker run --rm --user 1000 --entrypoint sh "${SITE_VOLUMES[@]}" "$FULL" -c 'printf "name: Fake\ntype: module\n" > /var/www/files/public/hello_site.info.yml'
+extension_before="$(sql "select data from config where name='core.extension'")"
+updates_before="$(sql "select count(*) from key_value where collection='system.schema'")"
+out="$(run_to_exit "$FULL" "${COMMON_ENV[@]}" "${SITE_VOLUMES[@]}")"
+[[ "$out" =~ ^EXIT=[1-9][0-9]* ]] && pass "missing code: the container stops with an error" || fail "missing code: the container stops with an error (got ${out%%$'\n'*})"
+assert_contains "$out" "module hello_site" "missing code: the message names the module"
+assert_contains "$out" "theme hello_theme" "missing code: the message names the theme"
+assert_contains "$out" "\"Adding modules and themes\" in docs/docker.md" "missing code: the message points to the docs"
+assert_not_contains "$out" "running database updates" "missing code: database updates don't run"
+assert_eq "$extension_before" "$(sql "select data from config where name='core.extension'")" "missing code: the enabled modules and themes are unchanged"
+assert_eq "$updates_before" "$(sql "select count(*) from key_value where collection='system.schema'")" "missing code: the schema records are unchanged"
+out="$(run_to_exit "$FULL" "${COMMON_ENV[@]}" "${SITE_VOLUMES[@]}" -e MUKURTU_RUN_UPDATES=false)"
+assert_contains "$out" "module hello_site" "missing code: the check also runs with MUKURTU_RUN_UPDATES=false"
+
+# A release that removed a module on purpose lists it in the profile, and its update
+# hook takes it out of core.extension. The check must not stop that release.
+REMOVED_IMAGE="mukurtu-test:removed-$RUN_ID"
+printf 'FROM %s\nUSER root\nRUN sed -i "s/^mukurtu_removed_extensions: \\[\\]$/mukurtu_removed_extensions: [hello_site]/" /var/www/html/web/profiles/mukurtu/mukurtu.info.yml && grep -q "^mukurtu_removed_extensions: \\[hello_site\\]$" /var/www/html/web/profiles/mukurtu/mukurtu.info.yml\nUSER mukurtu\n' "$FULL" \
+  | docker build -q -t "$REMOVED_IMAGE" - >/dev/null 2>&1 && pass "an image that lists hello_site as removed builds" || fail "an image that lists hello_site as removed builds"
+out="$(run_to_exit "$REMOVED_IMAGE" "${COMMON_ENV[@]}" "${SITE_VOLUMES[@]}")"
+assert_not_contains "$out" "module hello_site" "a module the profile lists as removed doesn't stop the start"
+assert_contains "$out" "theme hello_theme" "the other missing theme still stops it"
+docker rmi -f "$REMOVED_IMAGE" >/dev/null 2>&1
+
+if ext_up "${MOUNTS[@]}"; then pass "with the code back, the site starts again"; else fail "with the code back, the site starts again"; docker logs "$EXT_SITE" 2>&1 | tail -20; fi
+assert_eq "200" "$(ext_code /hello-site)" "with the code back, the custom module's page works again"
+docker rm -f "$EXT_SITE" >/dev/null
+
 echo "entrypoint: install in another language"
 LOCALE_DB="mukurtu-test-localedb-$RUN_ID"
 LOCALE_SITE="mukurtu-test-localesite-$RUN_ID"

@@ -173,3 +173,9 @@ dependencies:
 
 themes:
   - mukurtu_v4
+
+# Modules and themes a release removed from Mukurtu, each with an update hook
+# that takes it out of core.extension. The container image's startup check
+# doesn't stop for these. See "Removing a module or theme" in
+# docs/update-hooks.md.
+mukurtu_removed_extensions: []

@@ -110,6 +110,7 @@ for tag in "$IMAGE"; do
   check "$tag" "has msmtp" 'msmtp --version'
   check "$tag" "public files dir is writable by the runtime user" 'test -w /var/www/files/public'
   check "$tag" "private files dir is writable by the runtime user" 'test -w /var/www/files/private'
+  check "$tag" "the code folder is not writable by the runtime user" '! test -w /var/www/html && ! test -w /var/www/html/web'
   check "$tag" "web/sites/default/files points at the public volume" 'test "$(readlink /var/www/html/web/sites/default/files)" = /var/www/files/public'
   assert_eq "mukurtu" "$(run_in "$tag" 'id -un')" "$tag runs as user mukurtu"
   assert_eq "1000" "$(run_in "$tag" 'id -u')" "$tag runs as uid 1000"
