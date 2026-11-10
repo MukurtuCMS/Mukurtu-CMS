@@ -482,6 +482,18 @@ function mukurtu_browse_preprocess_block(&$variables) {
   if (isset($variables['content']['search_api_fulltext'])) {
     $variables['content']['search_api_fulltext']['#weight'] = -10.9;
   }
+
+  // These blocks are placed with Twig Tweak's drupal_block(), which moves the
+  // form's attributes to the block's wrapper. Better Exposed Filters reads its
+  // text field minimum length and its media query from the form itself, and
+  // without the length would submit after a single letter, so put those two
+  // back. Copying the others would make it bind its auto-submit to both
+  // elements.
+  foreach (['data-bef-auto-submit-minimum-length', 'data-bef-auto-submit-media-query'] as $attribute) {
+    if (isset($variables['attributes'][$attribute])) {
+      $variables['content']['#attributes'][$attribute] = $variables['attributes'][$attribute];
+    }
+  }
   $is_dictionary = $variables['plugin_id'] === 'views_exposed_filter_block:mukurtu_dictionary-mukurtu_dictionary_block';
 
   if (isset($variables['content']['sort_by'])) {
