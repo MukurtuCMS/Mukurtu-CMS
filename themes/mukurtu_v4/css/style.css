@@ -1521,11 +1521,25 @@ body.consent-popup-opened .klaro_toggle_dialog {
   min-block-size: 12rem;
 }
 
+.media--audio:has(> .field--name-field-media-audio-file):has(> .mukurtu-content-warnings:not(.dismissed)) > :not(.mukurtu-content-warnings) {
+  display: none;
+}
+.media--audio:has(> .field--name-field-media-audio-file):has(> .mukurtu-content-warnings:not(.dismissed)) > .mukurtu-content-warnings {
+  position: relative;
+  inset: auto;
+  -ms-flex-item-align: stretch;
+      align-self: stretch;
+  overflow-y: visible;
+  background-color: rgba(0, 0, 0, 0.9);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .mukurtu-content-warnings {
   position: absolute;
   inset: 0;
   z-index: 10;
-  padding: 1rem;
+  padding: 1rem 1rem 0;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -1563,6 +1577,40 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .splide__track--nav .mukurtu-content-warnings > * {
   display: none;
 }
+.mukurtu-content-warnings--card, a .mukurtu-content-warnings {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  gap: var(--v-space-6xs);
+  padding: var(--v-space-5xs) var(--v-space-5xs) 0;
+}
+
+.mukurtu-content-warnings__card-hint {
+  display: none;
+  margin: 0;
+}
+.mukurtu-content-warnings--card .mukurtu-content-warnings__card-hint, a .mukurtu-content-warnings__card-hint {
+  display: block;
+}
+.mukurtu-content-warnings__card-hint a {
+  color: inherit;
+  text-decoration: underline;
+}
+.mukurtu-content-warnings__card-hint a:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+.mukurtu-content-warnings--card .mukurtu-content-warnings__list,
+a .mukurtu-content-warnings__list,
+a .mukurtu-content-warnings__actions {
+  display: none;
+}
+
+.mukurtu-content-warnings.mukurtu-content-warnings--card .mukurtu-content-warnings__actions {
+  padding-block: 0 var(--v-space-5xs);
+  background: none;
+}
 
 .mukurtu-content-warnings__title {
   margin: 0;
@@ -1581,6 +1629,27 @@ body.consent-popup-opened .klaro_toggle_dialog {
 .mukurtu-content-warnings__list li + li {
   -webkit-margin-before: var(--v-space-5xs);
           margin-block-start: var(--v-space-5xs);
+}
+
+.mukurtu-content-warnings__actions {
+  position: sticky;
+  inset-block-end: 0;
+  -ms-flex-item-align: stretch;
+      align-self: stretch;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding-block: var(--v-space-5xs) 1rem;
+}
+.mukurtu-content-warnings--scrolls .mukurtu-content-warnings__actions {
+  -webkit-padding-before: var(--v-space-4xxs);
+          padding-block-start: var(--v-space-4xxs);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.95) var(--v-space-4xxs));
 }
 
 .mukurtu-content-warnings__dismiss {
@@ -8521,9 +8590,24 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   display: -ms-flexbox;
   display: flex;
   gap: var(--v-space-4xxs);
-  -webkit-box-align: start;
-      -ms-flex-align: start;
-          align-items: start;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+}
+@media (min-width: 48rem) {
+  .dictionary-word__teaser-media {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: start;
+  }
 }
 .dictionary-word__teaser-media .field--name-field-recording {
   -webkit-box-flex: 2;
@@ -8536,6 +8620,12 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
       -ms-flex: 1;
           flex: 1;
   min-inline-size: 0;
+  max-inline-size: 250px;
+}
+@media (min-width: 48rem) {
+  .dictionary-word__teaser-thumbnail {
+    max-inline-size: none;
+  }
 }
 .dictionary-word__teaser-thumbnail img {
   block-size: auto;
