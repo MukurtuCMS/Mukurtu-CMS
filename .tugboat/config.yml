@@ -24,6 +24,12 @@ services:
         - echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/tugboat.ini
         - echo "memory_limit=1024M" >> /usr/local/etc/php/conf.d/tugboat.ini
         - echo "max_input_vars=3000" >> /usr/local/etc/php/conf.d/tugboat.ini
+        # Keep PHP errors out of responses. Startup warnings (such as an
+        # upload over post_max_size) fire before settings.php can switch
+        # display_errors off, and the printed text breaks session start.
+        - echo "display_errors=Off" >> /usr/local/etc/php/conf.d/tugboat.ini
+        - echo "display_startup_errors=Off" >> /usr/local/etc/php/conf.d/tugboat.ini
+        - echo "log_errors=On" >> /usr/local/etc/php/conf.d/tugboat.ini
 
         # Install composer.
         # See https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
