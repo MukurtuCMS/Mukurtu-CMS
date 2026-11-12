@@ -7,8 +7,9 @@ import { ADMIN_STATE } from '~helpers/auth-state';
  * Leaflet-Geoman marks the active drawing or editing mode only with an
  * "active" class on a wrapping div, so modules/mukurtu_core's
  * mukurtu-leaflet-widget.js copies it onto each focusable toolbar button as
- * aria-pressed. It also gives the map container role="region", so its name,
- * "Interactive location map", is announced.
+ * aria-pressed, and makes Space activate the toolbar buttons, which are links
+ * with role="button". It also gives the map container role="region", so its
+ * name, "Interactive location map", is announced.
  *
  * Buttons are found by Geoman's icon classes, not their titles, so the test
  * doesn't depend on the toolbar's wording.
@@ -56,6 +57,44 @@ test.describe('Map toolbar state', () => {
     // Escape leaves the mode.
     await page.keyboard.press('Escape');
     await expect(marker).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('Map toolbar state: Space works like Enter on toolbar buttons', async ({ page }) => {
+    await openMap(page);
+    const drag = toolbarButton(page, 'drag');
+    await drag.focus();
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+
+    await page.keyboard.press('Space');
+    await expect(drag).toHaveAttribute('aria-pressed', 'true');
+    // Space activates the button instead of scrolling the page.
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollBefore);
+
+    await page.keyboard.press('Space');
+    await expect(drag).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('Map toolbar state: finishing or cancelling a shape turns its mode off', async ({ page }) => {
+    await openMap(page);
+    const polygon = toolbarButton(page, 'polygon');
+    const rectangle = toolbarButton(page, 'rectangle');
+
+    // Finish: three clicks on the map, then Enter.
+    await polygon.click();
+    await expect(polygon).toHaveAttribute('aria-pressed', 'true');
+    const box = await page.locator('.leaflet-container').first().boundingBox();
+    if (!box) throw new Error('map has no bounding box');
+    for (const [dx, dy] of [[0.3, 0.5], [0.5, 0.3], [0.6, 0.6]]) {
+      await page.mouse.click(box.x + box.width * dx, box.y + box.height * dy);
+    }
+    await page.keyboard.press('Enter');
+    await expect(polygon).toHaveAttribute('aria-pressed', 'false');
+
+    // Cancel: Geoman's Cancel action leaves the mode.
+    await rectangle.click();
+    await expect(rectangle).toHaveAttribute('aria-pressed', 'true');
+    await page.locator('.button-container:has(.leaflet-pm-icon-rectangle) a.action-cancel').click();
+    await expect(rectangle).toHaveAttribute('aria-pressed', 'false');
   });
 
   test('Map toolbar state: the map is a named region', async ({ page }) => {

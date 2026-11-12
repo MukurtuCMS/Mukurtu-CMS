@@ -116,6 +116,20 @@
         map.getContainer().setAttribute('aria-describedby', instructionsId);
       }
 
+      // Geoman's toolbar buttons and actions are links with role="button",
+      // so only Enter activates them and Space scrolls the page. Make Space
+      // work too, as it does on a real button (#2687). The handler is
+      // namespaced and removed first, because this function runs again when
+      // the map is re-initialized and a second handler would toggle twice.
+      $(map.getContainer())
+        .off('keydown.mukurtuGeomanSpace')
+        .on('keydown.mukurtuGeomanSpace', 'a.leaflet-buttons-control-button, a.leaflet-pm-action', function (event) {
+          if (event.key === ' ' && !event.repeat) {
+            event.preventDefault();
+            this.click();
+          }
+        });
+
       Drupal.mukurtuLabelGeomanToolbar(map);
       Drupal.mukurtuSyncGeomanToolbarState(map);
       map.on('pm:globaldrawmodetoggled pm:globaleditmodetoggled pm:globaldragmodetoggled pm:globalremovalmodetoggled pm:globalcutmodetoggled pm:globalrotatemodetoggled', function () {
