@@ -89,6 +89,26 @@ class EntityReference extends MukurtuImportFieldProcessPluginBase implements Con
       return [['plugin' => 'get', 'source' => $source]];
     }
 
+    // A term's parent can be on a later row of the same file, so it gets its
+    // own lookup, which waits for that row (#2520).
+    if ($field_config->getTargetEntityTypeId() === 'taxonomy_term' && $field_config->getName() === 'parent') {
+      $target_bundles = array_keys($field_config->getSetting('handler_settings')['target_bundles'] ?? []);
+      if (count($target_bundles) === 1) {
+        return [
+          [
+            'plugin' => 'explode',
+            'source' => $source,
+            'delimiter' => $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER,
+            'strict' => FALSE,
+          ],
+          [
+            'plugin' => 'mukurtu_term_parent',
+            'vid' => reset($target_bundles),
+          ],
+        ];
+      }
+    }
+
     $cardinality = $field_config->getFieldStorageDefinition()->getCardinality();
     $multivalue_delimiter = $context['multivalue_delimiter'] ?? self::MULTIVALUE_DELIMITER;
     $ref_type = $field_config->getSetting('target_type');

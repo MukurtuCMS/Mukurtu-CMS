@@ -112,15 +112,21 @@ class MukurtuMediaContentWarnings {
    */
   protected function buildMediaContentWarnings(PeopleInterface $entity): array {
     $build = [];
-    CacheableMetadata::createFromRenderArray($build)
+    $media_tags = $this->getMediaTagsWithAncestors($entity);
+    $cacheability = CacheableMetadata::createFromRenderArray($build)
       ->addCacheableDependency($this->contentWarningSettings)->addCacheableDependency($entity)
        // For deceased content warnings, they are shown based on the presence of
        // a person node with the same people tag as the media item, so we're
        // potentially dependent on any change to a person node.
-      ->addCacheTags(['node_list:person'])
-      ->applyTo($build);
+      ->addCacheTags(['node_list:person']);
+    // Moving a media tag, or one of its ancestors, can change which warnings
+    // apply, even when none applies yet.
+    foreach ($media_tags as $media_tag) {
+      $cacheability->addCacheableDependency($media_tag);
+    }
+    $cacheability->applyTo($build);
     $people_warnings = $this->buildPeopleWarnings($entity);
-    $taxonomy_warnings = $this->buildTaxonomyWarnings($entity);
+    $taxonomy_warnings = $this->buildTaxonomyWarnings(array_keys($media_tags));
     if (empty($people_warnings) && empty($taxonomy_warnings)) {
       return $build;
     }
@@ -173,36 +179,51 @@ class MukurtuMediaContentWarnings {
   }
 
   /**
-   * Build a render array of taxonomy warnings for the given entity.
+   * Gets an entity's media tags and every term they're nested under.
+   *
+   * A warning on a term applies to media tagged with any term nested under it
+   * (#2524), so a new nested term is covered with no settings change.
    *
    * @param \Drupal\mukurtu_core\Entity\PeopleInterface $entity
    *   A content entity that has people associated with it.
    *
-   * @return array
-   *   Render array of taxonomy warnings.
+   * @return \Drupal\taxonomy\TermInterface[]
+   *   The terms, keyed by term ID.
    */
-  protected function buildTaxonomyWarnings(PeopleInterface $entity): array {
-    $taxonomy_warnings = $this->contentWarningSettings->get('taxonomy_warnings');
-    if (!$taxonomy_warnings) {
+  protected function getMediaTagsWithAncestors(PeopleInterface $entity): array {
+    if (!$this->contentWarningSettings->get('taxonomy_warnings')) {
       return [];
     }
-    // If we have taxonomy warnings in config, we need to iterate through them
-    // all and see if the media item's media tags field matches any of the terms
-    //we see here.
-    $media_tags = $entity->get('field_media_tags')->referencedEntities();
-    // Make a quick list of tids that the media tags field has.
-    $tids = array_map(fn(TermInterface $media_tag) => $media_tag->id(), $media_tags);
+    /** @var \Drupal\taxonomy\TermStorageInterface $storage */
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
+    $terms = [];
+    foreach ($entity->get('field_media_tags')->referencedEntities() as $media_tag) {
+      $terms += $storage->loadAllParents($media_tag->id());
+    }
+    return $terms;
+  }
 
+  /**
+   * Build a render array of taxonomy warnings for some media tags.
+   *
+   * @param array $tids
+   *   The IDs of the media tags and the terms they're nested under.
+   *
+   * @return array
+   *   Render array of taxonomy warnings. Warnings with the same text show once.
+   */
+  protected function buildTaxonomyWarnings(array $tids): array {
+    $taxonomy_warnings = $this->contentWarningSettings->get('taxonomy_warnings') ?: [];
     $warnings = [];
     foreach ($taxonomy_warnings as $warning) {
-      if (in_array($warning['term'], $tids)) {
-        $warnings[] = [
+      if (in_array($warning['term'], $tids) && !isset($warnings[$warning['warning']])) {
+        $warnings[$warning['warning']] = [
           '#theme' => 'mukurtu_content_warning',
           '#warning' => $warning['warning'],
         ];
       }
     }
-    return $warnings;
+    return array_values($warnings);
   }
 
   /**

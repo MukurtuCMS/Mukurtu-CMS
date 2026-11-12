@@ -529,3 +529,59 @@ function mukurtu_import_update_40404(): ?string {
 
   return (string) t('Mapped the Language code column in the default language import template.');
 }
+
+/**
+ * Use semicolons between values in the default taxonomy import templates.
+ */
+function mukurtu_import_update_40406(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // The taxonomy templates split multiple values on "||", but CSV export
+  // joins them with ";", so a taxonomy export didn't import back with its own
+  // template (#2520). config/install now ships ";". As in
+  // mukurtu_import_update_40402(), only the shipped templates are touched, by
+  // id, and a template a site switched to another delimiter keeps it.
+  // Numbered 40406 because milestone 11 uses 40405.
+  $vids = [
+    'category',
+    'community_type',
+    'contributor',
+    'creator',
+    'format',
+    'interpersonal_relationship',
+    'keywords',
+    'language',
+    'location',
+    'media_tag',
+    'people',
+    'place_type',
+    'publisher',
+    'subject',
+    'type',
+    'word_type',
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy');
+  $updated = 0;
+
+  foreach ($vids as $vid) {
+    /** @var \Drupal\mukurtu_import\Entity\MukurtuImportStrategy|null $strategy */
+    $strategy = $storage->load("taxonomy_{$vid}_all_fields");
+    if (!$strategy || $strategy->getConfig('multivalue_delimiter') !== '||') {
+      continue;
+    }
+    $strategy->setConfig('multivalue_delimiter', ';');
+    $strategy->save();
+    $updated++;
+  }
+
+  if (!$updated) {
+    return NULL;
+  }
+
+  return (string) \Drupal::translation()->formatPlural($updated,
+    'Set 1 default taxonomy import template to separate multiple values with ";", matching CSV exports.',
+    'Set @count default taxonomy import templates to separate multiple values with ";", matching CSV exports.'
+  );
+}

@@ -124,6 +124,25 @@ class CombinedTermLabelFormatterTest extends EntityKernelTestBase {
   }
 
   /**
+   * Terms with the same name in one vocabulary are different terms.
+   *
+   * Two places called Springfield, nested under different regions, both
+   * show, while the same name from another vocabulary still combines.
+   */
+  public function testSameVocabularyNamesStaySeparate(): void {
+    $illinois = $this->createTerm('people', 'Springfield');
+    $oregon = $this->createTerm('people', 'Springfield');
+    $creator = $this->createTerm('creator', 'Springfield');
+
+    $elements = $this->buildField([$illinois, $oregon, $creator]);
+
+    $this->assertSame([0, 1], array_keys($elements));
+    $this->assertSame($illinois->toUrl()->toString(), $elements[0]['#url']->toString());
+    $this->assertSame($oregon->toUrl()->toString(), $elements[1]['#url']->toString());
+    $this->assertContains('taxonomy_term:' . $creator->id(), $elements[0]['#cache']['tags']);
+  }
+
+  /**
    * With linking turned off, the combined entry is plain text.
    */
   public function testUnlinkedOutput(): void {
