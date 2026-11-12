@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_import\ParagraphImportAccess;
 
 /**
  * Provides shared helper methods for import forms.
@@ -85,14 +86,16 @@ trait ImportFormTrait {
     }
 
     $options = [];
-    if (count($bundle_info[$entity_type_id]) > 1) {
-      $options = [-1 => $this->t('None: Base Fields Only')];
-    }
-
     foreach ($bundle_info[$entity_type_id] as $bundle => $info) {
       if ($this->userCanCreateEntity($entity_type_id, $bundle)) {
         $options[$bundle] = $info['label'] ?? $bundle;
       }
+    }
+
+    // Base fields only is a choice among sub-types, so it isn't offered when
+    // the user can't create any of them.
+    if ($options && count($bundle_info[$entity_type_id]) > 1) {
+      $options = [-1 => $this->t('None: Base Fields Only')] + $options;
     }
     return $options;
   }
@@ -237,6 +240,12 @@ trait ImportFormTrait {
     // narrowly scoped import permission.
     if ($entity_type_id === 'user') {
       return $account->hasPermission('import mukurtu users');
+    }
+
+    // New paragraphs pass create access for anyone, so they need the right
+    // to create the content they belong on.
+    if ($entity_type_id === 'paragraph' && !ParagraphImportAccess::canCreateHost($this->entityTypeManager, $this->entityBundleInfo, $account)) {
+      return FALSE;
     }
 
     return $this->entityTypeManager->getAccessControlHandler($entity_type_id)->createAccess($bundle, $account);

@@ -26,6 +26,10 @@ function mukurtu_import_migrate_destination_info_alter(array &$definitions) {
   if (isset($definitions['entity:taxonomy_term'])) {
     $definitions['entity:taxonomy_term']['class'] = ProtocolAwareEntityContent::class;
   }
+  // Paragraphs get the same access checks as the content they belong on.
+  if (isset($definitions['entity:paragraph'])) {
+    $definitions['entity:paragraph']['class'] = ProtocolAwareEntityContent::class;
+  }
 }
 
 /**
