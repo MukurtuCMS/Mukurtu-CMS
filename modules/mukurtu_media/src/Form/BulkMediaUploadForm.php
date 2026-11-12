@@ -89,6 +89,9 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     $month = date('m');
 
     $form['#attached']['library'][] = 'mukurtu_media/bulk_upload_dropzone';
+    // Upload each file in its own request, so the maximum file size applies
+    // to each file rather than to all of them together.
+    $form['#attached']['library'][] = 'mukurtu_core/sequential-upload';
 
     $form['dropzone'] = [
       '#type' => 'container',
@@ -123,6 +126,9 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       '#upload_location' => $config['uri_scheme'] . "://{$year}-{$month}",
       '#accept' => implode(',', array_map(fn($ext) => '.' . $ext, explode(' ', $config['extensions']))),
       '#after_build' => [[static::class, 'setFileInputAccept']],
+      '#attributes' => [
+        'class' => ['js-mukurtu-sequential-upload'],
+      ],
       '#required' => TRUE,
     ];
 

@@ -145,6 +145,18 @@ reset-refused-upload:
     - core/drupal.ajax
     - core/drupal.announce
 
+sequential-upload:
+  version: 1.x
+  js:
+    js/sequential-upload.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.announce
+    - file/drupal.file
+
 focus-file-field:
   version: 1.x
   js:

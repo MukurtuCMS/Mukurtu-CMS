@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import\Form;
 
+use Drupal\Component\Utility\Environment;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\file\Element\ManagedFile;
 use Drupal\Core\Link;
@@ -43,6 +45,10 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       )->toString(),
     ];
 
+    // Upload each file in its own request, so the server's upload limit
+    // applies to each file rather than to all of them together.
+    $form['#attached']['library'][] = 'mukurtu_core/sequential-upload';
+
     $form['metadata_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Metadata Files'),
@@ -56,19 +62,23 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       ],
       '#attributes' => [
         'name' => 'import_file_upload',
+        'class' => ['js-mukurtu-sequential-upload'],
       ],
     ];
 
     $form['binary_files'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
-      '#description' => $this->t('Add your media & binary files here. You can reference these files by file name in your metadata files.'),
+      '#description' => $this->t('Add your media & binary files here. You can reference these files by file name in your metadata files.') . ' ' . $this->t('Maximum size per file: @size.', [
+        '@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize()),
+      ]),
       '#multiple' => TRUE,
       '#default_value' => $this->getBinaryFiles(),
       '#upload_location' => $this->getBinaryUploadLocation(),
       '#upload_validators' => $this->getAllowedMediaExtensionsValidator(),
       '#attributes' => [
         'name' => 'import_file_upload',
+        'class' => ['js-mukurtu-sequential-upload'],
       ],
     ];
 
