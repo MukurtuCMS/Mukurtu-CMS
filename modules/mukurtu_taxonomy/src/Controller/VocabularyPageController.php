@@ -12,8 +12,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Shows a public page listing a vocabulary's terms (#2612).
  *
- * Nested terms show under their parents. From TOOLS_MINIMUM terms the page adds
- * a filter box and letter links, and short vocabularies stay a plain list.
+ * Terms show as cards in columns, which suit groups of very different heights.
+ * A mostly nested vocabulary gets a card per top-level term, and a long flat one
+ * gets a card per letter. A short, mostly flat vocabulary stays a plain list.
+ * From TOOLS_MINIMUM terms the page adds a filter box and letter links.
  */
 class VocabularyPageController extends ControllerBase {
 
@@ -55,13 +57,27 @@ class VocabularyPageController extends ControllerBase {
       $by_parent[(int) reset($term->parents)][] = $term;
     }
     $items = $this->buildItems($by_parent);
-    $tools = count($terms) >= static::TOOLS_MINIMUM;
+    // Terms under an unpublished parent aren't listed, so aren't counted.
+    $total = $this->countItems($items);
+    $tools = $total >= static::TOOLS_MINIMUM;
+
+    // Nesting is the useful grouping only when most terms are nested. With a
+    // few nested terms, a card per top-level term would be mostly empty cards.
+    $groups = [];
+    if ($total - count($items) >= count($items) && $items) {
+      $groups = $this->groupByParent($items);
+    }
+    elseif ($tools) {
+      $groups = $this->groupByLetter($items);
+    }
 
     return [
       '#theme' => 'mukurtu_vocabulary_page',
       '#description' => $taxonomy_vocabulary->getDescription(),
-      '#items' => $tools ? [] : $items,
-      '#groups' => $tools ? $this->groupByLetter($items) : [],
+      '#items' => $groups ? [] : $items,
+      '#groups' => $groups,
+      '#letters' => $tools ? $this->getLetterLinks($groups) : [],
+      '#tools' => $tools,
       '#attached' => ['library' => ['mukurtu_taxonomy/vocabulary-page']],
       '#cache' => [
         'contexts' => ['languages:language_content', 'languages:language_interface', 'user.permissions'],
@@ -97,31 +113,82 @@ class VocabularyPageController extends ControllerBase {
   }
 
   /**
-   * Groups top-level items by the first letter of their name.
-   *
-   * Only letters in use are listed, because many Mukurtu vocabularies hold
-   * names in languages with their own alphabets.
+   * Counts items and everything nested under them.
+   */
+  protected function countItems(array $items): int {
+    return array_reduce($items, fn ($count, $item) => $count + 1 + $this->countItems($item['below']), 0);
+  }
+
+  /**
+   * Gets the first letter of a name.
+   */
+  protected function firstLetter(string $name): string {
+    return mb_strtoupper(mb_substr($name, 0, 1));
+  }
+
+  /**
+   * Makes a card for each top-level item, holding the terms nested under it.
    *
    * @return array
-   *   Groups with a letter, id and items.
+   *   Cards with a heading, url, letter, id and items.
+   */
+  protected function groupByParent(array $items): array {
+    $groups = [];
+    foreach ($items as $item) {
+      $groups[] = [
+        'heading' => $item['name'],
+        'url' => $item['url'],
+        'letter' => $this->firstLetter($item['name']),
+        // Numbered, since a letter or a name may not be valid in an ID.
+        'id' => 'vocabulary-group-' . (count($groups) + 1),
+        'items' => $item['below'],
+      ];
+    }
+    return $groups;
+  }
+
+  /**
+   * Makes a card for each first letter of the top-level items.
+   *
+   * @return array
+   *   Cards with a heading, url, letter, id and items.
    */
   protected function groupByLetter(array $items): array {
     $letters = [];
     foreach ($items as $item) {
-      $letters[mb_strtoupper(mb_substr($item['name'], 0, 1))][] = $item;
+      $letters[$this->firstLetter($item['name'])][] = $item;
     }
     ksort($letters, SORT_STRING);
 
     $groups = [];
     foreach ($letters as $letter => $letter_items) {
       $groups[] = [
+        'heading' => (string) $letter,
+        'url' => NULL,
         'letter' => (string) $letter,
-        // Numbered, since a letter may not be valid in an ID.
-        'id' => 'vocabulary-letter-' . (count($groups) + 1),
+        'id' => 'vocabulary-group-' . (count($groups) + 1),
         'items' => $letter_items,
       ];
     }
     return $groups;
+  }
+
+  /**
+   * Gets a link to the first card for each letter in use.
+   *
+   * Only letters in use are listed, because many Mukurtu vocabularies hold
+   * names in languages with their own alphabets.
+   *
+   * @return array
+   *   Links with a letter and an id, ordered by letter.
+   */
+  protected function getLetterLinks(array $groups): array {
+    $letters = [];
+    foreach ($groups as $group) {
+      $letters[$group['letter']] ??= ['letter' => $group['letter'], 'id' => $group['id']];
+    }
+    ksort($letters, SORT_STRING);
+    return array_values($letters);
   }
 
 }
