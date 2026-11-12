@@ -952,6 +952,42 @@ function mukurtu_core_update_40224(): string {
 }
 
 /**
+ * Lets Mukurtu Managers open the Google Tag, cookie consent, Not Found page, and bot protection settings linked from the dashboard.
+ */
+function mukurtu_core_update_40226(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // These dashboard links were visible only to administrators, because the
+  // manager role lacked the permission each settings page checks. A site may
+  // have uninstalled one of the providing modules, and granting a permission
+  // nothing defines throws on save, so each is granted only if it exists.
+  $manager = Role::load('mukurtu_manager');
+  if (!$manager) {
+    return;
+  }
+  $available = \Drupal::service('user.permissions')->getPermissions();
+  $changed = FALSE;
+  foreach ([
+    'administer altcha',
+    'administer facet bot blocker',
+    'administer google_tag_container',
+    'administer honeypot',
+    'administer klaro',
+    'administer mukurtu not found page',
+    'administer turnstile',
+  ] as $permission) {
+    if (isset($available[$permission]) && !$manager->hasPermission($permission)) {
+      $manager->grantPermission($permission);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $manager->save();
+  }
+}
+
+/**
  * Show categories only to people who can see their content, and unlink terms.
  */
 function mukurtu_core_update_40227(): string {
