@@ -54,6 +54,21 @@
   };
 
   /**
+   * Tells screen readers which Geoman mode is on (WCAG 4.1.2, #2687).
+   * Geoman marks the active mode only with an "active" class on the
+   * wrapping div, so copy that onto the focusable button as aria-pressed.
+   * Every toolbar button toggles a mode, so each one gets the attribute.
+   */
+  Drupal.mukurtuSyncGeomanToolbarState = function (map) {
+    $(map.getContainer()).find('.leaflet-pm-toolbar .button-container').each(function () {
+      const $button = $(this).find('a.leaflet-buttons-control-button').first();
+      if ($button.length) {
+        $button.attr('aria-pressed', $(this).hasClass('active') ? 'true' : 'false');
+      }
+    });
+  };
+
+  /**
    * Set the leaflet map object.
    */
   Drupal.Leaflet_Widget.prototype.set_leaflet_widget_map = function (map) {
@@ -92,14 +107,20 @@
 
       const containerId = $(map.getContainer()).attr('id');
       const instructionsId = containerId + '-keyboard-instructions';
+      // A name on a div with no role is often not announced, so make the
+      // map a region. Not "application": that would also turn off browse
+      // mode for the toolbar and points inside the map (#2687).
+      map.getContainer().setAttribute('role', 'region');
       map.getContainer().setAttribute('aria-label', Drupal.t('Interactive location map'));
       if ($('#' + instructionsId).length) {
         map.getContainer().setAttribute('aria-describedby', instructionsId);
       }
 
       Drupal.mukurtuLabelGeomanToolbar(map);
+      Drupal.mukurtuSyncGeomanToolbarState(map);
       map.on('pm:globaldrawmodetoggled pm:globaleditmodetoggled pm:globaldragmodetoggled pm:globalremovalmodetoggled pm:globalcutmodetoggled pm:globalrotatemodetoggled', function () {
         Drupal.mukurtuLabelGeomanToolbar(map);
+        Drupal.mukurtuSyncGeomanToolbarState(map);
       });
 
       // Move the location-description input's onblur handler to a
