@@ -31,7 +31,16 @@ test.describe('Map toolbar labels', () => {
     const toolbar = page.locator('.leaflet-pm-toolbar').first();
     await expect(toolbar).toBeVisible();
 
-    for (const title of ['Draw marker', 'Draw polygon', 'Draw line', 'Edit map points', 'Move map points', 'Remove map points']) {
+    for (const title of [
+      'Draw marker',
+      'Draw line',
+      'Draw rectangle',
+      'Draw polygon',
+      'Draw circle',
+      'Edit map points',
+      'Move map points',
+      'Remove map points',
+    ]) {
       const container = page.locator(`.button-container[title="${title}"]`).first();
       await expect(container, `toolbar button titled "${title}"`).toHaveCount(1);
       await expect(container.locator('a.leaflet-buttons-control-button')).toHaveAttribute('aria-label', title);
