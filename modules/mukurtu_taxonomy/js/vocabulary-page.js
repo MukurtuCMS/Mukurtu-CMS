@@ -1,13 +1,17 @@
 /**
  * @file
- * Filters a long vocabulary page as you type, and collapses nested terms.
+ * Filters a long vocabulary page as you type, collapses nested terms, and
+ * shortens long letter cards.
  *
- * The script adds the expand and collapse buttons itself, so with JavaScript
- * off every term stays visible.
+ * The script adds the buttons itself, so with JavaScript off every term stays
+ * visible.
  */
 
 (function (Drupal, once) {
   'use strict';
+
+  // As on the term page's side panel (term-panel.js).
+  const VISIBLE_TERMS = 10;
 
   // Matches ignore case and accents, so "e" finds "é".
   function normalize(text) {
@@ -90,6 +94,46 @@
   }
 
   /**
+   * Shortens a long letter card to its first terms, with a See more button.
+   *
+   * Matches the term page's side panel (term-panel.js).
+   *
+   * @return {object|null}
+   *   The card's hidden terms, button and whether it's been opened, or null
+   *   if the card is short enough already.
+   */
+  function shortenCard(group) {
+    const list = group.querySelector(':scope > ul');
+    const extra = list ? Array.from(list.children).slice(VISIBLE_TERMS) : [];
+    if (!extra.length) {
+      return null;
+    }
+    const card = {extra: extra, open: false};
+    card.button = addButton(Drupal.t('See more'), function () {
+      card.open = true;
+      showCard(card);
+      // The button goes, so focus moves to the first term it revealed.
+      extra[0].querySelector('a').focus();
+      card.button.remove();
+    });
+    card.button.classList.add('vocabulary-page__more');
+    // Says which letter, since every long card has one of these buttons.
+    const heading = group.querySelector(':scope > h2');
+    if (heading && heading.id) {
+      card.button.setAttribute('aria-describedby', heading.id);
+    }
+    list.after(card.button);
+    showCard(card);
+    return card;
+  }
+
+  function showCard(card) {
+    card.extra.forEach(function (term) {
+      term.hidden = !card.open;
+    });
+  }
+
+  /**
    * Adds the filter and the expand and collapse controls to a vocabulary page.
    */
   Drupal.behaviors.mukurtuVocabularyPage = {
@@ -123,6 +167,13 @@
           );
           letters.after(expandControls);
         }
+
+        // Letter cards have no term of their own in the heading. Cards in a
+        // nested vocabulary collapse their branches instead.
+        const cards = Array.from(groups)
+          .filter(function (group) { return !group.querySelector('[data-vocabulary-card-term]'); })
+          .map(shortenCard)
+          .filter(Boolean);
 
         // Waits for a pause in typing, so screen readers aren't interrupted by
         // a new count for every letter.
@@ -158,6 +209,14 @@
             branch.button.hidden = query !== '';
             if (!query) {
               showBranch(branch);
+            }
+          });
+          // Filtering shows every match, however far down its card. Clearing
+          // it shortens the cards the visitor hadn't opened again.
+          cards.forEach(function (card) {
+            card.button.hidden = query !== '';
+            if (!query) {
+              showCard(card);
             }
           });
           announce(query, matches);

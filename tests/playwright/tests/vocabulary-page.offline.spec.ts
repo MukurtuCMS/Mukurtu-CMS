@@ -156,3 +156,58 @@ test.describe('Vocabulary page script', () => {
     await expect(page.locator('[data-vocabulary-status]')).toHaveText('0 of 8 terms match.');
   });
 });
+
+test.describe('Long letter cards', () => {
+  // Letter cards as mukurtu-vocabulary-page.html.twig renders them: the
+  // heading has an id and no link.
+  const letterCard = (id: number, letter: string, count: number) =>
+    `<section data-vocabulary-group><h2 id="vocabulary-letter-${id}">${letter}</h2>${list(
+      ...Array.from({ length: count }, (_, i) => term(`${letter}${String(i + 1).padStart(2, '0')}`)),
+    )}</section>`;
+  const LONG = letterCard(1, 'A', 14) + letterCard(2, 'B', 10);
+
+  test('show their first 10 terms and a See more button', async ({ page }) => {
+    await load(page, LONG);
+    const terms = await visibleTerms(page);
+    expect(terms.filter((name) => name.startsWith('A'))).toHaveLength(10);
+    expect(terms.filter((name) => name.startsWith('B'))).toHaveLength(10);
+    const more = page.getByRole('button', { name: 'See more' });
+    await expect(more).toHaveCount(1);
+    await expect(more).toHaveAttribute('aria-describedby', 'vocabulary-letter-1');
+  });
+
+  test('See more shows the rest and moves focus to the first one', async ({ page }) => {
+    await load(page, LONG);
+    await page.getByRole('button', { name: 'See more' }).click();
+    expect((await visibleTerms(page)).filter((name) => name.startsWith('A'))).toHaveLength(14);
+    await expect(page.getByRole('link', { name: 'A11' })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'See more' })).toHaveCount(0);
+  });
+
+  test('filtering finds hidden terms, and clearing shortens the card again', async ({ page }) => {
+    await load(page, LONG);
+    const filter = page.getByLabel('Filter terms');
+    await filter.fill('a13');
+    expect(await visibleTerms(page)).toEqual(['A13']);
+    await expect(page.getByRole('button', { name: 'See more' })).toBeHidden();
+
+    await filter.fill('');
+    expect((await visibleTerms(page)).filter((name) => name.startsWith('A'))).toHaveLength(10);
+    await expect(page.getByRole('button', { name: 'See more' })).toBeVisible();
+  });
+
+  test('an opened card stays open after filtering', async ({ page }) => {
+    await load(page, LONG);
+    await page.getByRole('button', { name: 'See more' }).click();
+    const filter = page.getByLabel('Filter terms');
+    await filter.fill('a0');
+    await filter.fill('');
+    expect((await visibleTerms(page)).filter((name) => name.startsWith('A'))).toHaveLength(14);
+  });
+
+  test('cards in a nested vocabulary are left whole', async ({ page }) => {
+    await load(page, card('Washington', list(...Array.from({ length: 12 }, (_, i) => term(`Town ${i + 1}`)))));
+    expect(await visibleTerms(page)).toHaveLength(13);
+    await expect(page.getByRole('button', { name: 'See more' })).toHaveCount(0);
+  });
+});
