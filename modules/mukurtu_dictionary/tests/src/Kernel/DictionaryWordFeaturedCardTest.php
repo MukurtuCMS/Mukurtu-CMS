@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\Core\Template\Attribute;
+use Drupal\Core\Theme\ActiveTheme;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
@@ -296,9 +297,16 @@ class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
    * A warned thumbnail on a /dictionary teaser gets the card overlay (#1301).
    */
   public function testTeaserWrapsWarnedThumbnail(): void {
-    // The teaser includes an icon from the active theme's directory.
-    $theme = $this->container->get('theme.initialization')->initTheme('mukurtu_v4');
-    $this->container->get('theme.manager')->setActiveTheme($theme);
+    // The teaser includes an icon from the active theme's directory. The
+    // theme is not installed, so initTheme() would fall back to "core". An
+    // empty engine skips loading a theme extension we don't have; Twig still
+    // loads, since core always includes it.
+    $theme_path = $this->container->get('extension.list.theme')->getPath('mukurtu_v4');
+    $this->container->get('theme.manager')->setActiveTheme(new ActiveTheme([
+      'name' => 'mukurtu_v4',
+      'path' => $theme_path,
+      'engine' => '',
+    ]));
     $context = [
       'content_attributes' => new Attribute(),
       'title_attributes' => new Attribute(),
