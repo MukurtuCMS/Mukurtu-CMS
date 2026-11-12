@@ -49,21 +49,29 @@ class BulkEditGridForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state, ?string $view_id = NULL, ?string $display_id = NULL) {
     $data = $this->selection((string) $view_id, (string) $display_id);
     $columns = $view_id && function_exists('_mukurtu_core_bulk_edit_columns') ? _mukurtu_core_bulk_edit_columns($view_id) : NULL;
-    if (!$data || !$columns) {
+    // The rows a submitted grid showed. They outlast the selection, which
+    // another window's save may already have cleared.
+    $posted = $this->postedRows($form_state);
+    if (!$columns || (!$data && $posted === NULL && !$form_state->get('grid_items'))) {
       return $this->stale($form, $data);
     }
 
-    $count = $this->selectedCount($data);
-    if ($count > self::MAX_ITEMS) {
-      $form['too_many'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'p',
-        '#value' => $this->t('You selected @count items. Edit up to 50 at a time: narrow the selection and try again.', ['@count' => $count]),
-      ];
-      return $this->addBackLink($form, $data);
+    $items = $form_state->get('grid_items');
+    if ($items === NULL && $posted !== NULL) {
+      $items = $this->allowedRows($posted, $columns->entityTypeId());
     }
-
-    $items = $form_state->get('grid_items') ?? $this->loadItems($data, $columns->entityTypeId());
+    elseif ($items === NULL) {
+      $count = $this->selectedCount($data);
+      if ($count > self::MAX_ITEMS) {
+        $form['too_many'] = [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $this->t('You selected @count items. Edit up to 50 at a time: narrow the selection and try again.', ['@count' => $count]),
+        ];
+        return $this->addBackLink($form, $data);
+      }
+      $items = $this->loadItems($data, $columns->entityTypeId());
+    }
     $form_state->set('grid_items', $items);
     if (!$items) {
       return $this->stale($form, $data);
@@ -94,9 +102,10 @@ class BulkEditGridForm extends FormBase {
 
     $this->buildColumnsPanel($form, $form_state, $available, $fields);
 
-    // Each cell's starting text, kept across rebuilds so a failed row is
-    // compared with its stored values, not with what the editor typed.
-    $originals = $form_state->get('grid_originals') ?? [];
+    // Each cell's starting text: what the editor saw when the grid opened.
+    // It's posted back with the form, as Drupal doesn't keep a form built on
+    // a page load, and kept in the form state across rebuilds.
+    $originals = $form_state->get('grid_originals') ?? $this->postedOriginals($form_state);
     $cells = new GridCellText();
     $definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($first->getEntityTypeId(), $type);
 
@@ -171,6 +180,17 @@ class BulkEditGridForm extends FormBase {
       }
     }
     $form_state->set('grid_originals', $originals);
+    $form['grid_rows'] = [
+      '#type' => 'hidden',
+      '#value' => json_encode(array_values($items)),
+    ];
+    $form['grid_originals'] = ['#tree' => TRUE];
+    foreach (array_keys($loaded) as $key) {
+      $form['grid_originals'][$key] = [
+        '#type' => 'hidden',
+        '#default_value' => json_encode($originals[$key] ?? []),
+      ];
+    }
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -255,6 +275,11 @@ class BulkEditGridForm extends FormBase {
       $this->messenger()->addStatus($this->formatPlural($saved, 'Saved 1 item.', 'Saved @count items.'));
     }
     $form_state->set('grid_originals', $originals);
+    $input = $form_state->getUserInput();
+    foreach ($originals as $key => $texts) {
+      $input['grid_originals'][$key] = json_encode($texts);
+    }
+    $form_state->setUserInput($input);
     if ($errors) {
       $this->messenger()->addError($this->formatPlural(count($errors), "1 item couldn't be saved. Fix the values below and save again.", "@count items couldn't be saved. Fix the values below and save again."));
       $form_state->set('grid_errors', $errors);
@@ -473,11 +498,58 @@ class BulkEditGridForm extends FormBase {
       }
     }
 
-    // Only items the editor can edit, of one type; the bulk edit page offers
-    // no others.
+    return $this->allowedRows($rows, $entity_type_id);
+  }
+
+  /**
+   * Keeps the rows the bulk edit page could offer the editor.
+   *
+   * Only items of the page's entity type and one bundle that the editor can
+   * edit, up to the most the grid opens.
+   *
+   * @param array $rows
+   *   Rows as [entity type, ID, langcode], keyed by row.
+   * @param string $entity_type_id
+   *   The bulk edit page's entity type.
+   */
+  protected function allowedRows(array $rows, string $entity_type_id): array {
+    $rows = array_slice(array_filter($rows, fn($row) => $row[0] === $entity_type_id), 0, self::MAX_ITEMS, TRUE);
     $loaded = array_filter($this->loadTranslations($rows), fn($item) => $item->access('update'));
     $bundle = $loaded ? reset($loaded)->bundle() : NULL;
     return array_intersect_key($rows, array_filter($loaded, fn($item) => $item->bundle() === $bundle));
+  }
+
+  /**
+   * Returns the rows a submitted grid showed, or NULL on a fresh page.
+   */
+  protected function postedRows(FormStateInterface $form_state): ?array {
+    $json = $form_state->getUserInput()['grid_rows'] ?? NULL;
+    $list = is_string($json) ? json_decode($json, TRUE) : NULL;
+    if (!is_array($list)) {
+      return NULL;
+    }
+    $rows = [];
+    foreach ($list as $row) {
+      if (is_array($row) && count($row) === 3 && array_filter($row, 'is_string') === $row) {
+        [$entity_type_id, $id, $langcode] = array_values($row);
+        $rows["$id-$langcode"] = [$entity_type_id, $id, $langcode];
+      }
+    }
+    return $rows;
+  }
+
+  /**
+   * Returns each cell's starting text as the submitted grid showed it.
+   */
+  protected function postedOriginals(FormStateInterface $form_state): array {
+    $originals = [];
+    foreach ((array) ($form_state->getUserInput()['grid_originals'] ?? []) as $key => $json) {
+      $texts = is_string($json) ? json_decode($json, TRUE) : NULL;
+      if (is_array($texts)) {
+        $originals[$key] = array_filter($texts, 'is_string');
+      }
+    }
+    return $originals;
   }
 
   /**
@@ -539,6 +611,10 @@ class BulkEditGridForm extends FormBase {
     $store->delete((string) $this->currentUser()->id());
     if (($data['redirect_url'] ?? NULL) instanceof Url) {
       $form_state->setRedirectUrl($data['redirect_url']);
+    }
+    // Another window already cleared the selection: back to the type's page.
+    elseif (($context = $form_state->get('grid_context')) && $columns = _mukurtu_core_bulk_edit_columns($context[0])) {
+      $form_state->setRedirect($columns->route(), ['arg_0' => $context[1]]);
     }
   }
 

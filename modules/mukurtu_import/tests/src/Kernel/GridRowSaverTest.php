@@ -201,6 +201,52 @@ class GridRowSaverTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Values the importer couldn't find are reported, not dropped.
+   */
+  public function testNotFoundReported(): void {
+    $field = FieldConfig::loadByName('node', 'protocol_aware_content', 'field_keywords');
+    $settings = $field->getSetting('handler_settings');
+    $settings['auto_create'] = FALSE;
+    $field->setSetting('handler_settings', $settings)->save();
+    Term::create(['vid' => 'keywords', 'name' => 'Basketry'])->save();
+    $node = $this->item();
+    $before = $this->revisions($node);
+
+    $errors = (new GridRowSaver())->save($node, ['field_keywords' => 'Basketry;Nope;Nada'], 'Grid log');
+    $this->assertSame(['field_keywords' => ["Some values weren't found: Nope, Nada. Check the spelling, or use the ID instead."]], $errors);
+    $this->assertSame($before, $this->revisions($node));
+
+    // A value typed twice is found, not missing.
+    $this->assertSame([], (new GridRowSaver())->save($this->reload($node), ['field_keywords' => 'Basketry;Basketry'], 'Grid log'));
+  }
+
+  /**
+   * A single-value reference that isn't found is reported.
+   */
+  public function testSingleNotFoundReported(): void {
+    FieldStorageConfig::create([
+      'field_name' => 'field_category',
+      'entity_type' => 'node',
+      'type' => 'entity_reference',
+      'settings' => ['target_type' => 'taxonomy_term'],
+    ])->save();
+    FieldConfig::create([
+      'field_name' => 'field_category',
+      'entity_type' => 'node',
+      'bundle' => 'protocol_aware_content',
+      'label' => 'Category',
+      'settings' => [
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => ['target_bundles' => ['keywords' => 'keywords'], 'auto_create' => FALSE],
+      ],
+    ])->save();
+
+    $errors = (new GridRowSaver())->save($this->item(), ['field_category' => 'Nope'], 'Grid log');
+
+    $this->assertSame(['field_category' => ["Some values weren't found: Nope. Check the spelling, or use the ID instead."]], $errors);
+  }
+
+  /**
    * No changes, no save.
    */
   public function testNothingToSave(): void {

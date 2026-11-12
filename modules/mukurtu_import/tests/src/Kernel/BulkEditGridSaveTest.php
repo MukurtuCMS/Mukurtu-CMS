@@ -100,15 +100,15 @@ class BulkEditGridSaveTest extends MukurtuImportTestBase {
   }
 
   /**
-   * Submits the grid with titles keyed by item.
+   * Submits the grid with titles keyed by item, plus any other posted values.
    */
-  protected function submit(array $titles, ?FormStateInterface $form_state = NULL): FormStateInterface {
+  protected function submit(array $titles, array $posted = []): FormStateInterface {
     $grid = [];
     foreach ($titles as $nid => $title) {
       $grid["$nid-en"]['title'] = $title;
     }
-    $form_state ??= new FormState();
-    $form_state->setValues(['grid' => $grid, 'op' => 'Save changes']);
+    $form_state = new FormState();
+    $form_state->setValues(['grid' => $grid, 'op' => 'Save changes'] + $posted);
     $this->container->get('form_builder')->submitForm(BulkEditGridForm::class, $form_state, 'mukurtu_bulk_edit_content', 'page');
     return $form_state;
   }
@@ -174,19 +174,49 @@ class BulkEditGridSaveTest extends MukurtuImportTestBase {
     $node = $this->item('Canoe');
     $this->select($node);
     $key = $node->id() . '-en';
-    // The grid opened when the title was still "Old canoe".
-    $form_state = new FormState();
-    $form_state->set('grid_originals', [$key => ['title' => 'Old canoe']]);
 
-    $this->submit([$node->id() => 'My canoe'], $form_state);
+    // The page showed "Old canoe"; someone has saved "Canoe" since.
+    $form_state = $this->submit([$node->id() => 'My canoe'], [
+      'grid_originals' => [$key => json_encode(['title' => 'Old canoe'])],
+    ]);
 
     $this->assertSame('Canoe', $this->reload($node)->label());
     $this->assertSame(
       ["Someone else changed this after you opened the page. It's now: Canoe. Save again to replace it with yours."],
       $form_state->get('grid_errors')[$key]['title'],
     );
-    // Saving again now replaces it on purpose.
-    $this->assertSame('Canoe', $form_state->get('grid_originals')[$key]['title']);
+    // The page now carries "Canoe" as the starting text, so saving again
+    // replaces it on purpose.
+    $this->assertSame(json_encode(['title' => 'Canoe']), $form_state->getUserInput()['grid_originals'][$key]);
+
+    $this->submit([$node->id() => 'My canoe'], [
+      'grid_originals' => [$key => json_encode(['title' => 'Canoe'])],
+    ]);
+    $this->assertSame('My canoe', $this->reload($node)->label());
+  }
+
+  /**
+   * A grid saves after another window's save cleared the selection.
+   */
+  public function testSelectionAlreadyCleared(): void {
+    $node = $this->item('Canoe');
+    $key = $node->id() . '-en';
+
+    $form_state = $this->submit([$node->id() => 'My canoe'], [
+      'grid_rows' => json_encode([
+        ['user', (string) $this->currentUser->id(), 'en'],
+        ['node', (string) $node->id(), 'en'],
+      ]),
+      'grid_originals' => [$key => json_encode(['title' => 'Canoe'])],
+    ]);
+
+    $this->assertSame('My canoe', $this->reload($node)->label());
+    // Only rows the bulk edit page could offer: no user account.
+    $this->assertSame([$key], array_keys($form_state->get('grid_items')));
+    // Back to the content type's bulk edit page.
+    $redirect = $form_state->setProgrammed(FALSE)->getRedirect();
+    $this->assertSame('view.mukurtu_bulk_edit_content.page', $redirect->getRouteName());
+    $this->assertSame(['arg_0' => 'protocol_aware_content'], $redirect->getRouteParameters());
   }
 
 }
