@@ -121,8 +121,10 @@ class ImportBlankIdentifierTest extends MukurtuImportTestBase {
   }
 
   /**
-   * The same on a translation-enabled bundle, where mapping langcode turns
-   * the import into a translation import.
+   * A blank langcode cell on a translatable bundle gets the default language.
+   *
+   * Mapping langcode on a translation-enabled bundle turns the import into a
+   * translation import, which takes a different path through the destination.
    */
   public function testBlankLangcodeOnNewRowTranslatableBundle(): void {
     \Drupal::service('content_translation.manager')->setEnabled('node', 'protocol_aware_content', TRUE);
@@ -174,8 +176,10 @@ class ImportBlankIdentifierTest extends MukurtuImportTestBase {
   }
 
   /**
-   * In one translation import, a blank-langcode row updates the original
-   * while a row with a langcode still adds that translation.
+   * Blank and set langcode cells in one translation import both work.
+   *
+   * The blank-langcode row updates the original, while the row with a
+   * langcode still adds that translation.
    */
   public function testMixedBlankAndSetLangcodeOnTranslatableBundle(): void {
     \Drupal::service('content_translation.manager')->setEnabled('node', 'protocol_aware_content', TRUE);
