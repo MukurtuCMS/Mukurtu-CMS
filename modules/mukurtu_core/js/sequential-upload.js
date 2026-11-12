@@ -161,19 +161,39 @@
     const wrapper = input ? input.closest('[id^="ajax-wrapper"]') : null;
     const area = input ? messageArea(input, queue.key) : null;
     let failed = !input || !answered(xhr);
+    // The command for a file over the server's limit announces its own
+    // message. See mukurtu_core/reset-refused-upload.
+    const announced = xhr.responseText.includes('"mukurtuResetRefusedUpload"');
     if (wrapper) {
       wrapper.querySelectorAll('[data-drupal-messages]').forEach((messages) => {
-        if (messages.querySelector('.messages--error, [role="alert"]')) {
+        const errors = messages.querySelectorAll('.messages--error');
+        const alerts = messages.querySelectorAll('[role="alert"]');
+        if (errors.length || alerts.length) {
           failed = true;
         }
+        // Errors in an alert role were announced when they appeared. Gin's
+        // aren't in one, so say which file failed and why. Otherwise screen
+        // readers hear only the summary at the end.
+        if (!announced && !alerts.length) {
+          errors.forEach((error) => {
+            const content = error.querySelector('.messages__content') || error;
+            // innerText keeps a break between the message and its list of
+            // reasons, which textContent runs together.
+            const text = (content.innerText || content.textContent)
+              .replace(/\s+/g, ' ')
+              .trim();
+            if (text) {
+              // Drupal.announce() sets innerHTML, and innerText has undone
+              // the escaping of the file name in the message.
+              Drupal.announce(Drupal.checkPlain(text), 'assertive');
+            }
+          });
+        }
         if (area) {
-          // Screen readers already announced these alerts when they appeared,
-          // so moving them shouldn't announce them again. Without the
-          // attribute, Drupal's own message handling no longer treats the
-          // moved copy as a place to put new messages.
-          messages
-            .querySelectorAll('[role="alert"]')
-            .forEach((alert) => alert.removeAttribute('role'));
+          // Moving an alert would announce it again. Without the
+          // data-drupal-messages attribute, Drupal's own message handling no
+          // longer treats the moved copy as a place to put new messages.
+          alerts.forEach((alert) => alert.removeAttribute('role'));
           messages.removeAttribute('data-drupal-messages');
           area.append(messages);
         }
@@ -209,13 +229,14 @@
     const ajax = Drupal.ajax.instances.find(
       (instance) => instance && instance.element === button,
     );
-    pending = {
+    const upload = {
       parents: ajax ? elementParents(ajax.url) : null,
       done: (xhr) => {
         afterUpload(queue, xhr);
         next(queue);
       },
     };
+    pending = upload;
 
     Drupal.announce(
       Drupal.t('Uploading file @current of @total: @filename.', {
@@ -225,6 +246,14 @@
       }),
     );
     $(button).trigger('mousedown');
+    // Drupal sends the request during the mousedown handler, and
+    // watchRequest() takes it. If nothing was sent, move on rather than wait
+    // for a request that won't come.
+    if (pending === upload) {
+      pending = null;
+      queue.failed += 1;
+      setTimeout(() => next(queue), 0);
+    }
   }
 
   /**

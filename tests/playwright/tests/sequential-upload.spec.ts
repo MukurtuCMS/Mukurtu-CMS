@@ -103,6 +103,16 @@ test('sends each picked file in its own request', async ({ page }) => {
 });
 
 test('keeps a refused file\'s error while the rest upload', async ({ page }) => {
+  // Each announcement replaces the last one in the live region, so record
+  // every call instead.
+  await page.evaluate(() => {
+    const announce = Drupal.announce;
+    window.__announced = [];
+    Drupal.announce = (text, priority) => {
+      window.__announced.push(text);
+      return announce(text, priority);
+    };
+  });
   await page.locator('[data-drupal-selector="edit-binary-files-upload"]')
     .setInputFiles([IMAGE, NOT_ALLOWED, AUDIO_1]);
 
@@ -112,6 +122,10 @@ test('keeps a refused file\'s error while the rest upload', async ({ page }) => 
   );
   // The refusal named the file, and the upload after it didn't replace it.
   await expect(page.locator('[data-mukurtu-upload-messages]')).toContainText('not-allowed.xyz');
+  // Screen readers hear which file failed, not only the summary.
+  expect(await page.evaluate(() => window.__announced)).toContainEqual(
+    expect.stringContaining('The specified file not-allowed.xyz could not be uploaded.'),
+  );
   await expect(listed(page, 'image-test', 'png')).toBeVisible();
   await expect(listed(page, 'mukurtu-intro1', 'mp3')).toBeVisible();
 });

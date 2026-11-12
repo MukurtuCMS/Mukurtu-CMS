@@ -91,3 +91,9 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* Upload errors kept above the field by mukurtu_core/sequential-upload read
+   from the start, not centered like the drop zone's hint. */
+.mukurtu-bulk-dropzone [data-mukurtu-upload-messages] {
+  text-align: start;
+}
