@@ -549,6 +549,17 @@ mukurtu.settings:
     mukurtu_related_content_display:
       type: string
       label: 'Related content display method'
+    related_content_preview:
+      type: sequence
+      label: 'Sidebar related content preview, keyed by node bundle machine name'
+      sequence:
+        type: string
+        label: 'Preview mode'
+        constraints:
+          Choice:
+            - 'off'
+            - jump_link
+            - thumbnails
     citation_templates:
       type: sequence
       label: 'Citation field templates, keyed by node bundle machine name'

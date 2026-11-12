@@ -99,8 +99,11 @@ jobs:
             # landed into. Guard against branch-name reuse: only count a
             # match that merged after this PR was opened (a base can't have
             # "already merged" before the PR stacked on it even existed).
-            merged_match=$(gh pr list --repo "$REPO" --search "head:$base" --state merged --limit 200 --json number,mergedAt \
-              --jq "[.[] | select(.mergedAt > \"$created_at\")] | sort_by(.mergedAt) | last")
+            # Only a PR from this repository can own the base: a base branch
+            # is always one of ours, and a fork's PR with the same branch name
+            # (such as #2500's `docker-image`) is a different branch.
+            merged_match=$(gh pr list --repo "$REPO" --search "head:$base" --state merged --limit 200 --json number,mergedAt,isCrossRepository \
+              --jq "[.[] | select(.isCrossRepository == false and .mergedAt > \"$created_at\")] | sort_by(.mergedAt) | last")
 
             if [[ "$merged_match" != "null" && -n "$merged_match" ]]; then
               base_pr=$(echo "$merged_match" | jq -r '.number')
@@ -115,8 +118,8 @@ jobs:
 
             # Distinct, cheaper-to-check case: the base's own PR was closed
             # without merging - an abandoned stack, not a stale-merged one.
-            closed_match=$(gh pr list --repo "$REPO" --search "head:$base" --state closed --limit 200 --json number,mergedAt \
-              --jq '[.[] | select(.mergedAt == null)] | last')
+            closed_match=$(gh pr list --repo "$REPO" --search "head:$base" --state closed --limit 200 --json number,mergedAt,isCrossRepository \
+              --jq '[.[] | select(.isCrossRepository == false and .mergedAt == null)] | last')
 
             if [[ "$closed_match" != "null" && -n "$closed_match" ]]; then
               base_pr=$(echo "$closed_match" | jq -r '.number')
