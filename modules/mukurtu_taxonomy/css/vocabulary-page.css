@@ -80,8 +80,13 @@ message may not be announced (WCAG 4.1.3). */
 }
 
 .vocabulary-page__expand[hidden],
-.vocabulary-page__toggle[hidden] {
+.vocabulary-page__toggle[hidden],
+.vocabulary-page__more[hidden] {
   display: none;
+}
+
+.vocabulary-page__more {
+  margin-block-start: 0.5rem;
 }
 
 /* Every term keeps this indent, so names stay lined up with or without a
