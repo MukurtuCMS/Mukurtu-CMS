@@ -54,8 +54,9 @@
           var files = e.dataTransfer.files;
           if (!files || files.length === 0) { return; }
 
-          // Transfer dragged files to the managed_file input, then trigger
-          // Drupal's AJAX upload pipeline by clicking the Upload button.
+          // Transfer dragged files to the managed_file input. Its change
+          // event starts the upload: core's for one file, and
+          // mukurtu_core/sequential-upload's, one file at a time, for more.
           try {
             var dt = new DataTransfer();
             Array.from(files).forEach(function (file) { dt.items.add(file); });
@@ -69,16 +70,6 @@
               '@count files added. Processing upload.',
               { '@count': fileCount }
             ));
-
-            // Click the managed_file Upload submit button so Drupal processes
-            // the files through its AJAX pipeline and stores the FIDs.
-            var managedFileWrapper = fileInput.closest('.js-form-managed-file');
-            if (managedFileWrapper) {
-              var uploadBtn = managedFileWrapper.querySelector('input[type="submit"], button[type="submit"]');
-              if (uploadBtn) {
-                setTimeout(function () { uploadBtn.click(); }, 100);
-              }
-            }
           } catch (err) {
             // DataTransfer not available; user can use the Browse button instead.
             announce(Drupal.t('File drop is not supported in this browser. Please use the Choose Files button.'));

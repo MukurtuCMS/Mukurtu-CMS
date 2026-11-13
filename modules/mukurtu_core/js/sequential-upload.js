@@ -1,0 +1,463 @@
+/**
+ * @file
+ * Uploads the files picked for a multi-file field one request at a time.
+ *
+ * Core sends every file picked for a field in a single request, so the
+ * server's upload limit applies to all of them together, and one request
+ * over that limit loses the whole batch. Fields with the
+ * js-mukurtu-sequential-upload class instead upload each file in its own
+ * request, so the limit applies to each file.
+ *
+ * Each response replaces the field, along with any error message about the
+ * file it sent. The messages are moved above the field, so an error about one
+ * file is still there after the files after it upload.
+ *
+ * A file over the size limit in drupalSettings.mukurtuSequentialUpload isn't
+ * sent. Its error is shown above the field instead.
+ *
+ * While files are uploading, the browser asks before leaving the page. If
+ * the page is left anyway, no more files are sent.
+ */
+
+(($, Drupal, drupalSettings, once) => {
+  const FIELD = '.js-form-managed-file.js-mukurtu-sequential-upload';
+  const UPLOAD_BUTTON = '.js-form-submit[data-drupal-selector$="upload-button"]';
+
+  /**
+   * The upload a queue is waiting to send, if any.
+   *
+   * @type {{parents: (string|null), done: function(XMLHttpRequest)}|null}
+   */
+  let pending = null;
+
+  /**
+   * Files still to upload, keyed by the file input's name.
+   *
+   * The response replaces the input, and the new one has the same name. Its
+   * data-drupal-selector and ID change on every upload.
+   *
+   * @type {Map<string, object>}
+   */
+  const queues = new Map();
+
+  /**
+   * Finds a field's current file input.
+   *
+   * @param {string} key
+   *   The input's name.
+   *
+   * @return {HTMLInputElement|null}
+   *   The input, or null if it's gone.
+   */
+  function findInput(key) {
+    return document.querySelector(
+      `${FIELD} input[type="file"][name="${CSS.escape(key)}"]`,
+    );
+  }
+
+  /**
+   * Finds or adds the area above a field that keeps its upload messages.
+   *
+   * It sits outside the field's AJAX wrapper, so responses don't replace it.
+   *
+   * @param {HTMLInputElement} input
+   *   The field's file input.
+   * @param {string} key
+   *   The input's name.
+   *
+   * @return {HTMLElement|null}
+   *   The area, or null if the field has no AJAX wrapper.
+   */
+  function messageArea(input, key) {
+    const existing = document.querySelector(
+      `[data-mukurtu-upload-messages="${CSS.escape(key)}"]`,
+    );
+    if (existing) {
+      return existing;
+    }
+    const wrapper = input.closest('[id^="ajax-wrapper"]');
+    if (!wrapper) {
+      return null;
+    }
+    const area = document.createElement('div');
+    area.setAttribute('data-mukurtu-upload-messages', key);
+    wrapper.before(area);
+    return area;
+  }
+
+  /**
+   * Reads the element_parents query parameter from an AJAX URL.
+   *
+   * Every upload request for a field has the same element_parents, and
+   * requests from other fields and forms don't.
+   *
+   * @param {string} url
+   *   The URL.
+   *
+   * @return {string|null}
+   *   The value, or null if there isn't one.
+   */
+  function elementParents(url) {
+    try {
+      return new URL(url, window.location.href).searchParams.get(
+        'element_parents',
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * Announces how the uploads went, and forgets the queue.
+   *
+   * @param {object} queue
+   *   The finished queue.
+   */
+  function finish(queue) {
+    queues.delete(queue.key);
+    if (queue.failed) {
+      Drupal.announce(
+        Drupal.t(
+          '@failed of @total files could not be uploaded. Check the error messages for details.',
+          { '@failed': queue.failed, '@total': queue.total },
+        ),
+        'assertive',
+      );
+      return;
+    }
+    Drupal.announce(
+      Drupal.formatPlural(
+        queue.total,
+        'Finished uploading 1 file.',
+        'Finished uploading @count files.',
+      ),
+    );
+  }
+
+  /**
+   * Checks whether a request came back as a readable AJAX response.
+   *
+   * @param {XMLHttpRequest} xhr
+   *   The finished request.
+   *
+   * @return {boolean}
+   *   TRUE if the server answered with a list of AJAX commands.
+   */
+  function answered(xhr) {
+    if (xhr.status < 200 || xhr.status >= 300) {
+      return false;
+    }
+    try {
+      return Array.isArray(JSON.parse(xhr.responseText));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * Keeps the messages from the last upload, and notes whether it failed.
+   *
+   * @param {object} queue
+   *   The queue that sent the upload.
+   * @param {XMLHttpRequest} xhr
+   *   The finished request.
+   */
+  function afterUpload(queue, xhr) {
+    const input = findInput(queue.key);
+    const wrapper = input ? input.closest('[id^="ajax-wrapper"]') : null;
+    const area = input ? messageArea(input, queue.key) : null;
+    let failed = !input || !answered(xhr);
+    // The command for a file over the server's limit announces its own
+    // message. See mukurtu_core/reset-refused-upload.
+    const announced = xhr.responseText.includes('"mukurtuResetRefusedUpload"');
+    if (wrapper) {
+      wrapper.querySelectorAll('[data-drupal-messages]').forEach((messages) => {
+        const errors = messages.querySelectorAll('.messages--error');
+        const alerts = messages.querySelectorAll('[role="alert"]');
+        if (errors.length || alerts.length) {
+          failed = true;
+        }
+        // Errors in an alert role were announced when they appeared. Gin's
+        // aren't in one, so say which file failed and why. Otherwise screen
+        // readers hear only the summary at the end.
+        if (!announced && !alerts.length) {
+          errors.forEach((error) => {
+            const content = error.querySelector('.messages__content') || error;
+            // innerText keeps a break between the message and its list of
+            // reasons, which textContent runs together.
+            const text = (content.innerText || content.textContent)
+              .replace(/\s+/g, ' ')
+              .trim();
+            if (text) {
+              // Drupal.announce() sets innerHTML, and innerText has undone
+              // the escaping of the file name in the message.
+              Drupal.announce(Drupal.checkPlain(text), 'assertive');
+            }
+          });
+        }
+        if (area) {
+          // Moving an alert would announce it again. Without the
+          // data-drupal-messages attribute, Drupal's own message handling no
+          // longer treats the moved copy as a place to put new messages.
+          alerts.forEach((alert) => alert.removeAttribute('role'));
+          messages.removeAttribute('data-drupal-messages');
+          area.append(messages);
+        }
+      });
+    }
+    if (failed) {
+      queue.failed += 1;
+    }
+  }
+
+  /**
+   * Uploads the next file in a queue, or finishes it.
+   *
+   * @param {object} queue
+   *   The queue.
+   */
+  function next(queue) {
+    const input = findInput(queue.key);
+    const field = input ? input.closest('.js-form-managed-file') : null;
+    const button = field ? field.querySelector(UPLOAD_BUTTON) : null;
+    if (!queue.files.length || !button) {
+      queue.failed += queue.files.length;
+      finish(queue);
+      return;
+    }
+
+    const file = queue.files.shift();
+    queue.current += 1;
+    const limit = sizeLimit();
+    if (limit && file.size > limit.bytes) {
+      refuseOversized(input, queue.key, file, limit);
+      queue.failed += 1;
+      setTimeout(() => next(queue), 0);
+      return;
+    }
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+
+    const ajax = Drupal.ajax.instances.find(
+      (instance) => instance && instance.element === button,
+    );
+    const upload = {
+      parents: ajax ? elementParents(ajax.url) : null,
+      done: (xhr, aborted) => {
+        // The browser cancels uploads when the page is left. Sending the
+        // next file would start an upload the browser cancels too, after
+        // the server may already have part of it.
+        if (aborted) {
+          queues.delete(queue.key);
+          return;
+        }
+        afterUpload(queue, xhr);
+        next(queue);
+      },
+    };
+    pending = upload;
+
+    Drupal.announce(
+      Drupal.t('Uploading file @current of @total: @filename.', {
+        '@current': queue.current,
+        '@total': queue.total,
+        '@filename': file.name,
+      }),
+    );
+    $(button).trigger('mousedown');
+    // Drupal sends the request during the mousedown handler, and
+    // watchRequest() takes it. If nothing was sent, move on rather than wait
+    // for a request that won't come.
+    if (pending === upload) {
+      pending = null;
+      queue.failed += 1;
+      setTimeout(() => next(queue), 0);
+    }
+  }
+
+  /**
+   * Starts uploading files one at a time, or adds them to a running queue.
+   *
+   * @param {HTMLInputElement} input
+   *   The field's file input.
+   * @param {File[]} files
+   *   The files to upload.
+   */
+  function start(input, files) {
+    const key = input.name;
+    const running = queues.get(key);
+    if (running) {
+      running.files.push(...files);
+      running.total += files.length;
+      return;
+    }
+    const area = messageArea(input, key);
+    if (area) {
+      area.replaceChildren();
+    }
+    const queue = { key, files, total: files.length, current: 0, failed: 0 };
+    queues.set(key, queue);
+    next(queue);
+  }
+
+  /**
+   * Reads the largest file the server takes in one upload.
+   *
+   * @return {{bytes: number, label: string}|null}
+   *   The limit in bytes and as text, or null if the page doesn't say.
+   */
+  function sizeLimit() {
+    const settings = drupalSettings.mukurtuSequentialUpload || {};
+    const bytes = Number(settings.maxFilesize);
+    if (!bytes || bytes < 1) {
+      return null;
+    }
+    return { bytes, label: settings.maxFilesizeLabel || '' };
+  }
+
+  /**
+   * Shows that a file is over the limit, without sending it.
+   *
+   * A request over the server's limit can be refused before Drupal sees it,
+   * for example by a proxy, and the response then isn't one Drupal can read.
+   * Its only message would be the AJAX error handler's generic one.
+   *
+   * @param {HTMLInputElement} input
+   *   The field's file input.
+   * @param {string} key
+   *   The input's name.
+   * @param {File} file
+   *   The file.
+   * @param {{bytes: number, label: string}} limit
+   *   The limit it's over.
+   */
+  function refuseOversized(input, key, file, limit) {
+    const area = messageArea(input, key);
+    // The same text core uses when PHP refuses a file over this limit.
+    const text = Drupal.t(
+      'The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.',
+      { '%file': file.name, '%maxsize': limit.label },
+    );
+    // Drupal.Message announces errors assertively. The message it shows is
+    // also an alert, which screen readers would read a second time.
+    const messages = new Drupal.Message(area || undefined);
+    const shown = messages.select(messages.add(text, { type: 'error' }));
+    if (shown) {
+      [shown, ...shown.querySelectorAll('[role="alert"]')].forEach((element) => {
+        if (element.getAttribute('role') === 'alert') {
+          element.removeAttribute('role');
+          element.removeAttribute('aria-label');
+        }
+      });
+    }
+    // Otherwise the input still shows the file as picked when it's the only
+    // or last one.
+    input.value = '';
+  }
+
+  /**
+   * Takes picked files away from core's single-request upload.
+   *
+   * Listens in the capture phase on the document, so it runs before core's
+   * change handlers on the input. Core still handles a single file, unless
+   * it's over the size limit.
+   *
+   * @param {Event} event
+   *   The change event.
+   */
+  function onChange(event) {
+    const input = event.target;
+    if (
+      !(input instanceof HTMLInputElement) ||
+      input.type !== 'file' ||
+      !input.closest(FIELD) ||
+      !input.files ||
+      !input.files.length ||
+      typeof DataTransfer === 'undefined' ||
+      !input.name
+    ) {
+      return;
+    }
+    const files = Array.from(input.files);
+    const limit = sizeLimit();
+    const oversized = limit && files.some((file) => file.size > limit.bytes);
+    if (files.length < 2 && !oversized) {
+      return;
+    }
+    event.stopImmediatePropagation();
+    start(input, files);
+  }
+
+  /**
+   * Watches for the end of the request a queue is waiting on.
+   *
+   * Listens on the browser's own request rather than jQuery's ajaxComplete,
+   * which never fires when Drupal can't read the response: its error handler
+   * throws first, and the queue would wait forever.
+   *
+   * @param {object} options
+   *   The jQuery AJAX options for a request about to be sent.
+   */
+  function watchRequest(options) {
+    if (
+      !pending ||
+      (pending.parents !== null &&
+        elementParents(options.url) !== pending.parents)
+    ) {
+      return;
+    }
+    const { done } = pending;
+    pending = null;
+    const createXhr = options.xhr;
+    options.xhr = () => {
+      const xhr = createXhr();
+      // loadend comes after jQuery and Drupal have handled the response, so
+      // the field has been replaced by then. The timeout lets the response's
+      // behaviors finish attaching to the new field.
+      // A request cut off by leaving the page ends with abort, before
+      // loadend.
+      let aborted = false;
+      xhr.addEventListener('abort', () => {
+        aborted = true;
+      });
+      xhr.addEventListener('loadend', () =>
+        setTimeout(() => done(xhr, aborted), 0),
+      );
+      return xhr;
+    };
+  }
+
+  /**
+   * Asks before leaving the page while files are still uploading.
+   *
+   * Leaving cancels the upload in progress and the files after it. The
+   * browser shows its own message, in the browser's language.
+   *
+   * @param {BeforeUnloadEvent} event
+   *   The beforeunload event.
+   */
+  function onBeforeUnload(event) {
+    if (!queues.size) {
+      return;
+    }
+    event.preventDefault();
+    // Older browsers ask only when returnValue is set.
+    event.returnValue = '';
+  }
+
+  /**
+   * Uploads files one at a time in fields that ask for it.
+   *
+   * @type {Drupal~behavior}
+   */
+  Drupal.behaviors.mukurtuSequentialUpload = {
+    attach(context) {
+      once('mukurtu-sequential-upload', 'html', context).forEach(() => {
+        document.addEventListener('change', onChange, true);
+        window.addEventListener('beforeunload', onBeforeUnload);
+        $.ajaxPrefilter(watchRequest);
+      });
+    },
+  };
+})(jQuery, Drupal, drupalSettings, once);

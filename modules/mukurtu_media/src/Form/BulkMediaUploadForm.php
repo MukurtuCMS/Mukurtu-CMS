@@ -12,6 +12,7 @@ use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
+use Drupal\mukurtu_core\SequentialUpload;
 use Drupal\mukurtu_media\MediaTypeExtensions;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -108,7 +109,9 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     $form['dropzone']['status'] = [
       '#markup' => '<div class="mukurtu-bulk-dropzone__status" aria-live="polite" aria-atomic="true"></div>',
     ];
-    $form['dropzone']['upload'] = [
+    // Upload each file in its own request, so the maximum file size applies
+    // to each file rather than to all of them together.
+    $form['dropzone']['upload'] = SequentialUpload::apply([
       '#type' => 'managed_file',
       '#title' => $this->t('Choose files'),
       '#title_display' => 'before',
@@ -124,7 +127,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       '#accept' => implode(',', array_map(fn($ext) => '.' . $ext, explode(' ', $config['extensions']))),
       '#after_build' => [[static::class, 'setFileInputAccept']],
       '#required' => TRUE,
-    ];
+    ]);
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
