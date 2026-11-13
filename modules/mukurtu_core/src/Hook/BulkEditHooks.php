@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Url;
 use Drupal\mukurtu_core\BulkEdit\MukurtuModifyEntityValues;
 use Drupal\views\ViewExecutable;
 
@@ -30,6 +31,23 @@ class BulkEditHooks {
     if (($definitions['views_bulk_edit']['class'] ?? NULL) === 'Drupal\views_bulk_edit\Plugin\Action\ModifyEntityValues') {
       $definitions['views_bulk_edit']['class'] = MukurtuModifyEntityValues::class;
     }
+  }
+
+  /**
+   * Implements hook_preprocess_HOOK() for menu-local-action templates.
+   *
+   * Core marks every action link as an "add" button, which the admin theme
+   * draws with a plus sign. "Bulk edit media" opens existing items rather
+   * than adding one, so it keeps the button style without the plus.
+   */
+  #[Hook('preprocess_menu_local_action')]
+  public function preprocessMenuLocalAction(array &$variables): void {
+    $url = $variables['link']['#url'] ?? NULL;
+    if (!$url instanceof Url || !$url->isRouted() || $url->getRouteName() !== 'mukurtu_core.bulk_edit_media') {
+      return;
+    }
+    $classes = &$variables['link']['#options']['attributes']['class'];
+    $classes = array_values(array_diff($classes ?? [], ['button-action', 'button--action']));
   }
 
   /**
