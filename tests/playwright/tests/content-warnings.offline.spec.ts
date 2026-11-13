@@ -34,7 +34,7 @@ function overlay(mid: number): string {
   return `
     <div class="mukurtu-content-warnings" data-mid="${mid}" tabindex="-1">
       <p id="${id}-title" class="mukurtu-content-warnings__title">Media content warnings</p>
-      <p class="mukurtu-content-warnings__card-hint">Access item to view</p>
+      <p class="mukurtu-content-warnings__card-hint">Read warnings</p>
       <ul id="${id}" class="mukurtu-content-warnings__list" role="list">
         ${WARNINGS.map((w) => `<li><div class="mukurtu-content-warning">${w}</div></li>`).join('')}
       </ul>
@@ -138,7 +138,7 @@ const LINKED_CARD = `
 test('A card shows the title, a link to the item, and Show media last', async ({ page }) => {
   await load(page, CARD);
   const warning = page.locator('.mukurtu-content-warnings');
-  const link = page.getByRole('link', { name: 'Access item to view' });
+  const link = page.getByRole('link', { name: 'Read warnings' });
   const button = page.getByRole('button', { name: 'Show media' });
   await expect(page.getByText('Media content warnings')).toBeVisible();
   await expect(link).toHaveAttribute('href', '#item');
@@ -157,7 +157,7 @@ test('A card shows the title, a link to the item, and Show media last', async ({
 
 test('A card link opens the item without revealing the media', async ({ page }) => {
   await load(page, CARD);
-  await page.getByRole('link', { name: 'Access item to view' }).click();
+  await page.getByRole('link', { name: 'Read warnings' }).click();
   await expect(page).toHaveURL(/#item$/);
   await expect(page.locator('.mukurtu-content-warnings')).not.toHaveClass(/dismissed/);
 });
@@ -172,17 +172,17 @@ test('Show media on a card reveals the media in place', async ({ page }) => {
 
 test('Media still inside a link shows the title and hint, and adds no Tab stop', async ({ page }) => {
   await load(page, LINKED_CARD);
-  await expect(page.getByText('Access item to view')).toBeVisible();
+  await expect(page.getByText('Read warnings')).toBeVisible();
   await expect(page.locator('.mukurtu-content-warnings__dismiss')).toBeHidden();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Card title' })).toBeFocused();
-  await page.getByText('Access item to view').click();
+  await page.getByText('Read warnings').click();
   await expect(page).toHaveURL(/#item$/);
 });
 
 test('Outside cards, the card hint stays hidden', async ({ page }) => {
   await load(page, VIDEO);
-  await expect(page.getByText('Access item to view')).toBeHidden();
+  await expect(page.getByText('Read warnings')).toBeHidden();
 });
 
 test('The button stays in view while long warnings scroll', async ({ page }) => {
@@ -280,7 +280,7 @@ test('A dictionary teaser thumbnail gets the card overlay', async ({ page }) => 
   await page.setViewportSize({ width: 320, height: 640 });
   await load(page, TEASER_THUMBNAIL);
   const warning = page.locator('.mukurtu-content-warnings');
-  const link = page.getByRole('link', { name: 'Access item to view' });
+  const link = page.getByRole('link', { name: 'Read warnings' });
   await expect(warning).toHaveClass(/mukurtu-content-warnings--card/);
   await expect(link).toHaveAttribute('href', '#word');
   await expect(link).toHaveAccessibleDescription('aloha');

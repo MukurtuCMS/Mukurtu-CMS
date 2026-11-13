@@ -199,7 +199,7 @@ class MediaContentWarningsDisplayTest extends KernelTestBase {
     $this->assertSame("$id-title $id", (string) $button[0]['aria-describedby']);
     $this->assertSame('Show media', trim((string) $button[0]));
     $this->assertSame('Media content warnings', trim((string) $this->cssSelect("p#$id-title")[0]));
-    $this->assertSame('Access item to view', trim((string) $this->cssSelect('p.mukurtu-content-warnings__card-hint')[0]));
+    $this->assertSame('Read warnings', trim((string) $this->cssSelect('p.mukurtu-content-warnings__card-hint')[0]));
   }
 
   /**
