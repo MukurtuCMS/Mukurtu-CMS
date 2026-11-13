@@ -90,7 +90,9 @@ async function clickAway(page: Page) {
     link.href = '/admin';
     link.id = 'test-leave-link';
     link.textContent = 'Leave';
-    document.body.prepend(link);
+    // At the top of the page, the admin toolbar would get the click.
+    link.style.cssText = 'position: fixed; top: 50%; left: 50%; z-index: 100000; background: #fff; padding: 1em;';
+    document.body.append(link);
   });
   await page.locator('#test-leave-link').click({ noWaitAfter: true });
 }
