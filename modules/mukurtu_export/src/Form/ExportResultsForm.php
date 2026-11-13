@@ -43,6 +43,11 @@ class ExportResultsForm extends ExportBaseForm {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $fid = $_SESSION['mukurtu_export']['download_fid'];
 
+    $overlong = $_SESSION['mukurtu_export']['results']['overlong'] ?? [];
+    if ($overlong) {
+      $form['overlong'] = $this->buildOverlongWarning($overlong);
+    }
+
     $form['exported'] = [
       '#type' => 'table',
       '#caption' => $this->t('Items Exported'),
@@ -86,6 +91,52 @@ class ExportResultsForm extends ExportBaseForm {
     ];
 
     return $form;
+  }
+
+  /**
+   * Builds the warning about values too long for an Excel cell.
+   *
+   * @param array $overlong
+   *   Keyed by column header, each with a 'count' of items and the first
+   *   few item 'labels', as recorded by CSV::recordOverlongValues().
+   *
+   * @return array
+   *   A render array for a warning message.
+   */
+  protected function buildOverlongWarning(array $overlong): array {
+    $lines = [];
+    foreach ($overlong as $field => $info) {
+      $labels = implode(', ', $info['labels'] ?? []);
+      $more = ($info['count'] ?? 0) - count($info['labels'] ?? []);
+      $lines[] = $more > 0
+        ? $this->t('@field: @items, and @count more', ['@field' => $field, '@items' => $labels, '@count' => $more])
+        : $this->t('@field: @items', ['@field' => $field, '@items' => $labels]);
+    }
+
+    return [
+      '#theme' => 'status_messages',
+      '#message_list' => [
+        'warning' => [
+          [
+            'intro' => [
+              '#type' => 'html_tag',
+              '#tag' => 'p',
+              '#value' => $this->t('Some values are longer than the 32,767 characters an Excel cell can hold. If you open these files in Excel, these fields will be truncated, and their data will be lost on save. See <a href=":url">File Formats and Spreadsheet Tools</a> for recommended spreadsheet tools.', [
+                ':url' => 'https://docs.mukurtu.org/roundtrip/RoundtripFormatting/',
+              ]),
+            ],
+            'fields' => [
+              '#theme' => 'item_list',
+              '#items' => $lines,
+            ],
+          ],
+        ],
+      ],
+      '#status_headings' => [
+        'warning' => $this->t('Warning message'),
+      ],
+      '#weight' => -100,
+    ];
   }
 
   /**
