@@ -236,22 +236,27 @@ test('asks before leaving while files upload, and keeps uploading on Stay', asyn
   expect(uploads).toEqual([['image-test.png'], ['mukurtu-intro1.mp3']]);
 });
 
-test('sends no more files once the page is left', async ({ page }) => {
+test('sends no more files once an upload is cancelled', async ({ page }) => {
   const { uploads, release } = await holdFirstUpload(page);
+  // Keep the request each upload sends, to cancel it.
+  await page.evaluate(() => {
+    const send = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = function (...args) {
+      window.__lastRequest = this;
+      return send.apply(this, args);
+    };
+  });
   await page.locator('[data-drupal-selector="edit-binary-files-upload"]')
     .setInputFiles([IMAGE, AUDIO_1, AUDIO_2]);
   await expect.poll(() => uploads.length).toBe(1);
 
-  page.once('dialog', (dialog) => dialog.accept());
-  const left = page.waitForURL(/\/admin$/);
-  await clickAway(page);
-  await left;
+  // Firefox cancels the upload this way as soon as the page starts to leave,
+  // while the page's scripts still run. Chromium waits until the next page
+  // arrives, so leaving the page here wouldn't show it. Before, the queue
+  // then sent the next file.
+  await page.evaluate(() => window.__lastRequest.abort());
   release();
 
-  // Before, the queue sent the next file as the page was leaving.
   await page.waitForTimeout(3000);
   expect(uploads).toEqual([['image-test.png']]);
-
-  // Back to the form for afterEach's reset.
-  await gotoReady(page, '/admin/import');
 });
