@@ -7,11 +7,13 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\media\Entity\Media;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -31,6 +33,7 @@ use PHPUnit\Framework\Attributes\Group;
 #[Group('mukurtu_core')]
 class ArticleFullDisplayTemplateTest extends KernelTestBase {
 
+  use MediaTypeCreationTrait;
   use UserCreationTrait;
 
   /**
@@ -44,6 +47,9 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
     'text',
     'filter',
     'taxonomy',
+    'file',
+    'image',
+    'media',
   ];
 
   /**
@@ -55,8 +61,11 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installEntitySchema('taxonomy_term');
+    $this->installEntitySchema('file');
+    $this->installEntitySchema('media');
     $this->installSchema('node', ['node_access']);
-    $this->installConfig(['system', 'field', 'filter', 'node']);
+    $this->installSchema('file', ['file_usage']);
+    $this->installConfig(['system', 'field', 'filter', 'node', 'image', 'media']);
 
     NodeType::create(['type' => 'article', 'name' => 'Article'])->save();
     FieldStorageConfig::create([
@@ -89,6 +98,30 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
       ],
     ])->save();
 
+    // Media Assets, as basic pages have, on both bundles.
+    $this->createMediaType('file', ['id' => 'document']);
+    NodeType::create(['type' => 'page', 'name' => 'Basic page'])->save();
+    FieldStorageConfig::create([
+      'field_name' => 'field_page_media_assets',
+      'entity_type' => 'node',
+      'type' => 'entity_reference',
+      'cardinality' => -1,
+      'settings' => ['target_type' => 'media'],
+    ])->save();
+    foreach (['article', 'page'] as $bundle) {
+      FieldConfig::create([
+        'field_name' => 'field_page_media_assets',
+        'entity_type' => 'node',
+        'bundle' => $bundle,
+      ])->save();
+      \Drupal::service('entity_display.repository')->getViewDisplay('node', $bundle)
+        ->setComponent('field_page_media_assets', [
+          'type' => 'entity_reference_entity_view',
+          'label' => 'hidden',
+        ])
+        ->save();
+    }
+
     \Drupal::service('entity_display.repository')->getViewDisplay('node', 'article')
       ->setComponent('body', ['type' => 'text_default', 'label' => 'hidden'])
       ->setComponent('field_article_tags', [
@@ -98,7 +131,7 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
       ])
       ->save();
 
-    $this->setUpCurrentUser([], ['access content']);
+    $this->setUpCurrentUser([], ['access content', 'view media']);
 
     // mukurtu_v4 lives inside the profile, and the config install scan only
     // looks in the active profile's directories.
@@ -111,17 +144,20 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
   }
 
   /**
-   * Renders an article in full view mode, with stand-in extra components.
+   * Renders a node in full view mode; articles get stand-in extra components.
    */
-  protected function renderArticle(NodeInterface $node): void {
+  protected function renderNode(NodeInterface $node): array {
     $build = $this->container->get('entity_type.manager')
       ->getViewBuilder('node')
       ->view($node, 'full');
-    $build['field_title'] = ['#markup' => '<div class="stray-field-title">Stray title</div>'];
-    $build['links'] = ['#markup' => '<div class="stray-links">Stray links</div>'];
-    $build['flag_export_content'] = ['#markup' => '<div class="stray-flag">Stray flag</div>'];
-    $build['comment'] = ['#markup' => '<div class="stand-in-comments">Comments</div>'];
+    if ($node->bundle() === 'article') {
+      $build['field_title'] = ['#markup' => '<div class="stray-field-title">Stray title</div>'];
+      $build['links'] = ['#markup' => '<div class="stray-links">Stray links</div>'];
+      $build['flag_export_content'] = ['#markup' => '<div class="stray-flag">Stray flag</div>'];
+      $build['comment'] = ['#markup' => '<div class="stand-in-comments">Comments</div>'];
+    }
     $this->setRawContent((string) $this->container->get('renderer')->renderInIsolation($build));
+    return $build;
   }
 
   /**
@@ -144,7 +180,7 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
   public function testArticleUsesFullNodeGrid(): void {
     $term = Term::create(['vid' => 'article_tags', 'name' => 'Announcements']);
     $term->save();
-    $this->renderArticle($this->createArticle(['field_article_tags' => $term->id()]));
+    $this->renderNode($this->createArticle(['field_article_tags' => $term->id()]));
 
     $this->assertCount(1, $this->cssSelect('.full-node.full-node--article .full-node__grid .full-node__main .full-node__content'));
     $content = (string) $this->cssSelect('.full-node__content')[0]->asXML();
@@ -163,7 +199,7 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
    * The Title extra field, node links and export flag are not printed.
    */
   public function testStrayComponentsAreLeftOut(): void {
-    $this->renderArticle($this->createArticle());
+    $this->renderNode($this->createArticle());
 
     $this->assertNoRaw('stray-field-title');
     $this->assertNoRaw('stray-links');
@@ -171,16 +207,44 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
   }
 
   /**
-   * With no tags, the sidebar is not rendered at all.
-   *
-   * An empty field still leaves cache metadata in the content array, so a
-   * plain "is not empty" check would print an empty sidebar box.
+   * The sidebar ends with the published date, even with no tags.
    */
-  public function testNoSidebarWithoutTags(): void {
-    $this->renderArticle($this->createArticle());
+  public function testPublishedDateEndsSidebar(): void {
+    $created = mktime(12, 0, 0, 11, 13, 2025);
+    $this->renderNode($this->createArticle(['created' => $created]));
 
-    $this->assertCount(1, $this->cssSelect('.full-node__main'));
-    $this->assertCount(0, $this->cssSelect('.full-node__list'));
+    $section = $this->cssSelect('.full-node__sidebar .sidebar-section');
+    $this->assertCount(1, $section);
+    $this->assertCount(0, $this->cssSelect('.field--name-field-article-tags'));
+    $fields = $this->cssSelect('.full-node__sidebar .sidebar-section > .field');
+    $last = end($fields);
+    $this->assertSame('Published', trim((string) $last->div[0]));
+    $time = $this->cssSelect('.full-node__sidebar .field--name-created time');
+    $this->assertCount(1, $time);
+    $this->assertSame('November 13, 2025', trim((string) $time[0]));
+    $this->assertSame(date('c', $created), (string) $time[0]['datetime']);
+  }
+
+  /**
+   * Article media assets don't get the Expand lightbox; basic pages do.
+   */
+  public function testArticleMediaHasNoLightbox(): void {
+    $media = Media::create(['bundle' => 'document', 'name' => 'Sample document']);
+    $media->save();
+
+    $build = $this->renderNode($this->createArticle(['field_page_media_assets' => $media->id()]));
+    $this->assertCount(1, $this->cssSelect('.full-node__content .field-item__container'));
+    $this->assertNotContains('mukurtu_v4/media-glightbox', $build['#attached']['library'] ?? []);
+
+    $page = Node::create([
+      'type' => 'page',
+      'title' => 'A basic page',
+      'field_page_media_assets' => $media->id(),
+      'status' => 1,
+    ]);
+    $page->save();
+    $build = $this->renderNode($page);
+    $this->assertContains('mukurtu_v4/media-glightbox', $build['#attached']['library'] ?? []);
   }
 
 }
