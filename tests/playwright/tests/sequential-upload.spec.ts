@@ -165,6 +165,8 @@ test('doesn\'t send a file over the size limit', async ({ page }) => {
   expect(await page.evaluate(() => window.__announced)).toContainEqual(
     expect.stringContaining('could not be saved because it exceeds'),
   );
+  // Announced once: the message on screen isn't an alert as well.
+  await expect(page.locator('[data-mukurtu-upload-messages] [role="alert"]')).toHaveCount(0);
   await expect(page.getByText('Oops, something went wrong')).toHaveCount(0);
   await expect(listed(page, 'image-test', 'png')).toBeVisible();
   await expect(listed(page, 'mukurtu-intro2', 'mp3')).toBeVisible();

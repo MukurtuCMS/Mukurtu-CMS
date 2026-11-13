@@ -329,8 +329,18 @@
       'The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.',
       { '%file': file.name, '%maxsize': limit.label },
     );
-    // Drupal.Message announces errors assertively.
-    new Drupal.Message(area || undefined).add(text, { type: 'error' });
+    // Drupal.Message announces errors assertively. The message it shows is
+    // also an alert, which screen readers would read a second time.
+    const messages = new Drupal.Message(area || undefined);
+    const shown = messages.select(messages.add(text, { type: 'error' }));
+    if (shown) {
+      [shown, ...shown.querySelectorAll('[role="alert"]')].forEach((element) => {
+        if (element.getAttribute('role') === 'alert') {
+          element.removeAttribute('role');
+          element.removeAttribute('aria-label');
+        }
+      });
+    }
     // Otherwise the input still shows the file as picked when it's the only
     // or last one.
     input.value = '';
