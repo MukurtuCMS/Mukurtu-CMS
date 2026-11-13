@@ -29,7 +29,15 @@ class SequentialUploadTest extends KernelTestBase implements FormInterface {
   protected static $modules = [
     'system',
     'user',
+    'field',
+    'node',
+    'text',
+    'geofield',
+    'leaflet',
     'file',
+    'image',
+    'media',
+    'mukurtu_core',
   ];
 
   /**
@@ -67,21 +75,24 @@ class SequentialUploadTest extends KernelTestBase implements FormInterface {
    */
   public function testApply(): void {
     $form = $this->container->get('form_builder')->getForm($this);
+    $field = $form['files'];
     // Other attributes stay.
-    $this->assertSame('kept', $form['files']['#attributes']['name']);
-    $this->render($form);
+    $this->assertSame('kept', $field['#attributes']['name']);
 
-    $fields = $this->xpath('//div[contains(concat(" ", @class, " "), " js-form-managed-file ") and contains(concat(" ", @class, " "), " js-mukurtu-sequential-upload ")]');
-    $this->assertCount(1, $fields);
-
-    // Attachments bubble up from the field when the form renders.
-    $this->assertContains('mukurtu_core/sequential-upload', $form['#attached']['library']);
+    // The field renders its attachments, so AJAX responses that replace it
+    // carry them too.
+    $this->assertContains('mukurtu_core/sequential-upload', $field['#attached']['library']);
     $max = (int) Environment::getUploadMaxSize();
     $this->assertGreaterThan(0, $max);
     $this->assertSame([
       'maxFilesize' => $max,
       'maxFilesizeLabel' => (string) ByteSizeMarkup::create($max),
-    ], $form['#attached']['drupalSettings']['mukurtuSequentialUpload']);
+    ], $field['#attached']['drupalSettings']['mukurtuSequentialUpload']);
+
+    // The library finds the field by its wrapper's class.
+    $this->render($form);
+    $fields = $this->xpath('//div[contains(concat(" ", @class, " "), " js-form-managed-file ") and contains(concat(" ", @class, " "), " js-mukurtu-sequential-upload ")]');
+    $this->assertCount(1, $fields);
   }
 
 }
