@@ -21,9 +21,30 @@ class PersonalCollectionAddItemController extends ControllerBase {
    *   The access result.
    */
   public function access(AccountInterface $account, NodeInterface $node) {
+    // Only content a personal collection can hold gets the tab; articles and
+    // basic pages, for example, can't be added.
+    $bundle = AccessResult::allowedIf(static::isValidPersonalCollectionItemBundle($node))
+      ->addCacheableDependency($node);
     // The page shows the item's title, so the account must be able to see it.
-    return AccessResult::allowedIfHasPermission($account, 'add personal collection entities')
+    return $bundle
+      ->andIf(AccessResult::allowedIfHasPermission($account, 'add personal collection entities'))
       ->andIf($node->access('view', $account, TRUE));
+  }
+
+  /**
+   * Checks whether a node's bundle can be added to a personal collection.
+   *
+   * Reads the bundles field_items_in_collection accepts, so the tab and the
+   * field never disagree.
+   */
+  public static function isValidPersonalCollectionItemBundle(NodeInterface $node): bool {
+    $fields = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions('personal_collection');
+    if (!isset($fields['field_items_in_collection'])) {
+      return FALSE;
+    }
+    $target_bundles = $fields['field_items_in_collection']->getSetting('handler_settings')['target_bundles'] ?? NULL;
+    // No bundle list means every bundle is accepted.
+    return empty($target_bundles) || in_array($node->bundle(), $target_bundles, TRUE);
   }
 
   /**
