@@ -9,7 +9,7 @@ id: node.article.field_article_tags
 field_name: field_article_tags
 entity_type: node
 bundle: article
-label: Tags
+label: 'Article Tags'
 description: ''
 required: false
 translatable: false

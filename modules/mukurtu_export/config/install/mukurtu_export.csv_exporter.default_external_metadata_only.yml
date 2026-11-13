@@ -18,7 +18,7 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     body: Body
     field_page_media_assets: 'Media Assets'
-    field_article_tags: Tags
+    field_article_tags: 'Article Tags'
     field_multipage_page_of: 'Multipage parent'
     uuid: UUID
   node__collection:

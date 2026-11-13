@@ -1075,7 +1075,7 @@ function mukurtu_core_update_40228(): void {
 }
 
 /**
- * Replace article Category and Keywords with Tags, and add Media Assets.
+ * Replace article Category and Keywords with Article Tags, and add Media Assets.
  */
 function mukurtu_core_update_40229(array &$sandbox): ?string {
   // Keep the docblock above to one line; see mukurtu_core_update_40201() for
@@ -1118,7 +1118,7 @@ function mukurtu_core_update_40229(array &$sandbox): ?string {
   $term_storage = $entity_type_manager->getStorage('taxonomy_term');
   $node_storage = $entity_type_manager->getStorage('node');
   $batch = array_splice($sandbox['nids'], 0, 25);
-  // Articles cached before the Tags field existed don't have it.
+  // Articles cached before the Article Tags field existed don't have it.
   $node_storage->resetCache($batch);
   foreach ($node_storage->loadMultiple($batch) as $node) {
     $tids = [];
@@ -1176,8 +1176,8 @@ function mukurtu_core_update_40229(array &$sandbox): ?string {
 
   return (string) \Drupal::translation()->formatPlural(
     $sandbox['total'],
-    'Articles now use Tags and Media Assets. Category and Keywords terms on 1 article were copied into the new Article Tags vocabulary, and those two fields were removed. Article images were not moved; they stay in the Image field.',
-    'Articles now use Tags and Media Assets. Category and Keywords terms on @count articles were copied into the new Article Tags vocabulary, and those two fields were removed. Article images were not moved; they stay in the Image field.',
+    'Articles now use Article Tags and Media Assets. Category and Keywords terms on 1 article were copied into the new Article Tags vocabulary, and those two fields were removed. Article images were not moved; they stay in the Image field.',
+    'Articles now use Article Tags and Media Assets. Category and Keywords terms on @count articles were copied into the new Article Tags vocabulary, and those two fields were removed. Article images were not moved; they stay in the Image field.',
   );
 }
 
@@ -1189,8 +1189,9 @@ function _mukurtu_core_update_40229_add_config(): void {
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
   $install = new FileStorage($module_path . '/config/install');
 
-  // Vocabulary, Tags field, and Media Assets on articles. Each is created from
-  // its shipped config/install file, the same file a new site gets.
+  // Vocabulary, Article Tags field, and Media Assets on articles. Each is
+  // created from its shipped config/install file, the same file a new site
+  // gets.
   foreach ([
     'taxonomy.vocabulary.article_tags' => 'taxonomy_vocabulary',
     'field.storage.node.field_article_tags' => 'field_storage_config',
@@ -1222,7 +1223,8 @@ function _mukurtu_core_update_40229_add_config(): void {
     $manager->save();
   }
 
-  // Form: Title, Body, Media Assets, Tags, then everything else as it was.
+  // Form: Title, Body, Media Assets, Article Tags, then everything else as it
+  // was.
   $form_display = \Drupal::service('entity_display.repository')->getFormDisplay('node', 'article');
   if (!$form_display->isNew()) {
     $form_display->removeComponent('field_article_category');
@@ -1262,7 +1264,7 @@ function _mukurtu_core_update_40229_add_config(): void {
     $form_display->save();
   }
 
-  // Page: Media Assets in the main column, Tags in the sidebar.
+  // Page: Media Assets in the main column, Article Tags in the sidebar.
   $view_display = \Drupal::service('entity_display.repository')->getViewDisplay('node', 'article');
   if (!$view_display->isNew()) {
     $view_display->removeComponent('field_article_category');
@@ -1304,8 +1306,8 @@ function _mukurtu_core_update_40229_add_config(): void {
     }
   }
 
-  // Export presets: Tags and Media Assets columns instead of Category and
-  // Keywords, and an Article Tags terms section. Only the shipped presets
+  // Export presets: Article Tags and Media Assets columns instead of Category
+  // and Keywords, and an Article Tags terms section. Only the shipped presets
   // are touched; a site's own presets are its to edit.
   if (\Drupal::moduleHandler()->moduleExists('mukurtu_export')) {
     $presets = [
@@ -1340,7 +1342,7 @@ function _mukurtu_core_update_40229_add_config(): void {
 }
 
 /**
- * Swaps Category/Keywords for Tags/Media Assets in an export preset's columns.
+ * Swaps Category/Keywords for Article Tags/Media Assets export columns.
  *
  * @param array $list
  *   A csv_exporter's entity_fields_export_list.
@@ -1349,7 +1351,7 @@ function _mukurtu_core_update_40229_add_config(): void {
  *   The list with the article columns and Article Tags terms section updated.
  */
 function _mukurtu_core_update_40229_export_list(array $list): array {
-  $new_columns = ['field_page_media_assets' => 'Media Assets', 'field_article_tags' => 'Tags'];
+  $new_columns = ['field_page_media_assets' => 'Media Assets', 'field_article_tags' => 'Article Tags'];
   if (isset($list['node__article'])) {
     $columns = [];
     foreach ($list['node__article'] as $key => $label) {

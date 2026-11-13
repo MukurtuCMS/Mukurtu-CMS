@@ -124,7 +124,7 @@ field_settings:
       module:
         - node
   node__field_article_tags__name:
-    label: Tags
+    label: 'Article Tags'
     datasource_id: 'entity:node'
     property_path: 'field_article_tags:entity:name'
     type: text
@@ -134,7 +134,7 @@ field_settings:
       module:
         - taxonomy
   node__field_article_tags__name__facet:
-    label: 'Tags Facet'
+    label: 'Article Tags Facet'
     datasource_id: 'entity:node'
     property_path: 'field_article_tags:entity:name'
     type: string
@@ -144,7 +144,7 @@ field_settings:
       module:
         - taxonomy
   node__field_article_tags__uuid:
-    label: 'Tags » Taxonomy term » UUID'
+    label: 'Article Tags » Taxonomy term » UUID'
     datasource_id: 'entity:node'
     property_path: 'field_article_tags:entity:uuid'
     type: text

@@ -347,17 +347,17 @@ function mukurtu_migrate_update_40209(): ?string {
 }
 
 /**
- * Map Mukurtu 3 article categories and tags into the article Tags field.
+ * Map Mukurtu 3 article categories and tags into the Article Tags field.
  */
 function mukurtu_migrate_update_40212(): ?string {
   // Keep the docblock above to one line; see mukurtu_core_update_40201() for
   // why.
   //
   // mukurtu_core_update_40229() replaces the article Category and Keywords
-  // fields with Tags, so the shipped article migration would otherwise write
-  // to fields that no longer exist. Only the shipped mappings are replaced; a
-  // site that customized either one is left alone. The Image mapping stays,
-  // because existing sites keep the Image field.
+  // fields with Article Tags, so the shipped article migration would
+  // otherwise write to fields that no longer exist. Only the shipped mappings
+  // are replaced; a site that customized either one is left alone. The Image
+  // mapping stays, because existing sites keep the Image field.
   $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_article');
   if ($config->isNew()) {
     return NULL;
@@ -385,5 +385,5 @@ function mukurtu_migrate_update_40212(): ?string {
   }
   $config->set('process', $process)->save();
 
-  return (string) t('Updated the Mukurtu 3 article migration so article categories and tags are migrated into the article Tags field.');
+  return (string) t('Updated the Mukurtu 3 article migration so article categories and tags are migrated into the Article Tags field.');
 }
