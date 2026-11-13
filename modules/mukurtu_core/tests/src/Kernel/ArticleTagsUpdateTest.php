@@ -283,7 +283,7 @@ class ArticleTagsUpdateTest extends KernelTestBase {
       'title' => 'Title',
       'body' => 'Body',
       'field_page_media_assets' => 'Media Assets',
-      'field_article_tags' => 'Tags',
+      'field_article_tags' => 'Article Tags',
       'field_article_image/target_id' => 'Image > File ID',
       'uuid' => 'UUID',
     ], $list['node__article']);

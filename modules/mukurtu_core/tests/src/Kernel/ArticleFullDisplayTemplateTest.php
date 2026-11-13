@@ -82,7 +82,7 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
       'field_name' => 'field_article_tags',
       'entity_type' => 'node',
       'bundle' => 'article',
-      'label' => 'Tags',
+      'label' => 'Article Tags',
       'settings' => [
         'handler' => 'default:taxonomy_term',
         'handler_settings' => ['target_bundles' => ['article_tags' => 'article_tags']],
