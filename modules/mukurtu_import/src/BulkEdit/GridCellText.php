@@ -56,7 +56,7 @@ class GridCellText {
       'field_file' => 'id',
       'field_image' => 'id',
       'entity_reference_node' => 'id',
-      'entity_reference_media' => 'entity',
+      'entity_reference_media' => 'id',
       'entity_reference_taxonomy_term' => 'name',
       'entity_reference_user' => 'username',
       'entity_reference_paragraph' => 'entity',
