@@ -346,7 +346,7 @@ A custom Drupal plugin type that provides a strategy pattern for converting diff
   1. If numeric → load by file ID.
   2. If string → query by filename within the import's upload location (`STARTS_WITH` condition on URI).
 - A blank cell returns `NULL` (no file).
-- Any other value that matches no file, or more than one, throws a `MigrateException`, so the row fails with "Could not find an uploaded file named ..." or "More than one uploaded file is named ...". See `UploadedFileLookupTrait`.
+- Any other value that matches no file, or more than one, throws a `MigrateException`, so the row fails with "Could not find a file matching ..." or "More than one uploaded file is named ...". See `UploadedFileLookupTrait`.
 
 ### `mukurtu_imageitem` (id: `mukurtu_imageitem`)
 - Same lookup as `mukurtu_fileitem` (`UploadedFileLookupTrait`).

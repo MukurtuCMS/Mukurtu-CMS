@@ -145,7 +145,17 @@ class ImportFileReferenceTest extends MukurtuImportTestBase {
     $this->importFiles('clip.txt;not-uploaded.txt');
 
     $this->assertTrue($this->reloadNode()->get('field_file')->isEmpty(), 'A row naming a missing file must not be imported.');
-    $this->assertSame(['Could not find an uploaded file named "not-uploaded.txt".'], $this->messages());
+    $this->assertSame(['Could not find a file matching "not-uploaded.txt". Use a file ID, or the filename of a file uploaded with this import.'], $this->messages());
+  }
+
+  /**
+   * A file ID that doesn't exist, as from another site's export, fails too.
+   */
+  public function testMissingFileIdFailsTheRow() {
+    $this->importFiles('99999');
+
+    $this->assertTrue($this->reloadNode()->get('field_file')->isEmpty());
+    $this->assertSame(['Could not find a file matching "99999". Use a file ID, or the filename of a file uploaded with this import.'], $this->messages());
   }
 
   /**

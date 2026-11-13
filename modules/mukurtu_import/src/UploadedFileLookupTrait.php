@@ -60,7 +60,7 @@ trait UploadedFileLookupTrait {
     }
     $file = $ids ? $file_storage->load(reset($ids)) : NULL;
     if (!$file instanceof FileInterface) {
-      throw new MigrateException((string) t('Could not find an uploaded file named "@name".', ['@name' => $value]));
+      throw new MigrateException((string) t('Could not find a file matching "@value". Use a file ID, or the filename of a file uploaded with this import.', ['@value' => $value]));
     }
     return $file->id();
   }
