@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import;
 
+use Drupal\Component\Utility\Html;
 use Drupal\file\FileInterface;
 use Drupal\migrate\MigrateException;
 
@@ -56,13 +57,30 @@ trait UploadedFileLookupTrait {
       ->execute();
 
     if (count($ids) > 1) {
-      throw new MigrateException((string) t('More than one uploaded file is named "@name". Remove the extra copies from Media/Binary Files and try again.', ['@name' => $value]));
+      throw new MigrateException($this->plainText(t('More than one uploaded file is named "@name". Remove the extra copies from Media/Binary Files and try again.', ['@name' => $value])));
     }
     $file = $ids ? $file_storage->load(reset($ids)) : NULL;
     if (!$file instanceof FileInterface) {
-      throw new MigrateException((string) t('Could not find a file matching "@value". Use a file ID, or the filename of a file uploaded with this import.', ['@value' => $value]));
+      throw new MigrateException($this->plainText(t('Could not find a file matching "@value". Use a file ID, or the filename of a file uploaded with this import.', ['@value' => $value])));
     }
     return $file->id();
+  }
+
+  /**
+   * Turns a translated message into plain text for a row message.
+   *
+   * Row messages are stored as plain strings and escaped when shown, so a
+   * value that t() has already escaped would be escaped twice, and a filename
+   * like "Tom's song.mp3" would show as "Tom&#039;s song.mp3".
+   *
+   * @param \Stringable|string $message
+   *   The translated message.
+   *
+   * @return string
+   *   The message as plain text.
+   */
+  protected function plainText(\Stringable|string $message): string {
+    return Html::decodeEntities((string) $message);
   }
 
 }

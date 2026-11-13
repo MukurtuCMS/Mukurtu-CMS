@@ -149,6 +149,29 @@ class ImportFileReferenceTest extends MukurtuImportTestBase {
   }
 
   /**
+   * The message shows a filename with special characters as written.
+   *
+   * The results page escapes row messages, so they must be plain text.
+   */
+  public function testMissingFilenameMessageIsPlainText() {
+    $this->importFiles("Tom's & <b>Jerry</b>.txt");
+
+    $this->assertSame(['Could not find a file matching "Tom\'s & <b>Jerry</b>.txt". Use a file ID, or the filename of a file uploaded with this import.'], $this->messages());
+  }
+
+  /**
+   * A duplicate filename with special characters is shown as written too.
+   */
+  public function testDuplicateFilenameMessageIsPlainText() {
+    $this->createUploadedFile('public://imports/a/tom.txt', "Tom's & co.txt");
+    $this->createUploadedFile('public://imports/b/tom.txt', "Tom's & co.txt");
+
+    $this->importFiles("Tom's & co.txt");
+
+    $this->assertSame(['More than one uploaded file is named "Tom\'s & co.txt". Remove the extra copies from Media/Binary Files and try again.'], $this->messages());
+  }
+
+  /**
    * A file ID that doesn't exist, as from another site's export, fails too.
    */
   public function testMissingFileIdFailsTheRow() {
