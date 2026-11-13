@@ -3,10 +3,12 @@
 namespace Drupal\mukurtu_collection\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\Element;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_core\Form\AjaxRowTableAccessibilityTrait;
@@ -231,9 +233,8 @@ class CollectionOrganizationForm extends FormBase {
     $form['add'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add to Collection'),
-      '#attributes' => [
-        'id' => 'collections-table-add-button',
-      ],
+      // Drupal binds #ajax to #id, so an id in #attributes would stop it.
+      '#id' => 'collections-table-add-button',
       '#submit' => ['::addCollectionToOrganizationAjax'],
       '#ajax' => [
         'callback' => '::addCollectionToTableCallback',
@@ -262,6 +263,26 @@ class CollectionOrganizationForm extends FormBase {
   }
 
   public function addCollectionToTableCallback(array &$form, FormStateInterface $form_state) {
+    $response = new AjaxResponse();
+
+    // A failed validation changes nothing, so show its errors instead of
+    // announcing an update. This response only replaces the table, so errors
+    // left in the queue would wait for the next page.
+    if ($form_state->hasAnyErrors()) {
+      $clear_previous = TRUE;
+      foreach ($this->messenger()->deleteByType(MessengerInterface::TYPE_ERROR) as $error) {
+        $response->addCommand(new MessageCommand($error, NULL, ['type' => 'error'], $clear_previous));
+        $clear_previous = FALSE;
+      }
+      return $response;
+    }
+
+    // Pressing Add with nothing new to add changes nothing, so there's no
+    // update to announce.
+    if ($form_state->get('organization_unchanged')) {
+      return $response;
+    }
+
     // Marks the table so the shared ajax-row-table-status JS behavior can
     // find it as a descendant of the #collections-table wrapper once() is
     // scoped to - Drupal.attachBehaviors() runs with that wrapper itself as
@@ -271,7 +292,6 @@ class CollectionOrganizationForm extends FormBase {
     $message = $this->formatPlural($count, 'Collection organization updated. 1 item in the collection.', 'Collection organization updated. @count items in the collection.');
     $this->markAjaxRowTableChanged($form['collections'], $message, 'collections-table-status', 'collections-table-add-button');
 
-    $response = new AjaxResponse();
     $response->addCommand(new ReplaceCommand('#collections-table', $form['collections']));
     return $response;
   }
@@ -338,6 +358,8 @@ class CollectionOrganizationForm extends FormBase {
   public function addCollectionToOrganizationAjax(array &$form, FormStateInterface $form_state) {
     $new_collection_autocomplete_value = $form_state->getValue('add_subcollection') ?? '';
 
+    // Form storage lasts across AJAX requests, so both submit handlers set this.
+    $form_state->set('organization_unchanged', TRUE);
     $matches = [];
     if (preg_match('/^(.*) \((\d+)\)$/', $new_collection_autocomplete_value, $matches)) {
       $id = $matches[2];
@@ -352,6 +374,7 @@ class CollectionOrganizationForm extends FormBase {
           $this->addCollectionWithChildren($collection, $root_collection_id, $collection_values);
 
           $form_state->setValue('collections', $collection_values);
+          $form_state->set('organization_unchanged', FALSE);
 
           // Rebuild the collections table.
           $form['collections'] = $this->buildCollectionsTable($this->getOrganizationFromValues($collection_values), $root_collection_id);
@@ -365,6 +388,7 @@ class CollectionOrganizationForm extends FormBase {
    * Ajax submit handler to remove a collection from the organization.
    */
   public function removeCollectionFromOrganizationAjax(array &$form, FormStateInterface $form_state) {
+    $form_state->set('organization_unchanged', FALSE);
     $triggering_element = $form_state->getTriggeringElement();
     $collection_id_to_remove = $triggering_element['#collection_id'] ?? NULL;
 
