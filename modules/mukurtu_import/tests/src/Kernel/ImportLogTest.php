@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\mukurtu_import\Kernel;
 
 use Drupal\file\FileInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
 use Drupal\mukurtu_import\ImportBatchExecutable;
 use Drupal\node\Entity\Node;
@@ -489,6 +490,97 @@ class ImportLogTest extends MukurtuImportTestBase {
     $this->assertCount(2, $rows);
     $this->assertEquals(1, $rows[$file_success->id()]->success);
     $this->assertEquals(0, $rows[$file_failure->id()]->success);
+  }
+
+  /**
+   * A failed row is reported with its spreadsheet row number.
+   *
+   * The identifier column here is "nid", so core's ID map names it
+   * "src_nid". The row number used to be read from a hard-coded "src_ID"
+   * and showed as "(unknown)" for every template without a column literally
+   * named "ID".
+   */
+  public function testFailedRowReportsItsSpreadsheetRow() {
+    $import_id = $this->container->get('uuid')->generate();
+    $node_a = $this->createNode('A');
+    $node_b = $this->createNode('B');
+
+    // The header is spreadsheet row 1, so the failing row is row 3.
+    $data = [
+      ['nid', 'title'],
+      [$node_a->id(), 'A updated'],
+      [$node_b->id(), ''],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $this->runBatchImport([$definition]);
+
+    $row = $this->loadLogRowsByFid($import_id)[$file->id()];
+    $failed = array_values(array_filter(
+      json_decode((string) $row->details, TRUE),
+      fn(array $detail) => $detail['status'] === 'failed',
+    ));
+    $this->assertCount(1, $failed);
+    $this->assertSame(3, $failed[0]['source_id']);
+
+    $messages = $this->container->get('tempstore.private')->get('mukurtu_import')->get('batch_results_messages');
+    $this->assertCount(1, $messages);
+    $this->assertStringStartsWith('Row 3: Title:', $messages[0]['message']);
+
+    // Per-run migration state is removed along with the ID map tables.
+    foreach (['migrate_status', 'migrate_interruption_result', 'migrate_last_imported'] as $collection) {
+      $this->assertFalse(\Drupal::keyValue($collection)->has($definition['id']), "$collection entry removed");
+    }
+  }
+
+  /**
+   * A run that finds its migration busy leaves the other run alone.
+   *
+   * Regression test for two runs of the same file sharing a migration ID.
+   * The second run used to report the first run's row errors as its own,
+   * add advice about mismatched columns, and then drop the first run's ID
+   * map tables, crashing the first run partway through.
+   */
+  public function testBusyMigrationLeavesTheOtherRunAlone() {
+    $import_id = $this->container->get('uuid')->generate();
+    $node = $this->createNode('Original Title');
+    $file = $this->createCsvFile([
+      ['nid', 'title'],
+      [$node->id(), ''],
+    ]);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    // Run A has processed its row, recording a row error, and is still
+    // importing.
+    $context = ['results' => [], 'sandbox' => []];
+    ImportBatchExecutable::batchProcessImportDefinition($definition, [], $context);
+    $migration = $this->container->get('plugin.manager.migration')->createStubMigration($definition);
+    $migration->setStatus(MigrationInterface::STATUS_IMPORTING);
+    $map_table = $migration->getIdMap()->mapTableName();
+    $message_table = $migration->getIdMap()->messageTableName();
+
+    // Run B starts and finishes while run A is still going.
+    $this->runBatchImport([$definition]);
+
+    $row = $this->loadLogRowsByFid($import_id)[$file->id()];
+    $this->assertEquals(1, $row->count_failed);
+    $this->assertStringContainsString('busy', $row->messages);
+    $this->assertStringNotContainsString('Title:', $row->messages, "Run A's row error is not reported as run B's");
+    $this->assertStringNotContainsString('failed before any rows', $row->messages);
+
+    $schema = \Drupal::database()->schema();
+    $this->assertTrue($schema->tableExists($map_table), "Run A's map table survives");
+    $this->assertTrue($schema->tableExists($message_table), "Run A's message table survives");
+    $this->assertSame(MigrationInterface::STATUS_IMPORTING, $migration->getStatus());
   }
 
 }

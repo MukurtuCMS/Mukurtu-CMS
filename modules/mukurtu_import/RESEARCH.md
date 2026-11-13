@@ -449,7 +449,7 @@ Lists all importable entity types (node, media, community, protocol, paragraph, 
 ### `batchFinishedImport()`
 
 - Stores results in the tempstore.
-- Parses migration IDs to extract file IDs (format: `{uid}__{fid}__{entity_type}__{bundle}`).
+- Migration IDs are `{run token}__{uid}__{fid}__{entity_type}__{bundle}`: `ExecuteImportForm` prefixes `toDefinition()`'s ID with a token unique to each submission, so overlapping runs of the same file never share ID map tables.
 - Associates error messages with the file that caused them.
 - Cleans up process pipeline error messages for readability by stripping the migration plugin ID prefix.
 
