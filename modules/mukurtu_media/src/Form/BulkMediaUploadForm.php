@@ -12,6 +12,7 @@ use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
+use Drupal\mukurtu_core\SequentialUpload;
 use Drupal\mukurtu_media\MediaTypeExtensions;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -126,9 +127,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       '#upload_location' => $config['uri_scheme'] . "://{$year}-{$month}",
       '#accept' => implode(',', array_map(fn($ext) => '.' . $ext, explode(' ', $config['extensions']))),
       '#after_build' => [[static::class, 'setFileInputAccept']],
-      '#attributes' => [
-        'class' => ['js-mukurtu-sequential-upload'],
-      ],
+      '#attributes' => SequentialUpload::attributes(),
       '#required' => TRUE,
     ];
 

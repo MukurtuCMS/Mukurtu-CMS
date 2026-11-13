@@ -155,6 +155,7 @@ sequential-upload:
     - core/once
     - core/drupal.ajax
     - core/drupal.announce
+    - core/drupal.message
     - file/drupal.file
 
 focus-file-field:

@@ -11,6 +11,9 @@
  * Each response replaces the field, along with any error message about the
  * file it sent. The messages are moved above the field, so an error about one
  * file is still there after the files after it upload.
+ *
+ * A file over the size limit in the field's data-mukurtu-max-filesize
+ * attribute isn't sent. Its error is shown above the field instead.
  */
 
 (($, Drupal, once) => {
@@ -222,6 +225,13 @@
 
     const file = queue.files.shift();
     queue.current += 1;
+    const limit = sizeLimit(input);
+    if (limit && file.size > limit.bytes) {
+      refuseOversized(input, queue.key, file, limit);
+      queue.failed += 1;
+      setTimeout(() => next(queue), 0);
+      return;
+    }
     const transfer = new DataTransfer();
     transfer.items.add(file);
     input.files = transfer.files;
@@ -282,10 +292,64 @@
   }
 
   /**
-   * Takes several picked files away from core's single-request upload.
+   * Reads the largest file a field's server will take in one upload.
+   *
+   * @param {HTMLInputElement} input
+   *   The field's file input.
+   *
+   * @return {{bytes: number, label: string}|null}
+   *   The limit in bytes and as text, or null if the field doesn't say.
+   */
+  function sizeLimit(input) {
+    const field = input.closest(FIELD);
+    const bytes = field
+      ? parseInt(field.getAttribute('data-mukurtu-max-filesize'), 10)
+      : NaN;
+    if (!bytes || bytes < 1) {
+      return null;
+    }
+    return {
+      bytes,
+      label: field.getAttribute('data-mukurtu-max-filesize-label') || '',
+    };
+  }
+
+  /**
+   * Shows that a file is over the limit, without sending it.
+   *
+   * A request over the server's limit can be refused before Drupal sees it,
+   * for example by a proxy, and the response then isn't one Drupal can read.
+   * Its only message would be the AJAX error handler's generic one.
+   *
+   * @param {HTMLInputElement} input
+   *   The field's file input.
+   * @param {string} key
+   *   The input's name.
+   * @param {File} file
+   *   The file.
+   * @param {{bytes: number, label: string}} limit
+   *   The limit it's over.
+   */
+  function refuseOversized(input, key, file, limit) {
+    const area = messageArea(input, key);
+    // The same text core uses when PHP refuses a file over this limit.
+    const text = Drupal.t(
+      'The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.',
+      { '%file': file.name, '%maxsize': limit.label },
+    );
+    // Drupal.Message announces errors assertively.
+    new Drupal.Message(area || undefined).add(text, { type: 'error' });
+    // Otherwise the input still shows the file as picked when it's the only
+    // or last one.
+    input.value = '';
+  }
+
+  /**
+   * Takes picked files away from core's single-request upload.
    *
    * Listens in the capture phase on the document, so it runs before core's
-   * change handlers on the input. Core still handles a single file.
+   * change handlers on the input. Core still handles a single file, unless
+   * it's over the size limit.
    *
    * @param {Event} event
    *   The change event.
@@ -297,14 +361,20 @@
       input.type !== 'file' ||
       !input.closest(FIELD) ||
       !input.files ||
-      input.files.length < 2 ||
+      !input.files.length ||
       typeof DataTransfer === 'undefined' ||
       !input.name
     ) {
       return;
     }
+    const files = Array.from(input.files);
+    const limit = sizeLimit(input);
+    const oversized = limit && files.some((file) => file.size > limit.bytes);
+    if (files.length < 2 && !oversized) {
+      return;
+    }
     event.stopImmediatePropagation();
-    start(input, Array.from(input.files));
+    start(input, files);
   }
 
   /**

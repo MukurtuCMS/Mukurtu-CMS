@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\file\Element\ManagedFile;
+use Drupal\mukurtu_core\SequentialUpload;
 use Drupal\Core\Link;
 use Exception;
 
@@ -62,8 +63,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       ],
       '#attributes' => [
         'name' => 'import_file_upload',
-        'class' => ['js-mukurtu-sequential-upload'],
-      ],
+      ] + SequentialUpload::attributes(),
     ];
 
     $form['binary_files'] = [
@@ -78,8 +78,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#upload_validators' => $this->getAllowedMediaExtensionsValidator(),
       '#attributes' => [
         'name' => 'import_file_upload',
-        'class' => ['js-mukurtu-sequential-upload'],
-      ],
+      ] + SequentialUpload::attributes(),
     ];
 
     $form['actions'] = [

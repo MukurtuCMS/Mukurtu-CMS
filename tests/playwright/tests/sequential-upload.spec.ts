@@ -129,3 +129,49 @@ test('keeps a refused file\'s error while the rest upload', async ({ page }) => 
   await expect(listed(page, 'image-test', 'png')).toBeVisible();
   await expect(listed(page, 'mukurtu-intro1', 'mp3')).toBeVisible();
 });
+
+test('doesn\'t send a file over the size limit', async ({ page }) => {
+  const field = page.locator('.js-form-managed-file.js-mukurtu-sequential-upload')
+    .filter({ has: page.locator('[data-drupal-selector="edit-binary-files-upload"]') });
+  // The server gives its own limit.
+  expect(Number(await field.getAttribute('data-mukurtu-max-filesize'))).toBeGreaterThan(0);
+
+  // A file over the real limit would be about 100 MB, so lower it to fall
+  // between the two audio files. Each response replaces the field, with the
+  // server's limit, so lower it again on every new one.
+  await page.evaluate(() => {
+    const lower = () => document.querySelectorAll('.js-mukurtu-sequential-upload').forEach((element) => {
+      if (element.getAttribute('data-mukurtu-max-filesize') !== '48500') {
+        element.setAttribute('data-mukurtu-max-filesize', '48500');
+        element.setAttribute('data-mukurtu-max-filesize-label', '48.5 KB');
+      }
+    });
+    lower();
+    new MutationObserver(lower).observe(document.body, { childList: true, subtree: true });
+    const announce = Drupal.announce;
+    window.__announced = [];
+    Drupal.announce = (text, priority) => {
+      window.__announced.push(text);
+      return announce(text, priority);
+    };
+  });
+  const uploads = await watchUploads(page);
+
+  // mukurtu-intro1.mp3 is 49,197 bytes; the other two are under 48,500.
+  await page.locator('[data-drupal-selector="edit-binary-files-upload"]')
+    .setInputFiles([IMAGE, AUDIO_1, AUDIO_2]);
+
+  await expect(announced(page)).toContainText(
+    '1 of 3 files could not be uploaded.',
+    { timeout: SETTLE },
+  );
+  expect(uploads).toEqual([['image-test.png'], ['mukurtu-intro2.mp3']]);
+  const refusal = 'The file mukurtu-intro1.mp3 could not be saved because it exceeds 48.5 KB, the maximum allowed size for uploads.';
+  await expect(page.locator('[data-mukurtu-upload-messages]')).toContainText(refusal);
+  expect(await page.evaluate(() => window.__announced)).toContainEqual(
+    expect.stringContaining('could not be saved because it exceeds'),
+  );
+  await expect(page.getByText('Oops, something went wrong')).toHaveCount(0);
+  await expect(listed(page, 'image-test', 'png')).toBeVisible();
+  await expect(listed(page, 'mukurtu-intro2', 'mp3')).toBeVisible();
+});
