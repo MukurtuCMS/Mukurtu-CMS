@@ -108,8 +108,10 @@ class MukurtuContentWarningsSettingsFormAccessibilityTest extends KernelTestBase
     $this->assertContains('visually-hidden', $form['taxonomy_warnings_status']['#attributes']['class']);
 
     // The Add taxonomy warning button has a deterministic id for JS focus
-    // targeting.
-    $this->assertSame('taxonomy-warnings-add-button', $form['taxonomy_warnings']['actions']['add_taxonomy_warning']['#attributes']['id']);
+    // targeting, set where Drupal's #ajax binding finds it.
+    $button = $form['taxonomy_warnings']['actions']['add_taxonomy_warning'];
+    $this->assertSame('taxonomy-warnings-add-button', $button['#id']);
+    $this->assertArrayNotHasKey('id', $button['#attributes'] ?? []);
   }
 
   /**
@@ -135,6 +137,22 @@ class MukurtuContentWarningsSettingsFormAccessibilityTest extends KernelTestBase
     $this->assertSame('taxonomy-warnings-status', $result['#attributes']['data-mukurtu-status-target'] ?? NULL);
     $this->assertSame('taxonomy-warnings-add-button', $result['#attributes']['data-mukurtu-focus-target'] ?? NULL);
     $this->assertNotSame('', (string) ($result['#attributes']['data-mukurtu-status-message'] ?? ''));
+  }
+
+  /**
+   * Tests that a failed validation announces no update.
+   */
+  public function testValidationErrorAnnouncesNoUpdate(): void {
+    $form_object = MukurtuContentWarningsSettingsForm::create(\Drupal::getContainer());
+    $form_state = new FormState();
+    $form_state->set('num_widgets', 1);
+    $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
+    $form_state->setErrorByName('taxonomy_warnings', 'Not valid.');
+
+    $result = $form_object->addMoreCallback($form, $form_state);
+    $form_state->clearErrors();
+
+    $this->assertArrayNotHasKey('data-mukurtu-ajax-row-table-changed', $result['#attributes'] ?? []);
   }
 
 }
