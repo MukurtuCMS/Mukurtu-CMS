@@ -54,7 +54,7 @@
             <div class="field field--name-created field--label-above">
               <div class="field__label">{{ 'Published'|t }}</div>
               <div class="field__item">
-                <time datetime="{{ node.getCreatedTime|date('c') }}">{{ node.getCreatedTime|format_date('custom', 'F j, Y') }}</time>
+                {{ published_date }}
               </div>
             </div>
           </div>
