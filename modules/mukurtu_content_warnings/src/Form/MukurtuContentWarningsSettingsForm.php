@@ -195,6 +195,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
         '#options' => $availableTerms,
         '#empty_option' => $this->t('Select a term'),
         '#default_value' => $id,
+        '#attributes' => ['data-mukurtu-warning-term' => ''],
       ];
       // Term warning text.
       $form['taxonomy_warnings'][$i]['text'] = [
@@ -208,7 +209,8 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       // rather than a row number - $i is a permanent per-slot index that
       // removeCallback() never renumbers, so after removing a row the
       // remaining rows' numbers would have a gap (e.g. "row 1", "row 3"),
-      // which would be misleading read aloud.
+      // which would be misleading read aloud. js/settings-form.js keeps this
+      // in step with the select.
       $remove_label = isset($availableTerms[$id])
         ? $this->t('Remove taxonomy warning for @term', ['@term' => $availableTerms[$id]])
         : $this->t('Remove empty taxonomy warning row');
@@ -219,6 +221,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
         '#name' => $i,
         '#attributes' => [
           'aria-label' => $remove_label,
+          'data-mukurtu-warning-remove' => '',
         ],
         '#submit' => ['::removeCallback'],
         '#ajax' => [
@@ -245,6 +248,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     ];
 
     $this->attachAjaxRowTableStatusLibrary($form);
+    $form['#attached']['library'][] = 'mukurtu_content_warnings/settings-form';
 
     // Warning media settings — view mode selection.
     $view_mode_options = $this->getMediaViewModes();
