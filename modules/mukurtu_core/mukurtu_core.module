@@ -1576,6 +1576,16 @@ function mukurtu_core_views_data_alter(array &$data)
       ],
     ];
   }
+  if (isset($data['taxonomy_term_field_data'])) {
+    $data['taxonomy_term_field_data']['mukurtu_visible_terms'] = [
+      'title' => t('Visible to the current user'),
+      'filter' => [
+        'id' => 'mukurtu_visible_terms',
+        'field' => 'tid',
+        'real field' => 'tid',
+      ],
+    ];
+  }
 }
 
 /**

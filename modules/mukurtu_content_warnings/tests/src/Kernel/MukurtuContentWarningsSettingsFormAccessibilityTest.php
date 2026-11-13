@@ -115,6 +115,17 @@ class MukurtuContentWarningsSettingsFormAccessibilityTest extends KernelTestBase
   }
 
   /**
+   * Tests that the form can keep Remove labels in step with the selects.
+   */
+  public function testRemoveLabelFollowsTheSelect(): void {
+    $form = $this->buildFormWithRows(1);
+
+    $this->assertContains('mukurtu_content_warnings/settings-form', $form['#attached']['library']);
+    $this->assertArrayHasKey('data-mukurtu-warning-term', $form['taxonomy_warnings'][0]['term']['#attributes']);
+    $this->assertArrayHasKey('data-mukurtu-warning-remove', $form['taxonomy_warnings'][0]['actions']['#attributes']);
+  }
+
+  /**
    * Tests that a blank, not-yet-configured row gets a generic label.
    */
   public function testBlankRowFallbackLabel(): void {
