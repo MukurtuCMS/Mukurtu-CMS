@@ -120,6 +120,25 @@
   }
 }
 
+// Articles have no sidebar, so the main column spans the full width, and
+// their fields are not separated by dividers.
+.full-node--article {
+  .full-node__main {
+    @include include-media.media('>=lg') {
+      grid-column: 1 / span 12;
+    }
+
+    @include include-media.media('>=2xl') {
+      grid-column: 2 / span 12;
+    }
+  }
+
+  .full-node__content .field {
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+}
+
 // Horizontal divider block placed via Layout Builder.
 .layout-builder-divider {
   border: none;
