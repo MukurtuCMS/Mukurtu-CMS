@@ -9188,6 +9188,12 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   -webkit-border-before: 0;
           border-block-start: 0;
 }
+.full-node--article .media-asset--link {
+  display: none;
+}
+.full-node--article .media-asset--actions:not(:has(> :not(.media-asset--link))) {
+  display: none;
+}
 
 .layout-builder-divider {
   border: none;

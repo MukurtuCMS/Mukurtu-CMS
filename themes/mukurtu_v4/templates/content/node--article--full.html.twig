@@ -4,8 +4,9 @@
  * Theme override to display an article node in full view mode.
  *
  * Uses the same main column + sidebar grid as Digital Heritage and Person,
- * with tags in the sidebar. Media assets render in the main column through
- * field--node--field-page-media-assets.html.twig, as on basic pages.
+ * with tags and the published date in the sidebar. Media assets render in
+ * the main column through field--node--field-page-media-assets.html.twig, as
+ * on basic pages.
  *
  * Without this template, articles fell back to node.html.twig, which has no
  * grid, and printed every component of the shipped display - including the
@@ -20,15 +21,6 @@
  */
 #}
 {% set sidebar_fields = ['field_article_tags'] %}
-
-{# An empty field still leaves cache metadata in content, so check for a
-   rendered field rather than "is not empty". #}
-{% set has_sidebar = false %}
-{% for field_name in sidebar_fields %}
-  {% if content[field_name]['#theme'] is defined %}
-    {% set has_sidebar = true %}
-  {% endif %}
-{% endfor %}
 
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node full-node--article">
@@ -52,17 +44,22 @@
 
       </div>
 
-      {% if has_sidebar %}
-        <div class="full-node__list">
-          <aside class="full-node__sidebar">
-            <div class="sidebar-section">
-              {% for field_name in sidebar_fields %}
-                {{ content[field_name] }}
-              {% endfor %}
+      <div class="full-node__list">
+        <aside class="full-node__sidebar">
+          <div class="sidebar-section">
+            {% for field_name in sidebar_fields %}
+              {{ content[field_name] }}
+            {% endfor %}
+            {# Uses the field markup so it is styled like the fields above. #}
+            <div class="field field--name-created field--label-above">
+              <div class="field__label">{{ 'Published'|t }}</div>
+              <div class="field__item">
+                <time datetime="{{ node.getCreatedTime|date('c') }}">{{ node.getCreatedTime|format_date('custom', 'F j, Y') }}</time>
+              </div>
             </div>
-          </aside>
-        </div>
-      {% endif %}
+          </div>
+        </aside>
+      </div>
 
       {% if content.comment is not empty %}
         <div class="full-node__comment">
