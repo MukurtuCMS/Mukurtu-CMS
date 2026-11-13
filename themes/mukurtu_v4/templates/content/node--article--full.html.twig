@@ -4,7 +4,8 @@
  * Theme override to display an article node in full view mode.
  *
  * Uses the same main column + sidebar grid as Digital Heritage and Person,
- * with category and keywords in the sidebar.
+ * with tags in the sidebar. Media assets render in the main column through
+ * field--node--field-page-media-assets.html.twig, as on basic pages.
  *
  * Without this template, articles fell back to node.html.twig, which has no
  * grid, and printed every component of the shipped display - including the
@@ -18,12 +19,7 @@
  * @see template_preprocess_node()
  */
 #}
-{% set sidebar_fields = [
-  'field_article_category',
-  'field_article_keywords',
-  'field_category',
-  'field_keywords',
-] %}
+{% set sidebar_fields = ['field_article_tags'] %}
 
 {# An empty field still leaves cache metadata in content, so check for a
    rendered field rather than "is not empty". #}
@@ -49,10 +45,7 @@
             'links',
             'flag_export_content',
             'comment',
-            'field_article_category',
-            'field_article_keywords',
-            'field_category',
-            'field_keywords'
+            'field_article_tags'
           ) }}
 
         </div>
