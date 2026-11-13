@@ -75,6 +75,59 @@ test.describe('Focus visible (admin)', () => {
     });
   }
 
+  // Gin's default focus color is 60% transparent, which measures 2.27:1 on
+  // white (#2626). Every Gin focus ring takes its color from this variable.
+  test('Focus visible: the light mode focus ring has enough contrast', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/admin/config/system/site-information');
+    const field = page.locator('input[name="site_name"]');
+    await field.focus();
+    // The ring fades in, so this retries until the transition has finished.
+    await expect(field).toHaveCSS('box-shadow', /rgb\(0, 125, 250\)/);
+  });
+
+  // Forced colors removes box-shadow, which is how Gin draws focus (#2626).
+  test('Focus visible: form fields keep an outline in forced colors', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/admin/config/system/site-information');
+    const field = page.locator('input[name="site_name"]');
+    await field.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(field).toBeFocused();
+    await expect(field).toHaveCSS('outline-style', 'solid');
+  });
+
+  // Gin gives links outline: none and draws focus as a box-shadow, so a link
+  // in a message had no focus indicator in forced colors (#2657). The message
+  // is injected so the test doesn't depend on which messages a page shows.
+  test('Focus visible: links in messages keep an outline in forced colors', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/admin/config/system/site-information');
+    await page.evaluate(() => {
+      const wrapper = document.createElement('div');
+      wrapper.setAttribute('data-drupal-messages', '');
+      wrapper.innerHTML =
+        '<div class="messages messages--warning"><a href="#" id="pw-message-link">Message link</a></div>';
+      document.querySelector('main')?.prepend(wrapper);
+    });
+    const link = page.locator('#pw-message-link');
+    await link.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(link).toBeFocused();
+    await expect(link).toHaveCSS('outline-style', 'solid');
+  });
+
+  // The outline is limited by this attribute, because the public theme draws
+  // its own focus ring and a second one would double it.
+  test('Focus visible: public pages are outside the forced colors outline', async ({ page }) => {
+    await page.goto('/admin/config/system/site-information');
+    await expect(page.locator('body')).toHaveAttribute('data-gin-layout-density');
+    await page.goto('/');
+    await expect(page.locator('body')).not.toHaveAttribute('data-gin-layout-density');
+  });
+
   // The fix hides the in-form originals, so the sticky copies become the
   // only way to submit. Pin that they are there and usable, or a future
   // change to Gin's markup could take the buttons away entirely and still

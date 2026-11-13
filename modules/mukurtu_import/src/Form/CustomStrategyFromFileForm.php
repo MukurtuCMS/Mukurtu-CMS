@@ -78,9 +78,12 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     $bundle_keys = array_keys($bundle_options);
     $form['bundle'] = [
       '#type' => 'radios',
+      // With no type to choose, there's no sub-type to choose either, and
+      // the type can't change to redraw this.
+      '#access' => !empty($form['entity_type_id']['#options']),
       '#title' => $this->t('Sub-type'),
       '#options' => $bundle_options,
-      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle() ?? reset($bundle_keys),
+      '#default_value' => $form_state->getValue('bundle') ?? $this->importConfig->getTargetBundle() ?? (reset($bundle_keys) ?: NULL),
       '#description' => $this->t('Optional Sub-type. When importing new content or media, they will be of this type if not specified in the import metadata.'),
       '#prefix' => "<div id=\"bundle-select\">",
       '#suffix' => "</div>",
@@ -364,7 +367,7 @@ class CustomStrategyFromFileForm extends ImportBaseForm {
     // Check how many fields for this file we have mapped with the selected process.
     $form['bundle']['#options'] = $this->getBundleOptions($form_state->getValue('entity_type_id'));
     $optionKeys = array_keys($form['bundle']['#options']);
-    $default = reset($optionKeys);
+    $default = reset($optionKeys) ?: NULL;
     $bundle = $default == -1 ? NULL : $default;
     $form['bundle']['#default_value'] = $default;
     $form['bundle']['#value'] = $default;
