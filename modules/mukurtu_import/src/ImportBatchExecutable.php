@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_import;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Utility\Error;
+use Drupal\migrate\Event\MigrateMapSaveEvent;
 use Drupal\migrate_tools\MigrateBatchExecutable;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
@@ -14,6 +15,24 @@ use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
  * Defines an import executable class for batch import via migrate API.
  */
 class ImportBatchExecutable extends MigrateBatchExecutable {
+
+  /**
+   * Seconds of row processing per batch request before handing back.
+   *
+   * Keeps each request well under typical PHP and proxy timeouts on shared
+   * hosting, and keeps the progress bar moving on large files.
+   */
+  const TIME_LIMIT = 5;
+
+  /**
+   * Seconds this import() call may process rows, or NULL for no limit.
+   */
+  protected ?float $timeLimit = NULL;
+
+  /**
+   * When the current import() call started, from microtime().
+   */
+  protected ?float $importStartedAt = NULL;
 
   /**
    * Batch import from a set of migration definitions rather than plugins.
@@ -84,6 +103,10 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $migration_plugin_manager,
       $options,
     );
+    // Core no longer calls migrate_tools' checkStatus(), so its per-request
+    // batch limit never applies and a whole file would import in a single
+    // request. Stop between rows once the time limit is reached instead.
+    $executable->timeLimit = (float) ($options['time_limit'] ?? self::TIME_LIMIT);
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
       $context['sandbox']['batch_limit'] = $executable->calculateBatchLimit($context);
@@ -151,6 +174,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
         $context['results'][$migration->id()]['messages'],
         iterator_to_array($executable->getIdMap()->getMessages())
       );
+      // A large file takes several requests. Clear what was just collected
+      // so the next request doesn't collect the same messages again.
+      $executable->getIdMap()->clearMessages();
     }
     foreach ($message->getErrorMessages() as $error_message) {
       $context['results'][$migration->id()]['messages'][] = (object) ['message' => $error_message];
@@ -444,6 +470,44 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       '#items' => array_map(static fn (array $message) => $message['message'], $messages),
     ];
     return $summary . (string) \Drupal::service('renderer')->renderInIsolation($error_build);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function import() {
+    $this->importStartedAt = microtime(TRUE);
+    try {
+      return parent::import();
+    }
+    finally {
+      // migrate_tools removes this executable's event listeners on
+      // POST_IMPORT, which a crash or a busy migration never reaches. Make
+      // sure a leftover listener can't interrupt a later import() of the
+      // same migration in this request.
+      $this->importStartedAt = NULL;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Every processed row, including failed and ignored ones, is saved to the
+   * ID map, so this runs once per row. Once the time limit is reached, ask
+   * import() to stop after this row. The next batch request starts a new
+   * import(), whose source skips the rows already in the ID map.
+   */
+  public function onMapSave(MigrateMapSaveEvent $event) {
+    parent::onMapSave($event);
+    if ($this->timeLimit === NULL || $this->importStartedAt === NULL) {
+      return;
+    }
+    if ($event->getMap()->getQualifiedMapTableName() !== $this->migration->getIdMap()->getQualifiedMapTableName()) {
+      return;
+    }
+    if (microtime(TRUE) - $this->importStartedAt >= $this->timeLimit) {
+      $this->migration->interruptMigration(MigrationInterface::RESULT_INCOMPLETE);
+    }
   }
 
   /**

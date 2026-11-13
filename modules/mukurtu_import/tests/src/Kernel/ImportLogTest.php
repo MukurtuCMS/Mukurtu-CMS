@@ -539,6 +539,56 @@ class ImportLogTest extends MukurtuImportTestBase {
   }
 
   /**
+   * A large file imports across several batch requests.
+   *
+   * Core no longer calls migrate_tools' checkStatus(), so the batch limit
+   * never applied and a whole file imported in one long request. A time
+   * limit of 0 stops after every row, standing in for a file too big for one
+   * request. Messages must not be collected again on each request.
+   */
+  public function testLargeFileImportsAcrossSeveralRequests() {
+    $import_id = $this->container->get('uuid')->generate();
+    $nodes = [$this->createNode('A'), $this->createNode('B'), $this->createNode('C')];
+    $data = [
+      ['nid', 'title'],
+      [$nodes[0]->id(), 'A updated'],
+      [$nodes[1]->id(), ''],
+      [$nodes[2]->id(), 'C updated'],
+    ];
+    $file = $this->createCsvFile($data);
+    $mapping = [
+      ['target' => 'nid', 'source' => 'nid'],
+      ['target' => 'title', 'source' => 'title'],
+    ];
+    $definition = $this->buildDefinition($file, $mapping, $import_id);
+
+    $context = ['results' => [], 'sandbox' => []];
+    $requests = 0;
+    do {
+      $context['finished'] = 1;
+      ImportBatchExecutable::batchProcessImportDefinition($definition, ['time_limit' => 0], $context);
+      $requests++;
+    } while ($context['finished'] < 1 && $requests < 10);
+    ImportBatchExecutable::batchFinishedImport(TRUE, $context['results'], []);
+
+    $this->assertGreaterThan(1, $requests, 'The file was imported across several requests');
+    $this->assertEquals(1, $context['finished']);
+
+    $row = $this->loadLogRowsByFid($import_id)[$file->id()];
+    $this->assertEquals(3, $row->count_processed);
+    $this->assertEquals(2, $row->count_updated);
+    $this->assertEquals(1, $row->count_failed);
+    $this->assertSame(1, substr_count($row->messages, 'Title:'), 'The row error is reported once');
+
+    $messages = $this->container->get('tempstore.private')->get('mukurtu_import')->get('batch_results_messages');
+    $this->assertCount(1, $messages);
+    $this->assertStringStartsWith('Row 3: Title:', $messages[0]['message']);
+
+    $this->assertEquals('A updated', Node::load($nodes[0]->id())->getTitle());
+    $this->assertEquals('C updated', Node::load($nodes[2]->id())->getTitle());
+  }
+
+  /**
    * A run that finds its migration busy leaves the other run alone.
    *
    * Regression test for two runs of the same file sharing a migration ID.
