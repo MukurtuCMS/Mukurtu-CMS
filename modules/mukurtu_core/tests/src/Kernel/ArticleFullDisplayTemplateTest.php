@@ -211,7 +211,7 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
    */
   public function testPublishedDateEndsSidebar(): void {
     $created = mktime(12, 0, 0, 11, 13, 2025);
-    $this->renderNode($this->createArticle(['created' => $created]));
+    $build = $this->renderNode($this->createArticle(['created' => $created]));
 
     $section = $this->cssSelect('.full-node__sidebar .sidebar-section');
     $this->assertCount(1, $section);
@@ -222,7 +222,9 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
     $time = $this->cssSelect('.full-node__sidebar .field--name-created time');
     $this->assertCount(1, $time);
     $this->assertSame('November 13, 2025', trim((string) $time[0]));
-    $this->assertSame(date('c', $created), (string) $time[0]['datetime']);
+    $this->assertSame(gmdate('Y-m-d\\TH:i:s', $created) . '+0000', (string) $time[0]['datetime']);
+    // The text follows the viewer's timezone, so the cache must vary by it.
+    $this->assertContains('timezone', $build['#cache']['contexts']);
   }
 
   /**

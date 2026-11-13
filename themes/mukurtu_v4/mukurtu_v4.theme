@@ -101,6 +101,19 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
   }
 
+  // The published date at the end of the article sidebar (see
+  // node--article--full.html.twig). The text follows the viewer's timezone,
+  // so it varies the render cache by timezone, as core's date formatters do.
+  if ($node->bundle() === 'article' && ($variables['view_mode'] ?? '') === 'full') {
+    $created = (int) $node->getCreatedTime();
+    $variables['published_date'] = [
+      '#theme' => 'time',
+      '#timestamp' => $created,
+      '#text' => \Drupal::service('date.formatter')->format($created, 'custom', 'F j, Y'),
+      '#cache' => ['contexts' => ['timezone']],
+    ];
+  }
+
   // This creates a twig variable that can be used in node templates to
   // render the media assets field (a second time) with thumbnail display.
   if ($node->hasField('field_media_assets')) {
