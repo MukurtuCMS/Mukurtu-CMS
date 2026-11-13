@@ -219,11 +219,15 @@ test('asks before leaving while files upload, and keeps uploading on Stay', asyn
     .setInputFiles([IMAGE, AUDIO_1]);
   await expect.poll(() => uploads.length).toBe(1);
 
-  const dialog = page.waitForEvent('dialog');
+  // The click doesn't finish until the question is answered, so answer it
+  // from a listener.
+  let asked = '';
+  page.once('dialog', async (dialog) => {
+    asked = dialog.type();
+    await dialog.dismiss();
+  });
   await clickAway(page);
-  const asked = await dialog;
-  expect(asked.type()).toBe('beforeunload');
-  await asked.dismiss();
+  expect(asked).toBe('beforeunload');
   release();
 
   await expect(announced(page)).toContainText('Finished uploading 2 files.', { timeout: SETTLE });
