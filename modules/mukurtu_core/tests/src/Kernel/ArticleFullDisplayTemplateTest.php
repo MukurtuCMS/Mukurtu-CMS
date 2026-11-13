@@ -21,8 +21,8 @@ use PHPUnit\Framework\Attributes\Group;
  * Articles used to fall back to the bare node.html.twig: no full-node grid,
  * and every component of the shipped display printed, including the "Title"
  * extra field, node links and the export flag. The template now uses the
- * same main column + sidebar grid as Digital Heritage and Person, and leaves
- * those three components out.
+ * full-node grid with a single full-width column (no sidebar), puts category
+ * and keywords after the body, and leaves those three components out.
  *
  * The "Title" extra field, links and flag come from modules this test does
  * not install, so they are stood in for by markup under the same render
@@ -139,20 +139,31 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
   }
 
   /**
-   * The article uses the full-node grid, with category in the sidebar.
+   * The article uses the full-node grid, with category after the body.
    */
   public function testArticleUsesFullNodeGrid(): void {
     $term = Term::create(['vid' => 'category', 'name' => 'Announcements']);
     $term->save();
+    // Category's weight would put it first; the template moves it after.
+    \Drupal::service('entity_display.repository')->getViewDisplay('node', 'article')
+      ->setComponent('field_article_category', [
+        'type' => 'entity_reference_label',
+        'label' => 'above',
+        'weight' => -10,
+        'settings' => ['link' => FALSE],
+      ])
+      ->save();
     $this->renderArticle($this->createArticle(['field_article_category' => $term->id()]));
 
-    $this->assertCount(1, $this->cssSelect('.full-node .full-node__grid .full-node__main .full-node__content'));
-    $this->assertStringContainsString('Article body text', (string) $this->cssSelect('.full-node__content')[0]->asXML());
+    $this->assertCount(1, $this->cssSelect('.full-node.full-node--article .full-node__grid .full-node__main .full-node__content'));
+    $this->assertCount(0, $this->cssSelect('.full-node__list, .full-node__sidebar'));
 
-    $sidebar = $this->cssSelect('.full-node__list aside.full-node__sidebar .sidebar-section');
-    $this->assertCount(1, $sidebar);
-    $this->assertStringContainsString('Announcements', (string) $sidebar[0]->asXML());
-    $this->assertStringNotContainsString('Announcements', (string) $this->cssSelect('.full-node__content')[0]->asXML());
+    $content = (string) $this->cssSelect('.full-node__content')[0]->asXML();
+    $body_position = strpos($content, 'Article body text');
+    $category_position = strpos($content, 'Announcements');
+    $this->assertNotFalse($body_position);
+    $this->assertNotFalse($category_position);
+    $this->assertGreaterThan($body_position, $category_position);
 
     $comments = $this->cssSelect('.full-node__grid > .full-node__comment .stand-in-comments');
     $this->assertCount(1, $comments);
@@ -170,13 +181,14 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
   }
 
   /**
-   * With no category or keywords, the sidebar is not rendered at all.
+   * With no category or keywords, the body still renders on its own.
    */
-  public function testNoSidebarWithoutCategoryOrKeywords(): void {
+  public function testArticleWithoutTerms(): void {
     $this->renderArticle($this->createArticle());
 
-    $this->assertCount(1, $this->cssSelect('.full-node__main'));
-    $this->assertCount(0, $this->cssSelect('.full-node__list'));
+    $this->assertCount(1, $this->cssSelect('.full-node__content'));
+    $this->assertStringContainsString('Article body text', (string) $this->cssSelect('.full-node__content')[0]->asXML());
+    $this->assertCount(0, $this->cssSelect('.field--name-field-article-category'));
   }
 
 }
