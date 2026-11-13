@@ -100,6 +100,15 @@ class ShippedSearchSuggestionConfigTest extends UnitTestCase {
   }
 
   /**
+   * New sites ship with both kinds of suggestions turned on.
+   */
+  public function testSuggestionsShipOn(): void {
+    $settings = $this->shipped('modules/mukurtu_search/config/install/mukurtu_search.settings.yml');
+    $this->assertTrue($settings['search_suggestions_enabled']);
+    $this->assertTrue($settings['header_suggestions_enabled']);
+  }
+
+  /**
    * Dictionary words come from every field the dictionary search box matches.
    */
   public function testDictionarySuggestionSources(): void {

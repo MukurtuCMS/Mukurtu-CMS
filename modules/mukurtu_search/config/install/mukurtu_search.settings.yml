@@ -2,3 +2,5 @@ collapse_multipage_pages: true
 collapse_community_records: false
 header_search_enabled: true
 header_search_path: '/browse'
+search_suggestions_enabled: true
+header_suggestions_enabled: true

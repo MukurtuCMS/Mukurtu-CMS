@@ -68,10 +68,12 @@ class SearchSuggestionHooks {
     if (!$search) {
       return;
     }
+    $settings = \Drupal::config('mukurtu_search.settings');
     $access = \Drupal::service('search_api_autocomplete.helper')->access($search, \Drupal::currentUser());
     $metadata = CacheableMetadata::createFromRenderArray($element)
-      ->merge(CacheableMetadata::createFromObject($access));
-    if ($access->isAllowed()) {
+      ->merge(CacheableMetadata::createFromObject($access))
+      ->addCacheableDependency($settings);
+    if (($settings->get('search_suggestions_enabled') ?? TRUE) && $access->isAllowed()) {
       $url = Url::fromRoute('search_api_autocomplete.autocomplete', ['search_api_autocomplete_search' => $search_id] + $data)
         ->toString(TRUE);
       $metadata = $metadata->merge(CacheableMetadata::createFromObject($url));

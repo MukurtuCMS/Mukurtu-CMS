@@ -69,7 +69,9 @@ class SearchSuggestController extends ControllerBase {
    */
   protected function page(): ?array {
     $config = $this->config('mukurtu_search.settings');
-    if (($config->get('backend') ?? 'db') !== 'db' || !($config->get('header_search_enabled') ?? TRUE)) {
+    if (($config->get('backend') ?? 'db') !== 'db'
+      || !($config->get('header_search_enabled') ?? TRUE)
+      || !($config->get('header_suggestions_enabled') ?? TRUE)) {
       return NULL;
     }
     return static::PAGES[$config->get('header_search_path') ?? '/browse'] ?? NULL;
