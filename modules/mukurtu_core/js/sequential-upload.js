@@ -12,11 +12,11 @@
  * file it sent. The messages are moved above the field, so an error about one
  * file is still there after the files after it upload.
  *
- * A file over the size limit in the field's data-mukurtu-max-filesize
- * attribute isn't sent. Its error is shown above the field instead.
+ * A file over the size limit in drupalSettings.mukurtuSequentialUpload isn't
+ * sent. Its error is shown above the field instead.
  */
 
-(($, Drupal, once) => {
+(($, Drupal, drupalSettings, once) => {
   const FIELD = '.js-form-managed-file.js-mukurtu-sequential-upload';
   const UPLOAD_BUTTON = '.js-form-submit[data-drupal-selector$="upload-button"]';
 
@@ -225,7 +225,7 @@
 
     const file = queue.files.shift();
     queue.current += 1;
-    const limit = sizeLimit(input);
+    const limit = sizeLimit();
     if (limit && file.size > limit.bytes) {
       refuseOversized(input, queue.key, file, limit);
       queue.failed += 1;
@@ -292,26 +292,18 @@
   }
 
   /**
-   * Reads the largest file a field's server will take in one upload.
-   *
-   * @param {HTMLInputElement} input
-   *   The field's file input.
+   * Reads the largest file the server takes in one upload.
    *
    * @return {{bytes: number, label: string}|null}
-   *   The limit in bytes and as text, or null if the field doesn't say.
+   *   The limit in bytes and as text, or null if the page doesn't say.
    */
-  function sizeLimit(input) {
-    const field = input.closest(FIELD);
-    const bytes = field
-      ? parseInt(field.getAttribute('data-mukurtu-max-filesize'), 10)
-      : NaN;
+  function sizeLimit() {
+    const settings = drupalSettings.mukurtuSequentialUpload || {};
+    const bytes = Number(settings.maxFilesize);
     if (!bytes || bytes < 1) {
       return null;
     }
-    return {
-      bytes,
-      label: field.getAttribute('data-mukurtu-max-filesize-label') || '',
-    };
+    return { bytes, label: settings.maxFilesizeLabel || '' };
   }
 
   /**
@@ -368,7 +360,7 @@
       return;
     }
     const files = Array.from(input.files);
-    const limit = sizeLimit(input);
+    const limit = sizeLimit();
     const oversized = limit && files.some((file) => file.size > limit.bytes);
     if (files.length < 2 && !oversized) {
       return;
@@ -421,4 +413,4 @@
       });
     },
   };
-})(jQuery, Drupal, once);
+})(jQuery, Drupal, drupalSettings, once);

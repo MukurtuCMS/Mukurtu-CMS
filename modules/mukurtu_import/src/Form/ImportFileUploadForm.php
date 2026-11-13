@@ -48,9 +48,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
 
     // Upload each file in its own request, so the server's upload limit
     // applies to each file rather than to all of them together.
-    $form['#attached']['library'][] = 'mukurtu_core/sequential-upload';
-
-    $form['metadata_files'] = [
+    $form['metadata_files'] = SequentialUpload::apply([
       '#type' => 'managed_file',
       '#title' => $this->t('Metadata Files'),
       '#description' => $this->t('Add your metadata files (e.g., CSV) here. You will configure how they are imported in the next step.'),
@@ -63,10 +61,10 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       ],
       '#attributes' => [
         'name' => 'import_file_upload',
-      ] + SequentialUpload::attributes(),
-    ];
+      ],
+    ]);
 
-    $form['binary_files'] = [
+    $form['binary_files'] = SequentialUpload::apply([
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
       '#description' => $this->t('Add your media & binary files here. You can reference these files by file name in your metadata files.') . ' ' . $this->t('Maximum size per file: @size.', [
@@ -78,8 +76,8 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#upload_validators' => $this->getAllowedMediaExtensionsValidator(),
       '#attributes' => [
         'name' => 'import_file_upload',
-      ] + SequentialUpload::attributes(),
-    ];
+      ],
+    ]);
 
     $form['actions'] = [
       '#type' => 'actions',

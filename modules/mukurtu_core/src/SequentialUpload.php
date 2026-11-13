@@ -8,31 +8,36 @@ use Drupal\Component\Utility\Environment;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 
 /**
- * Settings for managed_file fields that upload picked files one at a time.
+ * Makes a managed_file field upload picked files one at a time.
  *
- * See the mukurtu_core/sequential-upload library, which the form must also
- * attach.
+ * See the mukurtu_core/sequential-upload library.
  */
 final class SequentialUpload {
 
   /**
-   * Returns the #attributes a managed_file field needs.
+   * Turns on one-at-a-time uploads for a managed_file element.
    *
-   * The size limit lets the browser refuse a file the server can't take
-   * before sending it. A request over the limit can be refused before Drupal
-   * sees it, and Drupal then can't say which file was too big.
+   * Also gives the browser the largest file the server takes in one upload,
+   * so it can refuse a bigger file before sending it. A request over the
+   * limit can be refused before Drupal sees it, and Drupal then can't say
+   * which file was too big. The limit goes in drupalSettings because
+   * managed_file keeps only the class and ID of its #attributes.
+   *
+   * @param array $element
+   *   The managed_file element.
    *
    * @return array
-   *   The class that turns on one-at-a-time uploads, and the largest file
-   *   the server takes in one upload, in bytes and as text.
+   *   The element, with the class, library, and limit added.
    */
-  public static function attributes(): array {
+  public static function apply(array $element): array {
     $max = (int) Environment::getUploadMaxSize();
-    return [
-      'class' => ['js-mukurtu-sequential-upload'],
-      'data-mukurtu-max-filesize' => (string) $max,
-      'data-mukurtu-max-filesize-label' => (string) ByteSizeMarkup::create($max),
+    $element['#attributes']['class'][] = 'js-mukurtu-sequential-upload';
+    $element['#attached']['library'][] = 'mukurtu_core/sequential-upload';
+    $element['#attached']['drupalSettings']['mukurtuSequentialUpload'] = [
+      'maxFilesize' => $max,
+      'maxFilesizeLabel' => (string) ByteSizeMarkup::create($max),
     ];
+    return $element;
   }
 
 }

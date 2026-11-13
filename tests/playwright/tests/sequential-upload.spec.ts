@@ -131,23 +131,17 @@ test('keeps a refused file\'s error while the rest upload', async ({ page }) => 
 });
 
 test('doesn\'t send a file over the size limit', async ({ page }) => {
-  const field = page.locator('.js-form-managed-file.js-mukurtu-sequential-upload')
-    .filter({ has: page.locator('[data-drupal-selector="edit-binary-files-upload"]') });
   // The server gives its own limit.
-  expect(Number(await field.getAttribute('data-mukurtu-max-filesize'))).toBeGreaterThan(0);
+  expect(await page.evaluate(() => drupalSettings.mukurtuSequentialUpload?.maxFilesize))
+    .toBeGreaterThan(0);
 
   // A file over the real limit would be about 100 MB, so lower it to fall
-  // between the two audio files. Each response replaces the field, with the
-  // server's limit, so lower it again on every new one.
+  // between the two audio files. Each response merges the server's limit
+  // back into drupalSettings, so ignore those writes.
   await page.evaluate(() => {
-    const lower = () => document.querySelectorAll('.js-mukurtu-sequential-upload').forEach((element) => {
-      if (element.getAttribute('data-mukurtu-max-filesize') !== '48500') {
-        element.setAttribute('data-mukurtu-max-filesize', '48500');
-        element.setAttribute('data-mukurtu-max-filesize-label', '48.5 KB');
-      }
-    });
-    lower();
-    new MutationObserver(lower).observe(document.body, { childList: true, subtree: true });
+    const settings = drupalSettings.mukurtuSequentialUpload;
+    Object.defineProperty(settings, 'maxFilesize', { get: () => 48500, set: () => {}, enumerable: true });
+    Object.defineProperty(settings, 'maxFilesizeLabel', { get: () => '48.5 KB', set: () => {}, enumerable: true });
     const announce = Drupal.announce;
     window.__announced = [];
     Drupal.announce = (text, priority) => {

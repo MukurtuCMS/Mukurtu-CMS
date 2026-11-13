@@ -151,6 +151,7 @@ sequential-upload:
     js/sequential-upload.js: {}
   dependencies:
     - core/drupal
+    - core/drupalSettings
     - core/jquery
     - core/once
     - core/drupal.ajax
