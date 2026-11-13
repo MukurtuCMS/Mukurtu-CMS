@@ -3,14 +3,13 @@ status: true
 dependencies:
   config:
     - field.field.node.article.body
-    - field.field.node.article.field_article_category
-    - field.field.node.article.field_article_image
-    - field.field.node.article.field_article_keywords
-    - image.style.thumbnail
+    - field.field.node.article.field_article_tags
+    - field.field.node.article.field_page_media_assets
     - node.type.article
   module:
-    - image
+    - media_library
     - path
+    - tagify
     - text
 id: node.article.default
 targetEntityType: node
@@ -19,7 +18,7 @@ mode: default
 content:
   body:
     type: text_textarea_with_summary
-    weight: 4
+    weight: 1
     region: content
     settings:
       rows: 9
@@ -33,49 +32,37 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_article_category:
-    type: options_buttons
-    weight: 1
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  field_article_image:
-    type: image_image
+  field_article_tags:
+    type: tagify_entity_reference_autocomplete_widget
     weight: 3
     region: content
     settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
+      match_operator: CONTAINS
+      match_limit: 0
+      placeholder: ''
+      suggestions_dropdown: 0
+      show_entity_id: 0
+      show_info_label: 0
+      info_label: ''
+      parent_selection: 1
     third_party_settings: {  }
-  field_article_keywords:
-    type: entity_reference_autocomplete
+  field_page_media_assets:
+    type: media_library_widget
     weight: 2
     region: content
     settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_category:
-    type: options_buttons
-    weight: 1
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  field_keywords:
-    type: entity_reference_autocomplete
-    weight: 2
-    region: content
-    settings:
-      match_operator: CONTAINS
-      match_limit: 10
-      size: 60
-      placeholder: ''
+      media_types:
+        - audio
+        - document
+        - external_embed
+        - image
+        - remote_video
+        - soundcloud
+        - video
     third_party_settings: {  }
   langcode:
     type: language_select
-    weight: 2
+    weight: 4
     region: content
     settings:
       include_locked: true

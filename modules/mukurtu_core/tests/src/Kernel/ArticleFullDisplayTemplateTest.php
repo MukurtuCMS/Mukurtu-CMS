@@ -21,9 +21,8 @@ use PHPUnit\Framework\Attributes\Group;
  * Articles used to fall back to the bare node.html.twig: no full-node grid,
  * and every component of the shipped display printed, including the "Title"
  * extra field, node links and the export flag. The template now uses the
- * same main column + sidebar grid as Digital Heritage and Person, with
- * category and keywords in the sidebar, and leaves those three components
- * out.
+ * same main column + sidebar grid as Digital Heritage and Person, with tags
+ * in the sidebar, and leaves those three components out.
  *
  * The "Title" extra field, links and flag come from modules this test does
  * not install, so they are stood in for by markup under the same render
@@ -72,27 +71,27 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
       'label' => 'Body',
     ])->save();
 
-    Vocabulary::create(['vid' => 'category', 'name' => 'Category'])->save();
+    Vocabulary::create(['vid' => 'article_tags', 'name' => 'Article Tags'])->save();
     FieldStorageConfig::create([
-      'field_name' => 'field_article_category',
+      'field_name' => 'field_article_tags',
       'entity_type' => 'node',
       'type' => 'entity_reference',
       'settings' => ['target_type' => 'taxonomy_term'],
     ])->save();
     FieldConfig::create([
-      'field_name' => 'field_article_category',
+      'field_name' => 'field_article_tags',
       'entity_type' => 'node',
       'bundle' => 'article',
-      'label' => 'Category',
+      'label' => 'Tags',
       'settings' => [
         'handler' => 'default:taxonomy_term',
-        'handler_settings' => ['target_bundles' => ['category' => 'category']],
+        'handler_settings' => ['target_bundles' => ['article_tags' => 'article_tags']],
       ],
     ])->save();
 
     \Drupal::service('entity_display.repository')->getViewDisplay('node', 'article')
       ->setComponent('body', ['type' => 'text_default', 'label' => 'hidden'])
-      ->setComponent('field_article_category', [
+      ->setComponent('field_article_tags', [
         'type' => 'entity_reference_label',
         'label' => 'above',
         'settings' => ['link' => FALSE],
@@ -140,12 +139,12 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
   }
 
   /**
-   * The article uses the full-node grid, with category in the sidebar.
+   * The article uses the full-node grid, with tags in the sidebar.
    */
   public function testArticleUsesFullNodeGrid(): void {
-    $term = Term::create(['vid' => 'category', 'name' => 'Announcements']);
+    $term = Term::create(['vid' => 'article_tags', 'name' => 'Announcements']);
     $term->save();
-    $this->renderArticle($this->createArticle(['field_article_category' => $term->id()]));
+    $this->renderArticle($this->createArticle(['field_article_tags' => $term->id()]));
 
     $this->assertCount(1, $this->cssSelect('.full-node.full-node--article .full-node__grid .full-node__main .full-node__content'));
     $content = (string) $this->cssSelect('.full-node__content')[0]->asXML();
@@ -172,12 +171,12 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
   }
 
   /**
-   * With no category or keywords, the sidebar is not rendered at all.
+   * With no tags, the sidebar is not rendered at all.
    *
    * An empty field still leaves cache metadata in the content array, so a
    * plain "is not empty" check would print an empty sidebar box.
    */
-  public function testNoSidebarWithoutCategoryOrKeywords(): void {
+  public function testNoSidebarWithoutTags(): void {
     $this->renderArticle($this->createArticle());
 
     $this->assertCount(1, $this->cssSelect('.full-node__main'));

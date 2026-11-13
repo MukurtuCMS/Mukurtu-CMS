@@ -3,8 +3,7 @@ status: true
 dependencies:
   config:
     - field.storage.node.body
-    - field.storage.node.field_article_category
-    - field.storage.node.field_article_keywords
+    - field.storage.node.field_article_tags
     - field.storage.node.field_content_type
     - field.storage.node.field_page_media_assets
     - search_api.server.mukurtu_solr_server
@@ -124,64 +123,34 @@ field_settings:
     dependencies:
       module:
         - node
-  node__field_article_category__name:
-    label: Category
+  node__field_article_tags__name:
+    label: Tags
     datasource_id: 'entity:node'
-    property_path: 'field_article_category:entity:name'
+    property_path: 'field_article_tags:entity:name'
     type: text
     dependencies:
       config:
-        - field.storage.node.field_article_category
+        - field.storage.node.field_article_tags
       module:
         - taxonomy
-  node__field_article_category__name__facet:
-    label: 'Category Facet'
+  node__field_article_tags__name__facet:
+    label: 'Tags Facet'
     datasource_id: 'entity:node'
-    property_path: 'field_article_category:entity:name'
+    property_path: 'field_article_tags:entity:name'
     type: string
     dependencies:
       config:
-        - field.storage.node.field_article_category
+        - field.storage.node.field_article_tags
       module:
         - taxonomy
-  node__field_article_category__uuid:
-    label: 'Category » Taxonomy term » UUID'
+  node__field_article_tags__uuid:
+    label: 'Tags » Taxonomy term » UUID'
     datasource_id: 'entity:node'
-    property_path: 'field_article_category:entity:uuid'
+    property_path: 'field_article_tags:entity:uuid'
     type: text
     dependencies:
       config:
-        - field.storage.node.field_article_category
-      module:
-        - taxonomy
-  node__field_article_keywords__name:
-    label: Keywords
-    datasource_id: 'entity:node'
-    property_path: 'field_article_keywords:entity:name'
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.field_article_keywords
-      module:
-        - taxonomy
-  node__field_article_keywords__name__facet:
-    label: 'Keywords Facet'
-    datasource_id: 'entity:node'
-    property_path: 'field_article_keywords:entity:name'
-    type: string
-    dependencies:
-      config:
-        - field.storage.node.field_article_keywords
-      module:
-        - taxonomy
-  node__field_article_keywords__uuid:
-    label: 'Keywords » Taxonomy term » UUID'
-    datasource_id: 'entity:node'
-    property_path: 'field_article_keywords:entity:uuid'
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.field_article_keywords
+        - field.storage.node.field_article_tags
       module:
         - taxonomy
   node__field_category__name:
@@ -976,12 +945,9 @@ processor_settings:
       - node__body
       - node__field_all_related_content__title
       - node__field_alternate_spelling
-      - node__field_article_category__name
-      - node__field_article_category__name__facet
-      - node__field_article_category__uuid
-      - node__field_article_keywords__name
-      - node__field_article_keywords__name__facet
-      - node__field_article_keywords__uuid
+      - node__field_article_tags__name
+      - node__field_article_tags__name__facet
+      - node__field_article_tags__uuid
       - node__field_category__name
       - node__field_category__name__facet
       - node__field_category__uuid

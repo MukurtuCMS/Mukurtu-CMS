@@ -17,10 +17,8 @@ entity_fields_export_list:
     title: Title
     default_langcode: 'Default translation'
     body: Body
-    field_article_category: Category
-    field_article_image/target_id: 'Image > File ID'
-    field_article_image/alt: 'Image > Alternative text'
-    field_article_keywords: Keywords
+    field_page_media_assets: 'Media Assets'
+    field_article_tags: Tags
     uuid: UUID
     field_multipage_page_of: 'Multipage parent'
   node__collection:
@@ -510,6 +508,13 @@ entity_fields_export_list:
     filemime: 'File MIME type'
     filesize: 'File size'
     langcode: 'Language code'
+    uuid: UUID
+  taxonomy_term__article_tags:
+    langcode: Locale
+    name: Name
+    description: Description
+    parent: Parent
+    default_langcode: 'Default translation'
     uuid: UUID
   taxonomy_term__category:
     langcode: Locale

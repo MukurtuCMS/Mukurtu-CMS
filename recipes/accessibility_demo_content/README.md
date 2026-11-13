@@ -1,7 +1,7 @@
 # Accessibility demo content
 
 A Drupal recipe that creates one fully-described **Digital Heritage** item —
-plus every supporting entity it needs (a Community, a Protocol, 12 taxonomy
+plus every supporting entity it needs (a Community, a Protocol, 14 taxonomy
 terms, four media items (three with real files, one a real oEmbed video), a
 knowledge-keeper paragraph, one related Article, and a sample Multipage
 Item) — so the accessibility program has real, rendered pages to test on
@@ -34,8 +34,9 @@ for what that testing surfaced.
 - **Two OG memberships** granting the site's admin account (uid 1) the
   Community Manager role on the Sample Community and the Protocol Steward
   role on the Public Access protocol — see below for why both are needed.
-- **12 taxonomy terms**, one each for Category, Contributor, Creator, Format,
-  Language, Location, People, Publisher, Subject, Type, and two Keywords.
+- **14 taxonomy terms**, one each for Category, Contributor, Creator, Format,
+  Language, Location, People, Publisher, Subject, Type, two Keywords, and
+  two Article Tags.
 - **4 media items**:
   - An image, an audio file, and a PDF document, each with a real (generated
     placeholder) file so the page actually renders media instead of broken
@@ -49,9 +50,9 @@ for what that testing surfaced.
 - **1 paragraph** (Indigenous Knowledge Keeper) with every field filled in.
 - **1 fully-described Article node** ("Sample Related Story"), with a body
   containing a heading, a list, and a link (useful for testing rich-text
-  accessibility), plus `field_article_category`, `field_article_keywords`,
-  and `field_article_image` (with alt text) — all reusing terms/files created
-  above rather than duplicating them. Also used as the "Related content"
+  accessibility), plus `field_page_media_assets` (reusing the image media
+  item created above) and `field_article_tags` (two Article Tags terms of
+  its own). Also used as the "Related content"
   target for every other recipe in this directory (Digital Heritage,
   Collection, Person, Place, Word List/Dictionary Word), since it needs to
   exist before any of them.

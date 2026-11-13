@@ -53,6 +53,7 @@ class ImportTemplateExportConsistencyTest extends KernelTestBase {
     'remote_video_all_fields' => 'media__remote_video',
     'sample_sentence_all_fields' => 'paragraph__sample_sentence',
     'soundcloud_all_fields' => 'media__soundcloud',
+    'taxonomy_article_tags_all_fields' => 'taxonomy_term__article_tags',
     'taxonomy_category_all_fields' => 'taxonomy_term__category',
     'taxonomy_community_type_all_fields' => 'taxonomy_term__community_type',
     'taxonomy_contributor_all_fields' => 'taxonomy_term__contributor',

@@ -10,10 +10,9 @@ _meta:
   bundle: article
   default_langcode: en
   depends:
-    4bcaac48-ddf0-4dab-87ae-27edd59c03bb: file
-    298c0286-34f6-4b00-8495-bc0e840be802: taxonomy_term
-    a153b9f5-f2ab-4d27-8306-aea67943618b: taxonomy_term
-    893ab887-eb7d-477b-964d-470e848e5544: taxonomy_term
+    2520bf8f-2993-4c32-9f95-062814b7a2cc: media
+    f6dce815-6d0c-4cf5-81e4-431b644bd9d3: taxonomy_term
+    b016e0f9-9138-4365-b120-3cada817f5d3: taxonomy_term
 default:
   title:
     -
@@ -52,16 +51,11 @@ default:
         <p>Here is a <a href="/">sample link back to the homepage</a> for link-text testing.</p>
       format: basic_html
       summary: 'Placeholder article created for accessibility testing.'
-  field_article_category:
+  field_page_media_assets:
     -
-      entity: 298c0286-34f6-4b00-8495-bc0e840be802
-  field_article_keywords:
+      entity: 2520bf8f-2993-4c32-9f95-062814b7a2cc
+  field_article_tags:
     -
-      entity: a153b9f5-f2ab-4d27-8306-aea67943618b
+      entity: f6dce815-6d0c-4cf5-81e4-431b644bd9d3
     -
-      entity: 893ab887-eb7d-477b-964d-470e848e5544
-  field_article_image:
-    -
-      entity: 4bcaac48-ddf0-4dab-87ae-27edd59c03bb
-      alt: 'A generated placeholder photograph of a woven basket with a brown gradient background, used only for accessibility testing.'
-      title: ''
+      entity: b016e0f9-9138-4365-b120-3cada817f5d3
