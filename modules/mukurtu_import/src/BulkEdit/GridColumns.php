@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\BulkEdit;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\mukurtu_core\BulkEdit\BulkEditColumns;
 
 /**
@@ -13,11 +14,14 @@ use Drupal\mukurtu_core\BulkEdit\BulkEditColumns;
  * The grid offers the item's label field plus the fields the bulk edit page
  * offers as columns, leaving out those whose CSV text is only IDs or WKT:
  * paragraphs, files, images and map coverage. Media also offers its text
- * source (embed code, video or SoundCloud URL) and Published. The grid
+ * source (embed code, video or SoundCloud URL) and Published, and an image
+ * field's alternative text is offered on its own, as "field/alt". The grid
  * starts with the fields the editor shows on the bulk edit table; their grid
  * choice is saved per type.
  */
 class GridColumns {
+
+  use StringTranslationTrait;
 
   /**
    * Field types left out of the grid.
@@ -49,6 +53,15 @@ class GridColumns {
       $source = $media_type?->getSource()->getSourceFieldDefinition($media_type);
       if ($source && !in_array($source->getType(), self::EXCLUDED_TYPES, TRUE)) {
         $fields[$source->getName()] = $source->getLabel();
+      }
+    }
+
+    // An image's alternative text, though not the image itself. Single-value
+    // fields only, so a semicolon in the text can't split it. Core's media
+    // "thumbnail" is generated from the source, so it's left out.
+    foreach ($definitions as $name => $definition) {
+      if (str_starts_with($name, 'field_') && $definition->getType() === 'image' && !$definition->getFieldStorageDefinition()->isMultiple()) {
+        $fields["$name/alt"] = $this->t('@field alternative text', ['@field' => $definition->getLabel()]);
       }
     }
 

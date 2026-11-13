@@ -136,7 +136,8 @@ class BulkEditGridForm extends FormBase {
       ];
       foreach ($fields as $field) {
         $originals[$key][$field] ??= $cells->text($item, $field);
-        $definition = $definitions[$field];
+        // A sub-column such as "field_media_image/alt" is part of its field.
+        $definition = $definitions[explode('/', $field, 2)[0]];
 
         // Fields shared by all translations are edited on the original row.
         if (!$item->isDefaultTranslation() && !$definition->isTranslatable()) {
@@ -220,10 +221,11 @@ class BulkEditGridForm extends FormBase {
     }
     $originals = $form_state->get('grid_originals') ?? [];
     $values = (array) $form_state->getValue('grid');
-    [, $type] = $form_state->get('grid_context');
+    [$view_id, $type] = $form_state->get('grid_context');
     $loaded = $this->loadTranslations($items);
     $first = reset($loaded);
     $definitions = \Drupal::service('entity_field.manager')->getFieldDefinitions($first->getEntityTypeId(), $type);
+    $available = (new GridColumns(_mukurtu_core_bulk_edit_columns($view_id)))->available($type);
 
     $saver = new GridRowSaver();
     $cells = new GridCellText();
@@ -258,7 +260,7 @@ class BulkEditGridForm extends FormBase {
       if (!$changes || isset($errors[$key])) {
         continue;
       }
-      $labels = array_map(fn($field) => (string) $definitions[$field]->getLabel(), array_keys($changes));
+      $labels = array_map(fn($field) => (string) ($available[$field] ?? $definitions[$field]->getLabel()), array_keys($changes));
       // Views Bulk Edit's own wording, so both kinds of bulk edit read alike
       // in an item's history.
       $log = (string) $this->formatPlural(count($labels), 'Edited as a part of bulk operation. Field changed: @fields', 'Edited as a part of bulk operation. Fields changed: @fields', ['@fields' => implode(', ', $labels)]);
@@ -377,8 +379,9 @@ class BulkEditGridForm extends FormBase {
     $plugins = \Drupal::service('plugin.manager.mukurtu_import_field_process');
     $list = ['#type' => 'html_tag', '#tag' => 'dl'];
     foreach ($fields as $field) {
-      $plugin = $plugins->getInstance(['field_definition' => $definitions[$field]]);
-      $format = $plugin ? $plugin->getFormatDescription($definitions[$field]) : '';
+      [$name, $property] = explode('/', $field, 2) + [1 => NULL];
+      $plugin = $plugins->getInstance(['field_definition' => $definitions[$name]]);
+      $format = $plugin ? $plugin->getFormatDescription($definitions[$name], $property) : '';
       if ((string) $format !== '') {
         $list[$field . '_label'] = ['#type' => 'html_tag', '#tag' => 'dt', '#value' => $available[$field]];
         $list[$field . '_format'] = ['#type' => 'html_tag', '#tag' => 'dd', '#value' => $format];

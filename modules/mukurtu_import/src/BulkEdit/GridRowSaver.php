@@ -20,13 +20,14 @@ class GridRowSaver {
    * @param \Drupal\Core\Entity\ContentEntityInterface $item
    *   The item, in the row's language.
    * @param array<string, string> $cells
-   *   The changed cells' text, keyed by field name, in CSV import format.
+   *   The changed cells' text, keyed by column: a field name, or a field name
+   *   and sub-property such as "field_media_image/alt". CSV import format.
    * @param string $log
    *   The revision log message.
    *
    * @return array<string, string[]>
-   *   Problems keyed by field name, with an empty-string key for those not
-   *   tied to one field. Empty when the item was saved.
+   *   Problems keyed by column, with an empty-string key for those not tied
+   *   to one. Empty when the item was saved.
    */
   public function save(ContentEntityInterface $item, array $cells, string $log): array {
     if (!$cells) {
@@ -37,10 +38,25 @@ class GridRowSaver {
     if (!$item->isDefaultTranslation()) {
       $row[$entity_type->getKey('langcode')] = $item->language()->getId();
     }
-    $row += $cells;
+
+    // Alternative text is part of its image. The importer replaces the whole
+    // image field, so the current file goes along with the new text.
+    $columns = $cells;
+    foreach (array_keys($cells) as $column) {
+      if (str_ends_with($column, '/alt')) {
+        $file = substr($column, 0, -4) . '/target_id';
+        $columns[$file] ??= (new GridCellText())->text($item, $file);
+      }
+    }
+    $targets = [];
+    foreach ($columns as $column => $text) {
+      $source = str_replace('/', '__', $column);
+      $targets[$source] = $column;
+      $row[$source] = $text;
+    }
 
     $strategy = GridStrategy::forBundle($item->getEntityTypeId(), $item->bundle());
-    $definition = $strategy->rowDefinition($row, array_keys($cells), $log);
+    $definition = $strategy->rowDefinition($row, $targets, $log);
     /** @var \Drupal\migrate\Plugin\MigrationInterface $migration */
     $migration = \Drupal::service('plugin.manager.migration')->createStubMigration($definition);
     $executable = new GridRowExecutable($migration, new MigrateMessage());
@@ -52,20 +68,42 @@ class GridRowSaver {
     }
 
     $destination = $migration->getDestinationPlugin();
-    $errors = $destination instanceof GridEntityContent ? $destination->getFieldErrors() : [];
+    $errors = [];
+    foreach ($destination instanceof GridEntityContent ? $destination->getFieldErrors() : [] as $field => $messages) {
+      $errors[self::column($field, $cells)] = array_merge($errors[self::column($field, $cells)] ?? [], $messages);
+    }
     // Conversion problems, such as an ambiguous term name, arrive as
-    // "migration:field:plugin: message".
+    // "migration:target:plugin: message".
     // The destination's own errors also arrive here, joined into one message.
     $known = array_merge([], ...array_values($errors));
     foreach ($executable->messages as $message) {
-      if (preg_match('/^[^:\s]+:([^:\s]+):[^:\s]+: (.*)$/s', $message, $parts) && array_key_exists($parts[1], $cells)) {
-        $errors[$parts[1]][] = $parts[2];
+      if (preg_match('/^[^:\s]+:([^:\s]+):[^:\s]+: (.*)$/s', $message, $parts) && ($column = self::column($parts[1], $cells)) !== '') {
+        $errors[$column][] = $parts[2];
       }
       elseif (!in_array($message, $known, TRUE) && $message !== implode("\n", $known)) {
         $errors[''][] = self::withoutServerPath($message);
       }
     }
     return $errors;
+  }
+
+  /**
+   * Returns the changed column a field or target belongs to.
+   *
+   * An error on "field_media_image" belongs to its changed
+   * "field_media_image/alt" column. Returns an empty string for none.
+   */
+  protected static function column(string $key, array $cells): string {
+    if ($key === '' || isset($cells[$key])) {
+      return $key;
+    }
+    $field = explode('/', $key, 2)[0];
+    foreach (array_keys($cells) as $column) {
+      if (explode('/', $column, 2)[0] === $field) {
+        return $column;
+      }
+    }
+    return '';
   }
 
   /**
