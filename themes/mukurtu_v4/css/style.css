@@ -9182,16 +9182,6 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   }
 }
 
-@media (min-width: 60rem) {
-  .full-node--article .full-node__main {
-    grid-column: 1/span 12;
-  }
-}
-@media (min-width: 90rem) {
-  .full-node--article .full-node__main {
-    grid-column: 2/span 12;
-  }
-}
 .full-node--article .full-node__content .field {
   -webkit-padding-before: 0;
           padding-block-start: 0;

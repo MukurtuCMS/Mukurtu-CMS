@@ -3,8 +3,8 @@
  * @file
  * Theme override to display an article node in full view mode.
  *
- * Uses the full-node grid with a single full-width column: no sidebar, and
- * category and keywords follow the body.
+ * Uses the same main column + sidebar grid as Digital Heritage and Person,
+ * with category and keywords in the sidebar.
  *
  * Without this template, articles fell back to node.html.twig, which has no
  * grid, and printed every component of the shipped display - including the
@@ -18,12 +18,21 @@
  * @see template_preprocess_node()
  */
 #}
-{% set term_fields = [
+{% set sidebar_fields = [
   'field_article_category',
   'field_article_keywords',
   'field_category',
   'field_keywords',
 ] %}
+
+{# An empty field still leaves cache metadata in content, so check for a
+   rendered field rather than "is not empty". #}
+{% set has_sidebar = false %}
+{% for field_name in sidebar_fields %}
+  {% if content[field_name]['#theme'] is defined %}
+    {% set has_sidebar = true %}
+  {% endif %}
+{% endfor %}
 
 <article{{ attributes }}>
   <div{{ content_attributes }} class="full-node full-node--article">
@@ -46,13 +55,21 @@
             'field_keywords'
           ) }}
 
-          {% for field_name in term_fields %}
-            {{ content[field_name] }}
-          {% endfor %}
-
         </div>
 
       </div>
+
+      {% if has_sidebar %}
+        <div class="full-node__list">
+          <aside class="full-node__sidebar">
+            <div class="sidebar-section">
+              {% for field_name in sidebar_fields %}
+                {{ content[field_name] }}
+              {% endfor %}
+            </div>
+          </aside>
+        </div>
+      {% endif %}
 
       {% if content.comment is not empty %}
         <div class="full-node__comment">
