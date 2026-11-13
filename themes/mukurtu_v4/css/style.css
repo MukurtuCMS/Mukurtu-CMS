@@ -1062,6 +1062,8 @@ a:not(.primary-nav__menu-link) svg.tel path {
           padding-inline-end: var(--v-space-3xs) !important;
   --tag-bg: var(--color-white);
   --tag-hover: var(--brand-light-accent);
+  --placeholder-color: var(--color-text-secondary);
+  --placeholder-color-focus: var(--color-text-secondary);
 }
 .tagify:hover:not(.tagify--focus):not(.tagify--invalid) {
   -webkit-box-shadow: 0 0 0 1px var(--color-text-secondary);
@@ -1077,6 +1079,18 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 .tagify.tagify--loading {
   background-image: none;
+}
+
+.tagify__dropdown__item--active {
+  background: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+@media (forced-colors: active) {
+  .tagify__dropdown__item--active {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
 }
 
 .translation-status-badge {
@@ -1533,9 +1547,14 @@ body.consent-popup-opened .klaro_toggle_dialog {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-4xxs);
+  -webkit-box-pack: safe center;
+      -ms-flex-pack: safe center;
+          justify-content: safe center;
+  overflow-y: auto;
   background-color: rgba(0, 0, 0, 0.7);
 }
 @supports not (backdrop-filter: blur()) {
@@ -1552,23 +1571,50 @@ body.consent-popup-opened .klaro_toggle_dialog {
   cursor: pointer;
   text-align: center;
 }
-.mukurtu-content-warnings:hover {
-  text-decoration: underline;
-}
-.mukurtu-content-warnings:focus-visible {
-  /* This overlay's label is white on its own dark 70% scrim, but it sits
-  over arbitrary uploaded media, so neither currentcolor drawn outward
-  nor any fixed colour is safe against what's behind it. Inset the ring
-  so it lands on the scrim, which is a known dark surface (#2199). */
-  outline: var(--focus-color) solid 2px;
-  outline-offset: -4px;
-}
 .mukurtu-content-warnings.dismissed {
   display: none;
 }
-
-.splide__track--nav .mukurtu-content-warning {
+.splide__track--nav .mukurtu-content-warnings > * {
   display: none;
+}
+
+.mukurtu-content-warnings__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mukurtu-content-warnings__list li {
+  list-style: none;
+  line-height: inherit;
+}
+.mukurtu-content-warnings__list li + li {
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+}
+
+.mukurtu-content-warnings__dismiss {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  color: inherit;
+  background: transparent;
+  border: 2px solid currentcolor;
+  font-size: var(--font-size-base);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-4xxs);
+  text-shadow: inherit;
+  cursor: pointer;
+}
+.mukurtu-content-warnings:hover .mukurtu-content-warnings__dismiss {
+  text-decoration: underline;
+}
+.mukurtu-content-warnings__dismiss:focus-visible {
+  /* The button sits on the overlay's own dark scrim, a known dark
+  surface, so a white ring offset from the white border reads against
+  it (#2199). */
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
 }
 
 .block-featured-content {
@@ -6738,6 +6784,99 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
 }
 .related-content .field__item[hidden] {
   display: none;
+}
+
+.related-content-preview {
+  padding-block: var(--v-space-4xxs);
+  -webkit-border-after: 1px solid var(--brand-light);
+          border-block-end: 1px solid var(--brand-light);
+  line-height: var(--line-height-s);
+}
+.related-content-preview__summary {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-5xs);
+  font-size: var(--font-size-s);
+  font-weight: var(--text-bold);
+  cursor: pointer;
+  list-style: none;
+}
+.related-content-preview__summary::marker {
+  content: "";
+}
+.related-content-preview__summary::-webkit-details-marker {
+  display: none;
+}
+.related-content-preview__summary::after {
+  content: "+";
+  content: "+"/"";
+  -webkit-margin-start: auto;
+          margin-inline-start: auto;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  font-size: 1.25em;
+  line-height: 1;
+}
+.related-content-preview__summary:focus-visible {
+  outline: var(--focus-color) solid 2px;
+  outline-offset: 2px;
+}
+.related-content-preview__details[open] > .related-content-preview__summary::after {
+  content: "−";
+  content: "−"/"";
+}
+.related-content-preview__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(6rem, 50% - var(--v-space-4xxs)), 1fr));
+  gap: var(--v-space-4xxs);
+  margin: 0;
+  padding: 0;
+  -webkit-padding-before: var(--v-space-4xxs);
+          padding-block-start: var(--v-space-4xxs);
+  list-style: none;
+}
+.related-content-preview__item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: var(--v-space-5xs);
+}
+.related-content-preview__thumbnail {
+  overflow: hidden;
+}
+.related-content-preview__thumbnail img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 1;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+.related-content-preview__thumbnail--empty {
+  aspect-ratio: 1;
+  background: url("../images/no-thumbnail-square.png") center/cover no-repeat;
+}
+.related-content-preview__title {
+  overflow-wrap: anywhere;
+}
+.related-content-preview__all {
+  display: inline-block;
+  -webkit-margin-before: var(--v-space-5xs);
+          margin-block-start: var(--v-space-5xs);
+}
+
+.full-node__sidebar .sidebar-section .related-content-preview__thumbnail .field {
+  padding-block: 0;
+  -webkit-border-after: 0;
+          border-block-end: 0;
 }
 
 .full-node--access-denied .full-node__main {
