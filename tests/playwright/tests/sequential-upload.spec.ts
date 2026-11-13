@@ -54,6 +54,47 @@ async function watchUploads(page: Page): Promise<string[][]> {
   return uploads;
 }
 
+/**
+ * Holds the first upload request until the returned function is called.
+ *
+ * Keeps an upload running for as long as a test needs. Lists the files in
+ * every upload request, like watchUploads().
+ */
+async function holdFirstUpload(page: Page): Promise<{ uploads: string[][], release: () => void }> {
+  const uploads: string[][] = [];
+  let release = () => {};
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route(/element_parents=binary_files/, async (route) => {
+    const body = route.request().postDataBuffer()?.toString('latin1') ?? '';
+    uploads.push([...body.matchAll(/; filename="([^"]+)"/g)].map((match) => match[1]));
+    if (uploads.length === 1) {
+      await held;
+    }
+    // The browser may have cancelled the request while it was held.
+    await route.continue().catch(() => {});
+  });
+  return { uploads, release };
+}
+
+/**
+ * Clicks a link away from the page.
+ *
+ * A real click, because browsers ask before leaving only after the person
+ * has interacted with the page.
+ */
+async function clickAway(page: Page) {
+  await page.evaluate(() => {
+    const link = document.createElement('a');
+    link.href = '/admin';
+    link.id = 'test-leave-link';
+    link.textContent = 'Leave';
+    document.body.prepend(link);
+  });
+  await page.locator('#test-leave-link').click({ noWaitAfter: true });
+}
+
 /** Text Drupal.announce() has passed to screen readers. */
 const announced = (page: Page) => page.locator('#drupal-live-announce');
 
@@ -170,4 +211,41 @@ test('doesn\'t send a file over the size limit', async ({ page }) => {
   await expect(page.getByText('Oops, something went wrong')).toHaveCount(0);
   await expect(listed(page, 'image-test', 'png')).toBeVisible();
   await expect(listed(page, 'mukurtu-intro2', 'mp3')).toBeVisible();
+});
+
+test('asks before leaving while files upload, and keeps uploading on Stay', async ({ page }) => {
+  const { uploads, release } = await holdFirstUpload(page);
+  await page.locator('[data-drupal-selector="edit-binary-files-upload"]')
+    .setInputFiles([IMAGE, AUDIO_1]);
+  await expect.poll(() => uploads.length).toBe(1);
+
+  const dialog = page.waitForEvent('dialog');
+  await clickAway(page);
+  const asked = await dialog;
+  expect(asked.type()).toBe('beforeunload');
+  await asked.dismiss();
+  release();
+
+  await expect(announced(page)).toContainText('Finished uploading 2 files.', { timeout: SETTLE });
+  expect(uploads).toEqual([['image-test.png'], ['mukurtu-intro1.mp3']]);
+});
+
+test('sends no more files once the page is left', async ({ page }) => {
+  const { uploads, release } = await holdFirstUpload(page);
+  await page.locator('[data-drupal-selector="edit-binary-files-upload"]')
+    .setInputFiles([IMAGE, AUDIO_1, AUDIO_2]);
+  await expect.poll(() => uploads.length).toBe(1);
+
+  page.once('dialog', (dialog) => dialog.accept());
+  const left = page.waitForURL(/\/admin$/);
+  await clickAway(page);
+  await left;
+  release();
+
+  // Before, the queue sent the next file as the page was leaving.
+  await page.waitForTimeout(3000);
+  expect(uploads).toEqual([['image-test.png']]);
+
+  // Back to the form for afterEach's reset.
+  await gotoReady(page, '/admin/import');
 });

@@ -14,6 +14,9 @@
  *
  * A file over the size limit in drupalSettings.mukurtuSequentialUpload isn't
  * sent. Its error is shown above the field instead.
+ *
+ * While files are uploading, the browser asks before leaving the page. If
+ * the page is left anyway, no more files are sent.
  */
 
 (($, Drupal, drupalSettings, once) => {
@@ -241,7 +244,14 @@
     );
     const upload = {
       parents: ajax ? elementParents(ajax.url) : null,
-      done: (xhr) => {
+      done: (xhr, aborted) => {
+        // The browser cancels uploads when the page is left. Sending the
+        // next file would start an upload the browser cancels too, after
+        // the server may already have part of it.
+        if (aborted) {
+          queues.delete(queue.key);
+          return;
+        }
         afterUpload(queue, xhr);
         next(queue);
       },
@@ -405,9 +415,35 @@
       // loadend comes after jQuery and Drupal have handled the response, so
       // the field has been replaced by then. The timeout lets the response's
       // behaviors finish attaching to the new field.
-      xhr.addEventListener('loadend', () => setTimeout(() => done(xhr), 0));
+      // A request cut off by leaving the page ends with abort, before
+      // loadend.
+      let aborted = false;
+      xhr.addEventListener('abort', () => {
+        aborted = true;
+      });
+      xhr.addEventListener('loadend', () =>
+        setTimeout(() => done(xhr, aborted), 0),
+      );
       return xhr;
     };
+  }
+
+  /**
+   * Asks before leaving the page while files are still uploading.
+   *
+   * Leaving cancels the upload in progress and the files after it. The
+   * browser shows its own message, in the browser's language.
+   *
+   * @param {BeforeUnloadEvent} event
+   *   The beforeunload event.
+   */
+  function onBeforeUnload(event) {
+    if (!queues.size) {
+      return;
+    }
+    event.preventDefault();
+    // Older browsers ask only when returnValue is set.
+    event.returnValue = '';
   }
 
   /**
@@ -419,6 +455,7 @@
     attach(context) {
       once('mukurtu-sequential-upload', 'html', context).forEach(() => {
         document.addEventListener('change', onChange, true);
+        window.addEventListener('beforeunload', onBeforeUnload);
         $.ajaxPrefilter(watchRequest);
       });
     },
