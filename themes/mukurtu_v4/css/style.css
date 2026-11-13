@@ -1062,6 +1062,8 @@ a:not(.primary-nav__menu-link) svg.tel path {
           padding-inline-end: var(--v-space-3xs) !important;
   --tag-bg: var(--color-white);
   --tag-hover: var(--brand-light-accent);
+  --placeholder-color: var(--color-text-secondary);
+  --placeholder-color-focus: var(--color-text-secondary);
 }
 .tagify:hover:not(.tagify--focus):not(.tagify--invalid) {
   -webkit-box-shadow: 0 0 0 1px var(--color-text-secondary);
@@ -1077,6 +1079,18 @@ a:not(.primary-nav__menu-link) svg.tel path {
 }
 .tagify.tagify--loading {
   background-image: none;
+}
+
+.tagify__dropdown__item--active {
+  background: var(--brand-primary-dark);
+  color: var(--color-white);
+}
+@media (forced-colors: active) {
+  .tagify__dropdown__item--active {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
 }
 
 .translation-status-badge {
