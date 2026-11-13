@@ -5604,6 +5604,65 @@ body.is-fixed {
   background-color: var(--brand-light);
 }
 
+/**
+ * @file
+ * Suggestion list under a search box (mukurtu_browse/search-suggest).
+ *
+ * Focus stays in the search box, so the active option is shown with a
+ * background and an outline rather than the browser focus ring.
+ */
+.mukurtu-search-suggest {
+  position: relative;
+}
+
+.mukurtu-search-suggest__list {
+  position: absolute;
+  z-index: 20;
+  inset-block-start: 100%;
+  inset-inline: 0;
+  max-block-size: min(20rem, 60vh);
+  overflow-y: auto;
+  margin: var(--v-space-6xs) 0 0;
+  padding: var(--v-space-6xs) 0;
+  list-style: none;
+  border: 1px solid var(--brand-primary-dark);
+  border-radius: 0.5rem;
+  background: var(--color-white);
+  color: var(--brand-text-color);
+  -webkit-box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+          box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+}
+.mukurtu-search-suggest__list[hidden] {
+  display: none;
+}
+
+.mukurtu-search-suggest__option {
+  display: block;
+  /* Keeps every option at least 24px tall (WCAG 2.5.8). */
+  min-block-size: 1.5rem;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-5xs);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.mukurtu-search-suggest__option:hover {
+  background: var(--brand-light);
+}
+.mukurtu-search-suggest__option[aria-selected=true] {
+  background: var(--brand-primary-dark);
+  color: var(--color-white);
+  outline: var(--focus-color) solid 2px;
+  outline-offset: -2px;
+}
+@media (forced-colors: active) {
+  .mukurtu-search-suggest__option[aria-selected=true] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    outline: 2px solid Highlight;
+  }
+}
+
 .vertical-card {
   --card-font-size: var(--font-size-l);
   -webkit-column-break-inside: avoid;
