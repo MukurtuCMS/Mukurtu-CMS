@@ -11,7 +11,7 @@ mukurtu_core.media_found_in:
 #  weight: 60
 
 mukurtu_core.bulk_edit:
-  title: 'Bulk edit'
+  title: 'Bulk edit content'
   route_name: mukurtu_core.bulk_edit
   base_route: system.admin_content
   weight: 20
