@@ -1,0 +1,82 @@
+{#
+/**
+ * @file
+ * Theme override to display an article node in full view mode.
+ *
+ * Uses the same main column + sidebar grid as Digital Heritage and Person.
+ * Without this template, articles fell back to node.html.twig, which has no
+ * grid, and printed every component of the shipped display - including the
+ * "Title" extra field (the page title block already shows it), node links,
+ * and the export flag.
+ *
+ * Those three are left out here rather than hidden in the view display
+ * config, so existing sites (including migrated ones with a customized
+ * article display) pick this up without an update hook.
+ *
+ * Available variables: see node.html.twig.
+ *
+ * @see template_preprocess_node()
+ */
+#}
+{% set sidebar_fields = [
+  'field_article_category',
+  'field_article_keywords',
+  'field_category',
+  'field_keywords',
+] %}
+
+{# An empty field still leaves cache metadata in content, so check for a
+   rendered field rather than "is not empty". #}
+{% set has_sidebar = false %}
+{% for field_name in sidebar_fields %}
+  {% if content[field_name]['#theme'] is defined %}
+    {% set has_sidebar = true %}
+  {% endif %}
+{% endfor %}
+
+<article{{ attributes }}>
+  <div{{ content_attributes }} class="full-node">
+    {{ title_prefix }}
+    {{ title_suffix|without('mukurtu_not_yet_translated') }}
+
+    <div class="full-node__grid">
+      <div class="full-node__main">
+        {{ title_suffix.mukurtu_not_yet_translated }}
+        <div class="full-node__content">
+
+          {{ content|without(
+            'field_title',
+            'links',
+            'flag_export_content',
+            'comment',
+            'field_article_category',
+            'field_article_keywords',
+            'field_category',
+            'field_keywords'
+          ) }}
+
+        </div>
+
+      </div>
+
+      {% if has_sidebar %}
+        <div class="full-node__list">
+          <aside class="full-node__sidebar">
+            <div class="sidebar-section">
+              {% for field_name in sidebar_fields %}
+                {{ content[field_name] }}
+              {% endfor %}
+            </div>
+          </aside>
+        </div>
+      {% endif %}
+
+      {% if content.comment is not empty %}
+        <div class="full-node__comment">
+          {{ content.comment }}
+        </div>
+      {% endif %}
+    </div> {# __grid #}
+
+  </div>
+</article>
