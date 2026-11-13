@@ -16,16 +16,18 @@ use PHPUnit\Framework\Attributes\Group;
 class ArticleLabelsUpdateTest extends KernelTestBase {
 
   /**
-   * The display config is written raw, without the fields it references.
-   *
-   * @var bool
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * {@inheritdoc}
+   *
+   * Only for the formatter settings schemas the display config uses.
    */
-  protected static $modules = ['system'];
+  protected static $modules = [
+    'system',
+    'user',
+    'field',
+    'file',
+    'image',
+    'text',
+  ];
 
   /**
    * The article display config name.
@@ -48,16 +50,32 @@ class ArticleLabelsUpdateTest extends KernelTestBase {
    * Writes the article display with the given labels.
    */
   protected function writeDisplay(string $body_label, string $image_label): void {
+    $component = fn (string $type, string $label, array $settings = []): array => [
+      'type' => $type,
+      'label' => $label,
+      'settings' => $settings,
+      'third_party_settings' => [],
+      'weight' => 0,
+      'region' => 'content',
+    ];
     $this->config(self::NAME)->setData([
+      'langcode' => 'en',
+      'status' => TRUE,
+      'dependencies' => [],
       'id' => 'node.article.default',
       'targetEntityType' => 'node',
       'bundle' => 'article',
       'mode' => 'default',
       'content' => [
-        'body' => ['type' => 'text_default', 'label' => $body_label],
-        'field_article_image' => ['type' => 'image', 'label' => $image_label],
-        'field_article_category' => ['type' => 'entity_reference_label', 'label' => 'above'],
+        'body' => $component('text_default', $body_label),
+        'field_article_image' => $component('image', $image_label, [
+          'image_link' => '',
+          'image_style' => '',
+          'image_loading' => ['attribute' => 'lazy'],
+        ]),
+        'field_article_category' => $component('entity_reference_label', 'above', ['link' => TRUE]),
       ],
+      'hidden' => [],
     ])->save();
   }
 
