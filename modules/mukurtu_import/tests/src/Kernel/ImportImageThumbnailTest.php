@@ -153,7 +153,7 @@ class ImportImageThumbnailTest extends MukurtuImportTestBase {
 
     $messages = iterator_to_array($this->lastMigration->getIdMap()->getMessages());
     $this->assertCount(1, $messages);
-    $this->assertStringContainsString('No image file matches "nope.jpg"', $messages[0]->message);
+    $this->assertStringContainsString('Could not find a file matching "nope.jpg". Use a file ID, or the filename of a file uploaded with this import.', $messages[0]->message);
   }
 
   /**
