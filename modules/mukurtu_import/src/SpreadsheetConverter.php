@@ -143,7 +143,7 @@ class SpreadsheetConverter {
       /** @var \Drupal\file\FileInterface $csv */
       $csv = $this->entityTypeManager->getStorage('file')->create([
         'uri' => $uri,
-        'filename' => $this->fileSystem->basename($uri),
+        'filename' => basename($uri),
         'filemime' => 'text/csv',
         'uid' => $file->getOwnerId(),
         'status' => $file->isPermanent() ? FileInterface::STATUS_PERMANENT : 0,
