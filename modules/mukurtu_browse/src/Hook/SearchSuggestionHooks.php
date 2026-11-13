@@ -10,10 +10,13 @@ use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
+use Drupal\mukurtu_browse\Controller\SearchSuggestController;
 use Drupal\search_api_autocomplete\Element\SearchApiAutocomplete;
 
 /**
  * Swaps Search API Autocomplete's dropdown for Mukurtu's accessible one.
+ *
+ * Also gives the header search its item suggestions.
  *
  * The module's dropdown is core's jQuery UI autocomplete, which has no
  * combobox roles and announces results in English only. The module's server
@@ -65,10 +68,12 @@ class SearchSuggestionHooks {
     if (!$search) {
       return;
     }
+    $settings = \Drupal::config('mukurtu_search.settings');
     $access = \Drupal::service('search_api_autocomplete.helper')->access($search, \Drupal::currentUser());
     $metadata = CacheableMetadata::createFromRenderArray($element)
-      ->merge(CacheableMetadata::createFromObject($access));
-    if ($access->isAllowed()) {
+      ->merge(CacheableMetadata::createFromObject($access))
+      ->addCacheableDependency($settings);
+    if (($settings->get('search_suggestions_enabled') ?? TRUE) && $access->isAllowed()) {
       $url = Url::fromRoute('search_api_autocomplete.autocomplete', ['search_api_autocomplete_search' => $search_id] + $data)
         ->toString(TRUE);
       $metadata = $metadata->merge(CacheableMetadata::createFromObject($url));
@@ -80,6 +85,34 @@ class SearchSuggestionHooks {
       $element['#attached']['library'][] = 'mukurtu_browse/search-suggest';
     }
     $metadata->applyTo($element);
+  }
+
+  /**
+   * Gives the header search its item suggestions.
+   *
+   * Called from mukurtu_browse_preprocess_block(), since a module can
+   * implement a preprocess hook only once. The header search lives in the
+   * main menu block's template.
+   */
+  public function preprocessBlock(array &$variables): void {
+    // Minimal kernel tests can enable this module without its dependencies.
+    if (($variables['plugin_id'] ?? NULL) !== 'system_menu_block:main' || !\Drupal::moduleHandler()->moduleExists('search_api_autocomplete')) {
+      return;
+    }
+    $controller = \Drupal::classResolver(SearchSuggestController::class);
+    $access = $controller->access(\Drupal::currentUser());
+    $metadata = CacheableMetadata::createFromRenderArray($variables)
+      ->merge(CacheableMetadata::createFromObject($access));
+    $search = $controller->search();
+    if ($search && $access->isAllowed()) {
+      $url = Url::fromRoute('mukurtu_browse.search_suggest')->toString(TRUE);
+      $metadata = $metadata->merge(CacheableMetadata::createFromObject($url))
+        ->addCacheableDependency($search);
+      $variables['header_suggest_url'] = $url->getGeneratedUrl();
+      $variables['header_suggest_min'] = (int) $search->getOption('min_length');
+      $variables['#attached']['library'][] = 'mukurtu_browse/search-suggest';
+    }
+    $metadata->applyTo($variables);
   }
 
 }
