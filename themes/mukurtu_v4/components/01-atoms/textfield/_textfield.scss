@@ -100,6 +100,10 @@ $field-border-radius: 0.5rem;
   padding-inline-end: var(--v-space-3xs) !important;
   --tag-bg: var(--color-white);
   --tag-hover: var(--brand-light-accent);
+  // Tagify's default placeholder grays are 2.8:1 or lower on --brand-light,
+  // below WCAG 1.4.3's 4.5:1, and fade further while the field has focus.
+  --placeholder-color: var(--color-text-secondary);
+  --placeholder-color-focus: var(--color-text-secondary);
 
   // Container-level state feedback, now that the resting border above is
   // gone: --color-text-secondary (already used at 3:1+ contrast elsewhere
@@ -122,5 +126,23 @@ $field-border-radius: 0.5rem;
 
   &.tagify--loading {
     background-image: none;
+  }
+}
+
+// The suggestion picked with the arrow keys, or under the pointer. Tagify's
+// default is white on #3595f6, about 3.1:1, below WCAG 1.4.3's 4.5:1. The
+// Tagify module's Gin skin replaces it on admin pages; this does the same
+// here with the dark brand color, which carries white text elsewhere in the
+// theme. The list is appended to <body>, outside .tagify, so it isn't
+// nested above.
+.tagify__dropdown__item--active {
+  background: var(--brand-primary-dark);
+  color: var(--color-white);
+
+  // Forced colors drop the background, which would hide the highlight.
+  @media (forced-colors: active) {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
   }
 }

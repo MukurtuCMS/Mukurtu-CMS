@@ -259,9 +259,8 @@ class MukurtuImportStrategyForm extends EntityForm {
     $form['add_mapping'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add mapping'),
-      '#attributes' => [
-        'id' => 'import-add-mapping-button',
-      ],
+      // Drupal binds #ajax to #id, so an id in #attributes would stop it.
+      '#id' => 'import-add-mapping-button',
       '#submit' => ['::addMappingCallback'],
       '#ajax' => [
         'callback' => '::mappingTableAjaxCallback',
