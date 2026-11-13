@@ -76,6 +76,7 @@
         "drupal/redirect": "^1.13",
         "drupal/restui": "^1.22",
         "drupal/search_api": "^1.41",
+        "drupal/search_api_autocomplete": "^1.12",
         "drupal/search_api_glossary": "^4.2",
         "drupal/search_api_solr": "^4.3",
         "drupal/tagify": "^2.0",

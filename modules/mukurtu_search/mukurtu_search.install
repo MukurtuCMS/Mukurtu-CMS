@@ -5,9 +5,11 @@
  * Install, update and uninstall functions for the Mukurtu Search module.
  */
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api_db\Plugin\search_api\backend\Database;
+use Drupal\user\Entity\Role;
 
 function mukurtu_search_install() {
   mukurtu_search_rebuild_index();
@@ -119,6 +121,47 @@ function mukurtu_search_update_40010() {
   foreach (Index::loadMultiple() as $index) {
     if ($index->status() && $index->isValidProcessor('transliteration')) {
       $index->reindex();
+    }
+  }
+}
+
+/**
+ * Suggest search words as people type on Browse, Digital Heritage and Dictionary.
+ */
+function mukurtu_search_update_40011() {
+  \Drupal::service('extension.list.module')->reset();
+  if (!\Drupal::moduleHandler()->moduleExists('search_api_autocomplete')) {
+    \Drupal::service('module_installer')->install(['search_api_autocomplete']);
+  }
+
+  $module_list = \Drupal::service('extension.list.module');
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  $sources = [
+    'mukurtu_browse' => new FileStorage($module_list->getPath('mukurtu_browse') . '/config/install'),
+    'mukurtu_digital_heritage_browse' => new FileStorage($module_list->getPath('mukurtu_browse') . '/config/install'),
+    'mukurtu_dictionary' => new FileStorage($module_list->getPath('mukurtu_dictionary') . '/config/install'),
+  ];
+  $search_storage = $entity_type_manager->getStorage('search_api_autocomplete_search');
+  $view_storage = $entity_type_manager->getStorage('view');
+  $permissions = [];
+  foreach ($sources as $id => $source) {
+    // A site that deleted the view has no search box to add suggestions to.
+    if (!$view_storage->load($id)) {
+      continue;
+    }
+    if (!$search_storage->load($id)) {
+      $search_storage->createFromStorageRecord($source->read('search_api_autocomplete.search.' . $id))->save();
+    }
+    $permissions[] = 'use search_api_autocomplete for ' . $id;
+  }
+
+  foreach (['anonymous', 'authenticated'] as $role_id) {
+    if ($role = Role::load($role_id)) {
+      foreach ($permissions as $permission) {
+        $role->grantPermission($permission);
+      }
+      $role->save();
     }
   }
 }
