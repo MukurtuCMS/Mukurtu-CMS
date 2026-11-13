@@ -143,8 +143,9 @@ class CollectionOrganizationFormAccessibilityTest extends ProtocolAwareEntityTes
     $this->assertContains('visually-hidden', $form['collections_status']['#attributes']['class']);
 
     // The Add to Collection button has a deterministic id for JS focus
-    // targeting.
-    $this->assertSame('collections-table-add-button', $form['add']['#attributes']['id']);
+    // targeting, set where Drupal's #ajax binding finds it.
+    $this->assertSame('collections-table-add-button', $form['add']['#id']);
+    $this->assertArrayNotHasKey('id', $form['add']['#attributes'] ?? []);
   }
 
   /**
@@ -169,6 +170,52 @@ class CollectionOrganizationFormAccessibilityTest extends ProtocolAwareEntityTes
     $this->assertStringContainsString('data-mukurtu-ajax-row-table-changed', $rendered);
     $this->assertStringContainsString('data-mukurtu-status-target="collections-table-status"', $rendered);
     $this->assertStringContainsString('data-mukurtu-focus-target="collections-table-add-button"', $rendered);
+  }
+
+  /**
+   * Tests that pressing Add with nothing to add announces no update.
+   */
+  public function testNothingToAddAnnouncesNoUpdate(): void {
+    $form_object = CollectionOrganizationForm::create(\Drupal::getContainer());
+    $form_state = new FormState();
+    $form_state->addBuildInfo('args', [$this->rootCollection, []]);
+    $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
+    $form_state->setValue('add_subcollection', '');
+
+    $form_object->addCollectionToOrganizationAjax($form, $form_state);
+    $response = $form_object->addCollectionToTableCallback($form, $form_state);
+
+    $this->assertSame([], (new \ReflectionProperty($response, 'commands'))->getValue($response));
+
+    // A Remove after that still updates the table.
+    $form_state->setTriggeringElement(['#collection_id' => NULL]);
+    $form_object->removeCollectionFromOrganizationAjax($form, $form_state);
+    $response = $form_object->addCollectionToTableCallback($form, $form_state);
+    $this->assertNotEmpty((new \ReflectionProperty($response, 'commands'))->getValue($response));
+  }
+
+  /**
+   * Tests that a failed validation shows its error and announces no update.
+   */
+  public function testValidationErrorIsShown(): void {
+    $form_object = CollectionOrganizationForm::create(\Drupal::getContainer());
+    $form_state = new FormState();
+    $form_state->addBuildInfo('args', [$this->rootCollection, []]);
+    $form = \Drupal::formBuilder()->buildForm($form_object, $form_state);
+    $form_state->setErrorByName('collections', 'Not a valid organization.');
+    // Validation moves errors to the messenger when it finishes.
+    \Drupal::messenger()->addError('Not a valid organization.');
+
+    $response = $form_object->addCollectionToTableCallback($form, $form_state);
+    $commands = (new \ReflectionProperty($response, 'commands'))->getValue($response);
+    $form_state->clearErrors();
+
+    $this->assertCount(1, $commands);
+    $this->assertSame('message', $commands[0]['command']);
+    $this->assertSame('Not a valid organization.', (string) $commands[0]['message']);
+    $this->assertSame('error', $commands[0]['messageOptions']['type']);
+    // The error isn't left waiting for the next page.
+    $this->assertEmpty(\Drupal::messenger()->messagesByType('error'));
   }
 
 }
