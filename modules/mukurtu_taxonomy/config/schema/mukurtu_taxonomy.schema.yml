@@ -24,3 +24,11 @@ mukurtu_taxonomy.settings:
 field.formatter.settings.mukurtu_combined_term_label:
   type: field.formatter.settings.entity_reference_label
   label: 'Combined term label formatter settings'
+
+taxonomy.vocabulary.*.third_party.mukurtu_taxonomy:
+  type: mapping
+  label: 'Mukurtu taxonomy settings'
+  mapping:
+    show_unused_terms:
+      type: boolean
+      label: 'Show terms with no content'
