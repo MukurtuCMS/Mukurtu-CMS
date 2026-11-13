@@ -1,0 +1,101 @@
+// Related content preview in an item's sidebar. See
+// mukurtu_core/templates/mukurtu-related-content-preview.html.twig.
+.related-content-preview {
+  padding-block: var(--v-space-4xxs);
+  border-block-end: 1px solid var(--brand-light);
+  line-height: var(--line-height-s);
+
+  // Sized like the sidebar's field labels. The link and titles keep the
+  // field values' size.
+  &__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--v-space-5xs);
+    font-size: var(--font-size-s);
+    font-weight: var(--text-bold);
+    cursor: pointer;
+    list-style: none;
+
+    &::marker {
+      content: '';
+    }
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    // Plus/minus collapse indicator, matching the browse page facets.
+    // <details> already exposes the expanded/collapsed state, so the "/ ''"
+    // alt text keeps screen readers from announcing "plus".
+    &::after {
+      content: '+';
+      content: '+' / '';
+      margin-inline-start: auto;
+      flex-shrink: 0;
+      font-size: 1.25em;
+      line-height: 1;
+    }
+
+    &:focus-visible {
+      outline: var(--focus-color) solid 2px;
+      outline-offset: 2px;
+    }
+  }
+
+  &__details[open] > &__summary::after {
+    content: '\2212';
+    content: '\2212' / '';
+  }
+
+  // Two columns of tiles, or one when the sidebar is too narrow for two
+  // 6rem tiles. The max() keeps a wide sidebar from fitting a third.
+  &__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(max(6rem, calc(50% - var(--v-space-4xxs))), 1fr));
+    gap: var(--v-space-4xxs);
+    margin: 0;
+    padding: 0;
+    padding-block-start: var(--v-space-4xxs);
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--v-space-5xs);
+  }
+
+  &__thumbnail {
+    overflow: hidden;
+
+    img {
+      display: block;
+      inline-size: 100%;
+      block-size: auto;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+
+    // Items without media get the theme's no-thumbnail graphic.
+    &--empty {
+      aspect-ratio: 1;
+      background: url('../images/no-thumbnail-square.png') center / cover no-repeat;
+    }
+  }
+
+  &__title {
+    overflow-wrap: anywhere;
+  }
+
+  &__all {
+    display: inline-block;
+    margin-block-start: var(--v-space-5xs);
+  }
+}
+
+// The sidebar gives every .field padding and a border, which would also
+// frame the media field inside each thumbnail.
+.full-node__sidebar .sidebar-section .related-content-preview__thumbnail .field {
+  padding-block: 0;
+  border-block-end: 0;
+}

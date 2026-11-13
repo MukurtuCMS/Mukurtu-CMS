@@ -45,6 +45,10 @@ function mukurtu_core_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-related-content-grouped',
       'variables' => ['title' => NULL, 'items' => [], 'filters' => [], 'has_filters' => FALSE],
     ],
+    'mukurtu_related_content_preview' => [
+      'template' => 'mukurtu-related-content-preview',
+      'variables' => ['mode' => NULL, 'count' => 0, 'target' => NULL, 'items' => []],
+    ],
     'mukurtu_not_yet_translated_indicator' => [
       'variables' => ['language_name' => NULL, 'langcode' => NULL, 'direction' => NULL],
     ],
@@ -1569,6 +1573,16 @@ function mukurtu_core_views_data_alter(array &$data)
         'id' => 'mukurtu_media_tag_filter',
         'field' => 'mid',
         'real field' => 'mid',
+      ],
+    ];
+  }
+  if (isset($data['taxonomy_term_field_data'])) {
+    $data['taxonomy_term_field_data']['mukurtu_visible_terms'] = [
+      'title' => t('Visible to the current user'),
+      'filter' => [
+        'id' => 'mukurtu_visible_terms',
+        'field' => 'tid',
+        'real field' => 'tid',
       ],
     ];
   }
