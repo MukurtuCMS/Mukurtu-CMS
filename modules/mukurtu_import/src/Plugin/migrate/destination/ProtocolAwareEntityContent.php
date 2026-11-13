@@ -771,10 +771,11 @@ class ProtocolAwareEntityContent extends EntityContentBase {
    *
    * Their field processes skip a blank cell (see SkipOnBlank), and core's
    * updateEntity() then empties every skipped field listed in
-   * overwrite_properties. Neither a creation time nor a yes/no flag such as
-   * Published can meaningfully be cleared, so the stored value is restored.
+   * overwrite_properties. Neither a creation time, a yes/no flag such as
+   * Published, nor the content's language can meaningfully be cleared, so
+   * the stored value is restored.
    */
-  protected const KEEP_ON_BLANK_FIELD_TYPES = ['boolean', 'created'];
+  protected const KEEP_ON_BLANK_FIELD_TYPES = ['boolean', 'created', 'language'];
 
   /**
    * Restores field values that an update emptied through a blank cell.
