@@ -1086,10 +1086,12 @@ function mukurtu_core_update_40229(array &$sandbox): ?string {
   // Category and Keywords vocabularies are shared with other content types,
   // so their terms are copied into Article Tags by name rather than moved.
   //
-  // The Image field is left alone: an image media item needs a cultural
-  // protocol, and articles have none to give it, so a migrated image would be
-  // hidden from visitors. Sites keep the field and its data, and can move
-  // images into Media Assets by hand.
+  // Article images aren't moved into Media Assets: an image media item needs
+  // a cultural protocol, and articles have none to give it, so a migrated
+  // image would be hidden from visitors. An unused Image field is deleted.
+  // One that holds images stays, so they aren't lost, but comes off the form
+  // so editors don't use it instead of Media Assets; the images still show
+  // until someone moves them.
   $entity_type_manager = \Drupal::entityTypeManager();
   $old_fields = ['field_article_category', 'field_article_keywords'];
 
@@ -1174,11 +1176,40 @@ function mukurtu_core_update_40229(array &$sandbox): ?string {
     }
   }
 
-  return (string) \Drupal::translation()->formatPlural(
-    $sandbox['total'],
-    'Articles now use Article Tags and Media Assets. Category and Keywords terms on 1 article were copied into the new Article Tags vocabulary, and those two fields were removed. Article images were not moved; they stay in the Image field.',
-    'Articles now use Article Tags and Media Assets. Category and Keywords terms on @count articles were copied into the new Article Tags vocabulary, and those two fields were removed. Article images were not moved; they stay in the Image field.',
-  );
+  $translation = \Drupal::translation();
+  $messages = [
+    (string) $translation->formatPlural(
+      $sandbox['total'],
+      'Articles now use Article Tags and Media Assets. Category and Keywords terms on 1 article were copied into the new Article Tags vocabulary, and those two fields were removed.',
+      'Articles now use Article Tags and Media Assets. Category and Keywords terms on @count articles were copied into the new Article Tags vocabulary, and those two fields were removed.',
+    ),
+  ];
+
+  if ($image = FieldConfig::loadByName('node', 'article', 'field_article_image')) {
+    $with_images = (int) $entity_type_manager->getStorage('node')->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', 'article')
+      ->exists('field_article_image')
+      ->count()
+      ->execute();
+    if (!$with_images) {
+      $image->delete();
+      $messages[] = (string) t('The article Image field was empty, so it was removed too.');
+    }
+    else {
+      $form_display = \Drupal::service('entity_display.repository')->getFormDisplay('node', 'article');
+      if (!$form_display->isNew() && $form_display->getComponent('field_article_image')) {
+        $form_display->removeComponent('field_article_image')->save();
+      }
+      $messages[] = (string) $translation->formatPlural(
+        $with_images,
+        "1 article still has an image in the old Image field. It's now hidden from the article form; move those images into Media Assets, then delete the field.",
+        "@count articles still have an image in the old Image field. It's now hidden from the article form; move those images into Media Assets, then delete the field.",
+      );
+    }
+  }
+
+  return implode(' ', $messages);
 }
 
 /**

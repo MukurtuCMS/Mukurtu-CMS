@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\field\Entity\FieldConfig;
+use Drupal\file\Entity\File;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
@@ -291,6 +292,60 @@ class ArticleTagsUpdateTest extends KernelTestBase {
 
     // A second pass leaves it as it is.
     $this->assertSame($list, _mukurtu_core_update_40229_export_list($list));
+  }
+
+  /**
+   * Adds the old article Image field, on the form, as it shipped.
+   */
+  protected function addImageField(): void {
+    FieldStorageConfig::create([
+      'field_name' => 'field_article_image',
+      'entity_type' => 'node',
+      'type' => 'image',
+    ])->save();
+    FieldConfig::create([
+      'field_name' => 'field_article_image',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+    ])->save();
+    \Drupal::service('entity_display.repository')->getFormDisplay('node', 'article')
+      ->setComponent('field_article_image', ['type' => 'image_image', 'weight' => 3])
+      ->save();
+  }
+
+  /**
+   * An Image field no article uses is deleted.
+   */
+  public function testUnusedImageFieldIsDeleted(): void {
+    $this->addImageField();
+    Node::create(['type' => 'article', 'title' => 'No image'])->save();
+
+    $message = $this->runUpdate();
+
+    $this->assertNull(FieldConfig::loadByName('node', 'article', 'field_article_image'));
+    $this->assertStringContainsString('The article Image field was empty, so it was removed too.', (string) $message);
+  }
+
+  /**
+   * An Image field holding images stays, but comes off the article form.
+   */
+  public function testUsedImageFieldIsHiddenFromForm(): void {
+    $this->addImageField();
+    $file = File::create(['uri' => 'public://article.png', 'status' => 1]);
+    $file->save();
+    $node = Node::create([
+      'type' => 'article',
+      'title' => 'Has an image',
+      'field_article_image' => ['target_id' => $file->id(), 'alt' => 'An image'],
+    ]);
+    $node->save();
+
+    $message = $this->runUpdate();
+
+    $this->assertNotNull(FieldConfig::loadByName('node', 'article', 'field_article_image'));
+    $this->assertSame((int) $file->id(), (int) Node::load($node->id())->get('field_article_image')->target_id);
+    $this->assertNull(\Drupal::service('entity_display.repository')->getFormDisplay('node', 'article')->getComponent('field_article_image'));
+    $this->assertStringContainsString("1 article still has an image in the old Image field. It's now hidden from the article form", (string) $message);
   }
 
 }
