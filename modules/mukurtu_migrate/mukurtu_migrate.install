@@ -356,8 +356,12 @@ function mukurtu_migrate_update_40212(): ?string {
   // mukurtu_core_update_40229() replaces the article Category and Keywords
   // fields with Article Tags, so the shipped article migration would
   // otherwise write to fields that no longer exist. Only the shipped mappings
-  // are replaced; a site that customized either one is left alone. The Image
-  // mapping stays, because existing sites keep the Image field.
+  // are replaced; a site that customized either one is left alone.
+  //
+  // The shipped Image mapping is dropped too, as it is on new sites:
+  // mukurtu_core_update_40229() deletes an unused Image field, and Mukurtu 3
+  // article images aren't migrated (an image media item needs a cultural
+  // protocol articles can't give it).
   $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_article');
   if ($config->isNew()) {
     return NULL;
@@ -377,6 +381,10 @@ function mukurtu_migrate_update_40212(): ?string {
   foreach (array_keys($shipped) as $field_name) {
     unset($process[$field_name]);
   }
+  $image = $process['field_article_image'] ?? NULL;
+  if (($image['plugin'] ?? NULL) === 'migration_lookup' && ($image['source'] ?? NULL) === 'field_image/0/fid') {
+    unset($process['field_article_image']);
+  }
 
   $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_migrate');
   $record = (new FileStorage($module_path . '/config/install'))->read('migrate_plus.migration.mukurtu_cms_v3_article');
@@ -385,5 +393,5 @@ function mukurtu_migrate_update_40212(): ?string {
   }
   $config->set('process', $process)->save();
 
-  return (string) t('Updated the Mukurtu 3 article migration so article categories and tags are migrated into the Article Tags field.');
+  return (string) t('Updated the Mukurtu 3 article migration so article categories and tags are migrated into the Article Tags field. Article images are no longer migrated.');
 }

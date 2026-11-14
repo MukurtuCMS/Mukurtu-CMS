@@ -171,8 +171,8 @@ class MukurtuCmsV3ArticleTagsTest extends MukurtuCmsV3UsersMigrationTestBase {
     foreach (['_article_category_tags', '_article_keyword_tags', 'field_article_tags'] as $key) {
       $this->assertSame($shipped[$key], $process[$key]);
     }
-    // Existing sites keep the Image field, so its mapping stays.
-    $this->assertArrayHasKey('field_article_image', $process);
+    // Mukurtu 3 article images aren't migrated, as on new sites.
+    $this->assertArrayNotHasKey('field_article_image', $process);
     $this->assertNotNull($message);
 
     // Nothing left to do on a second run.
