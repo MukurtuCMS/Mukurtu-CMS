@@ -13,6 +13,7 @@ use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
 use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\mukurtu_core\StaleConfigKeyCleanup;
 use Drupal\user\Entity\Role;
+use Drupal\views\Entity\View;
 
 /**
  * Implements hook_install().
@@ -948,4 +949,98 @@ function mukurtu_core_update_40224(): string {
   return $changed
     ? (string) t('Only administrators and Mukurtu Managers can now see content revision history.')
     : (string) t('Content revision history is already limited to administrators and Mukurtu Managers; nothing to change.');
+}
+
+/**
+ * Lets Mukurtu Managers open the Google Tag, cookie consent, Not Found page, and bot protection settings linked from the dashboard.
+ */
+function mukurtu_core_update_40226(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // These dashboard links were visible only to administrators, because the
+  // manager role lacked the permission each settings page checks. A site may
+  // have uninstalled one of the providing modules, and granting a permission
+  // nothing defines throws on save, so each is granted only if it exists.
+  $manager = Role::load('mukurtu_manager');
+  if (!$manager) {
+    return;
+  }
+  $available = \Drupal::service('user.permissions')->getPermissions();
+  $changed = FALSE;
+  foreach ([
+    'administer altcha',
+    'administer facet bot blocker',
+    'administer google_tag_container',
+    'administer honeypot',
+    'administer klaro',
+    'administer mukurtu not found page',
+    'administer turnstile',
+  ] as $permission) {
+    if (isset($available[$permission]) && !$manager->hasPermission($permission)) {
+      $manager->grantPermission($permission);
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $manager->save();
+  }
+}
+
+/**
+ * Show categories only to people who can see their content, and unlink terms.
+ */
+function mukurtu_core_update_40227(): string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // A term's name can be sensitive, and term pages now return a 404 unless the
+  // visitor can see content using the term (#2643). Term pages only list
+  // content items, so links from displays of anything else would lead there.
+  $config_factory = \Drupal::configFactory();
+  foreach ([
+    'core.entity_view_display.community.community.default' => ['field_community_type'],
+    'core.entity_view_display.community.community.full' => ['field_community_type'],
+    'core.entity_view_display.media.audio.audio_for_dictionary_teaser' => ['field_contributor'],
+    'core.entity_view_display.media.audio.audio_for_dictionary_word' => ['field_contributor'],
+    'core.entity_view_display.media.audio.default' => ['field_contributor'],
+    'core.entity_view_display.paragraph.dictionary_word_entry.default' => ['field_contributor', 'field_word_type'],
+    'core.entity_view_display.paragraph.dictionary_word_entry.preview' => ['field_contributor'],
+    'core.entity_view_display.paragraph.related_person.default' => ['field_relationship_type'],
+  ] as $name => $fields) {
+    $config = $config_factory->getEditable($name);
+    $changed = FALSE;
+    foreach ($fields as $field) {
+      if ($config->get("content.$field.settings.link") === TRUE) {
+        $config->set("content.$field.settings.link", FALSE);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $config->save();
+    }
+  }
+
+  // Saving the view also recalculates its cache contexts and tags.
+  $view = View::load('mukurtu_categories');
+  $display = $view ? $view->getDisplay('default') : [];
+  if ($view && !isset($display['display_options']['filters']['mukurtu_visible_terms'])) {
+    $display = &$view->getDisplay('default');
+    $display['display_options']['filters']['mukurtu_visible_terms'] = [
+      'id' => 'mukurtu_visible_terms',
+      'table' => 'taxonomy_term_field_data',
+      'field' => 'mukurtu_visible_terms',
+      'relationship' => 'none',
+      'group_type' => 'group',
+      'admin_label' => '',
+      'plugin_id' => 'mukurtu_visible_terms',
+      'operator' => '=',
+      'value' => '',
+      'group' => 1,
+      'vocabulary' => 'category',
+    ];
+    $view->save();
+  }
+
+  return (string) t('Categories pages now show only terms each visitor can see, and terms on media, paragraphs and communities no longer link to term pages.');
 }
