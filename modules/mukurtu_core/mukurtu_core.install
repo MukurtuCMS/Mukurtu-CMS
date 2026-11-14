@@ -5,13 +5,16 @@
  * Install, update and uninstall functions for the mukurtu_core module.
  */
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Serialization\Yaml;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\mukurtu_core\EntityReferenceRoleConverter;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
 use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\mukurtu_core\StaleConfigKeyCleanup;
+use Drupal\search_api\Item\Field as SearchApiField;
 use Drupal\user\Entity\Role;
 use Drupal\views\Entity\View;
 
@@ -1069,4 +1072,301 @@ function mukurtu_core_update_40228(): void {
   if ($changed) {
     $config->save();
   }
+}
+
+/**
+ * Replace article Category and Keywords with Article Tags, and add Media Assets.
+ */
+function mukurtu_core_update_40229(array &$sandbox): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Articles now have one Tags field (a new Article Tags vocabulary) instead
+  // of Category and Keywords, and the Media Assets field basic pages use. The
+  // Category and Keywords vocabularies are shared with other content types,
+  // so their terms are copied into Article Tags by name rather than moved.
+  //
+  // The Image field is left alone: an image media item needs a cultural
+  // protocol, and articles have none to give it, so a migrated image would be
+  // hidden from visitors. Sites keep the field and its data, and can move
+  // images into Media Assets by hand.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $old_fields = ['field_article_category', 'field_article_keywords'];
+
+  if (!isset($sandbox['nids'])) {
+    if (!$entity_type_manager->getStorage('node_type')->load('article')) {
+      return NULL;
+    }
+    _mukurtu_core_update_40229_add_config();
+
+    $query = $entity_type_manager->getStorage('node')->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', 'article');
+    $or = $query->orConditionGroup();
+    $has_old = FALSE;
+    foreach ($old_fields as $field_name) {
+      if (FieldConfig::loadByName('node', 'article', $field_name)) {
+        $or->exists($field_name);
+        $has_old = TRUE;
+      }
+    }
+    $sandbox['nids'] = $has_old ? array_values($query->condition($or)->execute()) : [];
+    $sandbox['total'] = count($sandbox['nids']);
+    $sandbox['tags'] = [];
+  }
+
+  $term_storage = $entity_type_manager->getStorage('taxonomy_term');
+  $node_storage = $entity_type_manager->getStorage('node');
+  $batch = array_splice($sandbox['nids'], 0, 25);
+  // Articles cached before the Article Tags field existed don't have it.
+  $node_storage->resetCache($batch);
+  foreach ($node_storage->loadMultiple($batch) as $node) {
+    $tids = [];
+    foreach ($old_fields as $field_name) {
+      if (!$node->hasField($field_name)) {
+        continue;
+      }
+      foreach ($node->get($field_name)->referencedEntities() as $term) {
+        $name = trim((string) $term->getName());
+        if ($name === '') {
+          continue;
+        }
+        $key = mb_strtolower($name);
+        if (!isset($sandbox['tags'][$key])) {
+          $existing = $term_storage->loadByProperties(['vid' => 'article_tags', 'name' => $name]);
+          if ($existing) {
+            $sandbox['tags'][$key] = (int) reset($existing)->id();
+          }
+          else {
+            $tag = $term_storage->create(['vid' => 'article_tags', 'name' => $name]);
+            $tag->save();
+            $sandbox['tags'][$key] = (int) $tag->id();
+          }
+        }
+        $tids[$sandbox['tags'][$key]] = $sandbox['tags'][$key];
+      }
+    }
+    if (!$tids) {
+      continue;
+    }
+    foreach ($node->get('field_article_tags')->getValue() as $item) {
+      unset($tids[(int) $item['target_id']]);
+    }
+    if ($tids) {
+      foreach ($tids as $tid) {
+        $node->get('field_article_tags')->appendItem(['target_id' => $tid]);
+      }
+      // Keep the changed time and revision history as they were.
+      $node->setSyncing(TRUE);
+      $node->setNewRevision(FALSE);
+      $node->save();
+    }
+  }
+
+  $sandbox['#finished'] = $sandbox['total'] ? 1 - count($sandbox['nids']) / $sandbox['total'] : 1;
+  if ($sandbox['#finished'] < 1) {
+    return NULL;
+  }
+
+  foreach ($old_fields as $field_name) {
+    if ($field = FieldConfig::loadByName('node', 'article', $field_name)) {
+      $field->delete();
+    }
+  }
+
+  return (string) \Drupal::translation()->formatPlural(
+    $sandbox['total'],
+    'Articles now use Article Tags and Media Assets. Category and Keywords terms on 1 article were copied into the new Article Tags vocabulary, and those two fields were removed. Article images were not moved; they stay in the Image field.',
+    'Articles now use Article Tags and Media Assets. Category and Keywords terms on @count articles were copied into the new Article Tags vocabulary, and those two fields were removed. Article images were not moved; they stay in the Image field.',
+  );
+}
+
+/**
+ * Adds the config mukurtu_core_update_40229() needs, where it is missing.
+ */
+function _mukurtu_core_update_40229_add_config(): void {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $install = new FileStorage($module_path . '/config/install');
+
+  // Vocabulary, Article Tags field, and Media Assets on articles. Each is
+  // created from its shipped config/install file, the same file a new site
+  // gets.
+  foreach ([
+    'taxonomy.vocabulary.article_tags' => 'taxonomy_vocabulary',
+    'field.storage.node.field_article_tags' => 'field_storage_config',
+    'field.field.node.article.field_article_tags' => 'field_config',
+    'field.field.node.article.field_page_media_assets' => 'field_config',
+  ] as $name => $entity_type_id) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $id = substr($name, strlen($storage->getEntityType()->getConfigPrefix()) + 1);
+    if (!$storage->load($id)) {
+      $storage->createFromStorageRecord($install->read($name))->save();
+    }
+  }
+
+  // Translation settings for the new vocabulary, as Keywords has.
+  if (\Drupal::moduleHandler()->moduleExists('content_translation')
+    && !$entity_type_manager->getStorage('language_content_settings')->load('taxonomy_term.article_tags')) {
+    $multilingual = \Drupal::service('extension.list.module')->getPath('mukurtu_multilingual');
+    $record = (new FileStorage($multilingual . '/config/optional'))->read('language.content_settings.taxonomy_term.article_tags');
+    if ($record) {
+      $entity_type_manager->getStorage('language_content_settings')->createFromStorageRecord($record)->save();
+    }
+  }
+
+  // Managers can manage Article Tags terms, as they can Keywords terms.
+  if ($manager = Role::load('mukurtu_manager')) {
+    foreach (['create', 'delete', 'edit'] as $operation) {
+      $manager->grantPermission("$operation terms in article_tags");
+    }
+    $manager->save();
+  }
+
+  // Form: Title, Body, Media Assets, Article Tags, then everything else as it
+  // was.
+  $form_display = \Drupal::service('entity_display.repository')->getFormDisplay('node', 'article');
+  if (!$form_display->isNew()) {
+    $form_display->removeComponent('field_article_category');
+    $form_display->removeComponent('field_article_keywords');
+    foreach ($form_display->getComponents() as $name => $component) {
+      if (!in_array($name, ['title', 'body'], TRUE) && ($component['weight'] ?? 0) <= 3) {
+        $form_display->setComponent($name, ['weight' => ($component['weight'] ?? 0) + 4] + $component);
+      }
+    }
+    if ($form_display->getComponent('title')) {
+      $form_display->setComponent('title', ['weight' => 0] + $form_display->getComponent('title'));
+    }
+    if ($form_display->getComponent('body')) {
+      $form_display->setComponent('body', ['weight' => 1] + $form_display->getComponent('body'));
+    }
+    $form_display->setComponent('field_page_media_assets', [
+      'type' => 'media_library_widget',
+      'weight' => 2,
+      'settings' => [
+        'media_types' => ['audio', 'document', 'external_embed', 'image', 'remote_video', 'soundcloud', 'video'],
+      ],
+    ]);
+    $form_display->setComponent('field_article_tags', [
+      'type' => 'tagify_entity_reference_autocomplete_widget',
+      'weight' => 3,
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'match_limit' => 0,
+        'placeholder' => '',
+        'suggestions_dropdown' => 0,
+        'show_entity_id' => 0,
+        'show_info_label' => 0,
+        'info_label' => '',
+        'parent_selection' => 1,
+      ],
+    ]);
+    $form_display->save();
+  }
+
+  // Page: Media Assets in the main column, Article Tags in the sidebar.
+  $view_display = \Drupal::service('entity_display.repository')->getViewDisplay('node', 'article');
+  if (!$view_display->isNew()) {
+    $view_display->removeComponent('field_article_category');
+    $view_display->removeComponent('field_article_keywords');
+    $view_display->setComponent('field_article_tags', [
+      'type' => 'entity_reference_label',
+      'label' => 'above',
+      'settings' => ['link' => TRUE],
+      'weight' => 2,
+    ]);
+    $view_display->setComponent('field_page_media_assets', [
+      'type' => 'entity_reference_entity_view',
+      'label' => 'hidden',
+      'settings' => ['view_mode' => 'media_assets', 'link' => FALSE],
+      'weight' => 3,
+    ]);
+    $view_display->save();
+  }
+
+  // Search: the browse index gets the same name fields new sites ship with.
+  // Deleting the old fields drops their index fields on its own.
+  if (\Drupal::moduleHandler()->moduleExists('search_api')
+    && ($index = $entity_type_manager->getStorage('search_api_index')->load('mukurtu_browse_auto_index'))) {
+    $changed = FALSE;
+    foreach (['node__field_article_tags__name' => 'string', 'node__field_article_tags__name__text' => 'text'] as $field_id => $type) {
+      if (!$index->getField($field_id)) {
+        $field = new SearchApiField($index, $field_id);
+        $field->setType($type);
+        $field->setDatasourceId('entity:node');
+        $field->setPropertyPath('field_article_tags:entity:name');
+        $field->setLabel('Article Tags');
+        $index->addField($field);
+        $changed = TRUE;
+      }
+    }
+    if ($changed) {
+      $index->save();
+      $index->reindex();
+    }
+  }
+
+  // Export presets: Article Tags and Media Assets columns instead of Category
+  // and Keywords, and an Article Tags terms section. Only the shipped presets
+  // are touched; a site's own presets are its to edit.
+  if (\Drupal::moduleHandler()->moduleExists('mukurtu_export')) {
+    $presets = [
+      'default_local_metadata_only',
+      'default_local_with_media',
+      'default_external_metadata_only',
+      'default_external_with_media',
+    ];
+    foreach ($presets as $id) {
+      $config = \Drupal::configFactory()->getEditable("mukurtu_export.csv_exporter.$id");
+      $list = $config->get('entity_fields_export_list');
+      if ($config->isNew() || !is_array($list)) {
+        continue;
+      }
+      $list = _mukurtu_core_update_40229_export_list($list);
+      $config->set('entity_fields_export_list', $list)->save();
+    }
+  }
+
+  // Import: a template for Article Tags terms, as each vocabulary has.
+  if (\Drupal::moduleHandler()->moduleExists('mukurtu_import')) {
+    $import = \Drupal::service('extension.list.module')->getPath('mukurtu_import');
+    $name = 'mukurtu_import.mukurtu_import_strategy.taxonomy_article_tags_all_fields';
+    $storage = $entity_type_manager->getStorage('mukurtu_import_strategy');
+    if (!$storage->load('taxonomy_article_tags_all_fields')) {
+      $record = (new FileStorage($import . '/config/install'))->read($name);
+      if ($record) {
+        $storage->createFromStorageRecord($record)->save();
+      }
+    }
+  }
+}
+
+/**
+ * Swaps Category/Keywords for Article Tags/Media Assets export columns.
+ *
+ * @param array $list
+ *   A csv_exporter's entity_fields_export_list.
+ *
+ * @return array
+ *   The list with the article columns and Article Tags terms section updated.
+ */
+function _mukurtu_core_update_40229_export_list(array $list): array {
+  $new_columns = ['field_page_media_assets' => 'Media Assets', 'field_article_tags' => 'Article Tags'];
+  if (isset($list['node__article'])) {
+    $columns = [];
+    foreach ($list['node__article'] as $key => $label) {
+      if (in_array($key, ['field_article_category', 'field_article_keywords'], TRUE)) {
+        continue;
+      }
+      $columns[$key] = $label;
+      if ($key === 'body') {
+        $columns += $new_columns;
+      }
+    }
+    $list['node__article'] = $columns + $new_columns;
+  }
+  if (!isset($list['taxonomy_term__article_tags']) && isset($list['taxonomy_term__keywords'])) {
+    $list['taxonomy_term__article_tags'] = $list['taxonomy_term__keywords'];
+  }
+  return $list;
 }

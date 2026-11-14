@@ -2,13 +2,12 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.media.media_assets
     - field.field.node.article.body
-    - field.field.node.article.field_article_category
-    - field.field.node.article.field_article_image
-    - field.field.node.article.field_article_keywords
+    - field.field.node.article.field_article_tags
+    - field.field.node.article.field_page_media_assets
     - node.type.article
   module:
-    - image
     - text
     - user
 id: node.article.default
@@ -23,6 +22,23 @@ content:
     third_party_settings: {  }
     weight: 4
     region: content
+  field_article_tags:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_page_media_assets:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: media_assets
+      link: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
   field_all_related_content:
     type: entity_reference_label
     label: hidden
@@ -31,55 +47,12 @@ content:
     third_party_settings: {  }
     weight: 16
     region: content
-  field_article_category:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 1
-    region: content
-  field_article_image:
-    type: image
-    label: hidden
-    settings:
-      image_link: ''
-      image_style: ''
-      image_loading:
-        attribute: lazy
-    third_party_settings: {  }
-    weight: 3
-    region: content
-  field_article_keywords:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 2
-    region: content
-  field_category:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 1
-    region: content
   field_citation:
     type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
     weight: 17
-    region: content
-  field_keywords:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 2
     region: content
   field_representative_media:
     type: entity_reference_label

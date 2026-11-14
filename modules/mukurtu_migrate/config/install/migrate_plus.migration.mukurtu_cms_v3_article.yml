@@ -35,20 +35,78 @@ process:
   body/format:
     plugin: default_value
     default_value: basic_html
-  field_article_image:
-    plugin: migration_lookup
-    migration:
-      - mukurtu_cms_v3_file_private
-      - mukurtu_cms_v3_file
-    source: field_image/0/fid
-  field_article_category:
-    plugin: migration_lookup
-    migration: mukurtu_cms_v3_terms_category
+  _article_category_tags:
+    plugin: sub_process
     source: field_category
-  field_article_keywords:
-    plugin: migration_lookup
-    migration: mukurtu_cms_v3_terms_keywords
+    process:
+      target_id:
+        -
+          plugin: migration_lookup
+          migration: mukurtu_cms_v3_terms_category
+          source: tid
+          no_stub: true
+        -
+          plugin: skip_on_empty
+          method: process
+        -
+          plugin: entity_value
+          entity_type: taxonomy_term
+          field_name: name
+        -
+          plugin: extract
+          index:
+            - 0
+            - value
+        -
+          plugin: entity_generate
+          entity_type: taxonomy_term
+          bundle_key: vid
+          bundle: article_tags
+          value_key: name
+          ignore_case: true
+  _article_keyword_tags:
+    plugin: sub_process
     source: field_tags
+    process:
+      target_id:
+        -
+          plugin: migration_lookup
+          migration: mukurtu_cms_v3_terms_keywords
+          source: tid
+          no_stub: true
+        -
+          plugin: skip_on_empty
+          method: process
+        -
+          plugin: entity_value
+          entity_type: taxonomy_term
+          field_name: name
+        -
+          plugin: extract
+          index:
+            - 0
+            - value
+        -
+          plugin: entity_generate
+          entity_type: taxonomy_term
+          bundle_key: vid
+          bundle: article_tags
+          value_key: name
+          ignore_case: true
+  field_article_tags:
+    -
+      plugin: merge
+      source:
+        - '@_article_category_tags'
+        - '@_article_keyword_tags'
+    -
+      plugin: flatten
+    -
+      plugin: callback
+      callable: array_unique
+    -
+      plugin: callback
+      callable: array_values
   status: status
   created: created
   changed: changed

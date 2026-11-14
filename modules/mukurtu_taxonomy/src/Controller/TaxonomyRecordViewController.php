@@ -62,6 +62,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    * Custom site vocabularies not in this list fall back to the admin label.
    */
   const VOCABULARY_LABEL_MAP = [
+    'article_tags' => 'Article Tag',
     'category' => 'Category',
     'community_type' => 'Community Type',
     'contributor' => 'Contributor',

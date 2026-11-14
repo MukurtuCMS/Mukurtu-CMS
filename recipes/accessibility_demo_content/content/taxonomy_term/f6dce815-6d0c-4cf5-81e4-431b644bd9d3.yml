@@ -1,0 +1,13 @@
+_meta:
+  version: '1.0'
+  entity_type: taxonomy_term
+  uuid: f6dce815-6d0c-4cf5-81e4-431b644bd9d3
+  bundle: article_tags
+  default_langcode: en
+default:
+  name:
+    -
+      value: 'weaving'
+  status:
+    -
+      value: true
