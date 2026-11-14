@@ -124,6 +124,13 @@ class ShippedRolePermissionsTest extends UnitTestCase {
     yield 'unflag content for export' => ['unflag export_content'];
     yield 'flag media for export' => ['flag export_media'];
     yield 'unflag media for export' => ['unflag export_media'];
+    yield 'ALTCHA settings' => ['administer altcha'];
+    yield 'faceted search crawler blocking' => ['administer facet bot blocker'];
+    yield 'Google Tag settings' => ['administer google_tag_container'];
+    yield 'Honeypot settings' => ['administer honeypot'];
+    yield 'cookie and consent settings' => ['administer klaro'];
+    yield 'not found page' => ['administer mukurtu not found page'];
+    yield 'Turnstile route protection' => ['administer turnstile'];
     yield 'bulk editing' => ['use mukurtu bulk edit'];
     yield 'content revision history' => ['view all revisions'];
   }

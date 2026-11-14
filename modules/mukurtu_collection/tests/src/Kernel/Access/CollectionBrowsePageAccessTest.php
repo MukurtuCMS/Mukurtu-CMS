@@ -12,6 +12,9 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\views\Entity\View;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Tests who can reach the Collections page.
@@ -133,6 +136,40 @@ class CollectionBrowsePageAccessTest extends CollectionTestBase {
     $draft->setPublished()->save();
     $this->assertFalse($cache->get('collections_403'));
     $this->assertTrue($this->canAccess(['access content']));
+  }
+
+  /**
+   * A sort from the current page's own view is ignored (#2621).
+   *
+   * Menus run this check on other pages, and a view reads its exposed input
+   * from the current URL unless it's given its own.
+   */
+  public function testAnotherViewsSortIsIgnored(): void {
+    $this->buildCollection('Visible collection')->save();
+
+    $view = View::load('mukurtu_browse_collections');
+    $display = &$view->getDisplay('default');
+    $display['display_options']['exposed_form'] = ['type' => 'basic'];
+    $display['display_options']['sorts'] = [
+      'title' => [
+        'id' => 'title',
+        'table' => 'node_field_data',
+        'field' => 'title',
+        'entity_type' => 'node',
+        'plugin_id' => 'standard',
+        'order' => 'ASC',
+        'exposed' => TRUE,
+        'expose' => ['label' => 'Title', 'field_identifier' => 'title'],
+      ],
+    ];
+    $view->save();
+
+    $request = Request::create('/digital-heritage', 'GET', ['sort_by' => 'newest']);
+    $request->setSession(new Session(new MockArraySessionStorage()));
+    $this->container->get('request_stack')->push($request);
+
+    $this->assertTrue($this->canAccess(['access content']));
+    $this->assertSame([], $this->container->get('messenger')->all());
   }
 
   /**

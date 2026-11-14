@@ -112,6 +112,12 @@ class MukurtuDictionaryController extends ControllerBase {
       return AccessResult::forbidden();
     }
     $view->setDisplay('default');
+    // The main menu runs this check on every page, and a view reads its exposed
+    // input from the current URL by default. That page's filters and sort
+    // aren't this view's, so another view's ?sort_by=newest showed "not allowed",
+    // and the menu cached an answer based on them. Any non-empty input stops
+    // the view reading the URL.
+    $view->setExposedInput(['access_check' => TRUE]);
     $view->execute();
     if (!empty($view->result)) {
       return AccessResult::allowed();

@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_content_warnings\Hook;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Routing\AdminContext;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\mukurtu_core\Entity\PeopleInterface;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
@@ -20,6 +23,8 @@ use Drupal\taxonomy\TermInterface;
  * Adds media content warnings to media entities.
  */
 class MukurtuMediaContentWarnings {
+
+  use StringTranslationTrait;
 
   /**
    * The Mukurtu content warnings settings.
@@ -37,11 +42,14 @@ class MukurtuMediaContentWarnings {
    *   The entity type manager.
    * @param \Drupal\Core\Routing\AdminContext $adminContext
    *   The admin context.
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository
+   *   The entity repository.
    */
   public function __construct(
     ConfigFactoryInterface $configFactory,
     protected EntityTypeManagerInterface $entityTypeManager,
     protected AdminContext $adminContext,
+    protected EntityRepositoryInterface $entityRepository,
   ) {
     $this->contentWarningSettings = $configFactory->get('mukurtu_content_warnings.settings');
   }
@@ -127,8 +135,34 @@ class MukurtuMediaContentWarnings {
     return array_merge($build, [
       '#theme' => 'mukurtu_content_warnings',
       '#media' => $entity,
-      '#warnings' => array_merge($people_warnings, $taxonomy_warnings),
+      '#warnings' => $this->removeDuplicateWarnings(array_merge($people_warnings, $taxonomy_warnings)),
     ]);
+  }
+
+  /**
+   * Remove warnings whose text matches a warning earlier in the list.
+   *
+   * Two media tags can be configured with the same warning text, and showing
+   * the same sentence twice only makes the overlay longer.
+   *
+   * @param array $warnings
+   *   Render arrays of individual warnings.
+   *
+   * @return array
+   *   The warnings, keeping the first of each distinct text.
+   */
+  protected function removeDuplicateWarnings(array $warnings): array {
+    $seen = [];
+    $unique = [];
+    foreach ($warnings as $warning) {
+      $text = trim((string) $warning['#warning']);
+      if (isset($seen[$text])) {
+        continue;
+      }
+      $seen[$text] = TRUE;
+      $unique[] = $warning;
+    }
+    return $unique;
   }
 
   /**
@@ -148,14 +182,23 @@ class MukurtuMediaContentWarnings {
     if (empty($person_nodes)) {
       return [];
     }
-    $names = array_map(fn(NodeInterface $node) => $node->getTitle(), $person_nodes);
+    $names = array_map(fn(NodeInterface $node) => $this->entityRepository->getTranslationFromContext($node)->label(), $person_nodes);
     if (count($person_nodes) > 1) {
       $warning_template = $this->contentWarningSettings->get('people_warnings.warning_multiple');
-      $warning_text = str_replace("[names]", implode(' ', $names), $warning_template);
+      // The names are plain text and Twig escapes the warning when it prints
+      // it, so decode the escaping the placeholders add.
+      $list = array_shift($names);
+      foreach ($names as $name) {
+        $list = Html::decodeEntities((string) $this->t('@list, @name', [
+          '@list' => $list,
+          '@name' => $name,
+        ], ['context' => 'Content warning list of names']));
+      }
+      $warning_text = str_replace("[names]", $list, $warning_template);
     }
     else {
       $warning_template = $this->contentWarningSettings->get('people_warnings.warning_single');
-      $warning_text = str_replace("[name]", implode(' ', $names), $warning_template);
+      $warning_text = str_replace("[name]", reset($names), $warning_template);
     }
     // Incorporate cacheability metadata from the person nodes.
     $build = [
