@@ -83,6 +83,30 @@
       }
       map.pm.addControls(this.widgetsettings.toolbarSettings);
 
+      // Geoman calls the shapes on a map "layers", which means nothing to
+      // people editing a Map Points field (#864). Replace its button titles
+      // with translatable ones. Passing the active language as the fallback
+      // keeps Geoman's own translations of everything else; for a language
+      // Geoman doesn't ship, its other strings fall back to English.
+      // setLang() rebuilds the toolbar, so this runs before the aria-labels
+      // below are copied from the titles.
+      const geomanLang = L.PM.activeLang || 'en';
+      map.pm.setLang(geomanLang, {
+        buttonTitles: {
+          drawMarkerButton: Drupal.t('Draw marker'),
+          drawCircleMarkerButton: Drupal.t('Draw circle marker'),
+          drawPolyButton: Drupal.t('Draw polygon'),
+          drawLineButton: Drupal.t('Draw line'),
+          drawCircleButton: Drupal.t('Draw circle'),
+          drawRectButton: Drupal.t('Draw rectangle'),
+          editButton: Drupal.t('Edit map points'),
+          dragButton: Drupal.t('Move map points'),
+          cutButton: Drupal.t('Cut map points'),
+          deleteButton: Drupal.t('Remove map points'),
+          rotateButton: Drupal.t('Rotate map points'),
+        },
+      }, geomanLang);
+
       /* Mukurtu accessibility additions begin: */
 
       // Geoman ships Escape-to-exit and Enter-to-finish keyboard support,
