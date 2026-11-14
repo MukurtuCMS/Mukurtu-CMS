@@ -1,0 +1,33 @@
+{#
+/**
+ * @file
+ * Theme override for an article card (grid_browse view mode).
+ *
+ * Used by the Articles page and the Latest Articles block. Shows the card
+ * image, title and published date. card_media and published_date come from
+ * mukurtu_v4_preprocess_node(): the image is the first media asset the viewer
+ * can see, then the legacy Image field, then the site's placeholder.
+ *
+ * Available variables: see node.html.twig.
+ */
+#}
+<article{{ attributes.addClass('vertical-card', 'vertical-card--article') }}>
+  <div class="vertical-card__media">
+    {% include '@mukurtu_v4/content/_card-media.html.twig' with {
+      media_bundle: card_media_bundle,
+      media: card_media,
+      url: url,
+    } %}
+  </div>
+
+  <div{{ content_attributes }} class="vertical-card__content">
+    <div class="vertical-card__content-header">
+      {{ title_prefix }}
+      <h2{{ title_attributes }}>
+        <a href="{{ url }}" rel="bookmark">{{ label|add_suggestion('clean') }}</a>
+      </h2>
+      {{ title_suffix }}
+    </div>
+    <p class="vertical-card__date">{{ published_date }}</p>
+  </div>
+</article>

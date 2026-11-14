@@ -101,10 +101,17 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
   }
 
-  // The published date at the end of the article sidebar (see
-  // node--article--full.html.twig). The text follows the viewer's timezone,
-  // so it varies the render cache by timezone, as core's date formatters do.
-  if ($node->bundle() === 'article' && ($variables['view_mode'] ?? '') === 'full') {
+  // Article cards on the Articles page and the Latest Articles block. See
+  // node--article--grid-browse.html.twig.
+  if ($node->bundle() === 'article' && ($variables['view_mode'] ?? '') === 'grid_browse') {
+    $variables['card_media'] = _mukurtu_v4_article_card_media($node);
+    $variables['card_media_bundle'] = isset($variables['card_media']['#media']) ? $variables['card_media']['#media']->bundle() : 'image';
+  }
+
+  // The published date at the end of the article sidebar and on article
+  // cards. The text follows the viewer's timezone, so it varies the render
+  // cache by timezone, as core's date formatters do.
+  if ($node->bundle() === 'article' && in_array($variables['view_mode'] ?? '', ['full', 'grid_browse'], TRUE)) {
     $created = (int) $node->getCreatedTime();
     $variables['published_date'] = [
       '#theme' => 'time',
@@ -185,6 +192,56 @@ function _mukurtu_v4_dictionary_word_card_media($word): array {
   else {
     // Media the viewer can't see gets the restricted placeholder, if set.
     $restricted = !$word->get('field_recording')->isEmpty() || !$word->get('field_thumbnail')->isEmpty();
+    $card = _mukurtu_v4_card_placeholder($restricted, $cacheability);
+  }
+
+  $cacheability->merge(CacheableMetadata::createFromRenderArray($card))->applyTo($card);
+  return $card;
+}
+
+/**
+ * Picks the image for an article card.
+ *
+ * The first media asset the viewer can see, then the legacy Image field
+ * (which sites that had articles before Media Assets keep), then the site's
+ * placeholder image.
+ *
+ * @param \Drupal\node\NodeInterface $article
+ *   The article, in the grid_browse view mode.
+ *
+ * @return array
+ *   A render array for the card's media area.
+ */
+function _mukurtu_v4_article_card_media($article): array {
+  $cacheability = new CacheableMetadata();
+  $restricted = FALSE;
+  $card = NULL;
+
+  if ($article->hasField('field_page_media_assets')) {
+    $repository = \Drupal::service('entity.repository');
+    foreach ($article->get('field_page_media_assets')->referencedEntities() as $media) {
+      // Its name and alt text in the current language.
+      $media = $repository->getTranslationFromContext($media);
+      $access = $media->access('view', NULL, TRUE);
+      $cacheability->addCacheableDependency($access);
+      if ($access->isAllowed()) {
+        // Rendered as media, so content warnings still apply.
+        $card = \Drupal::entityTypeManager()->getViewBuilder('media')->view($media, 'browse');
+        break;
+      }
+      $restricted = TRUE;
+    }
+  }
+
+  if (!$card && $article->hasField('field_article_image') && !$article->get('field_article_image')->isEmpty()) {
+    $card = $article->get('field_article_image')->view([
+      'type' => 'image',
+      'label' => 'hidden',
+      'settings' => ['image_style' => 'medium_480px_w_'],
+    ]);
+  }
+
+  if (!$card) {
     $card = _mukurtu_v4_card_placeholder($restricted, $cacheability);
   }
 

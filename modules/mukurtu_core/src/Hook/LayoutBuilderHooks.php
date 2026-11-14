@@ -31,6 +31,7 @@ class LayoutBuilderHooks {
     'inline_block:local_contexts_block',
     'inline_block:media_carousel_block',
     'inline_block:vertical_image_with_description',
+    'views_block:mukurtu_articles-latest_articles_block',
     'views_block:mukurtu_browse_by_map-map_block',
     'views_block:mukurtu_categories-browse_by_category_block',
     'views_block:mukurtu_categories-browse_by_category_names_block',

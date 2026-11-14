@@ -21,6 +21,12 @@
     }
   }
 
+  // Article cards: the published date under the title.
+  &__date {
+    margin-block: 0;
+    font-size: var(--font-size-s);
+  }
+
   &__media {
     // A dictionary word's recording, with a play button over its image
     // (#2571). Same 4:3 box as the related content cards.

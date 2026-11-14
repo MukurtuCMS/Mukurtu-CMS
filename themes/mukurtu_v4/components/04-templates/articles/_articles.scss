@@ -1,0 +1,47 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+
+// The Articles page and the Latest Articles block (views.view.mukurtu_articles).
+// Cards fill rows left to right, newest first, unlike the masonry .grid used
+// by the browse pages, which flows down each column.
+
+// On the page, the view sits in the site's layout grid for its gutters. The
+// block doesn't: Layout Builder regions already have them.
+.articles-listing--page {
+  @include layout.layout--full-width-grid;
+
+  > * {
+    @include layout.layout--full-width-grid-item;
+  }
+}
+
+.articles-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--v-space-3xs);
+
+  @include include-media.media('>=md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include include-media.media('>=xl') {
+    gap: var(--v-space-2xs);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+// Article card images share one 4:3 frame, so the cards line up across a row
+// whatever shape each image is. The whole image is shown, on the same light
+// background as the article sidebar.
+.vertical-card--article .vertical-card__media {
+  margin-block-end: var(--v-space-5xs);
+
+  img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    background-color: var(--brand-light-accent);
+  }
+}
