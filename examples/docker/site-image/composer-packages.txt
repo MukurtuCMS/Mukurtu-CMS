@@ -1,0 +1,4 @@
+# Contributed modules and themes to add, one Composer package per line, for
+# example:
+#   drupal/coffee
+#   drupal/geofield:^1.60
