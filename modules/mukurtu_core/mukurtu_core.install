@@ -1370,3 +1370,35 @@ function _mukurtu_core_update_40229_export_list(array $list): array {
   }
   return $list;
 }
+
+/**
+ * Add the Articles page and the Latest Articles block.
+ */
+function mukurtu_core_update_40230(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Creates the article card display and the mukurtu_articles view from the
+  // files a new site gets, skipping either one a site already has. Sites
+  // without the article content type have nothing to list.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$entity_type_manager->getStorage('node_type')->load('article')) {
+    return NULL;
+  }
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+  $optional = new FileStorage($module_path . '/config/optional');
+
+  $added = FALSE;
+  foreach ([
+    'core.entity_view_display.node.article.grid_browse' => ['entity_view_display', 'node.article.grid_browse'],
+    'views.view.mukurtu_articles' => ['view', 'mukurtu_articles'],
+  ] as $name => [$entity_type_id, $id]) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    if (!$storage->load($id) && ($record = $optional->read($name))) {
+      $storage->createFromStorageRecord($record)->save();
+      $added = TRUE;
+    }
+  }
+
+  return $added ? (string) t('Added the Articles page at /articles and a Latest Articles block.') : NULL;
+}

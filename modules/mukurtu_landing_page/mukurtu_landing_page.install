@@ -267,3 +267,27 @@ function mukurtu_landing_page_update_40205(): string {
 
   return implode(' ', $changes);
 }
+
+/**
+ * Offer the Latest Articles block on landing pages.
+ */
+function mukurtu_landing_page_update_40206(): string {
+  $config = \Drupal::configFactory()
+    ->getEditable('core.entity_view_display.node.landing_page.default');
+  $views = $config->get('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks.Lists (Views)');
+
+  // Only extend an allowlist that already exists, as
+  // mukurtu_landing_page_update_40204() does.
+  $block = 'views_block:mukurtu_articles-latest_articles_block';
+  if (!is_array($views) || in_array($block, $views, TRUE)) {
+    return (string) t('Landing page block restrictions were already up to date.');
+  }
+
+  $views[] = $block;
+  sort($views);
+  $config
+    ->set('third_party_settings.layout_builder_restrictions.entity_view_mode_restriction.allowlisted_blocks.Lists (Views)', $views)
+    ->save();
+
+  return (string) t('Landing pages now offer the Latest Articles block.');
+}

@@ -1,0 +1,106 @@
+@use "../../../external/include-media";
+@use "../../00-base/layout/layout";
+@use "../../00-base/mixins/mixins";
+
+// The Articles page and the Latest Articles block (views.view.mukurtu_articles).
+// Cards fill rows left to right, newest first, unlike the masonry .grid used
+// by the browse pages, which flows down each column.
+
+// On the page, the view sits in the site's layout grid for its gutters. The
+// block doesn't: Layout Builder regions already have them.
+.articles-listing--page {
+  @include layout.layout--full-width-grid;
+
+  > * {
+    @include layout.layout--full-width-grid-item;
+  }
+}
+
+.articles-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--v-space-3xs);
+
+  @include include-media.media('>=md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include include-media.media('>=xl') {
+    gap: var(--v-space-2xs);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+// Article card images share one 4:3 frame, so the cards line up across a row
+// whatever shape each image is. The whole image is shown, on the same light
+// background as the article sidebar.
+.vertical-card--article .vertical-card__media {
+  margin-block-end: var(--v-space-5xs);
+
+  // The media and field wrappers otherwise shrink to the image's own width,
+  // so an image narrower than the column wouldn't fill the frame.
+  a,
+  .media,
+  .field {
+    display: block;
+    inline-size: 100%;
+  }
+
+  img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    background-color: var(--brand-light-accent);
+  }
+}
+
+// In the block, the cards keep their own look inside landing page block
+// wrappers, which center their headings and space them for block titles.
+// Card titles are h2 on the page and h3 in the block, under its title.
+.articles-listing .vertical-card--article .vertical-card__content-header :is(h2, h3) {
+  text-align: start;
+  margin-block: 0;
+  font-size: var(--card-font-size);
+  font-weight: var(--text-bold);
+
+  // A long single word (common in some languages) wraps rather than pushing
+  // the page sideways on a phone (WCAG 1.4.10).
+  overflow-wrap: anywhere;
+}
+
+.articles-listing--page .pager {
+  @include mixins.pager;
+}
+
+// The block's View all articles link, as a button below the cards.
+.articles-listing .more-link {
+  margin-block-start: var(--v-space-3xs);
+  text-align: center;
+
+  a {
+    @include mixins.block-link;
+
+    display: inline-block;
+    border-width: 2px;
+    padding-block: var(--v-space-4xs);
+    padding-inline: var(--v-space-4xxs);
+
+    // Set apart from the button's own border of the same colour.
+    &:focus-visible {
+      outline-offset: 4px;
+    }
+  }
+}
+
+// Landing page block regions run edge to edge, so the block brings its own
+// side space, as the Browse by Map block does.
+.layout--onecol .articles-listing--block {
+  padding-inline: var(--layout-padding);
+  padding-block: 0 var(--v-space-s);
+
+  @include include-media.media('>=lg') {
+    padding-inline: var(--layout-padding-m);
+  }
+}
