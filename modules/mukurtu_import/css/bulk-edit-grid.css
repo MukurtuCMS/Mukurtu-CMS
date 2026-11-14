@@ -1,0 +1,41 @@
+/**
+ * The per-item bulk edit grid.
+ */
+
+/* Each shown column's CSV format. */
+.mukurtu-bulk-edit-grid__formats dt {
+  font-weight: bold;
+}
+
+.mukurtu-bulk-edit-grid__formats dd {
+  margin: 0 0 0.75em;
+}
+
+.mukurtu-bulk-edit-grid__table th {
+  min-width: 12rem;
+  vertical-align: top;
+}
+
+/* A translation row's language, after its title. */
+.mukurtu-bulk-edit-grid__language,
+.mukurtu-bulk-edit-grid__note {
+  display: block;
+  color: var(--gin-color-text-light, #545560);
+  font-size: 0.875em;
+}
+
+.mukurtu-bulk-edit-grid__table input.form-text,
+.mukurtu-bulk-edit-grid__table textarea {
+  width: 100%;
+  min-width: 10rem;
+}
+
+/* The error summary, set apart from the table caption under it. */
+.mukurtu-bulk-edit-grid__error-summary {
+  margin-block-end: 1.5rem;
+}
+
+/* Gin's dark-mode error red (#ce6060) is 3.72:1 on the table; this is 5.91:1. */
+.gin--dark-mode .mukurtu-bulk-edit-grid__table .form-item__error-message {
+  color: #ef8a8a;
+}

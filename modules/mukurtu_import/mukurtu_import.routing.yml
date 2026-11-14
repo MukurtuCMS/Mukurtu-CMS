@@ -121,3 +121,13 @@ mukurtu_import.batch_report:
     message: '\d+'
   options:
     _admin_route: TRUE
+
+mukurtu_import.bulk_edit_grid:
+  path: '/admin/content/bulk-grid/{view_id}/{display_id}'
+  defaults:
+    _form: '\Drupal\mukurtu_import\Form\BulkEditGridForm'
+    _title: 'Edit items one by one'
+  requirements:
+    _permission: 'use mukurtu bulk edit'
+  options:
+    _admin_route: TRUE

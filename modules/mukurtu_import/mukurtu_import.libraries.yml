@@ -3,3 +3,14 @@ strategy_form:
     js/strategy-form.js: {}
   dependencies:
     - core/once
+
+bulk_edit_grid:
+  version: 1.x
+  css:
+    component:
+      css/bulk-edit-grid.css: {}
+  js:
+    js/bulk-edit-grid.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
