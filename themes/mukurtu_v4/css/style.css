@@ -1577,6 +1577,11 @@ body.consent-popup-opened .klaro_toggle_dialog {
   display: none;
 }
 
+.mukurtu-content-warnings__title {
+  margin: 0;
+  font-weight: var(--text-bold);
+}
+
 .mukurtu-content-warnings__list {
   margin: 0;
   padding: 0;
