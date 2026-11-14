@@ -121,6 +121,22 @@ class BulkEditGridSaveTest extends MukurtuImportTestBase {
   }
 
   /**
+   * Each row links to the item's full edit form, which returns to the grid.
+   */
+  public function testEditLink(): void {
+    $node = $this->item('Canoe');
+    $this->select($node);
+
+    $form = $this->container->get('form_builder')->getForm(BulkEditGridForm::class, 'mukurtu_bulk_edit_content', 'page');
+
+    $edit = $form['grid'][$node->id() . '-en']['item']['edit'];
+    $this->assertSame('Edit <span class="visually-hidden">Canoe</span>', (string) $edit['#title']);
+    $this->assertSame('entity.node.edit_form', $edit['#url']->getRouteName());
+    $this->assertSame((string) $node->id(), (string) $edit['#url']->getRouteParameters()['node']);
+    $this->assertArrayHasKey('destination', $edit['#url']->getOption('query'));
+  }
+
+  /**
    * Good rows save; a bad row stays with its error; untouched rows don't.
    */
   public function testPartialSave(): void {
