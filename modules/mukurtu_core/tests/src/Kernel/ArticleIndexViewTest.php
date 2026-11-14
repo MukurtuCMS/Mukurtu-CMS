@@ -6,6 +6,8 @@ namespace Drupal\Tests\mukurtu_core\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\mukurtu_core\Hook\LayoutBuilderHooks;
+use Drupal\mukurtu_core\Plugin\Block\LatestArticlesBlock;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\user\Traits\UserCreationTrait;
@@ -175,6 +177,38 @@ class ArticleIndexViewTest extends KernelTestBase {
     \Drupal::entityTypeManager()->getStorage('view')->load('mukurtu_articles')?->delete();
     $this->assertNull(mukurtu_core_update_40230());
     $this->assertNull(Views::getView('mukurtu_articles'));
+  }
+
+  /**
+   * Builds the Latest Articles block with the given configuration.
+   */
+  protected function buildBlock(array $configuration): string {
+    $id = 'views_block:mukurtu_articles-latest_articles_block';
+    $definitions = [$id => \Drupal::service('plugin.manager.block')->getDefinition($id)];
+    (new LayoutBuilderHooks())->latestArticlesBlockClass($definitions);
+    $this->assertSame(LatestArticlesBlock::class, $definitions[$id]['class']);
+
+    $block = LatestArticlesBlock::create($this->container, $configuration, $id, $definitions[$id]);
+    $build = $block->build();
+    return (string) $this->container->get('renderer')->renderInIsolation($build);
+  }
+
+  /**
+   * The block's View all articles link can be turned off; it's on by default.
+   */
+  public function testBlockLinkToggle(): void {
+    mukurtu_core_update_40230();
+    $this->createNode('article', 'An article', 1000);
+
+    $id = 'views_block:mukurtu_articles-latest_articles_block';
+    $block = LatestArticlesBlock::create($this->container, [], $id, \Drupal::service('plugin.manager.block')->getDefinition($id));
+    $this->assertTrue($block->getConfiguration()['show_more_link']);
+
+    $this->assertStringContainsString('View all articles', $this->buildBlock([]));
+    $this->assertStringContainsString('View all articles', $this->buildBlock(['show_more_link' => TRUE]));
+    $without = $this->buildBlock(['show_more_link' => FALSE]);
+    $this->assertStringNotContainsString('View all articles', $without);
+    $this->assertStringContainsString('An article', $without);
   }
 
 }

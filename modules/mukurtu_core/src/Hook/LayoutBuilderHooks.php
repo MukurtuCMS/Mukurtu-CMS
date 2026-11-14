@@ -4,6 +4,7 @@ namespace Drupal\mukurtu_core\Hook;
 
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\layout_builder\OverridesSectionStorageInterface;
+use Drupal\mukurtu_core\Plugin\Block\LatestArticlesBlock;
 use Drupal\node\NodeInterface;
 
 /**
@@ -56,6 +57,21 @@ class LayoutBuilderHooks {
     }
 
     $definitions = array_intersect_key($definitions, array_flip(self::ALLOWED_BLOCKS));
+  }
+
+  /**
+   * Implements hook_block_alter().
+   *
+   * Gives the Latest Articles block its own class, which adds a setting for
+   * its View all articles link. The plugin ID stays the same, so the block
+   * allowlists above and existing placements are unaffected.
+   */
+  #[Hook('block_alter')]
+  public function latestArticlesBlockClass(array &$definitions): void {
+    $id = 'views_block:mukurtu_articles-latest_articles_block';
+    if (isset($definitions[$id])) {
+      $definitions[$id]['class'] = LatestArticlesBlock::class;
+    }
   }
 
 }
