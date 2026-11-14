@@ -131,6 +131,7 @@ class ShippedRolePermissionsTest extends UnitTestCase {
     yield 'cookie and consent settings' => ['administer klaro'];
     yield 'not found page' => ['administer mukurtu not found page'];
     yield 'Turnstile route protection' => ['administer turnstile'];
+    yield 'bulk editing' => ['use mukurtu bulk edit'];
     yield 'content revision history' => ['view all revisions'];
   }
 
@@ -244,6 +245,16 @@ class ShippedRolePermissionsTest extends UnitTestCase {
       $reviewer,
       'Reviewers must not also be able to administer the submission settings.'
     );
+  }
+
+  /**
+   * The Bulk Editor role ships with bulk editing and nothing else.
+   *
+   * Bulk editing only opens the tools; which items an editor can change still
+   * comes from their protocol memberships.
+   */
+  public function testBulkEditorRoleShipsWithBulkEditOnly(): void {
+    $this->assertSame(['use mukurtu bulk edit'], self::effectivePermissions('mukurtu_bulk_editor'));
   }
 
   /**
