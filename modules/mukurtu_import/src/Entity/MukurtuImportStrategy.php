@@ -474,22 +474,25 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
 
     // If we have no ID or UUID, use the lookup column (for cross-migration
     // references) or fallback to _record_number.
+    if (empty($ids) && !empty($lookup_source_ids)) {
+      $ids = array_values($lookup_source_ids);
+    }
+
     if (empty($ids)) {
-      if (!empty($lookup_source_ids)) {
-        $ids = $lookup_source_ids;
-      }
-      else {
-        $ids[] = '_record_number';
-      }
+      $ids[] = '_record_number';
     }
     else {
-      // The identifier/ID/UUID column above is legitimately blank for rows
-      // that create new content in a combined "add + update" CSV. Two blank
-      // rows would otherwise hash to the same migrate ID map key, so the
-      // second row would resolve to the first row's just-created entity
-      // instead of creating its own. _record_number is unique per row within
-      // the file, so append it as a tie-breaker to keep every row's map key
-      // distinct regardless of blank values in the primary column(s).
+      // None of the columns above is guaranteed to be unique per row. The
+      // identifier/ID/UUID column is legitimately blank for rows that create
+      // new content in a combined "add + update" CSV, and a lookup (label)
+      // column such as a title is often shared by many rows. Two rows with
+      // the same values would otherwise hash to the same migrate ID map key,
+      // so the second row would update the first row's entity instead of
+      // creating its own. _record_number is unique per row within the file,
+      // so append it as a tie-breaker to keep every row's map key distinct.
+      // import_migration_lookup searches each sourceid column independently
+      // and passes numeric values through untouched, so the extra column does
+      // not affect cross-migration lookups by label.
       $ids[] = '_record_number';
     }
 
