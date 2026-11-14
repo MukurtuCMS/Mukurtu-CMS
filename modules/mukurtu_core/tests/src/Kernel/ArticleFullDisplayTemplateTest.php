@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_core\Kernel;
 
+use Drupal\Core\Config\FileStorage;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
@@ -18,7 +19,7 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_v4's node--article--full.html.twig.
+ * Tests mukurtu_v4's article page and card templates.
  *
  * Articles used to fall back to the bare node.html.twig: no full-node grid,
  * and every component of the shipped display printed, including the "Title"
@@ -141,6 +142,14 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
     $this->container->get('theme.manager')->setActiveTheme(
       $this->container->get('theme.initialization')->initTheme('mukurtu_v4')
     );
+
+    // The card view mode ships in mukurtu_core's config/install. Read after
+    // setInstallProfile(): looking up a module path before it caches a module
+    // list without the profile, and the theme install then warns that the
+    // "mukurtu" module is missing.
+    $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    $record = (new FileStorage($module_path . '/config/install'))->read('core.entity_view_mode.node.grid_browse');
+    \Drupal::entityTypeManager()->getStorage('entity_view_mode')->createFromStorageRecord($record)->save();
   }
 
   /**
@@ -247,6 +256,59 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
     $page->save();
     $build = $this->renderNode($page);
     $this->assertContains('mukurtu_v4/media-glightbox', $build['#attached']['library'] ?? []);
+  }
+
+  /**
+   * Renders an article as a card, as the Articles page and block do.
+   */
+  protected function renderCard(NodeInterface $node): void {
+    $build = $this->container->get('entity_type.manager')
+      ->getViewBuilder('node')
+      ->view($node, 'grid_browse');
+    $this->setRawContent((string) $this->container->get('renderer')->renderInIsolation($build));
+  }
+
+  /**
+   * A card shows the title link and the published date.
+   */
+  public function testCardShowsTitleAndDate(): void {
+    $node = $this->createArticle(['created' => mktime(12, 0, 0, 11, 13, 2025)]);
+    $this->renderCard($node);
+
+    $link = $this->cssSelect('article.vertical-card--article h2 a');
+    $this->assertCount(1, $link);
+    $this->assertSame('Website Now Live!', trim(strip_tags($link[0]->asXML())));
+    $this->assertSame($node->toUrl()->toString(), (string) $link[0]['href']);
+    $time = $this->cssSelect('.vertical-card__date time');
+    $this->assertCount(1, $time);
+    $this->assertSame('November 13, 2025', trim((string) $time[0]));
+  }
+
+  /**
+   * With no media, a card shows the site's placeholder image.
+   */
+  public function testCardWithoutMediaShowsPlaceholder(): void {
+    $this->renderCard($this->createArticle());
+
+    $img = $this->cssSelect('.vertical-card__media img');
+    $this->assertCount(1, $img);
+    $this->assertStringContainsString('no-thumbnail.png', (string) $img[0]['src']);
+  }
+
+  /**
+   * A card shows the first media asset, not the rest.
+   */
+  public function testCardShowsFirstMediaAsset(): void {
+    $first = Media::create(['bundle' => 'document', 'name' => 'First document']);
+    $first->save();
+    $second = Media::create(['bundle' => 'document', 'name' => 'Second document']);
+    $second->save();
+    $this->renderCard($this->createArticle(['field_page_media_assets' => [$first->id(), $second->id()]]));
+
+    $media = (string) $this->cssSelect('.vertical-card__media')[0]->asXML();
+    $this->assertStringContainsString('media--document', $media);
+    $this->assertStringNotContainsString('no-thumbnail.png', $media);
+    $this->assertCount(1, $this->cssSelect('.vertical-card__media .media--document'));
   }
 
 }
