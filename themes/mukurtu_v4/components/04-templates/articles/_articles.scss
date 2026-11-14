@@ -58,9 +58,20 @@
 
 // In the block, the cards keep their own look inside landing page block
 // wrappers, which center their headings and space them for block titles.
-.articles-listing .vertical-card--article .vertical-card__content-header h2 {
+// Card titles are h2 on the page and h3 in the block, under its title.
+.articles-listing .vertical-card--article .vertical-card__content-header :is(h2, h3) {
   text-align: start;
   margin-block: 0;
+  font-size: var(--card-font-size);
+  font-weight: var(--text-bold);
+
+  // A long single word (common in some languages) wraps rather than pushing
+  // the page sideways on a phone (WCAG 1.4.10).
+  overflow-wrap: anywhere;
+}
+
+.articles-listing--page .pager {
+  @include mixins.pager;
 }
 
 // The block's View all articles link, as a button below the cards.
@@ -75,6 +86,11 @@
     border-width: 2px;
     padding-block: var(--v-space-4xs);
     padding-inline: var(--v-space-4xxs);
+
+    // Set apart from the button's own border of the same colour.
+    &:focus-visible {
+      outline-offset: 4px;
+    }
   }
 }
 

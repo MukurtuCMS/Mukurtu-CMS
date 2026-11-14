@@ -4,7 +4,8 @@
  * Theme override for an article card (grid_browse view mode).
  *
  * Used by the Articles page and the Latest Articles block. Shows the card
- * image, title and published date. card_media and published_date come from
+ * image, title and published date. The title is an h2 on the page and an h3
+ * in the block (card_heading). card_media and published_date come from
  * mukurtu_v4_preprocess_node(): the image is the first media asset the viewer
  * can see, then the legacy Image field, then the site's placeholder.
  *
@@ -23,9 +24,9 @@
   <div{{ content_attributes }} class="vertical-card__content">
     <div class="vertical-card__content-header">
       {{ title_prefix }}
-      <h2{{ title_attributes }}>
+      <{{ card_heading }}{{ title_attributes }}>
         <a href="{{ url }}" rel="bookmark">{{ label|add_suggestion('clean') }}</a>
-      </h2>
+      </{{ card_heading }}>
       {{ title_suffix }}
     </div>
     <p class="vertical-card__date">{{ published_date }}</p>

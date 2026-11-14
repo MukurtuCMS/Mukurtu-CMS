@@ -246,3 +246,38 @@
     flex-shrink: 0;
   }
 }
+
+// A centered row of page links, the current page underlined in the secondary
+// colour. Include it on a .pager element (core's pager.html.twig markup).
+// Used by the browse pages and the Articles page.
+@mixin pager {
+  // Unordered list.
+  &__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-4xxs);
+    padding: 0;
+    justify-content: center;
+  }
+
+  // List item.
+  &__item {
+    list-style: none;
+    font-weight: var(--text-bold);
+
+    // stylelint-disable-next-line no-descending-specificity
+    a {
+      padding: var(--v-space-5xs);
+    }
+  }
+
+  .is-active {
+    // stylelint-disable-next-line no-descending-specificity
+    a {
+      color: var(--brand-text-color);
+      text-decoration: none;
+      border-block-end: 5px solid var(--brand-secondary);
+    }
+  }
+}
+
