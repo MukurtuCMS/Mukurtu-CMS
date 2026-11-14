@@ -120,6 +120,14 @@
   }
 }
 
+// Article fields are not separated by dividers.
+.full-node--article {
+  .full-node__content .field {
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+}
+
 // Horizontal divider block placed via Layout Builder.
 .layout-builder-divider {
   border: none;
