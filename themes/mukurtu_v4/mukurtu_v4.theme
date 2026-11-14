@@ -104,6 +104,9 @@ function mukurtu_v4_preprocess_node(&$variables) {
   // Article cards on the Articles page and the Latest Articles block. See
   // node--article--grid-browse.html.twig.
   if ($node->bundle() === 'article' && ($variables['view_mode'] ?? '') === 'grid_browse') {
+    // h3 under the Latest Articles block's title, h2 on the Articles page.
+    // See mukurtu_v4_preprocess_views_view_unformatted__mukurtu_articles().
+    $variables['card_heading'] = ($variables['elements']['#mukurtu_card_heading'] ?? '') === 'h3' ? 'h3' : 'h2';
     $variables['card_media'] = _mukurtu_v4_article_card_media($node);
     $variables['card_media_bundle'] = isset($variables['card_media']['#media']) ? $variables['card_media']['#media']->bundle() : 'image';
   }
@@ -197,6 +200,27 @@ function _mukurtu_v4_dictionary_word_card_media($word): array {
 
   $cacheability->merge(CacheableMetadata::createFromRenderArray($card))->applyTo($card);
   return $card;
+}
+
+/**
+ * Implements hook_preprocess_views_view_unformatted__mukurtu_articles().
+ *
+ * In the Latest Articles block, the cards sit under the block's h2 title, so
+ * their titles are h3. The heading level is part of each card's render cache
+ * key, so the block and the Articles page don't share cached cards.
+ */
+function mukurtu_v4_preprocess_views_view_unformatted__mukurtu_articles(array &$variables): void {
+  if ($variables['view']->current_display !== 'latest_articles_block') {
+    return;
+  }
+  foreach ($variables['rows'] as &$row) {
+    if (is_array($row['content'] ?? NULL)) {
+      $row['content']['#mukurtu_card_heading'] = 'h3';
+      if (isset($row['content']['#cache']['keys'])) {
+        $row['content']['#cache']['keys'][] = 'card_heading:h3';
+      }
+    }
+  }
 }
 
 /**

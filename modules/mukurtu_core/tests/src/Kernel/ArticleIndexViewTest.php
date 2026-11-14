@@ -46,6 +46,9 @@ class ArticleIndexViewTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+    // Before anything looks up a module path, so a later theme install can
+    // find the profile; see testCardHeadingLevels().
+    $this->setInstallProfile('mukurtu');
 
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
@@ -209,6 +212,29 @@ class ArticleIndexViewTest extends KernelTestBase {
     $without = $this->buildBlock(['show_more_link' => FALSE]);
     $this->assertStringNotContainsString('View all articles', $without);
     $this->assertStringContainsString('An article', $without);
+  }
+
+  /**
+   * Cards are h3 under the block's title, and h2 on the page.
+   */
+  public function testCardHeadingLevels(): void {
+    $this->container->get('theme_installer')->install(['mukurtu_v4']);
+    $this->config('system.theme')->set('default', 'mukurtu_v4')->save();
+    $this->container->get('theme.manager')->setActiveTheme(
+      $this->container->get('theme.initialization')->initTheme('mukurtu_v4')
+    );
+    mukurtu_core_update_40230();
+    $this->createNode('article', 'An article', 1000);
+
+    $this->setRawContent($this->buildBlock([]));
+    $this->assertCount(1, $this->cssSelect('.vertical-card--article h3 a'));
+    $this->assertCount(0, $this->cssSelect('.vertical-card--article h2'));
+
+    $view = Views::getView('mukurtu_articles');
+    $build = $view->buildRenderable('page');
+    $this->setRawContent((string) $this->container->get('renderer')->renderInIsolation($build));
+    $this->assertCount(1, $this->cssSelect('.vertical-card--article h2 a'));
+    $this->assertCount(0, $this->cssSelect('.vertical-card--article h3'));
   }
 
 }
