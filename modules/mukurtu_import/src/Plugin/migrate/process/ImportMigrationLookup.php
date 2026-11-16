@@ -7,6 +7,7 @@ namespace Drupal\mukurtu_import\Plugin\migrate\process;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\migrate\Attribute\MigrateProcess;
+use Drupal\migrate\MigrateException;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
@@ -31,6 +32,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * in each migration's ID map table, enabling lookup by any registered source
  * key. For example, a media migration may use both the media name and filename
  * as source IDs, allowing downstream CSVs to reference media by either value.
+ *
+ * A value that matches more than one destination entity (for example, a
+ * title shared by several rows in an upstream CSV) is ambiguous. Like
+ * mukurtu_entity_lookup, the plugin then fails the row rather than silently
+ * linking the first match.
  */
 #[MigrateProcess('import_migration_lookup')]
 class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactoryPluginInterface {
@@ -66,15 +72,16 @@ class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactor
     }
 
     $migration_ids = (array) ($this->configuration['migration_ids'] ?? []);
+    $schema = $this->database->schema();
+    $matches = [];
 
     foreach ($migration_ids as $migration_id) {
       $table = 'migrate_map_' . $migration_id;
-      if (!$this->database->schema()->tableExists($table)) {
+      if (!$schema->tableExists($table)) {
         continue;
       }
 
       // Discover all sourceid columns in this table.
-      $schema = $this->database->schema();
       $sourceid_columns = [];
       for ($i = 1; $i <= 10; $i++) {
         $col = 'sourceid' . $i;
@@ -86,18 +93,29 @@ class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactor
         }
       }
 
-      // Search each sourceid column independently.
+      // Search each sourceid column independently. Collect every distinct
+      // destination so a value shared by several upstream rows is detected
+      // instead of resolving to whichever row the database returns first.
       foreach ($sourceid_columns as $col) {
-        $dest_id = $this->database->select($table, 'm')
+        $dest_ids = $this->database->select($table, 'm')
           ->fields('m', ['destid1'])
           ->condition($col, $value)
+          ->isNotNull('destid1')
+          ->distinct()
           ->execute()
-          ->fetchField();
-
-        if ($dest_id !== FALSE) {
-          return $dest_id;
+          ->fetchCol();
+        foreach ($dest_ids as $dest_id) {
+          $matches[$dest_id] = $dest_id;
         }
       }
+    }
+
+    if (count($matches) > 1) {
+      throw new MigrateException(sprintf('"%s" is ambiguous, multiple items share the same label. Try referencing the item\'s ID.', $value));
+    }
+
+    if ($matches) {
+      return reset($matches);
     }
 
     // Not found — pass the original value through for downstream plugins.

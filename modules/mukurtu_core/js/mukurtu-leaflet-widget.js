@@ -54,6 +54,21 @@
   };
 
   /**
+   * Tells screen readers which Geoman mode is on (WCAG 4.1.2, #2687).
+   * Geoman marks the active mode only with an "active" class on the
+   * wrapping div, so copy that onto the focusable button as aria-pressed.
+   * Every toolbar button toggles a mode, so each one gets the attribute.
+   */
+  Drupal.mukurtuSyncGeomanToolbarState = function (map) {
+    $(map.getContainer()).find('.leaflet-pm-toolbar .button-container').each(function () {
+      const $button = $(this).find('a.leaflet-buttons-control-button').first();
+      if ($button.length) {
+        $button.attr('aria-pressed', $(this).hasClass('active') ? 'true' : 'false');
+      }
+    });
+  };
+
+  /**
    * Set the leaflet map object.
    */
   Drupal.Leaflet_Widget.prototype.set_leaflet_widget_map = function (map) {
@@ -83,6 +98,30 @@
       }
       map.pm.addControls(this.widgetsettings.toolbarSettings);
 
+      // Geoman calls the shapes on a map "layers", which means nothing to
+      // people editing a Map Points field (#864). Replace its button titles
+      // with translatable ones. Passing the active language as the fallback
+      // keeps Geoman's own translations of everything else; for a language
+      // Geoman doesn't ship, its other strings fall back to English.
+      // setLang() rebuilds the toolbar, so this runs before the aria-labels
+      // below are copied from the titles.
+      const geomanLang = L.PM.activeLang || 'en';
+      map.pm.setLang(geomanLang, {
+        buttonTitles: {
+          drawMarkerButton: Drupal.t('Draw marker'),
+          drawCircleMarkerButton: Drupal.t('Draw circle marker'),
+          drawPolyButton: Drupal.t('Draw polygon'),
+          drawLineButton: Drupal.t('Draw line'),
+          drawCircleButton: Drupal.t('Draw circle'),
+          drawRectButton: Drupal.t('Draw rectangle'),
+          editButton: Drupal.t('Edit map points'),
+          dragButton: Drupal.t('Move map points'),
+          cutButton: Drupal.t('Cut map points'),
+          deleteButton: Drupal.t('Remove map points'),
+          rotateButton: Drupal.t('Rotate map points'),
+        },
+      }, geomanLang);
+
       /* Mukurtu accessibility additions begin: */
 
       // Geoman ships Escape-to-exit and Enter-to-finish keyboard support,
@@ -92,14 +131,34 @@
 
       const containerId = $(map.getContainer()).attr('id');
       const instructionsId = containerId + '-keyboard-instructions';
+      // A name on a div with no role is often not announced, so make the
+      // map a region. Not "application": that would also turn off browse
+      // mode for the toolbar and points inside the map (#2687).
+      map.getContainer().setAttribute('role', 'region');
       map.getContainer().setAttribute('aria-label', Drupal.t('Interactive location map'));
       if ($('#' + instructionsId).length) {
         map.getContainer().setAttribute('aria-describedby', instructionsId);
       }
 
+      // Geoman's toolbar buttons and actions are links with role="button",
+      // so only Enter activates them and Space scrolls the page. Make Space
+      // work too, as it does on a real button (#2687). The handler is
+      // namespaced and removed first, because this function runs again when
+      // the map is re-initialized and a second handler would toggle twice.
+      $(map.getContainer())
+        .off('keydown.mukurtuGeomanSpace')
+        .on('keydown.mukurtuGeomanSpace', 'a.leaflet-buttons-control-button, a.leaflet-pm-action', function (event) {
+          if (event.key === ' ' && !event.repeat) {
+            event.preventDefault();
+            this.click();
+          }
+        });
+
       Drupal.mukurtuLabelGeomanToolbar(map);
+      Drupal.mukurtuSyncGeomanToolbarState(map);
       map.on('pm:globaldrawmodetoggled pm:globaleditmodetoggled pm:globaldragmodetoggled pm:globalremovalmodetoggled pm:globalcutmodetoggled pm:globalrotatemodetoggled', function () {
         Drupal.mukurtuLabelGeomanToolbar(map);
+        Drupal.mukurtuSyncGeomanToolbarState(map);
       });
 
       // Move the location-description input's onblur handler to a
