@@ -235,7 +235,6 @@ documentation on how to use @include media(). */
   --mukurtu-navbar-default-link-hover-color: var(--color-white);
   --mukurtu-navbar-default-link-hover-bg: var(--brand-primary-accent);
   --mukurtu-navbar-default-link-active-color: var(--color-gray);
-  --mukurtu-navbar-default-link-active-bg: color.adjust(var(--navbar-default-bg), $lightness: -6.5%);
   --mukurtu-navbar-default-link-disabled-color: #ccc;
   --mukurtu-navbar-default-link-disabled-bg: transparent;
   --mukurtu-mejs-text-color: var(--brand-text-color);
