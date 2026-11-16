@@ -65,6 +65,17 @@
     if (instance.DOM.originalInput?.classList.contains('tagify--autocreate')) {
       highlightExactMatchOnly(instance);
     }
+    // Tagify moves focus from a tag's remove button straight to the input,
+    // so Tab could never get past a tag to the remove buttons or the reorder
+    // arrows (#2710). Let them keep focus, and put focus on the input
+    // after a removal instead, as Tagify meant to.
+    instance.settings.focusInputOnRemove = false;
+    instance.on('remove', () => {
+      const active = document.activeElement;
+      if (!active || active === document.body || !active.isConnected) {
+        instance.DOM.input.focus();
+      }
+    });
     instance.__mukurtuPatched = true;
   }
 
@@ -195,6 +206,11 @@
           textbox.removeAttribute(attribute);
         }
       });
+      // The original input is hidden from screen readers (#2710), and a
+      // plain required attribute isn't copied above, so say it here.
+      if (original.required) {
+        textbox.setAttribute('aria-required', 'true');
+      }
     });
   }
 
@@ -401,6 +417,16 @@
       original.setAttribute('aria-hidden', 'true');
       original.addEventListener('invalid', (event) => showRequiredError(event, original));
       original.__tagify.on('add', () => clearRequiredError(original));
+      // A click on the field's label would focus the hidden original input,
+      // where nothing shows and typing goes nowhere. Focus Tagify's input.
+      const label = document.querySelector(`label[for="${original.id}"]`);
+      label?.addEventListener('click', (event) => {
+        const textbox = tagsElement.querySelector('.tagify__input');
+        if (textbox) {
+          event.preventDefault();
+          textbox.focus();
+        }
+      });
     });
   }
 

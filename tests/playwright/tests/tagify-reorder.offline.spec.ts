@@ -31,6 +31,7 @@ async function setUp(page: Page, { tags = [], required = false, limited = false 
   const value = JSON.stringify(tags.map((label, i) => ({ value: String(i + 1), label })));
   await page.setContent(`<!DOCTYPE html><html lang="en"><head><title>Tagify fixture</title></head><body>
     <form id="form" action="about:blank">
+      <label for="before">Title</label> <input id="before">
       <div class="form-item">
         <label for="keywords">Keywords</label>
         <input id="keywords" name="keywords" class="tagify-widget${limited ? ' tagify--limited' : ''}"
@@ -87,7 +88,8 @@ test.describe('Hidden original input', () => {
   test('screen readers find one Keywords field, with no JSON value', async ({ page }) => {
     await setUp(page, { tags: ['Baskets'] });
     await expect(page.locator('#keywords')).toHaveAttribute('aria-hidden', 'true');
-    await expect(page.getByRole('textbox')).toHaveCount(1);
+    // The Title field and Tagify's own input. The original isn't a third.
+    await expect(page.getByRole('textbox')).toHaveCount(2);
     await expect(page.getByRole('textbox', { name: 'Keywords' })).toHaveCount(1);
     const tree = await page.locator('body').ariaSnapshot();
     expect(tree).not.toContain('"value"');
@@ -97,6 +99,19 @@ test.describe('Hidden original input', () => {
     await setUp(page, { tags: ['Baskets'] });
     const data = await page.evaluate(() => new FormData(document.getElementById('form') as HTMLFormElement).get('keywords'));
     expect(JSON.parse(String(data))[0].label).toBe('Baskets');
+  });
+});
+
+test.describe('Required field', () => {
+  test('the visible field says it is required', async ({ page }) => {
+    await setUp(page, { required: true });
+    await expect(page.getByRole('textbox', { name: 'Keywords' })).toHaveAttribute('aria-required', 'true');
+  });
+
+  test('clicking the label focuses the visible field', async ({ page }) => {
+    await setUp(page, { tags: ['Baskets'] });
+    await page.getByText('Keywords', { exact: true }).click();
+    await expect(page.getByRole('textbox', { name: 'Keywords' })).toBeFocused();
   });
 });
 
@@ -169,6 +184,42 @@ test.describe('Reorder buttons', () => {
       'Gamma moved to position 1 of 3.',
       'Gamma moved to position 2 of 3.',
     ]);
+  });
+
+  test('Tab reaches every arrow and remove button, in order', async ({ page }) => {
+    await page.locator('#before').focus();
+    const stops: string[] = [];
+    for (let i = 0; i < 10; i++) {
+      await page.keyboard.press('Tab');
+      stops.push(await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement;
+        return el.getAttribute('aria-label') || el.className;
+      }));
+    }
+    // Disabled arrows are skipped. The library's own remove buttons aren't
+    // focusable; the Tagify module's template makes them so, and they're
+    // checked on a real form.
+    const arrowsAndInput = stops.filter((stop) => !stop.startsWith('remove '));
+    expect(arrowsAndInput.slice(0, 5)).toEqual([
+      'Move Alpha later',
+      'Move Beta earlier', 'Move Beta later',
+      'Move Gamma earlier',
+      'Keywords',
+    ]);
+  });
+
+  test('a focused arrow shows a focus outline', async ({ page }) => {
+    await page.locator('#before').focus();
+    await page.keyboard.press('Tab');
+    await expect(button(page, 'Move Alpha later')).toBeFocused();
+    const outline = await button(page, 'Move Alpha later').evaluate((el) => getComputedStyle(el).outlineStyle);
+    expect(outline).toBe('solid');
+  });
+
+  test('removing a tag with its remove button puts focus on the input', async ({ page }) => {
+    await page.locator('tags .tagify__tag').first().locator('.tagify__tag__removeBtn').click();
+    await expect.poll(() => order(page)).toEqual(['Beta', 'Gamma']);
+    await expect(page.locator('.tagify__input')).toBeFocused();
   });
 
   test('clicking an arrow neither removes the tag nor focuses the input', async ({ page }) => {
