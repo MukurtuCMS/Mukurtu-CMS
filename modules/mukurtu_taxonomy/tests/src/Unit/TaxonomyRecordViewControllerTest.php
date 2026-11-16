@@ -112,10 +112,10 @@ class TaxonomyRecordViewControllerTest extends UnitTestCase {
    */
   public function testVocabularyLabelMapCoversAllBuiltInVocabs(): void {
     $expected = [
-      'category', 'community_type', 'contributor', 'creator', 'format',
-      'interpersonal_relationship', 'keywords', 'language', 'location',
-      'media_tag', 'people', 'place_type', 'publisher', 'subject', 'type',
-      'word_type',
+      'article_tags', 'category', 'community_type', 'contributor', 'creator',
+      'format', 'interpersonal_relationship', 'keywords', 'language',
+      'location', 'media_tag', 'people', 'place_type', 'publisher', 'subject',
+      'type', 'word_type',
     ];
     foreach ($expected as $vocab) {
       $this->assertArrayHasKey($vocab, TaxonomyRecordViewController::VOCABULARY_LABEL_MAP,
