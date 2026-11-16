@@ -53,11 +53,12 @@
   }
 }
 
-// An article with no image gets a plain block in the same 4:3 frame and
-// colour as a Featured Content card with no media.
+// An article with no image gets a plain block in the same 4:3 frame as a
+// Featured Content card with no media, in a different colour so the two
+// blocks are easy to tell apart on the front page.
 .vertical-card--article .vertical-card__media--empty {
   aspect-ratio: 4 / 3;
-  background-color: var(--brand-secondary-accent);
+  background-color: var(--brand-light);
 }
 
 // In the block, the cards keep their own look inside landing page block
