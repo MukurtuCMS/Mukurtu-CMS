@@ -1,13 +1,13 @@
 /**
  * @file
- * Keeps keyboard focus on a browse control after it reloads the page.
+ * Keeps keyboard focus where it was after the browse filters reload the page.
  *
- * Filters, sort, the Display options toggles and the search box reload the
- * page as soon as they change (Better Exposed Filters auto-submit), which
- * sends focus back to the top. This remembers the control that changed and
- * focuses it again once the page loads, so keyboard and screen reader users
- * carry on where they were, and a parent's newly shown nested terms come
- * next in tab order (#2522, #2619).
+ * The filters, sort, Display options and search box wait for Apply (#2619).
+ * Applying reloads the page, which sends focus back to the top, a long way
+ * from the filters. This remembers what submitted the form (the Apply
+ * button, Reset, or the search box on Enter) and focuses it again once the
+ * page loads, so people can carry on refining. Shift+Tab from Apply reaches
+ * the filters, including a parent's newly shown nested terms (#2522).
  */
 ((Drupal, once) => {
   'use strict';
@@ -116,19 +116,16 @@
       });
 
       once('mukurtuFacetFocus', FORMS, context).forEach((form) => {
-        // Capture, so a control's own handler can't stop this seeing the
-        // change. The Display options toggles stop it bubbling.
-        form.addEventListener('change', (event) => {
-          if (event.target.matches('input[type="checkbox"], input[type="radio"], select')) {
-            save(event.target);
-          }
-        }, true);
-        // The search box submits while you type, or on Enter.
-        form.addEventListener('submit', () => {
+        form.addEventListener('submit', (event) => {
+          // The search box on Enter, or the button that was pressed. Safari
+          // doesn't focus a button on click, so fall back to the submitter.
           const active = document.activeElement;
-          if (active && form.contains(active)
-            && active.matches('input[type="text"], input[type="search"]')) {
-            save(active);
+          const control = active && active !== form && form.contains(active)
+            && active.matches('input[type="text"], input[type="search"], input[type="submit"], button')
+            ? active
+            : event.submitter;
+          if (control && form.contains(control)) {
+            save(control);
           }
         });
       });

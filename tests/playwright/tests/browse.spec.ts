@@ -59,68 +59,73 @@ test('Browse tests - facet headers show a collapse indicator', async ({ page }) 
 });
 
 /**
- * Regression test for issue #2522: checking a facet submits the browse form
- * and reloads the page, which used to send focus back to the top. Focus must
- * come back to the checkbox, so keyboard users carry on from there
- * (modules/mukurtu_browse/js/facet-focus.js).
+ * Regression tests for issue #2619: the filters, sort, Display options and
+ * search box used to reload the page as soon as they changed (WCAG 3.2.2).
+ * They now wait for Apply, and focus comes back to Apply, or to the search
+ * box on Enter, after the reload (modules/mukurtu_browse/js/facet-focus.js).
  */
-test('Browse tests - checking a facet keeps focus on it', async ({ page }) => {
-  await gotoReady(page, '/digital-heritage');
-  const checkbox = page.locator('form[id^="views-exposed-form-"] input[type="checkbox"][data-drupal-selector^="edit-category-"]').first();
-  test.skip(await checkbox.count() === 0, 'No category facet values in this content.');
-  const selector = await checkbox.getAttribute('data-drupal-selector');
+const FILTERS = 'form[id^="views-exposed-form-"]';
 
-  await checkbox.focus();
-  await Promise.all([page.waitForURL(/category/), page.keyboard.press('Space')]);
-  await page.waitForLoadState('load');
+/** Counts full page loads from here on. */
+function countLoads(page: Page): () => number {
+  let loads = 0;
+  page.on('request', (request) => {
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame()) {
+      loads += 1;
+    }
+  });
+  return () => loads;
+}
 
-  await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset?.drupalSelector)).toBe(selector);
-  await expect(page.locator(`[data-drupal-selector="${selector}"]`).first()).toBeChecked();
-});
+for (const path of ['/browse', '/digital-heritage', '/dictionary']) {
+  test(`Browse tests - ${path} waits for Apply`, async ({ page }) => {
+    await gotoReady(page, path);
+    const form = page.locator(FILTERS).first();
+    const loads = countLoads(page);
 
-/**
- * Regression test for issue #2619: the search box and the Display options
- * toggles reload the page too, and focus must come back to them
- * (modules/mukurtu_browse/js/facet-focus.js).
- */
-test('Browse tests - searching keeps focus in the search box', async ({ page }) => {
+    const checkbox = form.locator('input[type="checkbox"][data-drupal-selector]:visible').first();
+    if (await checkbox.count()) {
+      await checkbox.check();
+    }
+    await form.locator('.search-collapse-toggle__input').first().press('Space');
+    await form.locator('input[name="search_api_fulltext"], input[name="keywords"]').first().pressSequentially('zzz');
+    const sort = form.locator('select[name="sort_by"]');
+    if (await sort.count()) {
+      await sort.selectOption({ index: 1 });
+    }
+    // Well past Better Exposed Filters' old 500ms auto-submit delay.
+    await page.waitForTimeout(1500);
+    expect(loads(), 'A control reloaded the page before Apply.').toBe(0);
+
+    const apply = form.locator('input[type="submit"][value="Apply"]');
+    await apply.focus();
+    await Promise.all([page.waitForURL(/zzz/), page.keyboard.press('Enter')]);
+    await page.waitForLoadState('load');
+    expect(loads()).toBe(1);
+    // The Display options setting goes with the other filters.
+    expect(page.url()).toMatch(/(mpi|cr)_collapse=/);
+    await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLInputElement | null)?.value)).toBe('Apply');
+  });
+}
+
+test('Browse tests - Enter in the search box applies and keeps focus there', async ({ page }) => {
   await gotoReady(page, '/browse');
-  const search = page.locator('form[id^="views-exposed-form-"] input[name="search_api_fulltext"]').first();
-  await search.click();
-  await page.keyboard.type('zzzz', { delay: 80 });
-  await page.waitForURL(/search_api_fulltext=zzzz/);
+  const search = page.locator(`${FILTERS} input[name="search_api_fulltext"]`).first();
+  await search.pressSequentially('zzzz');
+  await Promise.all([page.waitForURL(/search_api_fulltext=zzzz/), search.press('Enter')]);
   await page.waitForLoadState('load');
   await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLInputElement | null)?.name)).toBe('search_api_fulltext');
 });
 
-test('Browse tests - a Display options toggle keeps focus on it', async ({ page }) => {
+test('Browse tests - Apply stays in view while the filters scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 1400, height: 800 });
   await gotoReady(page, '/browse');
-  const toggle = page.locator('form[id^="views-exposed-form-"] .search-collapse-toggle__input').first();
-  const param = await toggle.getAttribute('data-param');
-  await toggle.focus();
-  await Promise.all([page.waitForURL(new RegExp(`${param}=`)), page.keyboard.press('Space')]);
-  await page.waitForLoadState('load');
-  await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset?.param)).toBe(param);
+  const actions = page.locator(`${FILTERS} .form-actions`).first();
+  const form = await page.locator(FILTERS).first().boundingBox();
+  test.skip(!form || form.height < 900, 'The filters fit in the window, so nothing scrolls.');
+  // Scroll so the form's top is gone but its end is still below the window.
+  await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), form!.y + 100);
+  const box = await actions.boundingBox();
+  expect(box!.y + box!.height).toBeLessThanOrEqual(800);
+  expect(box!.y).toBeGreaterThan(600);
 });
-
-/**
- * Regression test for issue #2619: filters, sort and the search box reload
- * the page as soon as they change (Better Exposed Filters auto-submit). WCAG
- * 3.2.2 allows that only if people are told first, so a notice comes before
- * every control in the filters sidebar (mukurtu_browse_preprocess_block()).
- */
-for (const path of ['/browse', '/digital-heritage', '/dictionary']) {
-  test(`Browse tests - ${path} says filters reload the page before any control`, async ({ page }) => {
-    await gotoReady(page, path);
-    const form = page.locator('form[id^="views-exposed-form-"]').first();
-    const notice = form.locator('.browse-facets__notice');
-    await expect(notice).toHaveText('The page reloads with new results when you choose a filter, change the sort order, or pause while typing a search.');
-    const first = await form.evaluate((el) => {
-      const notice = el.querySelector('.browse-facets__notice');
-      const controls = Array.from(el.querySelectorAll('input:not([type="hidden"]), select, textarea, button'));
-      // Every control comes after the notice in reading order.
-      return controls.every((control) => notice!.compareDocumentPosition(control) & Node.DOCUMENT_POSITION_FOLLOWING);
-    });
-    expect(first).toBe(true);
-  });
-}

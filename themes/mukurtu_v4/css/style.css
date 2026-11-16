@@ -7183,6 +7183,26 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
 .browse__main-content .browse-container .browse-facets .form-actions {
   -webkit-margin-before: var(--v-space-4xs);
           margin-block-start: var(--v-space-4xs);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: var(--v-space-5xs);
+}
+.browse__main-content .browse-container .browse-facets .form-actions > * {
+  margin: 0;
+}
+@media (min-width: 60rem) and (min-height: 40rem) {
+  .browse__main-content .browse-container .browse-facets .form-actions {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 1;
+    padding-block: var(--v-space-5xs);
+    background-color: var(--color-white);
+    -webkit-box-shadow: 0 -1px 0 var(--color-greys-alpha-border);
+            box-shadow: 0 -1px 0 var(--color-greys-alpha-border);
+  }
 }
 .browse__main-content .browse-container .browse-facets details.form-item {
   background-color: var(--mukurtu-panel-pane-content-background-color);
@@ -7382,13 +7402,11 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   display: none;
 }
 
-.browse-facets__notice {
-  margin-block: 0 var(--v-space-4xxs);
-  font-size: var(--font-size-xs);
-  line-height: 1.4;
-  color: var(--color-text-secondary);
+@media (min-width: 60rem) and (min-height: 40rem) {
+  html:has(.browse-facets .form-actions) {
+    scroll-padding-block-end: 5rem;
+  }
 }
-
 .collections {
   grid-column: 1/-1;
   display: grid;
@@ -8303,11 +8321,6 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   -webkit-margin-before: 1rem;
           margin-block-start: 1rem;
 }
-.dictionary .browse-facets .browse-facets__notice {
-  grid-column: 1/-1;
-  margin-block: 0;
-  color: var(--color-text-secondary);
-}
 .dictionary .browse-facets .facets-widget-dropdown {
   grid-row: 1;
   -webkit-margin-after: var(--v-space-3xs);
@@ -8367,6 +8380,9 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
           margin-block-start: 0;
 }
 .dictionary .browse-facets .views-exposed-form .form-actions {
+  display: contents;
+}
+.dictionary .browse-facets .views-exposed-form .form-actions [data-drupal-selector^=edit-reset] {
   display: none;
 }
 .dictionary .browse-facets h2,
@@ -8483,7 +8499,8 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   gap: var(--v-space-5xs);
 }
 .dictionary .browse-links a,
-.dictionary .browse-links button {
+.dictionary .browse-links button,
+.dictionary .browse-links input[type=submit] {
   background-color: var(--color-white);
   border: 1px solid var(--brand-primary-dark);
   color: var(--brand-primary-dark);
@@ -8495,16 +8512,19 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   letter-spacing: normal;
 }
 .dictionary .browse-links a:hover,
-.dictionary .browse-links button:hover {
+.dictionary .browse-links button:hover,
+.dictionary .browse-links input[type=submit]:hover {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
 .dictionary .browse-links a:focus,
-.dictionary .browse-links button:focus {
+.dictionary .browse-links button:focus,
+.dictionary .browse-links input[type=submit]:focus {
   outline-offset: 1px;
 }
 .dictionary .browse-links a,
-.dictionary .browse-links button {
+.dictionary .browse-links button,
+.dictionary .browse-links input[type=submit] {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
@@ -8520,7 +8540,8 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   padding: var(--v-space-6xs) var(--v-space-5xs);
 }
 .dictionary .browse-links a:focus-visible,
-.dictionary .browse-links button:focus-visible {
+.dictionary .browse-links button:focus-visible,
+.dictionary .browse-links input[type=submit]:focus-visible {
   outline: 3px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
