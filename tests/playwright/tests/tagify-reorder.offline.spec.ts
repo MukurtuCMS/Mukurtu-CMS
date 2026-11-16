@@ -222,6 +222,17 @@ test.describe('Reorder buttons', () => {
     await expect(page.locator('.tagify__input')).toBeFocused();
   });
 
+  test('a removal by code leaves focus alone', async ({ page }) => {
+    await page.locator('#before').focus();
+    await page.evaluate(() => (document.activeElement as HTMLElement).blur());
+    await page.evaluate(() => {
+      const tagify = (document.getElementById('keywords') as any).__tagify;
+      tagify.removeTags(tagify.getTagElms()[0]);
+    });
+    await expect.poll(() => order(page)).toEqual(['Beta', 'Gamma']);
+    await expect(page.locator('.tagify__input')).not.toBeFocused();
+  });
+
   test('clicking an arrow neither removes the tag nor focuses the input', async ({ page }) => {
     await button(page, 'Move Beta earlier').click();
     expect(await order(page)).toEqual(['Beta', 'Alpha', 'Gamma']);

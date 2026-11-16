@@ -68,11 +68,19 @@
     // Tagify moves focus from a tag's remove button straight to the input,
     // so Tab could never get past a tag to the remove buttons or the reorder
     // arrows (#2710). Let them keep focus, and put focus on the input
-    // after a removal instead, as Tagify meant to.
+    // after a removal instead, as Tagify meant to. Only when the removed tag
+    // took focus with it, so removals the editor didn't make (on load, or
+    // from another widget) don't pull focus into the field.
     instance.settings.focusInputOnRemove = false;
+    let lastFocused = null;
+    instance.DOM.scope.addEventListener('focusin', (event) => {
+      lastFocused = event.target;
+    });
     instance.on('remove', () => {
       const active = document.activeElement;
-      if (!active || active === document.body || !active.isConnected) {
+      const lost = !active || active === document.body;
+      if (lost && lastFocused && !lastFocused.isConnected) {
+        lastFocused = null;
         instance.DOM.input.focus();
       }
     });
