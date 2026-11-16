@@ -26,6 +26,13 @@
   }
 }
 
+// The Browse by Category landing page block (the only place .category-grid
+// sits inside a Layout Builder block): same card widths, but a row that isn't
+// full is centered, as the Featured Content block does.
+[data-layout-block-uuid] .category-grid {
+  @include layout.layout--centered-card-row('.category-card');
+}
+
 // Teaser displays for Categories taxonomy terms on /categories.
 .category-teaser {
   block-size: 100%;
