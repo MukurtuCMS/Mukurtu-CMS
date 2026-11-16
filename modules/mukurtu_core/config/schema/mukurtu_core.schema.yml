@@ -739,3 +739,13 @@ mukurtu_core.consent_popup_text:
         decline_url_text:
           type: string
           label: 'Decline link text'
+
+# The Latest Articles block's settings: the Views block settings, plus the
+# toggle LatestArticlesBlock adds.
+block.settings.views_block:mukurtu_articles-latest_articles_block:
+  type: views_block
+  label: 'Latest Articles block'
+  mapping:
+    show_more_link:
+      type: boolean
+      label: 'Show "View all articles" link'
