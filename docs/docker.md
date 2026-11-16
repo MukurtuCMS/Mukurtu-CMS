@@ -22,16 +22,20 @@ is built and why*, see [docker-build.md](docker-build.md).
 
 ## Quick start
 
-You need Docker with the Compose plugin. The ready-to-run examples are in
-[`examples/docker/`](../examples/docker): get them with
+You need Docker with the Compose plugin. To check, run `docker compose version`: it
+prints a version number. If it doesn't, install the plugin; see Docker's
+[Install Docker Engine](https://docs.docker.com/engine/install/). On Ubuntu, the
+`docker.io` package doesn't include it; `apt-get install docker-compose-v2` adds it.
+
+The ready-to-run examples are in [`examples/docker/`](../examples/docker). Get the ones
+for the release you run, such as 4.0.8-r1:
 
 ```
-git clone --depth 1 --filter=blob:none --sparse https://github.com/OWNER/Mukurtu-CMS.git mukurtu-docker
+git clone --depth 1 --filter=blob:none --sparse --branch 4.0.8-r1 https://github.com/MukurtuCMS/Mukurtu-CMS.git mukurtu-docker
 cd mukurtu-docker && git sparse-checkout set examples/docker
 ```
 
-(or download the repository as a ZIP from GitHub). Replace `OWNER` with the GitHub account
-that publishes the image and the repository.
+(or download that release's source code as a ZIP from GitHub).
 
 **Try it (two minutes).** The `minimal` example needs nothing prepared:
 

@@ -67,7 +67,8 @@ them from drifting apart again.
    above its `hook_update_last_removed()` if it has one.
 3. **Compile SCSS** if the theme changed, without minifying `style.css`.
 4. **Bump the version** with `scripts/set-version.sh`, as above, and add the
-   release's entry to `CHANGELOG.md`.
+   release's entry to `CHANGELOG.md`. Update the release in the `git clone`
+   command in [docker.md](docker.md#quick-start), "Quick start".
 5. **Merge to `main`.** If the release work is a stack of pull requests, confirm
    each one's base actually moved before merging the next — see
    [stacked-prs.md](stacked-prs.md), which documents three occasions where a
