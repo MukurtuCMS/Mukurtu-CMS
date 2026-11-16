@@ -1044,3 +1044,29 @@ function mukurtu_core_update_40227(): string {
 
   return (string) t('Categories pages now show only terms each visitor can see, and terms on media, paragraphs and communities no longer link to term pages.');
 }
+
+/**
+ * Hide the Body and Image labels on article pages.
+ */
+function mukurtu_core_update_40228(): void {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Article pages now use the full-node layout, where these two labels read as
+  // clutter above the image and text. Only a label still at the shipped
+  // "Above" setting is changed, so a site that chose another one keeps it.
+  $config = \Drupal::configFactory()->getEditable('core.entity_view_display.node.article.default');
+  if ($config->isNew()) {
+    return;
+  }
+  $changed = FALSE;
+  foreach (['body', 'field_article_image'] as $field) {
+    if ($config->get("content.$field.label") === 'above') {
+      $config->set("content.$field.label", 'hidden');
+      $changed = TRUE;
+    }
+  }
+  if ($changed) {
+    $config->save();
+  }
+}
