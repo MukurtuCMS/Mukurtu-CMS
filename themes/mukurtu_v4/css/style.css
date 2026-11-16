@@ -7009,7 +7009,7 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
           flex: 1;
   padding-block: var(--v-space-5xs);
   padding-inline: var(--v-space-4xxs);
-  background-color: var(--brand-secondary-dark);
+  background-color: var(--brand-text-color);
   color: var(--color-white);
 }
 .articles-listing .vertical-card--article .vertical-card__content-header :is(h2, h3) {

@@ -58,9 +58,9 @@
 // In the block, the cards keep their own look inside landing page block
 // wrappers, which center their headings and space them for block titles.
 // Article cards look like Featured Content cards: the image, then a solid
-// caption with the title and the published date. The caption uses
-// --brand-secondary-dark rather than Featured Content's colour so the two
-// blocks are easy to tell apart. The whole card is the link, through the
+// caption with the title and the published date. The caption uses the
+// charcoal --brand-text-color rather than Featured Content's colour so the
+// two blocks are easy to tell apart. The whole card is the link, through the
 // title link's ::after.
 .articles-listing .vertical-card--article {
   position: relative;
@@ -79,7 +79,7 @@
     flex: 1;
     padding-block: var(--v-space-5xs);
     padding-inline: var(--v-space-4xxs);
-    background-color: var(--brand-secondary-dark);
+    background-color: var(--brand-text-color);
     color: var(--color-white);
   }
 
