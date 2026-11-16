@@ -37,4 +37,6 @@ facet-focus:
     js/facet-focus.js: {}
   dependencies:
     - core/drupal
+    - core/drupal.announce
+    - core/drupalSettings
     - core/once

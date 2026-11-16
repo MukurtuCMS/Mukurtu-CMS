@@ -62,7 +62,8 @@ test('Browse tests - facet headers show a collapse indicator', async ({ page }) 
  * Regression tests for issue #2619: the filters, sort, Display options and
  * search box used to reload the page as soon as they changed (WCAG 3.2.2).
  * They now wait for Apply, and focus comes back to Apply, or to the search
- * box on Enter, after the reload (modules/mukurtu_browse/js/facet-focus.js).
+ * box on Enter, after the reload, with the number of results announced
+ * (modules/mukurtu_browse/js/facet-focus.js).
  */
 const FILTERS = 'form[id^="views-exposed-form-"]';
 
@@ -105,6 +106,9 @@ for (const path of ['/browse', '/digital-heritage', '/dictionary']) {
     // The Display options setting goes with the other filters.
     expect(page.url()).toMatch(/(mpi|cr)_collapse=/);
     await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLInputElement | null)?.value)).toBe('Apply');
+    // Focus is on Apply, not the results, so the count is announced. No
+    // result has "zzz" in it.
+    await expect(page.locator('#drupal-live-announce')).toHaveText('0 results.');
   });
 }
 

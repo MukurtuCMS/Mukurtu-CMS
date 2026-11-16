@@ -10,6 +10,7 @@ use Drupal\node\NodeTypeInterface;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Item\Field;
 use Drupal\search_api\Plugin\views\query\SearchApiQuery;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_theme().
@@ -202,6 +203,25 @@ function mukurtu_browse_build_quick_actions(array &$variables, NodeInterface $no
     'icon_actions' => $icon_actions,
     'overflow_actions' => $overflow_actions,
   ];
+}
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Gives the page the number of results in the list, so after Apply reloads
+ * it, screen readers hear how many results there are (#2619). The grid and
+ * map show the same filtered results, so the list's total stands for all.
+ */
+function mukurtu_browse_views_pre_render(ViewExecutable $view): void {
+  $list_displays = [
+    'mukurtu_browse' => 'mukurtu_browse_block',
+    'mukurtu_digital_heritage_browse' => 'mukurtu_digital_heritage_browse_block',
+    'mukurtu_dictionary' => 'mukurtu_dictionary_block',
+  ];
+  if (($list_displays[$view->id()] ?? NULL) !== $view->current_display || !isset($view->total_rows)) {
+    return;
+  }
+  $view->element['#attached']['drupalSettings']['mukurtuBrowse']['resultCount'] = (int) $view->total_rows;
 }
 
 /**

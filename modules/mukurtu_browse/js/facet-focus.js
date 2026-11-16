@@ -6,10 +6,11 @@
  * Applying reloads the page, which sends focus back to the top, a long way
  * from the filters. This remembers what submitted the form (the Apply
  * button, Reset, or the search box on Enter) and focuses it again once the
- * page loads, so people can carry on refining. Shift+Tab from Apply reaches
- * the filters, including a parent's newly shown nested terms (#2522).
+ * page loads, so people can carry on refining, and announces the number of
+ * results. Shift+Tab from Apply reaches the filters, including a parent's
+ * newly shown nested terms (#2522).
  */
-((Drupal, once) => {
+((Drupal, drupalSettings, once) => {
   'use strict';
 
   const KEY = 'mukurtuFacetFocus';
@@ -99,6 +100,12 @@
         if (!selector) {
           return;
         }
+        // Focus lands on the control, not the results, so say how many
+        // there are now.
+        const count = drupalSettings.mukurtuBrowse?.resultCount;
+        if (Number.isInteger(count)) {
+          Drupal.announce(Drupal.formatPlural(count, '1 result.', '@count results.'));
+        }
         // The form can be rendered more than once, for example in a drawer on
         // small screens, so focus the copy that's visible. Reset isn't shown
         // once nothing is filtered, so it falls back to Apply.
@@ -148,4 +155,4 @@
     },
   };
 
-})(Drupal, once);
+})(Drupal, drupalSettings, once);
