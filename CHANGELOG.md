@@ -5,6 +5,16 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## Unreleased
+
+Articles now use the same full-page layout as other content, and have Article
+Tags, Media Assets, and an Articles page.
+
+Article images aren't migrated from Mukurtu 3. An image media item needs a
+cultural protocol, and articles don't have one. On updated sites, the article
+Image field is deleted if no article uses it. If articles use it, the field and
+its images stay, but the field is removed from the article form.
+
 ## 4.0.8
 
 A security and maintenance release. It fixes two security issues, and fixes
