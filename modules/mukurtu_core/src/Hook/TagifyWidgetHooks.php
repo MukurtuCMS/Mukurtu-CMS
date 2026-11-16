@@ -44,7 +44,9 @@ class TagifyWidgetHooks {
     if (static::isDragMessage($description)) {
       $description = $this->reorderMessage($description);
     }
-    elseif (($description['#theme'] ?? NULL) === 'item_list') {
+    // Otherwise the line may be a list item, after the field's own help.
+    // The field's help on its own is markup, not a render array.
+    elseif (is_array($description) && ($description['#theme'] ?? NULL) === 'item_list') {
       foreach ($description['#items'] as &$item) {
         if (static::isDragMessage($item)) {
           $item = $this->reorderMessage($item);

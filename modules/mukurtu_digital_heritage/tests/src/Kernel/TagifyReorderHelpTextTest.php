@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_digital_heritage\Kernel;
 
+use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\mukurtu_core\Hook\TagifyWidgetHooks;
@@ -74,6 +75,25 @@ class TagifyReorderHelpTextTest extends DigitalHeritageTestBase {
   public function testTagifyFieldMentionsArrows(): void {
     $line = $this->assertHelpLine(static::REORDER_MESSAGE, $this->description('field_keywords', 'tagify_entity_reference_autocomplete_widget'));
     $this->assertEquals('taxonomy terms', $line->getArguments()['@entity_types']);
+  }
+
+  /**
+   * Other help lines are left alone, including the field's own help.
+   *
+   * A single-value field has no drag line, and its help is markup rather
+   * than a list, which crashed the Person form.
+   */
+  public function testOtherHelpIsLeftAlone(): void {
+    $hooks = new TagifyWidgetHooks();
+    $hooks->setStringTranslation($this->container->get('string_translation'));
+    $help = FieldFilteredMarkup::create('Choose a relationship.');
+    $element = ['#description' => $help];
+    $hooks->tagifyWidgetFormAlter($element, new FormState(), []);
+    $this->assertSame($help, $element['#description']);
+
+    $element = ['#type' => 'entity_autocomplete_tagify'];
+    $hooks->tagifyWidgetFormAlter($element, new FormState(), []);
+    $this->assertArrayNotHasKey('#description', $element);
   }
 
   /**
