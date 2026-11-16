@@ -33,10 +33,11 @@ function overlay(mid: number): string {
   const id = `mukurtu-content-warnings-${mid}`;
   return `
     <div class="mukurtu-content-warnings" data-mid="${mid}" tabindex="-1">
+      <p id="${id}-title" class="mukurtu-content-warnings__title">Media content warnings</p>
       <ul id="${id}" class="mukurtu-content-warnings__list" role="list">
         ${WARNINGS.map((w) => `<li><div class="mukurtu-content-warning">${w}</div></li>`).join('')}
       </ul>
-      <button type="button" class="mukurtu-content-warnings__dismiss" aria-describedby="${id}">Show media</button>
+      <button type="button" class="mukurtu-content-warnings__dismiss" aria-describedby="${id}-title ${id}">Show media</button>
     </div>`;
 }
 
@@ -72,10 +73,10 @@ async function load(page: Page, body: string) {
   </body></html>`);
 }
 
-test('The dismiss button is described by every warning', async ({ page }) => {
+test('The dismiss button is described by the title and every warning', async ({ page }) => {
   await load(page, IMAGE);
   const button = page.getByRole('button', { name: 'Show media' }).first();
-  await expect(button).toHaveAccessibleDescription(new RegExp(`${WARNINGS[1].slice(0, 30)}.*${WARNINGS[2].slice(0, 30)}`));
+  await expect(button).toHaveAccessibleDescription(new RegExp(`^Media content warnings .*${WARNINGS[1].slice(0, 30)}.*${WARNINGS[2].slice(0, 30)}`));
 });
 
 test('Dismissing an image moves focus to the media, not the page body', async ({ page }) => {
