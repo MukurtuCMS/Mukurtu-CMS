@@ -8296,6 +8296,11 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   -webkit-margin-before: 1rem;
           margin-block-start: 1rem;
 }
+.dictionary .browse-facets .browse-facets__notice {
+  grid-column: 1/-1;
+  margin-block: 0;
+  color: var(--text-color);
+}
 .dictionary .browse-facets .facets-widget-dropdown {
   grid-row: 1;
   -webkit-margin-after: var(--v-space-3xs);

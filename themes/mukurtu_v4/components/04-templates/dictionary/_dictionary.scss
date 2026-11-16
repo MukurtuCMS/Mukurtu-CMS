@@ -35,6 +35,15 @@
       margin-block-start: 1rem;
     }
 
+    // The rest of this area is white text on dark-red headings, but the
+    // reload notice sits on the beige background. It spans the form's whole
+    // first row rather than squeezing into one grid column (#2619).
+    .browse-facets__notice {
+      grid-column: 1 / -1;
+      margin-block: 0;
+      color: var(--text-color);
+    }
+
     // Each dropdown facet.
     .facets-widget-dropdown {
       grid-row: 1;

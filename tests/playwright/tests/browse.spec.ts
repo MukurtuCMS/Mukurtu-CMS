@@ -77,3 +77,25 @@ test('Browse tests - checking a facet keeps focus on it', async ({ page }) => {
   await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset?.drupalSelector)).toBe(selector);
   await expect(page.locator(`[data-drupal-selector="${selector}"]`).first()).toBeChecked();
 });
+
+/**
+ * Regression test for issue #2619: filters, sort and the search box reload
+ * the page as soon as they change (Better Exposed Filters auto-submit). WCAG
+ * 3.2.2 allows that only if people are told first, so a notice comes before
+ * every control in the filters sidebar (mukurtu_browse_preprocess_block()).
+ */
+for (const path of ['/browse', '/digital-heritage', '/dictionary']) {
+  test(`Browse tests - ${path} says filters reload the page before any control`, async ({ page }) => {
+    await gotoReady(page, path);
+    const form = page.locator('form[id^="views-exposed-form-"]').first();
+    const notice = form.locator('.browse-facets__notice');
+    await expect(notice).toHaveText('The page reloads with new results when you choose a filter, change the sort order, or pause while typing a search.');
+    const first = await form.evaluate((el) => {
+      const notice = el.querySelector('.browse-facets__notice');
+      const controls = Array.from(el.querySelectorAll('input:not([type="hidden"]), select, textarea, button'));
+      // Every control comes after the notice in reading order.
+      return controls.every((control) => notice!.compareDocumentPosition(control) & Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+    expect(first).toBe(true);
+  });
+}
