@@ -108,6 +108,9 @@ function mukurtu_v4_preprocess_node(&$variables) {
     // See mukurtu_v4_preprocess_views_view_unformatted__mukurtu_articles().
     $variables['card_heading'] = ($variables['elements']['#mukurtu_card_heading'] ?? '') === 'h3' ? 'h3' : 'h2';
     $variables['card_media'] = _mukurtu_v4_article_card_media($node);
+    // An article with no image the viewer can see gets a plain colour block,
+    // as Featured Content cards do; card_media then carries only cacheability.
+    $variables['card_has_media'] = (bool) array_diff_key($variables['card_media'], ['#cache' => TRUE]);
     $variables['card_media_bundle'] = isset($variables['card_media']['#media']) ? $variables['card_media']['#media']->bundle() : 'image';
   }
 
@@ -227,18 +230,18 @@ function mukurtu_v4_preprocess_views_view_unformatted__mukurtu_articles(array &$
  * Picks the image for an article card.
  *
  * The first media asset the viewer can see, then the legacy Image field
- * (which sites that had articles before Media Assets keep), then the site's
- * placeholder image.
+ * (which sites that had articles before Media Assets keep). With neither,
+ * the card shows a plain colour block, as Featured Content cards do.
  *
  * @param \Drupal\node\NodeInterface $article
  *   The article, in the grid_browse view mode.
  *
  * @return array
- *   A render array for the card's media area.
+ *   A render array for the card's media area, or one holding only cache
+ *   metadata when there is nothing to show.
  */
 function _mukurtu_v4_article_card_media($article): array {
   $cacheability = new CacheableMetadata();
-  $restricted = FALSE;
   $card = NULL;
 
   if ($article->hasField('field_page_media_assets')) {
@@ -253,7 +256,6 @@ function _mukurtu_v4_article_card_media($article): array {
         $card = \Drupal::entityTypeManager()->getViewBuilder('media')->view($media, 'browse');
         break;
       }
-      $restricted = TRUE;
     }
   }
 
@@ -265,10 +267,9 @@ function _mukurtu_v4_article_card_media($article): array {
     ]);
   }
 
-  if (!$card) {
-    $card = _mukurtu_v4_card_placeholder($restricted, $cacheability);
-  }
-
+  // With nothing to show, the card gets a plain colour block instead of a
+  // placeholder image; return just the cacheability of that decision.
+  $card = $card ?: [];
   $cacheability->merge(CacheableMetadata::createFromRenderArray($card))->applyTo($card);
   return $card;
 }

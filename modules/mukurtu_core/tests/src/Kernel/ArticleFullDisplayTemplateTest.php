@@ -285,14 +285,14 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
   }
 
   /**
-   * With no media, a card shows the site's placeholder image.
+   * With no media, a card shows a plain colour block, not a placeholder image.
    */
-  public function testCardWithoutMediaShowsPlaceholder(): void {
+  public function testCardWithoutMediaShowsColourBlock(): void {
     $this->renderCard($this->createArticle());
 
-    $img = $this->cssSelect('.vertical-card__media img');
-    $this->assertCount(1, $img);
-    $this->assertStringContainsString('no-thumbnail.png', (string) $img[0]['src']);
+    $this->assertCount(1, $this->cssSelect('.vertical-card__media--empty'));
+    $this->assertCount(0, $this->cssSelect('.vertical-card__media img'));
+    $this->assertCount(0, $this->cssSelect('.vertical-card__media a'));
   }
 
   /**
@@ -307,7 +307,7 @@ class ArticleFullDisplayTemplateTest extends KernelTestBase {
 
     $media = (string) $this->cssSelect('.vertical-card__media')[0]->asXML();
     $this->assertStringContainsString('media--document', $media);
-    $this->assertStringNotContainsString('no-thumbnail.png', $media);
+    $this->assertCount(0, $this->cssSelect('.vertical-card__media--empty'));
     $this->assertCount(1, $this->cssSelect('.vertical-card__media .media--document'));
   }
 

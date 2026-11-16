@@ -7,19 +7,25 @@
  * image, title and published date. The title is an h2 on the page and an h3
  * in the block (card_heading). card_media and published_date come from
  * mukurtu_v4_preprocess_node(): the image is the first media asset the viewer
- * can see, then the legacy Image field, then the site's placeholder.
+ * can see, then the legacy Image field; with neither, a plain colour block.
  *
  * Available variables: see node.html.twig.
  */
 #}
 <article{{ attributes.addClass('vertical-card', 'vertical-card--article') }}>
-  <div class="vertical-card__media">
-    {% include '@mukurtu_v4/content/_card-media.html.twig' with {
-      media_bundle: card_media_bundle,
-      media: card_media,
-      url: url,
-    } %}
-  </div>
+  {% if card_has_media %}
+    <div class="vertical-card__media">
+      {% include '@mukurtu_v4/content/_card-media.html.twig' with {
+        media_bundle: card_media_bundle,
+        media: card_media,
+        url: url,
+      } %}
+    </div>
+  {% else %}
+    {# No image the viewer can see: a plain colour block, as on Featured
+       Content cards. card_media still carries cache metadata. #}
+    <div class="vertical-card__media vertical-card__media--empty">{{ card_media }}</div>
+  {% endif %}
 
   <div{{ content_attributes }} class="vertical-card__content">
     <div class="vertical-card__content-header">
