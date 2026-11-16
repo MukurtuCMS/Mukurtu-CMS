@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\Plugin\MukurtuExporter;
 use Drupal\mukurtu_export\Attribute\MukurtuExporter;
 use Drupal\mukurtu_export\ExportItemIdentity;
 use Drupal\mukurtu_export\Plugin\ExporterBase;
+use Drupal\mukurtu_export\SpreadsheetWorkbookWriter;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
@@ -14,6 +15,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Exception;
+use League\Csv\Bom;
 
 /**
  * Plugin implementation of MukurtuExporter for CSV.
@@ -24,6 +26,12 @@ use Exception;
   description: new TranslatableMarkup('Export to CSV.'),
 )]
 class CSV extends ExporterBase {
+
+  /**
+   * How many items to name for each field with values too long for Excel.
+   */
+  public const OVERLONG_LABELS_SHOWN = 5;
+
   /**
    * Entity IDs of the shipped default CSV export settings, in the order
    * they should be listed ahead of any other site-wide settings.
@@ -137,6 +145,17 @@ class CSV extends ExporterBase {
     $default_settings_id = $settings['settings_id'] ?? NULL;
     $form['export_settings']['#default_value'] = $default_settings_id && in_array($default_settings_id, $option_keys) ? $default_settings_id : reset($option_keys);
 
+    $form['export_format'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('File format'),
+      '#options' => [
+        'csv' => $this->t('CSV (one file per type)'),
+        'xlsx' => $this->t('Excel workbook (.xlsx)'),
+        'ods' => $this->t('OpenDocument spreadsheet (.ods)'),
+      ],
+      '#default_value' => static::getFormat($settings),
+    ];
+
     $form['settings_actions'] = [
       '#type' => 'actions',
     ];
@@ -162,7 +181,22 @@ class CSV extends ExporterBase {
   public function getSettings(array &$form, FormStateInterface $form_state) {
     $settings = [];
     $settings['settings_id'] = $form_state->getValue('export_settings');
+    $settings['format'] = static::getFormat(['format' => $form_state->getValue('export_format')]);
     return $settings;
+  }
+
+  /**
+   * The output file format from the export settings.
+   *
+   * @param array $settings
+   *   The exporter settings.
+   *
+   * @return string
+   *   'csv', or one of SpreadsheetWorkbookWriter::FORMATS.
+   */
+  public static function getFormat(array $settings): string {
+    $format = $settings['format'] ?? 'csv';
+    return in_array($format, SpreadsheetWorkbookWriter::FORMATS, TRUE) ? $format : 'csv';
   }
 
   /**
@@ -296,6 +330,14 @@ class CSV extends ExporterBase {
 
       $headers = $context['sandbox']['config']->getHeaders($entity_type_id, $bundle);
 
+      // A byte order mark tells Excel the file is UTF-8; without one it
+      // guesses the legacy Windows encoding and garbles non-English text.
+      // The importer strips it again. Workbook exports convert these files
+      // instead of shipping them, so they don't need one.
+      if (static::getFormat($context['results']['settings'] ?? []) === 'csv') {
+        fwrite($output, Bom::Utf8->value);
+      }
+
       fputcsv($output, $headers, $context['results']['csv']['separator'], $context['results']['csv']['enclosure'], $context['results']['csv']['escape']);
       $context['results']['headers_written'][$entity_type_id][$bundle] = TRUE;
     }
@@ -346,6 +388,7 @@ class CSV extends ExporterBase {
 
         // Export the entity.
         $result = static::class::export($entity, $context);
+        static::recordOverlongValues($entity, $result, $context);
 
         // Write out.
         fputcsv($output, $result, $context['results']['csv']['separator'], $context['results']['csv']['enclosure'], $context['results']['csv']['escape']);
@@ -386,6 +429,35 @@ class CSV extends ExporterBase {
     // We are done exporting if there are no more entities in the export list.
     if (!empty($context['results']['entities'])) {
       $context['finished'] = 0;
+    }
+  }
+
+  /**
+   * Notes values in a row too long for an Excel cell.
+   *
+   * Excel cuts such values short when it opens any export, so the results
+   * page lists them by field. Large map locations are the usual cause.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The exported entity, in the language it was exported in.
+   * @param array $row
+   *   The exported values, in header order.
+   * @param array $context
+   *   The batch context. Fills $context['results']['overlong'], keyed by
+   *   column header, with a 'count' of items and the first few item
+   *   'labels'.
+   */
+  protected static function recordOverlongValues(EntityInterface $entity, array $row, array &$context): void {
+    $headers = array_values($context['sandbox']['config']->getHeaders($entity->getEntityTypeId(), $entity->bundle()));
+    foreach (array_values($row) as $index => $value) {
+      if (mb_strlen((string) $value) <= SpreadsheetWorkbookWriter::XLSX_MAX_CELL_LENGTH) {
+        continue;
+      }
+      $header = (string) ($headers[$index] ?? $index);
+      $context['results']['overlong'][$header]['count'] = ($context['results']['overlong'][$header]['count'] ?? 0) + 1;
+      if (count($context['results']['overlong'][$header]['labels'] ?? []) < static::OVERLONG_LABELS_SHOWN) {
+        $context['results']['overlong'][$header]['labels'][] = (string) $entity->label();
+      }
     }
   }
 

@@ -50,6 +50,8 @@ class NamesOnlyCategoryBlockUpdateTest extends KernelTestBase {
     require_once \Drupal::root() . '/' . $module_path . '/mukurtu_core.install';
 
     $this->shippedView = Yaml::decode(file_get_contents($module_path . '/config/install/views.view.mukurtu_categories.yml'));
+    // This filter needs mukurtu_core, which this test leaves out.
+    unset($this->shippedView['display']['default']['display_options']['filters']['mukurtu_visible_terms']);
   }
 
   /**

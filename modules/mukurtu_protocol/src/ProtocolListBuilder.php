@@ -90,9 +90,12 @@ class ProtocolListBuilder extends EntityListBuilder {
     $rows = [];
     $visited = [];
 
-    // Walk only top-level communities (no parent), then recurse into children.
+    // Walk top-level communities, then recurse into children. A community
+    // whose parent the user can't view is treated as top-level, so it still
+    // shows without revealing the parent.
     foreach ($communities as $community) {
-      if (!$community->getParentCommunity()) {
+      $parent = $community->getParentCommunity();
+      if (!$parent || !isset($communities[$parent->id()])) {
         $this->addCommunityRows($community, $communities, $protocols_by_community, $rows, 0, $visited);
       }
     }
@@ -124,6 +127,11 @@ class ProtocolListBuilder extends EntityListBuilder {
           'og_membership_state',
           'og_role',
         ],
+        'tags' => array_merge(
+          $this->entityTypeManager->getDefinition('community')->getListCacheTags(),
+          $this->entityType->getListCacheTags(),
+          ['config:mukurtu_protocol.community_organization'],
+        ),
       ],
       '#attached' => ['library' => ['mukurtu_protocol/protocol-list']],
     ];
@@ -140,11 +148,10 @@ class ProtocolListBuilder extends EntityListBuilder {
     $visited[$community->id()] = TRUE;
 
     $community_protocols = $protocols_by_community[$community->id()] ?? [];
+    // Every community passed in is one the user can view, so it always gets
+    // a row, even when none of its protocols are visible to them. Only
+    // community managers get a linked name.
     $can_manage = $this->accessManager->checkNamedRoute('mukurtu_protocol.community_members', ['community' => $community->id()]);
-
-    if (!$can_manage && empty($community_protocols)) {
-      return;
-    }
 
     if ($can_manage) {
       $label = Link::createFromRoute(
@@ -201,8 +208,10 @@ class ProtocolListBuilder extends EntityListBuilder {
    *   The protocols to list.
    */
   protected function buildProtocolList(array $protocols) {
+    // Say so instead of leaving the cell blank, which screen readers announce
+    // as "blank" and which looks the same as missing data.
     if (empty($protocols)) {
-      return [];
+      return ['#markup' => $this->t('No protocols available')];
     }
 
     $items = [];

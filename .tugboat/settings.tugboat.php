@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 // Suppress PHP error output so it cannot reach the response body before
 // session headers are set. Errors are still written to the server error log.
+// This runs too late for startup warnings (such as an upload over
+// post_max_size), so tugboat.ini in .tugboat/config.yml also turns off
+// display_errors and display_startup_errors. Keep both.
 ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
 
