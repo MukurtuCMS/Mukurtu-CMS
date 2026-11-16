@@ -15,3 +15,7 @@ services:
     arguments: ['@messenger']
     tags:
       - { name: event_subscriber }
+
+  mukurtu_taxonomy.nested_terms:
+    class: Drupal\mukurtu_taxonomy\NestedTerms
+    arguments: ['@entity_type.manager', '@keyvalue', '@database']
