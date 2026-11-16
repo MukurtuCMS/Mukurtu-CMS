@@ -901,6 +901,19 @@ problem by 2px at 768px; with min-width: 0 its fields wrap instead. */
     min-width: 0;
 }
 
+/* gin_lb's version of the dialog, in Layout Builder, has no such wrapper:
+its results div is .glb-view-content, and the table sits straight inside it.
+At 320px with 200% text the table (Author and Updated columns) was 431px wide
+in a 294px dialog and pushed the dialog body sideways. Let the results scroll
+sideways on their own instead, as Gin's wrapper does elsewhere. WCAG 1.4.10
+exempts data tables from reflow; the dialog around them still reflows. Every
+row has a focusable checkbox and Edit link, so keyboard users can reach the
+scrolled-off columns. */
+.media-library-widget-modal .glb-view-content {
+    min-width: 0;
+    overflow-x: auto;
+}
+
 /* gin_lb puts the button (form-actions) BEFORE the count and gives it flex:1,
    leaving "Insert selected" left-aligned. Fix: stop the buttonset from growing
    and move it after the count so it reads [count] [button], right-aligned. */
