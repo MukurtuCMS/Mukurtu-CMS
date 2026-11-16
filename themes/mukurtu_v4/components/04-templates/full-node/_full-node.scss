@@ -120,11 +120,21 @@
   }
 }
 
-// Article fields are not separated by dividers.
+// Article fields are not separated by dividers, and article media has no
+// Expand lightbox (field--node--field-page-media-assets.html.twig skips its
+// library). An actions row left with nothing in it is hidden too.
 .full-node--article {
   .full-node__content .field {
     padding-block-start: 0;
     border-block-start: 0;
+  }
+
+  .media-asset--link {
+    display: none;
+  }
+
+  .media-asset--actions:not(:has(> :not(.media-asset--link))) {
+    display: none;
   }
 }
 
