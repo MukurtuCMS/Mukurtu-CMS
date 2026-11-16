@@ -136,6 +136,38 @@
   grid-gap: 10px var(--gutter);
 }
 
+// A row of cards the same width as layout--fourcol-grid's columns (one
+// column below sm, two from sm, four from lg), but laid out with flexbox so a
+// row that isn't full is centered instead of starting at the inline start.
+// Grid can't center a partial last row; auto-fit can, but it changes the card
+// widths. Pass the selector for the cards, which must be direct children.
+// stylelint-disable-next-line
+@mixin layout--centered-card-row($item-selector) {
+  --card-row-columns: 1;
+  --card-row-column-gap: var(--v-space-3xs);
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--v-space-3xs) var(--card-row-column-gap);
+
+  @include include-media.media('>=sm') {
+    --card-row-columns: 2;
+  }
+
+  @include include-media.media('>=lg') {
+    --card-row-columns: 4;
+    --card-row-column-gap: var(--gutter);
+
+    row-gap: 10px;
+  }
+
+  > #{$item-selector} {
+    flex: 0 0 calc((100% - (var(--card-row-columns) - 1) * var(--card-row-column-gap)) / var(--card-row-columns));
+    min-inline-size: 0;
+  }
+}
+
 .layout--full-width-grid {
   @include layout--full-width-grid;
 }
