@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_import\Form;
 
+use Drupal\Component\Utility\Environment;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\file\Element\ManagedFile;
+use Drupal\mukurtu_core\SequentialUpload;
 use Drupal\Core\Link;
 use Drupal\mukurtu_import\SpreadsheetConversionException;
 use Drupal\mukurtu_import\SpreadsheetConverter;
@@ -60,7 +63,9 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       )->toString(),
     ];
 
-    $form['metadata_files'] = [
+    // Upload each file in its own request, so the server's upload limit
+    // applies to each file rather than to all of them together.
+    $form['metadata_files'] = SequentialUpload::apply([
       '#type' => 'managed_file',
       '#title' => $this->t('Metadata Files'),
       '#description' => $this->t('Add your metadata files (CSV, XLSX, or ODS) here. Each sheet in a workbook is imported as a separate file. You will configure how they are imported in the next step.'),
@@ -74,12 +79,14 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#attributes' => [
         'name' => 'import_file_upload',
       ],
-    ];
+    ]);
 
-    $form['binary_files'] = [
+    $form['binary_files'] = SequentialUpload::apply([
       '#type' => 'managed_file',
       '#title' => $this->t('Media/Binary Files'),
-      '#description' => $this->t('Add your media & binary files here. You can reference these files by file name in your metadata files.'),
+      '#description' => $this->t('Add your media & binary files here. You can reference these files by file name in your metadata files.') . ' ' . $this->t('Maximum size per file: @size.', [
+        '@size' => ByteSizeMarkup::create(Environment::getUploadMaxSize()),
+      ]),
       '#multiple' => TRUE,
       '#default_value' => $this->getBinaryFiles(),
       '#upload_location' => $this->getBinaryUploadLocation(),
@@ -87,7 +94,7 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
       '#attributes' => [
         'name' => 'import_file_upload',
       ],
-    ];
+    ]);
 
     $form['actions'] = [
       '#type' => 'actions',

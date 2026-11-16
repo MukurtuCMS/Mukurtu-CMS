@@ -96,11 +96,12 @@ chapters:
                 Authors are prompted for alt text wherever they add an image.
                 Alt is required on seven of the eight image fields across
                 media bundles, including field_media_image on the Image
-                bundle, which is the path authors use, and on the article
-                image and footer logo fields. Two exceptions remain: the
-                document thumbnail and the user picture. The tool cannot judge
-                whether the text entered is a useful description, which no
-                authoring tool can.
+                bundle, which is the path authors use, and on the footer logo
+                field. Articles have no image field of their own; authors add
+                article images as media through Media Assets. Two exceptions
+                remain: the document thumbnail and the user picture. The tool
+                cannot judge whether the text entered is a useful description,
+                which no authoring tool can.
       - num: 1.2.1
         components:
           - name: web
