@@ -491,8 +491,15 @@ Restart the container after every change to the code. The site keeps compiled PH
 memory, and rebuilding Drupal's caches doesn't clear it.
 
 A contributed module can go in `custom/modules` too, if it doesn't need Composer
-libraries: download it from Drupal.org and unpack it there. To check, open the
-module's `composer.json`. If its `require` section lists only `drupal/` packages, or
+libraries: download it from the release's page on Drupal.org (the `tar.gz` link, not
+the `composer require` command) and unpack it there:
+
+```
+cd custom/modules
+curl -fsSL https://ftp.drupal.org/files/projects/coffee-2.0.1.tar.gz | tar xz
+```
+
+To check whether a module needs Composer libraries, open its `composer.json`. If its `require` section lists only `drupal/` packages, or
 the module has no `composer.json`, it works from the folder. Otherwise, use a
 [site image](#a-site-image). If you put one in the folder anyway,
 `drush pm:install --yes` answers Drupal's warning about the missing library for you
