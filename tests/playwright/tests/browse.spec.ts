@@ -79,6 +79,31 @@ test('Browse tests - checking a facet keeps focus on it', async ({ page }) => {
 });
 
 /**
+ * Regression test for issue #2619: the search box and the Display options
+ * toggles reload the page too, and focus must come back to them
+ * (modules/mukurtu_browse/js/facet-focus.js).
+ */
+test('Browse tests - searching keeps focus in the search box', async ({ page }) => {
+  await gotoReady(page, '/browse');
+  const search = page.locator('form[id^="views-exposed-form-"] input[name="search_api_fulltext"]').first();
+  await search.click();
+  await page.keyboard.type('zzzz', { delay: 80 });
+  await page.waitForURL(/search_api_fulltext=zzzz/);
+  await page.waitForLoadState('load');
+  await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLInputElement | null)?.name)).toBe('search_api_fulltext');
+});
+
+test('Browse tests - a Display options toggle keeps focus on it', async ({ page }) => {
+  await gotoReady(page, '/browse');
+  const toggle = page.locator('form[id^="views-exposed-form-"] .search-collapse-toggle__input').first();
+  const param = await toggle.getAttribute('data-param');
+  await toggle.focus();
+  await Promise.all([page.waitForURL(new RegExp(`${param}=`)), page.keyboard.press('Space')]);
+  await page.waitForLoadState('load');
+  await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset?.param)).toBe(param);
+});
+
+/**
  * Regression test for issue #2619: filters, sort and the search box reload
  * the page as soon as they change (Better Exposed Filters auto-submit). WCAG
  * 3.2.2 allows that only if people are told first, so a notice comes before
