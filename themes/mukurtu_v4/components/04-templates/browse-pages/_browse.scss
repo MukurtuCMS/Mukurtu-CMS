@@ -474,3 +474,13 @@
 .other-facets {
   display: none;
 }
+
+// Says the filters reload the page before any of them (WCAG 3.2.2, #2619).
+// Kept quiet: smaller than the filters' own text, in the secondary text
+// color (7:1 on white).
+.browse-facets__notice {
+  margin-block: 0 var(--v-space-4xxs);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}

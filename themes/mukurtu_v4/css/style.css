@@ -7382,6 +7382,13 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   display: none;
 }
 
+.browse-facets__notice {
+  margin-block: 0 var(--v-space-4xxs);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
 .collections {
   grid-column: 1/-1;
   display: grid;
@@ -8299,7 +8306,7 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
 .dictionary .browse-facets .browse-facets__notice {
   grid-column: 1/-1;
   margin-block: 0;
-  color: var(--text-color);
+  color: var(--color-text-secondary);
 }
 .dictionary .browse-facets .facets-widget-dropdown {
   grid-row: 1;
