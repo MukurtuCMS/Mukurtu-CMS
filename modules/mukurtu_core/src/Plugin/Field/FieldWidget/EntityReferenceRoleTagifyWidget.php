@@ -122,6 +122,9 @@ class EntityReferenceRoleTagifyWidget extends TagifyEntityReferenceAutocompleteW
           '#selection_handler' => 'default:taxonomy_term',
           '#selection_settings' => ['target_bundles' => $role_bundles],
           '#validate_reference' => FALSE,
+          // A template the script clones for every person's role box, and
+          // roles come from a short list, so no character palette (#2561).
+          '#character_palette' => FALSE,
           '#autocreate' => count($role_bundles) === 1 ? [
             'bundle' => reset($role_bundles),
             'uid' => method_exists($entity, 'getOwnerId') ? $entity->getOwnerId() : $this->currentUser->id(),
