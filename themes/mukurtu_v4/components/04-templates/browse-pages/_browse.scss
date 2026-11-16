@@ -242,14 +242,22 @@
         // so in the side column the pair stays in view at the bottom of the
         // window while the filters scroll. On small or zoomed screens it
         // stays at the end of the form, where it can't cover anything.
+        // A panel like the filter boxes, with a heavier top edge so it reads
+        // as separate from the filters scrolling under it.
         .form-actions {
           margin-block-start: var(--v-space-4xs);
           display: flex;
-          flex-wrap: wrap;
           gap: var(--v-space-5xs);
+          padding: var(--v-space-4xxs);
+          background-color: var(--mukurtu-panel-pane-content-background-color);
+          border-block-start: 3px solid var(--brand-primary-dark);
 
+          // Equal halves. Longer translations wrap inside the button.
           > * {
+            flex: 1 1 0;
+            min-inline-size: 0;
             margin: 0;
+            white-space: normal;
           }
 
           @include include-media.media('>=lg') {
@@ -257,9 +265,7 @@
               position: sticky;
               inset-block-end: 0;
               z-index: 1;
-              padding-block: var(--v-space-5xs);
-              background-color: var(--color-white);
-              box-shadow: 0 -1px 0 var(--color-greys-alpha-border);
+              box-shadow: 0 -4px 8px var(--color-greys-alpha-border);
             }
           }
         }

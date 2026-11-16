@@ -7186,22 +7186,27 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
   gap: var(--v-space-5xs);
+  padding: var(--v-space-4xxs);
+  background-color: var(--mukurtu-panel-pane-content-background-color);
+  -webkit-border-before: 3px solid var(--brand-primary-dark);
+          border-block-start: 3px solid var(--brand-primary-dark);
 }
 .browse__main-content .browse-container .browse-facets .form-actions > * {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 0px;
+          flex: 1 1 0;
+  min-inline-size: 0;
   margin: 0;
+  white-space: normal;
 }
 @media (min-width: 60rem) and (min-height: 40rem) {
   .browse__main-content .browse-container .browse-facets .form-actions {
     position: sticky;
     inset-block-end: 0;
     z-index: 1;
-    padding-block: var(--v-space-5xs);
-    background-color: var(--color-white);
-    -webkit-box-shadow: 0 -1px 0 var(--color-greys-alpha-border);
-            box-shadow: 0 -1px 0 var(--color-greys-alpha-border);
+    -webkit-box-shadow: 0 -4px 8px var(--color-greys-alpha-border);
+            box-shadow: 0 -4px 8px var(--color-greys-alpha-border);
   }
 }
 .browse__main-content .browse-container .browse-facets details.form-item {
