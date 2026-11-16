@@ -94,6 +94,13 @@
     const listId = ensureId(dropdown, `${original.id || 'tagify'}--suggestions`);
 
     input.setAttribute('role', 'combobox');
+    // A combobox can't have aria-placeholder, which Tagify gives its input.
+    // Keep any placeholder text as the input's description instead.
+    const placeholder = input.getAttribute('aria-placeholder');
+    input.removeAttribute('aria-placeholder');
+    if (placeholder && !input.hasAttribute('aria-description')) {
+      input.setAttribute('aria-description', placeholder);
+    }
     input.setAttribute('aria-autocomplete', 'list');
     input.setAttribute('aria-expanded', 'false');
     input.setAttribute('aria-controls', listId);

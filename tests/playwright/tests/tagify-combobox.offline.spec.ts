@@ -124,6 +124,31 @@ test.describe('Tagify combobox', () => {
     expect(await page.evaluate(() => (document.getElementById('keywords') as any).__tagify.DOM.dropdown.id)).toBe(controls);
   });
 
+  test('the combobox has no aria-placeholder, which combobox does not allow', async ({ page }) => {
+    await expect(combobox(page)).not.toHaveAttribute('aria-placeholder', /.*/);
+  });
+
+  test('placeholder text is kept as a description', async ({ page }) => {
+    await page.evaluate(() => {
+      const input = document.createElement('input');
+      input.id = 'people';
+      input.className = 'tagify-widget';
+      input.placeholder = 'Add a name';
+      const label = document.createElement('label');
+      label.htmlFor = 'people';
+      label.textContent = 'People';
+      document.body.append(label, input);
+      // @ts-ignore Tagify is the global from tagify.js.
+      new Tagify(input, { placeholder: 'Add a name' });
+      (window as any).Drupal.behaviors.mukurtuTagifyCombobox.attach(document);
+    });
+    // The override names the input; only the combobox file runs here.
+    const people = page.locator('#people').locator('xpath=preceding-sibling::tags[1]').locator('.tagify__input');
+    await expect(people).toHaveAttribute('role', 'combobox');
+    await expect(people).toHaveAttribute('aria-description', 'Add a name');
+    await expect(people).not.toHaveAttribute('aria-placeholder', /.*/);
+  });
+
   test('opening the list expands the combobox and announces the count', async ({ page }) => {
     await typeText(page, 'bas');
     await expect(combobox(page)).toHaveAttribute('aria-expanded', 'true');
