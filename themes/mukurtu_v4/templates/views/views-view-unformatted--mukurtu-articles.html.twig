@@ -1,0 +1,27 @@
+{#
+/**
+ * @file
+ * Rows of the Articles page and the Latest Articles block.
+ *
+ * Wraps the article cards in .articles-grid, so the cards get their own grid
+ * while the view's root element sits in the site's layout grid on the page.
+ * See _articles.scss.
+ *
+ * Available variables: see views-view-unformatted.html.twig.
+ */
+#}
+{% if title %}
+  <h3>{{ title }}</h3>
+{% endif %}
+<div class="articles-grid">
+  {% for row in rows %}
+    {%
+      set row_classes = [
+        default_row_class ? 'views-row',
+      ]
+    %}
+    <div{{ row.attributes.addClass(row_classes) }}>
+      {{- row.content -}}
+    </div>
+  {% endfor %}
+</div>
