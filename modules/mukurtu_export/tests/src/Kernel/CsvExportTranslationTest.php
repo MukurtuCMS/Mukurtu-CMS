@@ -211,6 +211,10 @@ class CsvExportTranslationTest extends CsvExportFieldTestBase {
     $this->assertArrayHasKey($key, $context['results']['exported_entities']['node']);
 
     $output = fopen("{$basepath}/Content - Protocol Aware Content.csv", 'r');
+    // CSV exports start with a UTF-8 byte order mark for Excel; skip it.
+    if (fread($output, 3) !== "\xEF\xBB\xBF") {
+      rewind($output);
+    }
     $header = fgetcsv($output, NULL, ',', '"', '\\');
     $row = fgetcsv($output, NULL, ',', '"', '\\');
     fclose($output);

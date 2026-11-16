@@ -18,7 +18,13 @@
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
+  gap: var(--v-space-4xxs);
+  // Several warnings can be taller than a small media item. Scroll instead of
+  // clipping, and use safe centering so the first line never sits above the
+  // top edge where it can't be scrolled to (WCAG 1.4.10).
+  justify-content: safe center;
+  overflow-y: auto;
   background-color: rgba(0 0 0 / 70%);
   // When backdrop-filter is unsupported the frosted glass effect is lost;
   // restore higher opacity to guarantee contrast (WCAG 1.4.3).
@@ -33,27 +39,56 @@
   cursor: pointer;
   text-align: center;
 
-  &:hover {
-    text-decoration: underline;
-  }
-
-  &:focus-visible {
-    /* This overlay's label is white on its own dark 70% scrim, but it sits
-    over arbitrary uploaded media, so neither currentcolor drawn outward
-    nor any fixed colour is safe against what's behind it. Inset the ring
-    so it lands on the scrim, which is a known dark surface (#2199). */
-    outline: var(--focus-color) solid 2px;
-    outline-offset: -4px;
-  }
-
   &.dismissed {
+    display: none;
+  }
+
+  // Thumbnails are too small for the text, and the thumbnail itself is the
+  // control there, so keep only the scrim.
+  .splide__track--nav & > * {
     display: none;
   }
 }
 
-.mukurtu-content-warning {
-  .splide__track--nav & {
-    display: none;
+.mukurtu-content-warnings__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  // The theme gives list items square markers and a taller line height.
+  li {
+    list-style: none;
+    line-height: inherit;
+  }
+
+  li + li {
+    margin-block-start: var(--v-space-5xs);
+  }
+}
+
+.mukurtu-content-warnings__dismiss {
+  flex-shrink: 0;
+  color: inherit;
+  background: transparent;
+  border: 2px solid currentcolor;
+  font-size: var(--font-size-base);
+  font-weight: var(--text-bold);
+  letter-spacing: var(--letter-spacing-label);
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-4xxs);
+  text-shadow: inherit;
+  cursor: pointer;
+
+  .mukurtu-content-warnings:hover & {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    /* The button sits on the overlay's own dark scrim, a known dark
+    surface, so a white ring offset from the white border reads against
+    it (#2199). */
+    outline: 2px solid currentcolor;
+    outline-offset: 2px;
   }
 }
 
