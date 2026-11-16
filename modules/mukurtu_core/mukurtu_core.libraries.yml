@@ -198,6 +198,20 @@ entity_reference_role_tagify:
     - core/once
     - core/sortable
 
+character_palette_settings:
+  version: 1.x
+  js:
+    js/character-palette-settings.js: {}
+  css:
+    component:
+      css/character-palette-settings.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.tabledrag
+    - core/jquery
+    - core/once
+
 visitors-country-map:
   version: 1.x
   js:
@@ -206,3 +220,16 @@ visitors-country-map:
     - core/jquery
     - core/drupal
     - leaflet/leaflet-drupal
+
+character_palette:
+  version: 1.x
+  css:
+    component:
+      css/character-palette.css: {}
+  js:
+    js/character-palette.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/drupal.announce
+    - core/once
