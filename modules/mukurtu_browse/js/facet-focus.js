@@ -21,6 +21,9 @@
 
   const FORMS = 'form[id^="views-exposed-form-"]';
 
+  // The form's Apply button.
+  const APPLY = '[data-drupal-selector^="edit-submit-"]';
+
   /**
    * A selector that finds the same control on the reloaded page.
    *
@@ -97,9 +100,11 @@
           return;
         }
         // The form can be rendered more than once, for example in a drawer on
-        // small screens, so focus the copy that's visible.
-        const match = Array.from(document.querySelectorAll(`${FORMS} ${selector}`))
+        // small screens, so focus the copy that's visible. Reset isn't shown
+        // once nothing is filtered, so it falls back to Apply.
+        const visible = (query) => Array.from(document.querySelectorAll(query))
           .find((element) => element.offsetParent !== null);
+        const match = visible(`${FORMS} ${selector}`) || visible(`${FORMS} ${APPLY}`);
         if (!match) {
           return;
         }
@@ -126,6 +131,17 @@
             : event.submitter;
           if (control && form.contains(control)) {
             save(control);
+          }
+        });
+      });
+
+      // The dictionary's Reset is a link beside Apply rather than a button,
+      // so it lands back on Apply.
+      once('mukurtuFacetFocusReset', '.browse-links .filter-reset', context).forEach((link) => {
+        link.addEventListener('click', () => {
+          const apply = link.parentElement.querySelector(APPLY);
+          if (apply) {
+            save(apply);
           }
         });
       });

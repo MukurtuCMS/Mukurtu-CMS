@@ -117,6 +117,21 @@ test('Browse tests - Enter in the search box applies and keeps focus there', asy
   await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLInputElement | null)?.name)).toBe('search_api_fulltext');
 });
 
+// Reset isn't shown once nothing is filtered, and on /dictionary it's a link,
+// so focus comes back to Apply.
+for (const [path, reset] of [
+  ['/browse?search_api_fulltext=zzz', `${FILTERS} input[type="submit"][value="Reset"]`],
+  ['/dictionary?keywords=zzz', '.browse-links .filter-reset'],
+]) {
+  test(`Browse tests - Reset on ${path.split('?')[0]} brings focus back to Apply`, async ({ page }) => {
+    await gotoReady(page, path);
+    await page.locator(reset).first().focus();
+    await Promise.all([page.waitForURL((url) => !url.search.includes('zzz')), page.keyboard.press('Enter')]);
+    await page.waitForLoadState('load');
+    await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLInputElement | null)?.value)).toBe('Apply');
+  });
+}
+
 test('Browse tests - Apply stays in view while the filters scroll', async ({ page }) => {
   await page.setViewportSize({ width: 1400, height: 800 });
   await gotoReady(page, '/browse');
