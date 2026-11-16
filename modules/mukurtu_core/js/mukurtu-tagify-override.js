@@ -296,6 +296,114 @@
     });
   }
 
+  /**
+   * Adds or removes one ID in an element's aria-describedby list.
+   */
+  function toggleDescribedBy(element, id, add) {
+    const ids = (element.getAttribute('aria-describedby') || '')
+      .split(/\s+/)
+      .filter((value) => value && value !== id);
+    if (add) {
+      ids.push(id);
+    }
+    if (ids.length) {
+      element.setAttribute('aria-describedby', ids.join(' '));
+    }
+    else {
+      element.removeAttribute('aria-describedby');
+    }
+  }
+
+  /**
+   * Shows the browser's "required" check as an error on the visible field.
+   *
+   * The original input keeps its required attribute so the browser still
+   * blocks an empty submit, but it's hidden, so the browser's own message
+   * would point at nothing a screen reader can reach. Show Drupal's message
+   * under the field instead, tie it to the visible input, and move focus
+   * there when it's the form's first problem. With browser validation
+   * turned off (enable_html5_validation = FALSE), this never runs and
+   * Drupal's server-side error is mirrored by labelTagifyInputs().
+   */
+  function showRequiredError(event, original) {
+    if (!original.validity.valueMissing) {
+      return;
+    }
+    event.preventDefault();
+
+    let error = original.__mukurtuRequiredError;
+    if (!error) {
+      error = document.createElement('div');
+      error.id = `${original.id}--required-error`;
+      error.className = 'form-item__error-message';
+      original.__mukurtuRequiredError = error;
+    }
+    const label = document.querySelector(`label[for="${original.id}"]`);
+    // Drupal.t() escapes "@" placeholders; decode them for textContent.
+    error.textContent = new DOMParser().parseFromString(
+      Drupal.t('@name field is required.', {
+        '@name': label ? label.textContent.trim() : '',
+      }),
+      'text/html',
+    ).documentElement.textContent;
+    if (!error.isConnected) {
+      // After the original input, keeping it right after Tagify's <tags>
+      // box, which tagify.css relies on to hide it.
+      original.insertAdjacentElement('afterend', error);
+    }
+    original.setAttribute('aria-invalid', 'true');
+    toggleDescribedBy(original, error.id, true);
+    labelTagifyInputs(original.parentElement);
+
+    // The browser focuses the first invalid control whose message it
+    // shows. This one's message is cancelled, so focus it here, but only
+    // if nothing before it in the form is invalid too.
+    const first = original.form && Array.from(original.form.elements)
+      .find((element) => element.willValidate && !element.validity.valid);
+    const textbox = original.previousElementSibling?.querySelector('.tagify__input');
+    if (first === original && textbox) {
+      setTimeout(() => textbox.focus(), 0);
+    }
+  }
+
+  /**
+   * Clears the required error once the field has a tag.
+   */
+  function clearRequiredError(original) {
+    const error = original.__mukurtuRequiredError;
+    if (!error || !error.isConnected) {
+      return;
+    }
+    error.remove();
+    original.removeAttribute('aria-invalid');
+    toggleDescribedBy(original, error.id, false);
+    labelTagifyInputs(original.parentElement);
+  }
+
+  /**
+   * Hides each original input from assistive technology (#2710).
+   *
+   * Tagify draws its own field over the original input and hides the
+   * original only visually (tagify.css), so screen readers found a second
+   * field with the same label and a JSON value. The original stays in the
+   * form, out of the tab order, so it's still submitted and its required
+   * attribute still stops an empty submit.
+   */
+  function hideOriginalInputs(context) {
+    const root = context && context.querySelectorAll ? context : document;
+    root.querySelectorAll('input.tagify-widget[id]').forEach((original) => {
+      const tagsElement = original.previousElementSibling;
+      if (original.__mukurtuHidden || !original.__tagify
+        || !tagsElement || tagsElement.tagName !== 'TAGS') {
+        return;
+      }
+      original.__mukurtuHidden = true;
+      original.setAttribute('aria-hidden', 'true');
+      original.addEventListener('invalid', (event) => showRequiredError(event, original));
+      original.__tagify.on('add', () => clearRequiredError(original));
+    });
+  }
+
   Drupal.behaviors.mukurtuTagifyOverride = {
     attach(context) {
       // Run immediately and again at end-of-tick in case Tagify initializes
@@ -305,6 +413,7 @@
         labelTagifyInputs(ctx);
         makeShowAllKeyboardReachable(ctx);
         announceTagChanges(ctx);
+        hideOriginalInputs(ctx);
       };
       runAll(context);
       setTimeout(() => runAll(context), 0);
