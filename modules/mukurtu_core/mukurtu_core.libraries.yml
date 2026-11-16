@@ -16,6 +16,7 @@ tagify-override:
   js:
     js/mukurtu-tagify-override.js: {}
     js/tagify-reorder.js: {}
+    js/tagify-combobox.js: {}
   css:
     component:
       css/tagify-reorder.css: {}
