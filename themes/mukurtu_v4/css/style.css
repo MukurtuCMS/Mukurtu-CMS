@@ -6928,18 +6928,20 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
 
 .articles-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
   gap: var(--v-space-3xs);
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  justify-items: center;
+  max-inline-size: 80rem;
+  margin-inline: auto;
 }
-@media (min-width: 48rem) {
-  .articles-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.articles-grid > .views-row {
+  min-inline-size: 0;
+  inline-size: 100%;
+  max-inline-size: 24rem;
 }
 @media (min-width: 80rem) {
   .articles-grid {
     gap: var(--v-space-2xs);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

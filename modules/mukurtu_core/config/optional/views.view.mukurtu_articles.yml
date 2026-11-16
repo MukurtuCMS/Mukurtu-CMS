@@ -300,7 +300,7 @@ display:
         type: some
         options:
           offset: 0
-          items_per_page: 3
+          items_per_page: 4
       empty: {  }
       defaults:
         title: false

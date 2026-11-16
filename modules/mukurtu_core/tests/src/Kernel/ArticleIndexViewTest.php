@@ -134,15 +134,15 @@ class ArticleIndexViewTest extends KernelTestBase {
   }
 
   /**
-   * The block shows the three newest and always links to the page.
+   * The block shows the four newest and always links to the page.
    */
-  public function testBlockShowsThreeNewestWithLink(): void {
+  public function testBlockShowsFourNewestWithLink(): void {
     mukurtu_core_update_40230();
     foreach (range(1, 5) as $i) {
       $this->createNode('article', "Article $i", $i * 1000);
     }
 
-    $this->assertSame(['Article 5', 'Article 4', 'Article 3'], $this->titles('latest_articles_block'));
+    $this->assertSame(['Article 5', 'Article 4', 'Article 3', 'Article 2'], $this->titles('latest_articles_block'));
 
     $view = Views::getView('mukurtu_articles');
     $view->setDisplay('latest_articles_block');
