@@ -9,7 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests mukurtu_landing_page_update_40203(), 40204() and 40205().
+ * Tests mukurtu_landing_page_update_40203() through 40206().
  *
  * The hooks widen allowlists on an existing site. The happy path matters
  * less than the guard rails: an allowlist key that is absent means the
@@ -24,6 +24,8 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
   protected const LEGACY_VIEW = 'views_block:browse_by_community-community_browse_block';
 
   protected const NAMES_BLOCK = 'views_block:mukurtu_categories-browse_by_category_names_block';
+
+  protected const ARTICLES_BLOCK = 'views_block:mukurtu_articles-latest_articles_block';
 
   protected const HEROES = [
     'inline_block:full_image_with_description',
@@ -100,7 +102,10 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
       $allowlists = &$restrictions['entity_view_mode_restriction']['allowlisted_blocks'];
       $allowlists['Inline blocks'] = array_values(array_diff($allowlists['Inline blocks'], self::HEROES));
       unset($allowlists['Mukurtu']);
-      $allowlists['Lists (Views)'] = array_values(array_diff($allowlists['Lists (Views)'], [self::NAMES_BLOCK]));
+      $allowlists['Lists (Views)'] = array_values(array_diff($allowlists['Lists (Views)'], [
+        self::NAMES_BLOCK,
+        self::ARTICLES_BLOCK,
+      ]));
       array_unshift($allowlists['Lists (Views)'], self::LEGACY_VIEW);
     });
     $this->rollBackCustomRestrictions();
@@ -169,6 +174,7 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
     mukurtu_landing_page_update_40203();
     mukurtu_landing_page_update_40204();
     mukurtu_landing_page_update_40205();
+    mukurtu_landing_page_update_40206();
 
     $shipped = $this->shipped['third_party_settings']['layout_builder_restrictions']['entity_view_mode_restriction'];
     $this->assertSame($shipped['allowlisted_blocks'], $this->allowlists());
@@ -251,6 +257,40 @@ class LandingPageRestrictionsUpdateTest extends KernelTestBase {
 
     $this->assertSame([], $this->allowlists());
     $this->assertStringContainsString('not configured', $message);
+  }
+
+  /**
+   * Update 40206 offers the Latest Articles block, keeping the others.
+   */
+  public function testAddsLatestArticlesBlock(): void {
+    $this->writePreFixDisplay();
+    $before = $this->allowlists()['Lists (Views)'];
+    $this->assertNotContains(self::ARTICLES_BLOCK, $before);
+
+    $message = mukurtu_landing_page_update_40206();
+
+    $after = $this->allowlists()['Lists (Views)'];
+    $this->assertContains(self::ARTICLES_BLOCK, $after);
+    $this->assertSame([], array_diff($before, $after));
+    $this->assertStringContainsString('Latest Articles', $message);
+
+    // Running it again changes nothing.
+    $message = mukurtu_landing_page_update_40206();
+    $this->assertSame($after, $this->allowlists()['Lists (Views)']);
+    $this->assertStringContainsString('already up to date', $message);
+  }
+
+  /**
+   * Update 40206 leaves an unrestricted Views category unrestricted.
+   */
+  public function testLatestArticlesLeavesUnrestrictedViewsAlone(): void {
+    $this->writeDisplay(static function (array &$restrictions): void {
+      unset($restrictions['entity_view_mode_restriction']['allowlisted_blocks']['Lists (Views)']);
+    });
+
+    mukurtu_landing_page_update_40206();
+
+    $this->assertArrayNotHasKey('Lists (Views)', $this->allowlists());
   }
 
   /**
