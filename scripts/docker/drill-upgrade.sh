@@ -59,8 +59,10 @@ docker run -d --name "$DB" --network "$NET" --network-alias "$DB" \
   -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=mukurtu -e MARIADB_USER=mukurtu -e MARIADB_PASSWORD=mukurtu \
   mariadb:11.8 --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci \
   --transaction-isolation=READ-COMMITTED --binlog-format=ROW >/dev/null
+# Wait for the real server, not MariaDB's temporary initialisation server (see
+# db_up() in test-entrypoint.sh).
 for _ in $(seq 1 60); do
-  docker exec "$DB" mariadb -uroot -proot -e 'select 1' >/dev/null 2>&1 && break
+  docker exec "$DB" healthcheck.sh --connect --innodb_initialized >/dev/null 2>&1 && break
   sleep 1
 done
 

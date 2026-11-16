@@ -39,8 +39,11 @@ db_up() { # db_up <container> : start MariaDB on the test network, wait until it
     mariadb:11.8 --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci \
     --transaction-isolation=READ-COMMITTED --binlog-format=ROW >/dev/null
   CLEANUP_CONTAINERS+=("$1")
+  # Not `select 1` over the socket: that also answers from the temporary server
+  # MariaDB runs while it initialises, which then stops before the real one starts.
+  # --connect uses TCP, which the temporary server doesn't listen on.
   for _ in $(seq 1 60); do
-    docker exec "$1" mariadb -uroot -proot -e 'select 1' >/dev/null 2>&1 && return 0
+    docker exec "$1" healthcheck.sh --connect --innodb_initialized >/dev/null 2>&1 && return 0
     sleep 1
   done
   return 1
