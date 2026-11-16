@@ -6970,12 +6970,61 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   background-color: var(--brand-light);
 }
 
+.articles-listing .vertical-card--article {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  block-size: 100%;
+  margin-block: 0;
+  -webkit-padding-after: 0;
+          padding-block-end: 0;
+  -webkit-border-after: 0;
+          border-block-end: 0;
+}
+.articles-listing .vertical-card--article .vertical-card__media {
+  -webkit-margin-after: 0;
+          margin-block-end: 0;
+}
+.articles-listing .vertical-card--article .vertical-card__content {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  padding-block: var(--v-space-5xs);
+  padding-inline: var(--v-space-4xxs);
+  background-color: var(--brand-secondary-dark);
+  color: var(--color-white);
+}
 .articles-listing .vertical-card--article .vertical-card__content-header :is(h2, h3) {
   text-align: start;
-  margin-block: 0;
-  font-size: var(--card-font-size);
+  margin-block: 0 var(--v-space-6xs);
+  font-size: var(--font-size-m);
   font-weight: var(--text-bold);
+  line-height: var(--line-height-xs);
   overflow-wrap: anywhere;
+}
+.articles-listing .vertical-card--article .vertical-card__content-header :is(h2, h3) a {
+  color: var(--color-white);
+  text-decoration: none;
+}
+.articles-listing .vertical-card--article .vertical-card__content-header :is(h2, h3) a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.articles-listing .vertical-card--article .vertical-card__content-header :is(h2, h3) a:hover {
+  text-decoration: underline;
+}
+.articles-listing .vertical-card--article .vertical-card__content-header :is(h2, h3) a:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+}
+.articles-listing .vertical-card--article .vertical-card__date {
+  color: var(--color-white);
 }
 
 .articles-listing--page .pager__items {
