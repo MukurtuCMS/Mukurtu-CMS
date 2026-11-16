@@ -206,7 +206,9 @@ test('The band follows text that grows inside an overlay of the same size', asyn
   const warning = page.locator('.mukurtu-content-warnings');
   await expect(warning).not.toHaveClass(/mukurtu-content-warnings--scrolls/);
   // As when a web font swaps in, or text-only zoom: the overlay keeps its size.
-  await page.locator('.mukurtu-content-warnings__list').evaluate((el) => { el.style.fontSize = '5rem'; });
+  // 10rem, not less: Linux CI's fallback font is narrower, and 5rem still fit.
+  await page.locator('.mukurtu-content-warnings__list').evaluate((el) => { el.style.fontSize = '10rem'; });
+  expect(await warning.evaluate((el) => el.scrollHeight > el.clientHeight + 1), 'the text now overflows').toBe(true);
   await expect(warning).toHaveClass(/mukurtu-content-warnings--scrolls/);
 });
 
