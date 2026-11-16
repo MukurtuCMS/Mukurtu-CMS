@@ -280,23 +280,3 @@
     }
   }
 }
-
-// A grid of cards sized against the container's own width: up to four
-// columns (the 80rem cap), and when there are fewer cards than fit, they grow
-// (capped at 24rem) and center instead of leaving the row half-empty. $item
-// selects the cards, relative to the grid.
-// Used by the Featured Content block and the Articles page and block.
-@mixin centered-card-grid($item) {
-  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
-  justify-items: center;
-  max-inline-size: 80rem; // 1280px, matches --grid-12col-max-width.
-  margin-inline: auto;
-
-  #{$item} {
-    // Grid items default to min-inline-size: auto, which can let long
-    // titles force a track wider than its minmax() floor.
-    min-inline-size: 0;
-    inline-size: 100%;
-    max-inline-size: 24rem; // Caps individual card growth when few items are present.
-  }
-}

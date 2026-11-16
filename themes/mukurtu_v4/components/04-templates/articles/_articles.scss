@@ -5,7 +5,8 @@
 // The Articles page and the Latest Articles block (views.view.mukurtu_articles).
 // Cards fill rows left to right, newest first, unlike the masonry .grid used
 // by the browse pages, which flows down each column. Up to four columns, and
-// a short row centers, as in the Featured Content block.
+// a short row is centered at the same card width, as in the Browse by
+// Category and Browse by Community blocks.
 
 // On the page, the view sits in the site's layout grid for its gutters. The
 // block doesn't: Layout Builder regions already have them.
@@ -18,14 +19,7 @@
 }
 
 .articles-grid {
-  display: grid;
-  gap: var(--v-space-3xs);
-
-  @include mixins.centered-card-grid('> .views-row');
-
-  @include include-media.media('>=xl') {
-    gap: var(--v-space-2xs);
-  }
+  @include layout.layout--centered-card-row('.views-row');
 }
 
 // Article card images share one 4:3 frame, so the cards line up across a row
