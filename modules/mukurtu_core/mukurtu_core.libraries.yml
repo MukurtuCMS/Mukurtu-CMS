@@ -15,8 +15,13 @@ tagify-override:
   version: 1.x
   js:
     js/mukurtu-tagify-override.js: {}
+    js/tagify-reorder.js: {}
+  css:
+    component:
+      css/tagify-reorder.css: {}
   dependencies:
     - core/drupal
+    - core/drupal.announce
     - core/drupalSettings
 
 splide:

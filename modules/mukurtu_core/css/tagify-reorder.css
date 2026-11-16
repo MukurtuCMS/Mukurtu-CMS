@@ -1,0 +1,79 @@
+/**
+ * @file
+ * Arrow buttons that reorder Tagify tags without dragging (#2710).
+ *
+ * Styled like the Entity Browser arrows from #2498
+ * (entity-browser-reorder.css), at a size that fits inside a tag.
+ */
+
+.mukurtu-tagify-move {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline: 0.25rem;
+}
+
+.mukurtu-tagify-move[hidden] {
+  display: none;
+}
+
+/* 24px meets the minimum target size (WCAG 2.5.8). The border is #767676,
+ * 4.54:1 on white, for the 3:1 a control's edge needs (1.4.11). */
+.mukurtu-tagify-move__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 1px solid #767676;
+  border-radius: 50%;
+  background-color: var(--gin-bg-layer, Canvas);
+  color: var(--gin-color-text, CanvasText);
+  cursor: pointer;
+}
+
+.mukurtu-tagify-move__button svg {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+}
+
+.mukurtu-tagify-move__button:hover:not(:disabled) {
+  background-color: var(--gin-bg-item-hover, Canvas);
+}
+
+/* The Tagify module removes focus styles inside the field
+ * (`.page-wrapper .tagify :focus` in tagify.css, which loads later), and Gin
+ * draws focus as a box-shadow, which forced colors removes (WCAG 2.4.7). The
+ * extra classes outrank both. */
+.tagify .mukurtu-tagify-move .mukurtu-tagify-move__button:focus-visible {
+  outline: 2px solid var(--gin-color-focus, Highlight);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .tagify .mukurtu-tagify-move .mukurtu-tagify-move__button:focus-visible {
+    outline-color: Highlight;
+  }
+
+  /* Tab now reaches each tag's remove button too (mukurtu-tagify-override.js).
+   * Gin shows its focus as a box-shadow, which forced colors removes. */
+  .tagify .tagify__tag .tagify__tag__removeBtn:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+/* Disabled controls are exempt from contrast minimums, and fading these makes
+ * it clear the tag is already at that end of the list. */
+.mukurtu-tagify-move__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The icons point along the line of tags, which runs right to left in RTL
+ * languages. */
+.tagify:dir(rtl) .mukurtu-tagify-move__button svg {
+  transform: scaleX(-1);
+}
