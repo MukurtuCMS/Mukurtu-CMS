@@ -53,7 +53,9 @@ class MukurtuImportStrategyFormAccessibilityTest extends MukurtuImportTestBase {
     $this->assertContains('visually-hidden', $form['mapping_status']['#attributes']['class']);
 
     // The Add mapping button has a deterministic id for JS focus targeting.
-    $this->assertSame('import-add-mapping-button', $form['add_mapping']['#attributes']['id']);
+    // Set where Drupal's #ajax binding finds it.
+    $this->assertSame('import-add-mapping-button', $form['add_mapping']['#id']);
+    $this->assertArrayNotHasKey('id', $form['add_mapping']['#attributes'] ?? []);
   }
 
   /**

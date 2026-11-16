@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\mukurtu_design\DesignPalette;
 
 /**
@@ -44,8 +45,9 @@ function mukurtu_design_preprocess_page(array &$variables) {
   $variables['header_background_treatment'] = $header['treatment'] ?? '';
   $variables['header_background_tint'] = $header['tint'] ?? TRUE;
 
-  \Drupal::service('mukurtu_design.page_background')
-    ->getCacheableMetadata()
+  // applyTo() replaces #cache, so this keeps what earlier hooks added.
+  CacheableMetadata::createFromRenderArray($variables)
+    ->merge(\Drupal::service('mukurtu_design.page_background')->getCacheableMetadata())
     ->applyTo($variables);
 }
 

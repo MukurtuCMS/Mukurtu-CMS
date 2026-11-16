@@ -549,6 +549,17 @@ mukurtu.settings:
     mukurtu_related_content_display:
       type: string
       label: 'Related content display method'
+    related_content_preview:
+      type: sequence
+      label: 'Sidebar related content preview, keyed by node bundle machine name'
+      sequence:
+        type: string
+        label: 'Preview mode'
+        constraints:
+          Choice:
+            - 'off'
+            - jump_link
+            - thumbnails
     citation_templates:
       type: sequence
       label: 'Citation field templates, keyed by node bundle machine name'
@@ -645,6 +656,14 @@ views.filter.mukurtu_media_protocol_filter:
 views.filter.mukurtu_media_tag_filter:
   type: views.filter.in_operator
   label: 'Media tag filter'
+
+views.filter.mukurtu_visible_terms:
+  type: views_filter
+  label: 'Visible terms filter'
+  mapping:
+    vocabulary:
+      type: string
+      label: 'Vocabulary'
 
 views_bulk_operations.action_config.mukurtu_change_moderation_state_action:
   type: views_bulk_operations_action_config

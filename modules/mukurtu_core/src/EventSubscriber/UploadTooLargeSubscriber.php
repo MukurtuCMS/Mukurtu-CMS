@@ -3,13 +3,13 @@
 namespace Drupal\mukurtu_core\EventSubscriber;
 
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\PrependCommand;
 use Drupal\Core\Form\Exception\BrokenPostRequestException;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\mukurtu_core\Ajax\ResetRefusedUploadCommand;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -53,10 +53,14 @@ class UploadTooLargeSubscriber implements EventSubscriberInterface {
     ]);
     $this->messenger->addError($message);
     $response = new AjaxResponse(NULL, 200);
+    $response->addCommand(new ResetRefusedUploadCommand((string) $message));
     $response->addCommand(new PrependCommand(NULL, ['#type' => 'status_messages']));
-    // Screen readers aren't told about the message above, because it isn't
-    // added to a live region.
-    $response->addCommand(new AnnounceCommand((string) $message, AnnounceCommand::PRIORITY_ASSERTIVE));
+    // This request has an empty POST, so Drupal can't tell which libraries the
+    // page already has, and any library on this response is sent again with
+    // everything it depends on. That reloads drupal.js, which replaces the
+    // global Drupal object. Themes can add libraries to status messages, so
+    // this response has to drop them, and the page has to load what it needs.
+    $response->setAttachments([]);
     $event->allowCustomResponseCode();
     $event->setResponse($response);
   }

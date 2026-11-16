@@ -18,16 +18,19 @@
         // Watch for iframes/objects inserted later by lazy loaders (e.g. Blazy).
         this.watchForNewEmbeds(element);
 
+        // Cards wrap their media in a link that is hidden from AT and out of
+        // the Tab order, since the card's title link goes to the same page.
+        // A button there would be a Tab stop AT can't see (WCAG 4.1.2).
+        if (element.closest('a')) {
+          element.querySelector('.mukurtu-content-warnings__dismiss')?.setAttribute('tabindex', '-1');
+        }
+
+        // A click anywhere on the overlay dismisses it. The dismiss button
+        // inside it gives keyboard and AT users the same action, since a
+        // native button fires click on Enter and Space.
         element.addEventListener('click', (event) => {
           event.preventDefault();
           this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
-        });
-
-        element.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
-          }
         });
       });
     },
@@ -67,6 +70,10 @@
         return;
       }
 
+      // The button is about to be hidden. If it has focus, move focus to the
+      // media it was covering so keyboard users don't land on the page body.
+      const hadFocus = element.contains(document.activeElement);
+
       const mid = element.dataset.mid;
       document.querySelectorAll(`.mukurtu-content-warnings[data-mid="${mid}"]`).forEach((contentWarnings) => {
         // Disconnect the mutation observer before restoring visibility.
@@ -80,6 +87,22 @@
         // Restore keyboard/AT access to the media behind the overlay.
         this.setMediaInert(contentWarnings, false);
       });
+
+      const mediaEl = element.closest('.media');
+      if (hadFocus && mediaEl) {
+        // Skip overlay controls and anything not rendered, such as the hidden
+        // lightbox copy of the media nested inside this .media.
+        const candidates = mediaEl.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]:not([tabindex="-1"])');
+        const target = [...candidates].find((el) => !el.closest('.mukurtu-content-warnings') && el.getClientRects().length > 0);
+        if (target) {
+          target.focus();
+        }
+        else {
+          // Images have no control of their own, so focus the media itself.
+          mediaEl.setAttribute('tabindex', '-1');
+          mediaEl.focus();
+        }
+      }
     },
 
     // Mark or unmark interactive elements inside .media as inert so keyboard
@@ -90,7 +113,10 @@
         return;
       }
       mediaEl.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]').forEach((el) => {
-        if (warningEl.contains(el)) {
+        // Skip every overlay's own controls, not only this one's: the hidden
+        // lightbox copy of the media is nested inside this .media, and its
+        // dismiss button must stay focusable once the lightbox shows it.
+        if (el.closest('.mukurtu-content-warnings')) {
           return;
         }
         if (inert) {

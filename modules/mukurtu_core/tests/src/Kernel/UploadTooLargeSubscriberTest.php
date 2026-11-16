@@ -10,6 +10,7 @@ use Drupal\Core\Form\Exception\BrokenPostRequestException;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\EventSubscriber\UploadTooLargeSubscriber;
+use Drupal\mukurtu_core\Hook\ManagedFileHooks;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +22,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Tests the message for an AJAX upload over the server's limit.
  */
 #[CoversClass(UploadTooLargeSubscriber::class)]
+#[CoversClass(ManagedFileHooks::class)]
 #[Group('mukurtu_core')]
 class UploadTooLargeSubscriberTest extends KernelTestBase {
 
@@ -62,11 +64,29 @@ class UploadTooLargeSubscriberTest extends KernelTestBase {
     $this->assertStringContainsString('This file is too large to upload. The maximum file size is 2 MB.', $commands);
     $this->assertStringNotContainsString('unrecoverable', $commands);
 
-    // Screen readers get the same message.
-    $announcements = array_values(array_filter($response->getCommands(), fn(array $command) => $command['command'] === 'announce'));
-    $this->assertCount(1, $announcements);
-    $this->assertSame('This file is too large to upload. The maximum file size is 2 MB.', $announcements[0]['text']);
-    $this->assertSame('assertive', $announcements[0]['priority']);
+    // The field is cleared before the new message goes in, so Save can't send
+    // the file again, and the message isn't removed with the old ones. The same
+    // command tells screen readers.
+    $reset = $response->getCommands()[0];
+    $this->assertSame('mukurtuResetRefusedUpload', $reset['command']);
+    $this->assertSame('This file is too large to upload. The maximum file size is 2 MB.', $reset['message']);
+
+    $this->assertEmpty($response->getAttachments()['library'] ?? []);
+  }
+
+  /**
+   * Tests that a library added by a theme's messages is dropped.
+   *
+   * A library on this response reloads drupal.js, which replaces the global
+   * Drupal object.
+   */
+  public function testThemeLibrariesAreDropped(): void {
+    $this->container->get('theme_installer')->install(['olivero']);
+    $this->container->get('theme.manager')->setActiveTheme($this->container->get('theme.initialization')->initTheme('olivero'));
+
+    $event = $this->dispatch(new BrokenPostRequestException(2097152), [FormBuilderInterface::AJAX_FORM_REQUEST => 1]);
+
+    $this->assertEmpty($event->getResponse()->getAttachments()['library'] ?? []);
   }
 
   /**
@@ -79,6 +99,22 @@ class UploadTooLargeSubscriberTest extends KernelTestBase {
     $this->assertNull($not_ajax->getResponse());
     $this->assertNull($other_exception->getResponse());
     $this->assertSame([], $this->container->get('messenger')->messagesByType('error'));
+  }
+
+  /**
+   * Tests that file fields load the command with the page.
+   */
+  public function testFileFieldsLoadTheCommand(): void {
+    $info = ['managed_file' => ['#process' => [['Core', 'process']]], 'textfield' => []];
+    (new ManagedFileHooks($this->container->get('request_stack')))->elementInfoAlter($info);
+
+    $this->assertArrayNotHasKey('#process', $info['textfield']);
+    $this->assertCount(3, $info['managed_file']['#process']);
+    $element = ['#attached' => ['library' => ['file/drupal.file']]];
+    foreach (array_slice($info['managed_file']['#process'], 1) as $process) {
+      $element = call_user_func($process, $element);
+    }
+    $this->assertSame(['file/drupal.file', 'mukurtu_core/reset-refused-upload', 'mukurtu_core/focus-file-field'], $element['#attached']['library']);
   }
 
   /**
