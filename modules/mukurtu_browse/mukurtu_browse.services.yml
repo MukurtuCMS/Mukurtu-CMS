@@ -13,3 +13,9 @@ services:
   mukurtu_browse.browse_link_builder:
     class: Drupal\mukurtu_browse\Service\BrowseLinkBuilder
     arguments: ['@config.factory', '@entity_type.manager']
+
+  mukurtu_browse.term_facet_name_redirect:
+    class: Drupal\mukurtu_browse\EventSubscriber\TermFacetNameRedirectSubscriber
+    arguments: ['@config.factory', '@entity_type.manager', '@?mukurtu_search.nested_term_facets']
+    tags:
+      - { name: event_subscriber }

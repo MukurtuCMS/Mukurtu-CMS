@@ -28,6 +28,24 @@ field_settings:
     dependencies:
       module:
         - node
+  category_tid:
+    label: 'Category » Term ID'
+    datasource_id: 'entity:node'
+    property_path: field_category
+    type: integer
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  keywords_tid:
+    label: 'Keywords » Term ID'
+    datasource_id: 'entity:node'
+    property_path: field_keywords
+    type: integer
+    dependencies:
+      module:
+        - node
+        - taxonomy
   collections:
     label: 'Collections » Content » Title'
     datasource_id: 'entity:node'
@@ -434,6 +452,12 @@ processor_settings:
       grouping_other: grouping_other
       grouping_az: 0
       grouping_09: 0
+  hierarchy:
+    weights:
+      preprocess_index: -45
+    fields:
+      category_tid: taxonomy_term-parent
+      keywords_tid: taxonomy_term-parent
   html_filter:
     weights:
       preprocess_index: -15
