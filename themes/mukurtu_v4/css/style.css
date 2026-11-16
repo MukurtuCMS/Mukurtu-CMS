@@ -7727,6 +7727,38 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   block-size: 100%;
 }
 
+[data-layout-block-uuid] .category-grid {
+  --card-row-columns: 1;
+  --card-row-column-gap: var(--v-space-3xs);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  gap: var(--v-space-3xs) var(--card-row-column-gap);
+}
+@media (min-width: 30rem) {
+  [data-layout-block-uuid] .category-grid {
+    --card-row-columns: 2;
+  }
+}
+@media (min-width: 60rem) {
+  [data-layout-block-uuid] .category-grid {
+    --card-row-columns: 4;
+    --card-row-column-gap: var(--gutter);
+    row-gap: 10px;
+  }
+}
+[data-layout-block-uuid] .category-grid > .category-card {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 calc((100% - (var(--card-row-columns) - 1) * var(--card-row-column-gap)) / var(--card-row-columns));
+          flex: 0 0 calc((100% - (var(--card-row-columns) - 1) * var(--card-row-column-gap)) / var(--card-row-columns));
+  min-inline-size: 0;
+}
+
 .category-teaser {
   block-size: 100%;
 }
@@ -8166,6 +8198,38 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   block-size: 19rem;
   -o-object-fit: cover;
      object-fit: cover;
+}
+
+.view-browse-by-community .communities {
+  --card-row-columns: 1;
+  --card-row-column-gap: var(--v-space-3xs);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  gap: var(--v-space-3xs) var(--card-row-column-gap);
+}
+@media (min-width: 30rem) {
+  .view-browse-by-community .communities {
+    --card-row-columns: 2;
+  }
+}
+@media (min-width: 60rem) {
+  .view-browse-by-community .communities {
+    --card-row-columns: 4;
+    --card-row-column-gap: var(--gutter);
+    row-gap: 10px;
+  }
+}
+.view-browse-by-community .communities > .communities__item {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 calc((100% - (var(--card-row-columns) - 1) * var(--card-row-column-gap)) / var(--card-row-columns));
+          flex: 0 0 calc((100% - (var(--card-row-columns) - 1) * var(--card-row-column-gap)) / var(--card-row-columns));
+  min-inline-size: 0;
 }
 
 .community--browse--wrapper .community-page-browse {
