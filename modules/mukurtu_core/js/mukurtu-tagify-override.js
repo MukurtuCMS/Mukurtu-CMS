@@ -62,7 +62,81 @@
         }
       }, true);
     }
+    if (instance.DOM.originalInput?.classList.contains('tagify--autocreate')) {
+      highlightExactMatchOnly(instance);
+    }
     instance.__mukurtuPatched = true;
+  }
+
+  /**
+   * Compares names the way Tagify does: trimmed and ignoring case.
+   */
+  function sameName(a, b) {
+    return String(a ?? '').trim().toLowerCase() === String(b ?? '').trim().toLowerCase();
+  }
+
+  /**
+   * Let Enter create a name that is the start of an existing one (#2661).
+   *
+   * On a field that can create terms, typing "Mary Jane" and pressing Enter
+   * added "Mary Jane Smith" instead of creating "Mary Jane", because:
+   * - Tagify highlights the first suggestion. Keep the highlight only when
+   *   the suggestion matches the typed name. Arrow keys and clicks still
+   *   pick any suggestion.
+   * - Up Arrow on the first suggestion went round to the last, so there was
+   *   no way back to the typed name. Up Arrow on the first suggestion, and
+   *   Down Arrow on the last, now clear the highlight.
+   * - With nothing highlighted, Enter adds the typed name, but first looks
+   *   for a suggestion it matches exactly. The Tagify module stores the
+   *   typed text on every suggestion it loads ("input") and searches that
+   *   too, so the typed name matched a lone suggestion. Match names only,
+   *   which still adds the existing term for a name typed in full.
+   */
+  function highlightExactMatchOnly(instance) {
+    const { show, filterListItems } = instance.dropdown;
+    instance.dropdown.show = (...args) => {
+      const result = show(...args);
+      const typed = args[0] === undefined ? instance.state.inputText : args[0];
+      const data = instance.state.ddItemData;
+      if (data && !sameName(data.label ?? data.value, typed)) {
+        instance.dropdown.highlightOption();
+      }
+      return result;
+    };
+
+    instance.dropdown.filterListItems = (value, options, ...rest) => {
+      const { dropdown } = instance.settings;
+      const { searchKeys } = dropdown;
+      if (!options?.exact || !Array.isArray(searchKeys)) {
+        return filterListItems(value, options, ...rest);
+      }
+      dropdown.searchKeys = searchKeys.filter((key) => key !== 'input');
+      try {
+        return filterListItems(value, options, ...rest);
+      }
+      finally {
+        dropdown.searchKeys = searchKeys;
+      }
+    };
+
+    // Capture on the wrapper so this runs before Tagify's own arrow key
+    // handler, which listens on the window while the list is open.
+    instance.DOM.scope.addEventListener('keydown', (event) => {
+      const up = event.key === 'ArrowUp' || event.key === 'Up';
+      const down = event.key === 'ArrowDown' || event.key === 'Down';
+      const active = instance.state.ddItemElm;
+      // Leave arrow keys alone while they choose characters in an IME.
+      if ((!up && !down) || event.isComposing || !active
+        || !instance.DOM.dropdown.isConnected) {
+        return;
+      }
+      const options = instance.dropdown.getAllSuggestionsRefs();
+      if ((up && active === options[0]) || (down && active === options[options.length - 1])) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        instance.dropdown.highlightOption();
+      }
+    }, true);
   }
 
   /**

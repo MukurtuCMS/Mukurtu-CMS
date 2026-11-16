@@ -17,6 +17,8 @@ libraries-override:
 libraries-extend:
   core/drupal.message:
     - mukurtu_v4/drupal.message
+  mukurtu_core/reset-refused-upload:
+    - mukurtu_v4/messages
 
 regions:
   user_menu: 'User menu'

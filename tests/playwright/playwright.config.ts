@@ -142,6 +142,11 @@ export default defineConfig({
       testMatch: 'default-content.spec.ts',
       // Default content needs to be created sequentially.
       fullyParallel: false,
+      // A retry cannot repair a partial seed. The tests skip when any
+      // community exists, so a retry after a failed seed would skip, report
+      // the test as flaky, and let the scans fail on a nearly empty site.
+      // Without retries, the failure stops the `chromium` project instead.
+      retries: 0,
       dependencies: ['auth'],
     },
     {

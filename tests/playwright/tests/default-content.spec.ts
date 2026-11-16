@@ -240,8 +240,10 @@ test('Default Content: Community', async ({ page, browserName }) => {
     await submitEntityForm(page, 'Save');
 
     // After creating the community, ensure we are redirected to create a
-    // protocol associated with this community.
-    await expect(page.locator('.page-title')).toContainText(`Creating cultural protocol for ${community.name}`);
+    // protocol associated with this community. The click above returns as
+    // soon as the form is submitted, so this wait has to cover the save, and
+    // needs the same 30s that submitEntityForm() allows for a slow preview.
+    await expect(page.locator('.page-title')).toContainText(`Creating cultural protocol for ${community.name}`, { timeout: 30000 });
     const communityIdMatch = page.url().match(/\/protocols\/protocol\/add\/community\/(\d+)/);
     if (!communityIdMatch) {
       throw new Error('Could not extract created community ID from URL.');
@@ -259,7 +261,8 @@ test('Default Content: Community', async ({ page, browserName }) => {
         .getByRole('radio', { name: protocol.field_access_mode })
         .check();
       await submitEntityForm(page, 'Save and create another protocol');
-      await expect(page.locator('.messages--status')).toContainText(`Created ${protocol.name}.`);
+      // This wait also has to cover the save. See the comment above.
+      await expect(page.locator('.messages--status')).toContainText(`Created ${protocol.name}.`, { timeout: 30000 });
     }
   }
 });

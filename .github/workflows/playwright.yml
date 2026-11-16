@@ -206,7 +206,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install Dependencies
         working-directory: tests/playwright
@@ -257,6 +257,7 @@ jobs:
             tests/playwright/test-results/a11y/
             tests/playwright/test-results/a11y-extra/
             tests/playwright/test-results/report.json
+            tests/playwright/test-results/default-content-*/error-context.md
           if-no-files-found: warn
           retention-days: 30
 
@@ -272,7 +273,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install Dependencies
         working-directory: tests/playwright
@@ -390,5 +391,6 @@ jobs:
             tests/playwright/test-results/a11y/
             tests/playwright/test-results/a11y-extra/
             tests/playwright/test-results/report.json
+            tests/playwright/test-results/default-content-*/error-context.md
           if-no-files-found: warn
           retention-days: 30

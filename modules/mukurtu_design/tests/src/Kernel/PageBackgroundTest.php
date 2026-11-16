@@ -224,6 +224,19 @@ class PageBackgroundTest extends KernelTestBase {
   }
 
   /**
+   * Page preprocess hooks share one variables array, so this one must keep
+   * the cache metadata that hooks running before it added.
+   */
+  public function testPreprocessKeepsCacheMetadataFromEarlierHooks(): void {
+    $variables = ['#cache' => ['tags' => ['config:from_an_earlier_hook']]];
+    mukurtu_design_preprocess_page($variables);
+
+    $this->assertContains('config:from_an_earlier_hook', $variables['#cache']['tags']);
+    $this->assertContains('config:mukurtu_design.settings', $variables['#cache']['tags']);
+    $this->assertContains('url.path.is_front', $variables['#cache']['contexts']);
+  }
+
+  /**
    * The tint is on unless it has been explicitly turned off.
    *
    * A missing key is a site that set its background before the setting

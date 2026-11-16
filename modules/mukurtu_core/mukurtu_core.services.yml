@@ -8,6 +8,11 @@ services:
     arguments: ['@current_user']
     tags:
       - { name: event_subscriber }
+  mukurtu_core.upload_too_large_subscriber:
+    class: Drupal\mukurtu_core\EventSubscriber\UploadTooLargeSubscriber
+    arguments: ['@messenger']
+    tags:
+      - { name: event_subscriber }
   mukurtu_core.layout_builder_menu_block_id_subscriber:
     class: Drupal\mukurtu_core\EventSubscriber\LayoutBuilderMenuBlockIdSubscriber
     tags:
@@ -28,6 +33,9 @@ services:
   mukurtu_core.related_content_grouper:
     class: Drupal\mukurtu_core\Service\RelatedContentGrouper
     arguments: ['@entity_type.manager', '@config.factory', '@event_dispatcher']
+  mukurtu_core.term_visibility:
+    class: Drupal\mukurtu_core\Service\TermVisibility
+    arguments: ['@database', '@entity_type.manager', '@current_user']
   mukurtu_core.entity_translation_resolver:
     class: Drupal\mukurtu_core\Service\EntityTranslationResolver
     arguments: ['@entity_type.manager', '@entity.repository']
