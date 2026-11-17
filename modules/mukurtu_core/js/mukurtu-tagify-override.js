@@ -104,14 +104,22 @@
    */
   function keepFocusOnEscape(instance) {
     const { input } = instance.DOM;
+    // Set once Escape has closed the list or cleared the field, until the
+    // person clicks or presses another key.
+    let dismissed = false;
     instance.DOM.scope.addEventListener('keydown', (event) => {
-      if ((event.key !== 'Escape' && event.key !== 'Esc') || event.target !== input
-        || Object.prototype.hasOwnProperty.call(input, 'blur')) {
+      if (event.key !== 'Escape' && event.key !== 'Esc') {
+        dismissed = false;
         return;
       }
+      if (event.target !== input || Object.prototype.hasOwnProperty.call(input, 'blur')) {
+        return;
+      }
+      dismissed = true;
       // An Escape that is closing the list leaves the text alone. Tagify's
-      // own flag can lag the list, so check that the list is off the page too.
-      const listOpen = instance.state.dropdown.visible || instance.DOM.dropdown.isConnected;
+      // flag stays on while suggestions load and the list is off the page,
+      // so the list counts as open only when it's showing too.
+      const listOpen = instance.state.dropdown.visible && instance.DOM.dropdown.isConnected;
       if (!listOpen && input.textContent.trim()) {
         instance.input.set.call(instance, '');
       }
@@ -120,6 +128,16 @@
         delete input.blur;
       }, 0);
     }, true);
+    instance.DOM.scope.addEventListener('mousedown', () => {
+      dismissed = false;
+    });
+    // Suggestions requested before Escape can still arrive, and the Tagify
+    // module opens the list for them. Close it again.
+    instance.on('dropdown:show', () => {
+      if (dismissed) {
+        setTimeout(() => instance.dropdown.hide(), 0);
+      }
+    });
   }
 
   /**

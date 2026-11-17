@@ -131,6 +131,40 @@ test.describe('Tagify Escape and aria-expanded', () => {
     await expect.poll(() => listOpen(page, 'keywords')).toBe(true);
   });
 
+  test('Escape before suggestions arrive clears the text, and late suggestions stay closed', async ({ page }) => {
+    await keywords(page).click();
+    // Nothing matches, so no list opens, as while a request is still out.
+    await page.keyboard.type('zzq');
+    await page.waitForTimeout(150);
+    expect(await listOpen(page, 'keywords')).toBe(false);
+
+    await page.keyboard.press('Escape');
+    await expect(keywords(page)).toHaveText('');
+    expect(await focusedName(page)).toBe('Keywords');
+
+    // The Tagify module opens the list when its answer arrives.
+    await page.evaluate(() => (document.getElementById('keywords') as any).__tagify.dropdown.show('zzq'));
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(false);
+
+    // Typing again shows suggestions as usual.
+    await page.keyboard.type('bas');
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(true);
+  });
+
+  test('late suggestions do not reopen a list Escape closed', async ({ page }) => {
+    await keywords(page).click();
+    await page.keyboard.type('bas');
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(true);
+    await page.waitForTimeout(150);
+    await page.keyboard.press('Escape');
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(false);
+
+    await page.evaluate(() => (document.getElementById('keywords') as any).__tagify.dropdown.show('bas'));
+    await page.waitForTimeout(150);
+    expect(await listOpen(page, 'keywords')).toBe(false);
+    await expect(keywords(page)).toHaveText('bas');
+  });
+
   test('Escape still reaches a dialog around the field', async ({ page }) => {
     await keywords(page).click();
     await page.keyboard.press('Escape');
