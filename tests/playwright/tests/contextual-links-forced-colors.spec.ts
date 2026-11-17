@@ -22,5 +22,13 @@ test.describe('Contextual links', () => {
     await page.keyboard.press('Tab');
     await expect(trigger).toBeFocused();
     await expect(trigger).toHaveCSS('outline-style', 'solid');
+
+    // The menu the button opens: its links' focus ring is a box-shadow too.
+    await page.keyboard.press('Enter');
+    await expect(trigger).toHaveAttribute('aria-pressed', 'true');
+    await page.keyboard.press('Tab');
+    const link = page.locator('.contextual-links a:focus');
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveCSS('outline-style', 'solid');
   });
 });

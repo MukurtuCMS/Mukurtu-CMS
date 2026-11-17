@@ -1,13 +1,20 @@
-// Contextual links: the pencil buttons editors see on blocks and content.
-// Core's contextual CSS gives the button `outline: none`. Its focus ring is
-// a box-shadow, and its pencil icon is a background image, and forced colors
-// removes both, so in a Windows contrast theme a focused button looked the
-// same as a hovered one: an empty circle (WCAG 2.4.7, #2740). Draw an outline
-// there, which forced colors keeps as a system color. Loads after core's CSS,
-// so it wins at equal specificity.
+// Contextual links: the pencil buttons editors see on blocks and content,
+// and the menu each one opens.
+// Core gives the button `outline: none`, and the menu's links get no
+// outline either. Their focus is a box-shadow ring, and the button's pencil
+// icon is a background image. Forced colors removes both, so in a Windows
+// contrast theme a focused button looked the same as a hovered one, an
+// empty circle, and a focused menu link looked like the others (WCAG 2.4.7,
+// #2740). Draw an outline there, which forced colors keeps as a system
+// color. The menu's links sit edge to edge, so their outline is inset.
 @media (forced-colors: active) {
-  .contextual .trigger:focus-visible {
+  .contextual-region .contextual .trigger:focus-visible {
     outline: 2px solid CanvasText;
     outline-offset: 2px;
+  }
+
+  .contextual-region .contextual .contextual-links li a:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: -2px;
   }
 }
