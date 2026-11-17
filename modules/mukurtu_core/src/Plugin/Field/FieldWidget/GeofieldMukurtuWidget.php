@@ -91,6 +91,8 @@ class GeofieldMukurtuWidget extends LeafletDefaultWidget {
     // LeafletDefaultWidget smashes our default value. We want to keep
     // our GeoJSON untouched.
     $element['value']['#default_value'] = $items[$delta]->value ?: NULL;
+    // The textarea holds the map's GeoJSON, not words (#2560).
+    $element['value']['#character_palette'] = FALSE;
 
     // Visually-hidden instructions for keyboard/screen reader users,
     // referenced by the map container's aria-describedby (set in

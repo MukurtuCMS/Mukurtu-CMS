@@ -1,0 +1,86 @@
+/**
+ * @file
+ * Reorder controls on the Character palette settings page (#2560).
+ */
+
+/* Dragging and the arrow buttons set the order, so its boxes and core's
+ * toggle for them are only for pages without JavaScript. The Move column is
+ * empty without it. */
+html.js .mukurtu-character-order,
+html.js [data-drupal-selector="mukurtu-core-character-palette-settings"] .tabledrag-toggle-weight-wrapper {
+  display: none;
+}
+
+html:not(.js) .mukurtu-character-move {
+  display: none;
+}
+
+td.mukurtu-character-move {
+  white-space: nowrap;
+}
+
+/* 32px clears the 24px minimum target size (WCAG 2.5.8). The border is
+ * #767676, 4.54:1 on white, for the 3:1 a control's edge needs (1.4.11). */
+.mukurtu-character-move__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  margin-inline-end: 0.25rem;
+  padding: 0;
+  /* Clears Gin's sticky header, which is taller than the scroll padding Gin
+   * sets, so a button that moves up isn't hidden behind it (WCAG 2.4.11). */
+  scroll-margin-block-start: 6rem;
+  border: 1px solid #767676;
+  border-radius: 50%;
+  background-color: var(--gin-bg-layer, Canvas);
+  color: var(--gin-color-text, CanvasText);
+  cursor: pointer;
+}
+
+.mukurtu-character-move__button:hover:not(:disabled) {
+  background-color: var(--gin-bg-item-hover, Canvas);
+}
+
+/* Gin's focus ring is too faint on white (2.27:1, WCAG 1.4.11) and forced
+ * colors removes it, so buttons get their own. The extra class outranks Gin's
+ * reset, which sets outline: none. */
+.mukurtu-character-table .mukurtu-character-move__button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Disabled controls are exempt from contrast minimums, and fading these makes
+ * it clear the row is already at that end of the list. */
+.mukurtu-character-move__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* On phones the two arrows side by side leave the boxes too narrow to show a
+ * character, so they stack and the boxes keep a readable width (WCAG 1.4.10). */
+@media (max-width: 30rem) {
+  .mukurtu-character-table td {
+    padding-inline: 0.125rem;
+  }
+
+  .mukurtu-character-table td:first-child {
+    white-space: nowrap;
+  }
+
+  .mukurtu-character-table input[type="text"] {
+    inline-size: 100%;
+    min-inline-size: 3rem;
+  }
+
+  .mukurtu-character-table td:first-child input[type="text"] {
+    inline-size: 3rem;
+  }
+
+  .mukurtu-character-move__button {
+    display: flex;
+    margin-block: 0.25rem;
+    margin-inline-end: 0;
+  }
+}

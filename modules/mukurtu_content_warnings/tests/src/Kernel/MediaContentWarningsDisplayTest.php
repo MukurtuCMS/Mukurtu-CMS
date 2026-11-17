@@ -168,7 +168,8 @@ class MediaContentWarningsDisplayTest extends KernelTestBase {
   }
 
   /**
-   * Several warnings render as a list that describes a real button.
+   * Several warnings render under a plural title, as a list that describes a
+   * real button.
    */
   public function testMarkupForSeveralWarnings(): void {
     $build = [
@@ -192,11 +193,13 @@ class MediaContentWarningsDisplayTest extends KernelTestBase {
     $this->assertStringContainsString('First warning', $items[0]->asXML());
     $this->assertStringContainsString('Second warning', $items[1]->asXML());
 
-    $button = $this->cssSelect('.mukurtu-content-warnings > button.mukurtu-content-warnings__dismiss');
+    $button = $this->cssSelect('.mukurtu-content-warnings > .mukurtu-content-warnings__actions > button.mukurtu-content-warnings__dismiss');
     $this->assertCount(1, $button);
     $this->assertSame('button', (string) $button[0]['type']);
-    $this->assertSame($id, (string) $button[0]['aria-describedby']);
+    $this->assertSame("$id-title $id", (string) $button[0]['aria-describedby']);
     $this->assertSame('Show media', trim((string) $button[0]));
+    $this->assertSame('Media content warnings', trim((string) $this->cssSelect("p#$id-title")[0]));
+    $this->assertSame('Read warnings', trim((string) $this->cssSelect('p.mukurtu-content-warnings__card-hint')[0]));
   }
 
   /**
@@ -215,7 +218,8 @@ class MediaContentWarningsDisplayTest extends KernelTestBase {
 
     $this->assertEmpty($this->cssSelect('.mukurtu-content-warnings ul'));
     $this->assertStringContainsString('Only warning', $this->cssSelect("div#{$id}")[0]->asXML());
-    $this->assertSame($id, (string) $this->cssSelect('button.mukurtu-content-warnings__dismiss')[0]['aria-describedby']);
+    $this->assertSame("$id-title $id", (string) $this->cssSelect('button.mukurtu-content-warnings__dismiss')[0]['aria-describedby']);
+    $this->assertSame('Media content warning', trim((string) $this->cssSelect("p#$id-title")[0]));
   }
 
   /**
