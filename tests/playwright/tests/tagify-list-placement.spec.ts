@@ -35,4 +35,36 @@ test.describe('Tagify suggestion list placement', () => {
       : listBox!.y - (fieldBox!.y + fieldBox!.height);
     expect(Math.abs(gap), `list ${JSON.stringify(listBox)}, field ${JSON.stringify(fieldBox)}`).toBeLessThan(4);
   });
+
+  // In a scrolling container, such as a dialog's content, the list scrolls
+  // with the container. Tagify measured the room below the field against the
+  // window, so near the container's bottom edge the list opened below the
+  // field and was cut off.
+  test('Near the bottom of a scrolling container, the list opens above its field', async ({ page }) => {
+    await page.goto('/node/add/digital_heritage');
+    const tab = page.locator('.horizontal-tab-button a:visible').filter({ hasText: 'Additional' }).first();
+    if (await tab.count()) {
+      await tab.click();
+    }
+    const field = page.locator('tags:has(+ input#edit-field-keywords)');
+    // Ends the form's main region 10px below the field, scrolling the rest.
+    await field.evaluate((element) => {
+      const region = element.closest('.layout-region-node-main') as HTMLElement;
+      const height = element.getBoundingClientRect().bottom - region.getBoundingClientRect().top + 10;
+      region.style.cssText = `block-size: ${height}px; overflow: auto`;
+    });
+    await field.locator('.tagify__input').click();
+    await page.keyboard.type('wea');
+
+    const list = page.locator('.tagify__dropdown');
+    const option = list.locator('.tagify__dropdown__item', { hasText: 'weaving' });
+    await expect(option).toBeVisible();
+    await expect(list).toHaveAttribute('placement', 'top');
+    // The option is drawn where it is, not hidden by the container's edge.
+    // Polled, because the list slides into place as it opens.
+    await expect.poll(() => option.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return element.contains(document.elementFromPoint(box.left + 10, box.top + box.height / 2));
+    })).toBe(true);
+  });
 });

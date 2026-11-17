@@ -10,6 +10,42 @@
  * field. css/tagify-list-placement.css corrects the list's position there.
  */
 ((Drupal) => {
+  /**
+   * The nearest ancestor that scrolls or clips, such as a dialog's content.
+   */
+  function scrollContainerOf(element) {
+    for (let parent = element.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+      const style = getComputedStyle(parent);
+      if (/auto|scroll|hidden|clip/.test(`${style.overflowY} ${style.overflowX}`)) {
+        return parent;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Opens the list above the field when there's no room for it below.
+   *
+   * Tagify measures the room against the window. Inside a dialog the list
+   * now scrolls with the dialog's content, so near the dialog's bottom edge
+   * it opened behind the dialog's buttons, hiding options that the arrow
+   * keys could still highlight. Measure against the field's scrolling
+   * container as well.
+   */
+  function placeWithinContainer(instance) {
+    const { position } = instance.dropdown;
+    instance.dropdown.position = (height, ...rest) => {
+      const listHeight = height || instance.DOM.dropdown.clientHeight;
+      const field = instance.DOM.scope.getBoundingClientRect();
+      const container = scrollContainerOf(instance.DOM.scope)?.getBoundingClientRect();
+      const top = Math.max(container ? container.top : 0, 0);
+      const bottom = Math.min(container ? container.bottom : window.innerHeight, window.innerHeight);
+      const below = bottom - field.bottom;
+      instance.settings.dropdown.placeAbove = below < listHeight && field.top - top > below;
+      return position(height, ...rest);
+    };
+  }
+
   Drupal.behaviors.mukurtuTagifyListPlacement = {
     attach(context) {
       const place = () => {
@@ -18,6 +54,7 @@
           const instance = element.__tagify;
           if (instance && instance.settings.dropdown.appendTarget !== instance.DOM.scope) {
             instance.settings.dropdown.appendTarget = instance.DOM.scope;
+            placeWithinContainer(instance);
           }
         });
       };
