@@ -140,6 +140,24 @@
     }
   }
 
+  // Blocks in the content region of the default page template (user pages,
+  // contact forms, node tabs such as Found In, confirmation forms, and any
+  // page without its own page template) sit on the same grid as the
+  // breadcrumb, title and tabs. Templates that override page_content (node
+  // displays, browse pages, 403, 404) don't render .layout-content.
+  .layout-content > .region > .block-wrapper {
+    @include layout.layout--full-width-grid;
+
+    > * {
+      @include layout.layout--full-width-grid-item;
+
+      // This wrapper already supplies the page gutter, so components inside
+      // it that build their own full-width grid (taxonomy term pages, for
+      // example) don't add it a second time.
+      --layout-padding: 0;
+    }
+  }
+
   // Constrain and center the "page not found" text to match other pages.
   .layout-content--404 {
     @include layout.layout--full-width-grid;
