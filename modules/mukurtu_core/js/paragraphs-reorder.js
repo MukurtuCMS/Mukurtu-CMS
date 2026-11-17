@@ -41,6 +41,15 @@
   }
 
   /**
+   * The row's own paragraph type label, not one of a paragraph nested in it.
+   */
+  function typeLabelOf(row) {
+    return Array.from(row.querySelectorAll('.paragraph-type-label')).find(
+      (label) => label.closest('tr') === row,
+    );
+  }
+
+  /**
    * The paragraph's name: its Title field if it has one, or its type.
    */
   function titleOf(row) {
@@ -51,9 +60,7 @@
     if (value) {
       return value;
     }
-    const type = Array.from(row.querySelectorAll('.paragraph-type-label')).find(
-      (label) => label.closest('tr') === row,
-    );
+    const type = typeLabelOf(row);
     return type ? type.textContent.trim() : '';
   }
 
@@ -138,8 +145,10 @@
     attach(context) {
       once('mukurtu-paragraphs-reorder', TABLE, context).forEach((table) => {
         const rows = rowsOf(table);
-        // One paragraph has nowhere to move.
-        if (rows.length < 2) {
+        // One paragraph has nowhere to move. Plain multiple-value fields
+        // inside a paragraph use the same table, but their rows aren't
+        // paragraphs and have no name to give the buttons.
+        if (rows.length < 2 || !rows.every(typeLabelOf)) {
           return;
         }
         rows.forEach((row) => {

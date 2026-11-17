@@ -49,4 +49,42 @@ test.describe('Paragraph reorder arrows', () => {
     expect(weights[0]).toBeLessThan(weights[1]);
     await expect(field.locator('tr.draggable').nth(1).locator('.tabledrag-changed')).toHaveCount(1);
   });
+
+  // Gin draws focus as a box-shadow, which forced colors removes.
+  test('A focused arrow keeps an outline in forced colors', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/node/add/person');
+    const tab = page.locator('a[href="#edit-group-biography"]:visible').first();
+    if (await tab.count()) {
+      await tab.click();
+    }
+    const field = page.locator('.field--name-field-sections').first();
+    if ((await field.locator('tr.draggable').count()) < 2) {
+      await field.locator('input[value="Add Biography section"]').click();
+    }
+    const arrow = field.locator('.mukurtu-paragraphs-move__later').first();
+    await arrow.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(arrow).toBeFocused();
+    await expect(arrow).toHaveCSS('outline-style', 'solid');
+  });
+
+  // Plain multiple-value fields inside a paragraph use the same kind of
+  // table, but their rows aren't paragraphs and have no name to give arrows.
+  test('Multiple-value fields inside a paragraph get no arrows', async ({ page }) => {
+    await page.goto('/node/add/dictionary_word');
+    const entries = page.locator('.field--name-field-additional-word-entries').first();
+    const pane = await entries.evaluate((element) => element.closest('.horizontal-tabs-pane, details[id]')?.id);
+    if (pane) {
+      const link = page.locator(`a[href="#${pane}"]:visible`).first();
+      if (await link.count()) {
+        await link.click();
+      }
+    }
+    const translations = entries.locator('.field--name-field-translation table.field-multiple-table').first();
+    await entries.locator('input[name*="field_translation_add_more"]').first().click();
+    await expect(translations.locator(':scope > tbody > tr.draggable')).toHaveCount(2);
+    await expect(translations.locator('.mukurtu-paragraphs-move__button')).toHaveCount(0);
+  });
 });
