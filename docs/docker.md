@@ -5,6 +5,7 @@ needs, every setting you can change, and how to operate it. For *how the image
 is built and why*, see [docker-build.md](docker-build.md).
 
 - [Quick start](#quick-start)
+- [A production checklist](#a-production-checklist)
 - [Images and tags](#images-and-tags)
 - [What the container does](#what-the-container-does)
 - [Settings (environment variables)](#settings-environment-variables)
@@ -70,6 +71,42 @@ proxy](#behind-a-reverse-proxy). To host several sites on one machine, use `mult
 
 For step-by-step instructions on a hosting provider's server, see [Hosting
 providers](#hosting-providers).
+
+## A production checklist
+
+A site that holds real community material needs more than a running container. Before
+you go live, make sure each of these is in place. The image doesn't do them for you.
+
+1. **Backups run automatically, are copied off the server, and you have restored
+   one.** Back up the database, both volumes, the `custom` folder, and the `secrets`
+   folder and `.env`; see [Upgrades and backups](#upgrades-and-backups). Keep copies
+   somewhere other than the server: if the server or the hosting account is lost, so
+   are the backups on it. Test one by restoring it into a second project ([Moving a
+   site to another host](#moving-a-site-to-another-host)).
+2. **Someone applies updates.** The image never updates itself. A security release
+   protects the site only after someone changes `MUKURTU_IMAGE` and restarts it; see
+   [Upgrades and backups](#upgrades-and-backups). To hear about releases, open the
+   [Mukurtu CMS repository](https://github.com/MukurtuCMS/Mukurtu-CMS) on GitHub and
+   click **Watch > Custom > Releases**. The server needs updates too: Ubuntu installs
+   security updates automatically, and when you sign in and see `System restart
+   required`, restart the server.
+3. **The site uses HTTPS on its domain.** See [Behind a reverse
+   proxy](#behind-a-reverse-proxy), or use the `multi-tenant` example, which gets
+   certificates automatically ([Hosting many sites](#hosting-many-sites)).
+4. **Only the ports you need are open.** Sign in to the server with an SSH key, not a
+   password, and allow only SSH (22), HTTP (80), and HTTPS (443) in your hosting
+   provider's firewall. Don't change `127.0.0.1:8080` in the `single-site` example to
+   `8080:8080`: Docker opens published ports past the server's own firewall (`ufw`),
+   so the site would be reachable without HTTPS.
+5. **Mail works.** Request a password reset for your own account and check that the
+   email arrives; see [Mail](#mail).
+6. **The disk can't fill up unnoticed.** The `single-site` and `multi-tenant` examples
+   keep at most 50 MB of log per container; if you write your own Compose file, copy
+   their `logging` settings. Uploads keep growing, so set an alert for when the disk
+   is 80% full. Most hosting providers offer one, such as DigitalOcean Monitoring.
+7. **You'll know when the site is down.** Set up an uptime check that loads the home
+   page and emails you when it fails. Most hosting providers offer one, or use an
+   external service.
 
 ## Images and tags
 
@@ -828,6 +865,9 @@ proxy](#behind-a-reverse-proxy), or use the `multi-tenant` example, which gets
 certificates automatically ([Hosting many sites](#hosting-many-sites)). In the control
 panel, add a **Cloud Firewall** that allows only SSH (22), HTTP (80), and HTTPS (443)
 in.
+
+**12. Before real use**, work through [A production
+checklist](#a-production-checklist).
 
 **When something goes wrong:**
 

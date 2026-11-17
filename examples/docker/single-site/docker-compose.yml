@@ -3,10 +3,19 @@
 
 name: mukurtu
 
+# Docker keeps a container's log forever unless told otherwise, and on a busy site that
+# slowly fills the disk. Keep the newest 50 MB per container (5 files of 10 MB).
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "5"
+
 services:
   db:
     image: mariadb:11.8
     restart: unless-stopped
+    logging: *logging
     # The settings Drupal asks of MariaDB/MySQL:
     #   utf8mb4          - emoji and non-Latin scripts are stored correctly
     #   READ-COMMITTED   - avoids lock contention and deadlocks (with ROW logging)
@@ -39,6 +48,7 @@ services:
     # Required, with no default: pin an exact version and upgrade on purpose.
     image: ${MUKURTU_IMAGE:?set MUKURTU_IMAGE in .env}
     restart: unless-stopped
+    logging: *logging
     depends_on:
       db:
         condition: service_healthy

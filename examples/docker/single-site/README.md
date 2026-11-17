@@ -1,7 +1,7 @@
 # Single site
 
 One Mukurtu site and its MariaDB database, with the passwords in secret files, a read-only
-container and memory limits.
+container, memory limits and rotated logs.
 
 ```
 ./generate-secrets.sh     # creates .env and secrets/ (random passwords); prints the admin password

@@ -336,12 +336,13 @@ Properties of Mukurtu and Drupal that the image can reduce but not remove.
 file and, where needed, a `.env.example` and a secrets generator. The tests check that each is
 valid, that `.env.example` covers every required variable, that the generators make random,
 private, distinct secrets and never overwrite them, that every Mukurtu service has the hardening
-below, and that each example **starts a working site** (the multi-tenant one starts two behind
+below, that every service in `single-site` and `multi-tenant` rotates its log, and that each example **starts a working site** (the multi-tenant one starts two behind
 Caddy, each answering only on its own name).
 
 - **`minimal/`**: the image and MariaDB with throwaway passwords in the file and nothing to
   prepare. For trying Mukurtu, not keeping it.
-- **`single-site/`**: secret files for every password, a read-only container, memory limits.
+- **`single-site/`**: secret files for every password, a read-only container, memory limits,
+  and logs capped at 50 MB per container (Docker otherwise keeps them forever).
   `generate-secrets.sh` writes random values; sample secrets are deliberately **not** committed,
   because anyone copying them would run a site with a publicly known password, and `.gitignore`
   keeps the generated ones out of git. `MUKURTU_IMAGE` is required with no default, so a version

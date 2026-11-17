@@ -124,6 +124,17 @@ check_services() { # check_services <name> <service names...>
 [[ -d "$WORK/single-site" ]] && check_services single-site mukurtu
 [[ -d "$WORK/multi-tenant" ]] && check_services multi-tenant site_a site_b
 
+echo "examples: every service in a production example rotates its log"
+for name in single-site multi-tenant; do
+  [[ -d "$WORK/$name" ]] || continue
+  json="$(compose_json "$name")" || continue
+  for svc in $(jq -r '.services | keys[]' <<<"$json"); do
+    size="$(jq -r ".services[\"$svc\"].logging.options[\"max-size\"] // \"\"" <<<"$json")"
+    files="$(jq -r ".services[\"$svc\"].logging.options[\"max-file\"] // \"\"" <<<"$json")"
+    [[ -n "$size" && -n "$files" ]] && pass "$name: $svc keeps at most $files log files of $size" || fail "$name: $svc rotates its log (max-size and max-file)"
+  done
+done
+
 echo "examples: each site mounts its own custom folders, read-only"
 # custom_mount <name> <service> <target>: print "<source> <read_only>" for the bind mount at <target>.
 custom_mount() {
