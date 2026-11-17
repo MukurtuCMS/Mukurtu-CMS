@@ -5,15 +5,78 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
-## Unreleased
+## 4.0.9-rc1
 
-Articles now use the same full-page layout as other content, and have Article
-Tags, Media Assets, and an Articles page.
+A feature and maintenance release. It adds search suggestions, XLSX and ODS import and export, a floating character palette for entering characters without the proper keyboard layout, manual ordering for the Collections page, and redesigned article tools. It also tightens several access checks and fixes accessibility issues.
+
+New in this release:
+
+- Search suggestions. Browse, Digital Heritage, and Dictionary suggest words
+  as you type, and the header search suggests items grouped by content type.
+  Suggestions only come from content the person can see.
+- Import and export support XLSX and ODS files as well as CSV. Overlapping
+  import runs no longer mix their results, failed rows show their row number,
+  and large files import in chunks.
+- An optional floating character palette for entering characters without the
+  proper keyboard layout. It's turned off until an administrator turns it on.
+- Mukurtu Managers can set the order of collections on the Collections page at
+  Dashboard > Collection order, and reset it to alphabetical.
+- Articles use the same full-page layout as other content, and have Article
+  Tags, Media Assets, an Articles page, and a Latest Articles block for landing
+  pages.
+- An optional related content preview in item sidebars.
+- Remote videos start and stop at the times in their URL, and media stops
+  playing when the viewer leaves its slide.
+- Stacked content warnings have one title and one instruction, screen readers
+  announce them, and they fit on cards and small media.
+
+Access changes:
+
+- Content revision history is limited to administrators and Mukurtu Managers.
+- Category and other term names are hidden from people who can't see any of
+  the term's content.
+- Adding an item to a collection or multipage item needs view access to it.
+- Importing paragraphs needs the right to create content.
+- A steward of any protocol on an "All" item can edit it if they can see it.
+- Mukurtu Managers can open the Google Tag, cookie consent, Not Found page, and
+  bot protection settings linked from the dashboard.
+
+This release also fixes several bugs and accessibility issues. File fields
+keep keyboard focus after an upload or removal, upload size limits apply to
+each file, and too-large files get a plain error message. CSV import no longer
+merges rows that share a title. The Communities and Cultural Protocols page
+shows every community you can see, and the map drawing toolbar announces its
+active mode.
 
 Article images aren't migrated from Mukurtu 3. An image media item needs a
 cultural protocol, and articles don't have one. On updated sites, the article
 Image field is deleted if no article uses it. If articles use it, the field and
 its images stay, but the field is removed from the article form.
+
+To update, back up your site, run `composer update`, and then run database
+updates (`drush updb`). `composer update` also installs Symfony 7.4.23, which
+fixes 12 Symfony security advisories, and two new dependencies:
+Search API Autocomplete and OpenSpout. This release includes 15 database
+updates. They:
+
+- Limit content revision history to administrators and Mukurtu Managers.
+- Let Mukurtu Managers open the admin-only settings linked from the dashboard.
+- Show categories only to people who can see their content.
+- Rename the default media thumbnail settings so configuration imports work.
+- Make sample sentences collapsible on the dictionary word edit form.
+- Remove the click-through instruction from the default deceased-person
+  content warning text.
+- Replace article Category and Keywords with Article Tags, add Media Assets,
+  hide the Body and Image labels on article pages, and map Mukurtu 3 article
+  categories and tags into Article Tags.
+- Add the Articles page and the Latest Articles block, and offer the block on
+  landing pages.
+- Add the character palette setting, turned off.
+- Turn on search suggestions for Browse, Digital Heritage, and Dictionary.
+- Add manual ordering for the Collections page. The page stays alphabetical
+  until someone sets an order. On Solr sites, this queues the whole Solr index
+  for reindexing. Cron works through it in batches; run
+  `drush search-api:index` to finish sooner.
 
 ## 4.0.8
 
