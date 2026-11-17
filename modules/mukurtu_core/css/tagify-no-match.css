@@ -10,7 +10,8 @@
  * The module also pushes the typed text to the far edge of the list, with a
  * grid column and with space-between on every list item. A wrapping flex
  * row keeps it right after the message instead, and moves it to the next
- * line when the list is narrow.
+ * line when the list is narrow. The library caps list items at 60px, which
+ * would cut that second line off (WCAG 1.4.10, 1.4.12).
  *
  * Scoped to the list so it outranks the module's single-class rule
  * whichever stylesheet loads last.
@@ -22,5 +23,6 @@
   align-items: baseline;
   justify-content: flex-start;
   gap: 0 0.5ch;
+  max-height: none;
   opacity: 1;
 }

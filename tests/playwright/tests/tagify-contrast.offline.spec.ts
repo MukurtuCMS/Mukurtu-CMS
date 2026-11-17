@@ -153,6 +153,22 @@ for (const [name, palette] of PALETTES) {
       expect(middle).toBeLessThan(message.y + message.height);
     });
 
+    test('"No matching suggestions" row grows to fit when it wraps', async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 640 });
+      // WCAG 1.4.12 text spacing, which makes the wrapped row taller still.
+      await page.addStyleTag({ content: '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p { margin-block-end: 2em !important; }' });
+      await page.locator('.tagify__input').click();
+      await page.keyboard.type('zqxzqxzqx');
+      const row = page.locator('.tagify--dropdown-item-no-match');
+      await expect(row).toBeVisible();
+      const [rowBox, value] = await row.evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element.querySelector('.tagify--value')!);
+        return [element.getBoundingClientRect().toJSON(), range.getBoundingClientRect().toJSON()];
+      });
+      expect(value.bottom).toBeLessThanOrEqual(rowBox.bottom);
+    });
+
     test('Placeholder text has 4.5:1 contrast', async ({ page }) => {
       expect(await contrast(page, '.tagify__input', '::before')).toBeGreaterThanOrEqual(4.5);
       await page.locator('.tagify__input').click();
