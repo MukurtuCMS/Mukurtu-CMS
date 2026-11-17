@@ -157,6 +157,17 @@
       // that build their own full-width grid (taxonomy term pages, the
       // Articles page) don't add it a second time.
       --layout-padding: 0;
+
+      // At 2xl those grids leave empty outer columns, and the gaps beside
+      // them would indent the content by a gutter inside this column. Pull
+      // them out by that gutter.
+      .local-tasks,
+      .taxonomy-term-page,
+      .articles-listing--page {
+        @include include-media.media('>=2xl') {
+          margin-inline: calc(var(--gutter) * -1);
+        }
+      }
     }
   }
 
