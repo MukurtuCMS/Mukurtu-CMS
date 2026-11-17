@@ -7,10 +7,18 @@
  * 3.02:1 plain in Gin, about 2:1 highlighted. The italic text and the
  * message itself still set it apart from real suggestions.
  *
+ * The module also puts the typed text in a grid column at the far edge of
+ * the list. A wrapping flex row keeps it right after the message instead,
+ * and moves it to the next line when the list is narrow.
+ *
  * Scoped to the list so it outranks the module's single-class rule
  * whichever stylesheet loads last.
  */
 
 .tagify__dropdown .tagify--dropdown-item-no-match {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.5ch;
   opacity: 1;
 }

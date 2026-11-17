@@ -129,6 +129,28 @@ for (const [name, palette] of PALETTES) {
       }
     });
 
+    test('Typed text follows the "No matching suggestions" message', async ({ page }) => {
+      // The fixture field is narrow enough to wrap the message; widen it to
+      // the size of a field on the edit form.
+      await page.addStyleTag({ content: 'tags.tagify { inline-size: 40rem; }' });
+      await page.locator('.tagify__input').click();
+      await page.keyboard.type('zqx');
+      // Measures the text, not the boxes, which can stretch to fill the row.
+      // Measured together: the list slides into place as it opens.
+      const [message, value] = await page.locator('.tagify--dropdown-item-no-match').evaluate((row) =>
+        ['p', '.tagify--value'].map((part) => {
+          const range = document.createRange();
+          range.selectNodeContents(row.querySelector(part)!);
+          return range.getBoundingClientRect().toJSON();
+        }));
+      // On the message's line, a short gap after it, not at the far edge.
+      expect(value.x - message.right).toBeGreaterThanOrEqual(0);
+      expect(value.x - message.right).toBeLessThan(16);
+      const middle = value.y + value.height / 2;
+      expect(middle).toBeGreaterThan(message.y);
+      expect(middle).toBeLessThan(message.y + message.height);
+    });
+
     test('Placeholder text has 4.5:1 contrast', async ({ page }) => {
       expect(await contrast(page, '.tagify__input', '::before')).toBeGreaterThanOrEqual(4.5);
       await page.locator('.tagify__input').click();
