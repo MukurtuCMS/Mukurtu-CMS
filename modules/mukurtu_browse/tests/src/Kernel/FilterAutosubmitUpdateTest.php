@@ -12,9 +12,10 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Tests that the browse filters wait for Apply (#2619).
  *
- * Covers the shipped views and mukurtu_browse_update_40024() and
- * mukurtu_dictionary_update_40049(), which turn off Better Exposed Filters
- * auto-submit on existing sites.
+ * Covers the shipped views and search suggestions, and
+ * mukurtu_browse_update_40024() and mukurtu_dictionary_update_40049(), which
+ * turn off Better Exposed Filters and Search API Autocomplete auto-submit on
+ * existing sites.
  */
 #[Group('mukurtu_browse')]
 class FilterAutosubmitUpdateTest extends KernelTestBase {
@@ -22,12 +23,15 @@ class FilterAutosubmitUpdateTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    *
-   * Views and Better Exposed Filters supply the schema for the saved views.
-   * mukurtu_browse lets the dictionary update load its install file.
+   * Views, Better Exposed Filters and Search API Autocomplete supply the
+   * schema for the saved config. mukurtu_browse lets the dictionary update
+   * load its install file.
    */
   protected static $modules = [
     'better_exposed_filters',
     'mukurtu_browse',
+    'search_api',
+    'search_api_autocomplete',
     'views',
   ];
 
@@ -68,6 +72,10 @@ class FilterAutosubmitUpdateTest extends KernelTestBase {
     $this->assertSame('bef', $exposed_form['type']);
     $this->assertFalse($exposed_form['options']['bef']['general']['autosubmit']);
     $this->assertFalse($exposed_form['options']['bef']['general']['autosubmit_hide']);
+
+    // Choosing a search suggestion fills in the box rather than searching.
+    $suggestions = Yaml::parseFile(dirname($path) . "/search_api_autocomplete.search.$view_id.yml");
+    $this->assertFalse($suggestions['options']['autosubmit']);
   }
 
   /**
@@ -76,6 +84,10 @@ class FilterAutosubmitUpdateTest extends KernelTestBase {
   public function testUpdatesTurnOffAutosubmit(): void {
     foreach (array_keys(static::shippedViews()) as $view_id) {
       $this->saveView($view_id);
+      \Drupal::configFactory()->getEditable("search_api_autocomplete.search.$view_id")
+        ->set('id', $view_id)
+        ->set('options', ['limit' => 10, 'autosubmit' => TRUE])
+        ->save();
     }
     // A site that swapped in another exposed form type keeps its settings.
     \Drupal::configFactory()->getEditable('views.view.other_view')
@@ -92,6 +104,11 @@ class FilterAutosubmitUpdateTest extends KernelTestBase {
       $this->assertFalse($general['autosubmit'], "$view_id no longer auto-submits.");
       $this->assertFalse($general['autosubmit_hide'], "$view_id shows Apply.");
       $this->assertSame(500, $general['autosubmit_textfield_delay'], "$view_id keeps its other settings.");
+      $this->assertSame(
+        ['limit' => 10, 'autosubmit' => FALSE],
+        $this->config("search_api_autocomplete.search.$view_id")->get('options'),
+        "Choosing a $view_id suggestion doesn't search.",
+      );
     }
 
     $this->assertSame(
@@ -109,6 +126,7 @@ class FilterAutosubmitUpdateTest extends KernelTestBase {
 
     foreach (array_keys(static::shippedViews()) as $view_id) {
       $this->assertTrue($this->config("views.view.$view_id")->isNew(), "$view_id isn't created.");
+      $this->assertTrue($this->config("search_api_autocomplete.search.$view_id")->isNew(), "$view_id suggestions aren't created.");
     }
   }
 

@@ -62,19 +62,26 @@ function mukurtu_browse_update_40024() {
 }
 
 /**
- * Turns off Better Exposed Filters auto-submit on the given views.
+ * Turns off auto-submit on the given views' filters and search suggestions.
  *
  * Filters, sort and the search box reloaded the page as soon as they
  * changed, a change of context on input (WCAG 3.2.2, #2619). They now wait
- * for the form's Apply button, which auto-submit hid on some views.
+ * for the form's Apply button, which auto-submit hid on some views. Choosing
+ * a search suggestion (#2473) fills in the search box instead of searching.
  *
  * @param string[] $view_ids
  *   The views to change. Views that don't exist, or don't use a Better
- *   Exposed Filters form, are skipped.
+ *   Exposed Filters form, are skipped, as are views without suggestions.
  */
 function mukurtu_browse_turn_off_filter_autosubmit(array $view_ids): void {
   $config_factory = \Drupal::configFactory();
   foreach ($view_ids as $view_id) {
+    // Search API Autocomplete searches use the view's ID.
+    $suggestions = $config_factory->getEditable("search_api_autocomplete.search.$view_id");
+    if (!$suggestions->isNew() && $suggestions->get('options.autosubmit') !== FALSE) {
+      $suggestions->set('options.autosubmit', FALSE)->save();
+    }
+
     $config = $config_factory->getEditable("views.view.$view_id");
     $key = 'display.default.display_options.exposed_form';
     if ($config->isNew() || $config->get("$key.type") !== 'bef') {

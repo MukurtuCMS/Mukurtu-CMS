@@ -121,6 +121,29 @@ test('Browse tests - Enter in the search box applies and keeps focus there', asy
   await expect.poll(() => page.evaluate(() => (document.activeElement as HTMLInputElement | null)?.name)).toBe('search_api_fulltext');
 });
 
+// Choosing a search suggestion (#2473) fills in the box and waits for Enter
+// or Apply, like everything else.
+test('Browse tests - choosing a search suggestion does not reload the page', async ({ page }) => {
+  await gotoReady(page, '/browse');
+  const search = page.locator(`${FILTERS} input[name="search_api_fulltext"]`).first();
+  const item = page.locator('.ui-autocomplete li:visible').first();
+  let found = false;
+  for (const letters of ['sam', 'wov', 'mul', 'the']) {
+    await search.fill('');
+    await search.pressSequentially(letters, { delay: 50 });
+    found = await item.waitFor({ timeout: 3000 }).then(() => true, () => false);
+    if (found) {
+      break;
+    }
+  }
+  test.skip(!found, 'No suggestions for the content on this site.');
+  const loads = countLoads(page);
+  await item.click();
+  await page.waitForTimeout(1500);
+  expect(loads(), 'Choosing a suggestion reloaded the page.').toBe(0);
+  expect(await search.inputValue()).not.toBe('');
+});
+
 // Reset isn't shown once nothing is filtered, and on /dictionary it's a link,
 // so focus comes back to Apply.
 for (const [path, reset] of [
