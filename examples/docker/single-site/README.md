@@ -32,8 +32,8 @@ It runs at 3:30 every morning, server time. Check `/var/log/mukurtu-backup.log` 
 then: each run ends with `backup written to` or `backup failed`.
 
 **Copy the backups off the server.** If the server or the hosting account is lost, the
-backups on it are lost too. For example, run this on your own computer, every week or after
-big changes; it copies only the new backups:
+backups on it are lost too. For example, every week or after big changes, on your own computer
+(not the server), run this; it copies only the new backups:
 
 ```
 rsync -a root@<server>:/root/mukurtu-docker/examples/docker/single-site/backups/ mukurtu-backups/

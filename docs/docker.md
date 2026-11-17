@@ -881,7 +881,7 @@ checklist](#a-production-checklist).
 | `unknown shorthand flag: 'd' in -d` | Compose isn't installed. Do step 4. |
 | `no configuration file provided: not found` | You're in the wrong folder. `cd /root/mukurtu-docker/examples/docker/single-site` |
 | `cd: ... No such file or directory` | The folder is somewhere else. On the droplet, `docker inspect mukurtu-mukurtu-1 --format '{{ index .Config.Labels "com.docker.compose.project.working_dir" }}'` prints it. |
-| `Permission denied (publickey)` when you open the connection in step 8 | You ran the command on the droplet. Type `exit`, and run it on your computer. |
+| `Permission denied (publickey)` when you run `ssh`, `rsync`, or `scp` | You ran the command on the droplet. Type `exit`, and run it on your computer. |
 | `bind: Address already in use` | Something on your computer already uses port 8080, such as an earlier connection. Close it, or use `ssh -L 8081:localhost:8080 root@<droplet-ip>` and browse to `http://localhost:8081`. |
 | `400 Bad Request` | Browse to `http://localhost:8080`, not `http://127.0.0.1:8080`. |
 | The browser can't connect | The connection from step 8 was closed. Open it again. |
