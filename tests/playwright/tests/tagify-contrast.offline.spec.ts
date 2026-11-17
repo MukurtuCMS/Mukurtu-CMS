@@ -17,10 +17,12 @@ const TAGIFY_JS = path.join(ROOT, 'libraries/tagify/dist/tagify.js');
 const TAGIFY_CSS = path.join(ROOT, 'libraries/tagify/dist/tagify.css');
 const NO_MATCH_CSS = path.join(ROOT, 'modules/mukurtu_core/css/tagify-no-match.css');
 
-// The Tagify module's rule for its "No matching suggestions" row
-// (css/tagify.css), copied because vendor/ isn't installed in the offline
-// job. It fades the row to half opacity (#2727).
-const MODULE_NO_MATCH_RULE = `.tagify--dropdown-item-no-match {
+// The Tagify module's rules for its list items and "No matching
+// suggestions" row (css/tagify.css), copied because vendor/ isn't installed
+// in the offline job. They fade the row to half opacity and push the typed
+// text to the far edge (#2727).
+const MODULE_NO_MATCH_RULE = `.tagify__dropdown__item { display: flex; align-items: center; justify-content: space-between; }
+.tagify--dropdown-item-no-match {
   display: grid; grid-template-columns: 1fr auto !important; align-items: center;
   padding: var(--tagify-dd-item-pad); opacity: 0.5; font-style: italic;
 }
