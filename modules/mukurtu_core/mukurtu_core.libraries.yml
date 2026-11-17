@@ -15,8 +15,14 @@ tagify-override:
   version: 1.x
   js:
     js/mukurtu-tagify-override.js: {}
+    js/tagify-reorder.js: {}
+    js/tagify-combobox.js: {}
+  css:
+    component:
+      css/tagify-reorder.css: {}
   dependencies:
     - core/drupal
+    - core/drupal.announce
     - core/drupalSettings
 
 splide:
@@ -145,6 +151,20 @@ reset-refused-upload:
     - core/drupal.ajax
     - core/drupal.announce
 
+sequential-upload:
+  version: 1.x
+  js:
+    js/sequential-upload.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.announce
+    - core/drupal.message
+    - file/drupal.file
+
 focus-file-field:
   version: 1.x
   js:
@@ -178,6 +198,20 @@ entity_reference_role_tagify:
     - core/once
     - core/sortable
 
+character_palette_settings:
+  version: 1.x
+  js:
+    js/character-palette-settings.js: {}
+  css:
+    component:
+      css/character-palette-settings.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.tabledrag
+    - core/jquery
+    - core/once
+
 visitors-country-map:
   version: 1.x
   js:
@@ -186,3 +220,16 @@ visitors-country-map:
     - core/jquery
     - core/drupal
     - leaflet/leaflet-drupal
+
+character_palette:
+  version: 1.x
+  css:
+    component:
+      css/character-palette.css: {}
+  js:
+    js/character-palette.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/drupal.announce
+    - core/once

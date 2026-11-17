@@ -5,7 +5,7 @@
 # README.md.
 
 # Required: the exact Mukurtu release to build on, for example
-#   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.8-r1 -t my-mukurtu:4.0.8-r1 .
+#   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.9-r1 -t my-mukurtu:4.0.9-r1 .
 ARG MUKURTU_IMAGE
 FROM ${MUKURTU_IMAGE:?MUKURTU_IMAGE_is_required} AS mukurtu
 
