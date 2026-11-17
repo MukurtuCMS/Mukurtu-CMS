@@ -1141,6 +1141,39 @@ a:not(.primary-nav__menu-link) svg.tel path {
           border-block-start: 5px solid var(--brand-secondary);
 }
 
+.vertical-card__media:has(> .card-media__multiple),
+.horizontal-card__media:has(> .card-media__multiple) {
+  position: relative;
+}
+
+.card-media__multiple {
+  position: absolute;
+  inset-block-start: var(--v-space-6xs);
+  inset-inline-end: var(--v-space-6xs);
+  z-index: 11;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 0.25rem;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  line-height: 0;
+  pointer-events: none;
+}
+@media (forced-colors: active) {
+  .card-media__multiple {
+    border: 1px solid CanvasText;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+}
+
+.card-media__multiple-icon {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+
 .splide__arrow--prev {
   inset-inline-start: 0.5em;
 }
