@@ -43,7 +43,10 @@
 {% if has_multiple_media %}
 <span class="card-media__multiple">
   <svg class="card-media__multiple-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="24" height="24">
-    <path fill="currentColor" d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zm-7.5-4.17 1.67 2.01 2.33-3 3 4H9.5l3-3.01z"/>
+    <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="8" y="3" width="13" height="13" rx="2"/>
+      <path d="M4 8v11a2 2 0 0 0 2 2h11"/>
+    </g>
   </svg>
   <span class="visually-hidden">{{ 'Includes multiple media assets'|t }}</span>
 </span>
