@@ -5,7 +5,7 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
-## 4.0.9-rc1
+## 4.0.9
 
 A feature and maintenance release. It adds search suggestions, XLSX and ODS import and export, a floating character palette for entering characters without the proper keyboard layout, manual ordering for the Collections page, and redesigned article tools. It also tightens several access checks and fixes accessibility issues.
 
