@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - search_api.index.mukurtu_dictionary_index
+    - views.view.mukurtu_dictionary
+  module:
+    - views
+id: mukurtu_dictionary
+label: Dictionary
+index_id: mukurtu_dictionary_index
+suggester_settings:
+  server:
+    fields:
+      - title
+      - dictionary_fulltext
+suggester_weights:
+  server: 0
+suggester_limits: {  }
+search_settings:
+  'views:mukurtu_dictionary':
+    displays:
+      default: false
+      selected:
+        - mukurtu_dictionary_block
+        - mukurtu_dictionary_block_map
+options:
+  limit: 10
+  min_length: 3
+  show_count: false
+  delay: 0
+  submit_button_selector: ':submit'
+  autosubmit: true
