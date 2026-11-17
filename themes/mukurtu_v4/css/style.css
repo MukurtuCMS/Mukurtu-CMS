@@ -1536,6 +1536,10 @@ body.consent-popup-opened .klaro_toggle_dialog {
   display: none;
 }
 
+html:has(.klaro_toggle_dialog) {
+  scroll-padding-block-end: 4.5rem;
+}
+
 .klaro.klaro-theme-mukurtu_v4 {
   --klaro-primary-color: var(--brand-primary-dark);
   --klaro-link-color-hover: var(--brand-primary-accent);

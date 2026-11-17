@@ -70,6 +70,16 @@ body.consent-popup-opened .klaro_toggle_dialog {
   display: none;
 }
 
+// Klaro's consent settings button floats over the bottom right of every page
+// (35px, fixed 25px from the corner, in vendor klaro-extend.css). Tabbing
+// scrolls a focused element only just into view, which leaves it at the
+// bottom of the screen, under the button, and a small control there can be
+// hidden completely (WCAG 2.4.11, #2712). Stop keyboard scrolling short of
+// the button so focused elements land above it.
+html:has(.klaro_toggle_dialog) {
+  scroll-padding-block-end: 4.5rem;
+}
+
 // Restyle Klaro's blocked-embed placeholder (.context-notice, shown in
 // place of a gated YouTube/Vimeo/SoundCloud embed in browse and full-content
 // views) to match Mukurtu's design system instead of Klaro's unstyled
