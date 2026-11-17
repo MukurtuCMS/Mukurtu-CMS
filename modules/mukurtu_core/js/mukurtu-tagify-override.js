@@ -84,7 +84,51 @@
         instance.DOM.input.focus();
       }
     });
+    keepFocusOnEscape(instance);
+    removeWrapperExpanded(instance);
     instance.__mukurtuPatched = true;
+  }
+
+  /**
+   * Keep focus in the field when Escape is pressed with the list closed.
+   *
+   * Tagify blurs its input then, so focus fell to the page body and keyboard
+   * and screen reader users lost their place (WCAG 2.4.3, #2719). Its handler
+   * calls the input's blur(), so stand in a no-op blur() for the length of
+   * the key press. The event itself still travels, so a dialog around the
+   * field can still close on Escape, and an open list or a tag being edited
+   * still handles it as before.
+   */
+  function keepFocusOnEscape(instance) {
+    const { input } = instance.DOM;
+    instance.DOM.scope.addEventListener('keydown', (event) => {
+      if ((event.key !== 'Escape' && event.key !== 'Esc') || event.target !== input
+        || Object.prototype.hasOwnProperty.call(input, 'blur')) {
+        return;
+      }
+      input.blur = () => {};
+      setTimeout(() => {
+        delete input.blur;
+      }, 0);
+    }, true);
+  }
+
+  /**
+   * Keep aria-expanded off Tagify's <tags> wrapper.
+   *
+   * Tagify sets it there when the list opens and closes, but the wrapper has
+   * no role, so the attribute isn't allowed (WCAG 4.1.2, #2720). The input
+   * inside is the combobox and carries its own aria-expanded
+   * (tagify-combobox.js).
+   */
+  function removeWrapperExpanded(instance) {
+    const { scope } = instance.DOM;
+    scope.removeAttribute('aria-expanded');
+    new MutationObserver(() => {
+      if (scope.hasAttribute('aria-expanded')) {
+        scope.removeAttribute('aria-expanded');
+      }
+    }).observe(scope, { attributes: true, attributeFilter: ['aria-expanded'] });
   }
 
   /**
@@ -251,8 +295,11 @@
         // Only open the list when it is closed. Re-clicking while it is open
         // refetches the suggestions and resets the highlight, so Down Arrow
         // could never move past the first option.
+        // Tagify inserts the wrapper just before the original element, which
+        // holds the instance. The wrapper's aria-expanded is removed (#2720).
+        const instance = tagsElement.nextElementSibling?.__tagify;
         if ((event.key === 'ArrowDown' || event.key === 'Down')
-          && tagsElement.getAttribute('aria-expanded') !== 'true') {
+          && instance && !instance.state.dropdown.visible) {
           input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         }
       });
