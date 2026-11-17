@@ -6,7 +6,8 @@ import { ADMIN_STATE } from '~helpers/auth-state';
  * landmark (#2721). mukurtu_core adds it to the field's wrapper instead, and
  * corrects its position there, since Tagify adds the page's scroll offset.
  *
- * Uses the "weaving" keyword from the accessibility demo content.
+ * Types text that matches no keyword, so the list shows its "No matching
+ * suggestions" row on any site, whatever terms it has.
  */
 test.describe('Tagify suggestion list placement', () => {
   test.use({ storageState: ADMIN_STATE });
@@ -23,10 +24,10 @@ test.describe('Tagify suggestion list placement', () => {
     await input.scrollIntoViewIfNeeded();
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
     await input.click();
-    await page.keyboard.type('wea');
+    await page.keyboard.type('zqxj');
 
     const list = page.locator('.tagify__dropdown');
-    await expect(list.locator('.tagify__dropdown__item', { hasText: 'weaving' })).toBeVisible();
+    await expect(list.locator('.tagify__dropdown__item')).toBeVisible();
     expect(await list.evaluate((element) => !!element.closest('main'))).toBe(true);
 
     const [listBox, fieldBox] = await Promise.all([list.boundingBox(), field.boundingBox()]);
@@ -54,10 +55,10 @@ test.describe('Tagify suggestion list placement', () => {
       region.style.cssText = `block-size: ${height}px; overflow: auto`;
     });
     await field.locator('.tagify__input').click();
-    await page.keyboard.type('wea');
+    await page.keyboard.type('zqxj');
 
     const list = page.locator('.tagify__dropdown');
-    const option = list.locator('.tagify__dropdown__item', { hasText: 'weaving' });
+    const option = list.locator('.tagify__dropdown__item');
     await expect(option).toBeVisible();
     await expect(list).toHaveAttribute('placement', 'top');
     // The option is drawn where it is, not hidden by the container's edge.
