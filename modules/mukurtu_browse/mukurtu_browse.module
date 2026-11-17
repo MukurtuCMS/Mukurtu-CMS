@@ -4,6 +4,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\mukurtu_browse\Hook\SearchSuggestionHooks;
 use Drupal\mukurtu_browse\Plugin\views\argument\MukurtuBoundingBox;
 use Drupal\node\NodeInterface;
 use Drupal\node\NodeTypeInterface;
@@ -471,6 +472,8 @@ function _mukurtu_browse_ensure_processor_on_index(
  * Implements hook_preprocess_block().
  */
 function mukurtu_browse_preprocess_block(&$variables) {
+  \Drupal::classResolver(SearchSuggestionHooks::class)->preprocessBlock($variables);
+
   $browse_block_ids = [
     'views_exposed_filter_block:mukurtu_browse-mukurtu_browse_block',
     'views_exposed_filter_block:mukurtu_digital_heritage_browse-mukurtu_digital_heritage_browse_block',

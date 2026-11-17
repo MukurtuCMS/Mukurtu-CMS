@@ -70,8 +70,7 @@ function mukurtu_search_entity_bundle_create($entity_type_id, $bundle) {
  */
 function mukurtu_search_static_taxonomy_name_fields() {
   return [
-    'node__field_article_category__name' => ['label' => 'Article Category', 'property_path' => 'field_article_category:entity:name'],
-    'node__field_article_keywords__name' => ['label' => 'Article Keywords', 'property_path' => 'field_article_keywords:entity:name'],
+    'node__field_article_tags__name' => ['label' => 'Article Tags', 'property_path' => 'field_article_tags:entity:name'],
     'node__field_category__name' => ['label' => 'Category', 'property_path' => 'field_category:entity:name'],
     'node__field_contributor__name' => ['label' => 'Contributor', 'property_path' => 'field_contributor:entity:name'],
     'node__field_creator__name' => ['label' => 'Creator', 'property_path' => 'field_creator:entity:name'],

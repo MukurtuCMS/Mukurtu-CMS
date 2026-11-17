@@ -18,17 +18,57 @@
         // Watch for iframes/objects inserted later by lazy loaders (e.g. Blazy).
         this.watchForNewEmbeds(element);
 
-        // Cards wrap their media in a link that is hidden from AT and out of
+        // Mark the overlay while its text scrolls, so the theme can put a
+        // band behind the pinned button only then. Watch the contents too:
+        // text can grow inside an overlay that keeps its size, for example
+        // when the web font swaps in.
+        if (window.ResizeObserver) {
+          const observer = new ResizeObserver(() => {
+            element.classList.toggle('mukurtu-content-warnings--scrolls', element.scrollHeight > element.clientHeight + 1);
+          });
+          [element, ...element.children].forEach((el) => observer.observe(el));
+        }
+
+        // Cards (themes' _card-media.html.twig) leave warned media unlinked and
+        // pass the item's URL instead. A card is too small for the warnings,
+        // so it shows the title, a link to the item, which shows every
+        // warning, and the "Show media" button.
+        const cardUrl = element.closest('[data-mukurtu-card-url]')?.dataset.mukurtuCardUrl;
+        const hint = element.querySelector('.mukurtu-content-warnings__card-hint');
+        if (cardUrl && hint) {
+          element.classList.add('mukurtu-content-warnings--card');
+          const link = document.createElement('a');
+          link.href = cardUrl;
+          link.textContent = hint.textContent.trim();
+          // Every card's link has the same text, so describe it by the card's
+          // title to tell them apart (WCAG 2.4.4).
+          const title = element.closest('article')?.querySelector('h2');
+          if (title) {
+            title.id ||= `mukurtu-card-title-${cardUrl.replace(/[^\w-]/g, '-')}`;
+            link.setAttribute('aria-describedby', title.id);
+          }
+          hint.replaceChildren(link);
+        }
+
+        // Media still wrapped in a link that is hidden from AT and out of
         // the Tab order, since the card's title link goes to the same page.
-        // A button there would be a Tab stop AT can't see (WCAG 4.1.2).
+        // A button there would be a Tab stop AT can't see (WCAG 4.1.2). A card
+        // is too small to show every warning, so it shows only the title and
+        // a click follows the link: the item page shows the full warnings
+        // before the media can be revealed.
         if (element.closest('a')) {
           element.querySelector('.mukurtu-content-warnings__dismiss')?.setAttribute('tabindex', '-1');
+          return;
         }
 
         // A click anywhere on the overlay dismisses it. The dismiss button
         // inside it gives keyboard and AT users the same action, since a
         // native button fires click on Enter and Space.
         element.addEventListener('click', (event) => {
+          // Let the card's link to the item navigate.
+          if (event.target.closest('a')) {
+            return;
+          }
           event.preventDefault();
           this.dismissContentWarning(event.target.closest('.mukurtu-content-warnings'));
         });

@@ -17,3 +17,9 @@ mukurtu_search.settings:
     header_search_path:
       type: path
       label: 'Path the header search box submits to'
+    search_suggestions_enabled:
+      type: boolean
+      label: 'Suggest search words on the Browse, Digital Heritage and Dictionary search boxes'
+    header_suggestions_enabled:
+      type: boolean
+      label: 'Suggest matching items in the header search box'
