@@ -93,11 +93,14 @@
    * Keep focus in the field when Escape is pressed with the list closed.
    *
    * Tagify blurs its input then, so focus fell to the page body and keyboard
-   * and screen reader users lost their place (WCAG 2.4.3, #2719). Its handler
-   * calls the input's blur(), so stand in a no-op blur() for the length of
-   * the key press. The event itself still travels, so a dialog around the
-   * field can still close on Escape, and an open list or a tag being edited
-   * still handles it as before.
+   * and screen reader users lost their place (WCAG 2.4.3, #2719). On fields
+   * that create terms, the blur also added the typed text as a new term.
+   * Its handler calls the input's blur(), so stand in a no-op blur() for the
+   * length of the key press, and clear the typed text instead, as the ARIA
+   * combobox pattern and the browse search box (#2473) do. The first Escape
+   * still just closes the list. The event itself still travels, so a dialog
+   * around the field can still close on Escape, and a tag being edited still
+   * handles it as before.
    */
   function keepFocusOnEscape(instance) {
     const { input } = instance.DOM;
@@ -105,6 +108,12 @@
       if ((event.key !== 'Escape' && event.key !== 'Esc') || event.target !== input
         || Object.prototype.hasOwnProperty.call(input, 'blur')) {
         return;
+      }
+      // An Escape that is closing the list leaves the text alone. Tagify's
+      // own flag can lag the list, so check that the list is off the page too.
+      const listOpen = instance.state.dropdown.visible || instance.DOM.dropdown.isConnected;
+      if (!listOpen && input.textContent.trim()) {
+        instance.input.set.call(instance, '');
       }
       input.blur = () => {};
       setTimeout(() => {

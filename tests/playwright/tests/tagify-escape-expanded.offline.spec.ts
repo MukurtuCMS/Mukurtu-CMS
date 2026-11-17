@@ -4,7 +4,8 @@ import path = require('path');
 /**
  * Two Tagify behaviors mukurtu-tagify-override.js corrects:
  * - Escape with the suggestion list closed blurred the input, so focus fell
- *   to the page body (WCAG 2.4.3, #2719).
+ *   to the page body (WCAG 2.4.3, #2719), and on fields that create terms
+ *   the typed text became a new term. It now clears the text instead.
  * - Tagify set aria-expanded on its <tags> wrapper, which has no role, so
  *   the attribute isn't allowed there (WCAG 4.1.2, #2720).
  *
@@ -104,20 +105,30 @@ test.describe('Tagify Escape and aria-expanded', () => {
     await setUp(page);
   });
 
-  test('Escape closes the list, then leaves focus in the field', async ({ page }) => {
+  test('Escape closes the list, then clears the text and leaves focus in the field', async ({ page }) => {
     await keywords(page).click();
     await page.keyboard.type('bas');
     await expect.poll(() => listOpen(page, 'keywords')).toBe(true);
+    // Tagify redraws the list after each letter. A person's Escape comes
+    // well after that; one sent within milliseconds can land mid-redraw.
+    await page.waitForTimeout(150);
 
     await page.keyboard.press('Escape');
     await expect.poll(() => listOpen(page, 'keywords')).toBe(false);
     expect(await focusedName(page)).toBe('Keywords');
+    // The first Escape only closes the list.
+    await expect(keywords(page)).toHaveText('bas');
 
     await page.keyboard.press('Escape');
     await page.waitForTimeout(50);
     expect(await focusedName(page)).toBe('Keywords');
-    // The typed text is still there to finish.
-    await expect(keywords(page)).toHaveText('bas');
+    await expect(keywords(page)).toHaveText('');
+    // Keywords creates terms, and the text didn't become one.
+    await expect(page.locator('tags').first().locator('tag')).toHaveCount(0);
+
+    // The field still works after clearing.
+    await page.keyboard.type('bead');
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(true);
   });
 
   test('Escape still reaches a dialog around the field', async ({ page }) => {
@@ -143,6 +154,9 @@ test.describe('Tagify Escape and aria-expanded', () => {
     await keywords(page).click();
     await page.keyboard.type('bas');
     await expect.poll(() => listOpen(page, 'keywords')).toBe(true);
+    // Tagify redraws the list after each letter. A person's Escape comes
+    // well after that; one sent within milliseconds can land mid-redraw.
+    await page.waitForTimeout(150);
     await expect(keywords(page)).toHaveAttribute('aria-expanded', 'true');
     await expect(wrapper).not.toHaveAttribute('aria-expanded', /.*/);
 
