@@ -16,6 +16,7 @@ is built and why*, see [docker-build.md](docker-build.md).
 - [Upgrades and backups](#upgrades-and-backups)
 - [Running commands](#running-commands)
 - [Hosting many sites](#hosting-many-sites)
+- [Hosting providers](#hosting-providers)
 - [Reading the start-up log](#reading-the-start-up-log)
 - [Troubleshooting](#troubleshooting)
 - [Building the image yourself](#building-the-image-yourself)
@@ -66,6 +67,9 @@ front of port 8080 and set `MUKURTU_HOST` to the site's domain; see [Behind a re
 proxy](#behind-a-reverse-proxy). To host several sites on one machine, use `multi-tenant`
 ([Hosting many sites](#hosting-many-sites)). The three examples are described in
 [`examples/docker/README.md`](../examples/docker/README.md).
+
+For step-by-step instructions on a hosting provider's server, see [Hosting
+providers](#hosting-providers).
 
 ## Images and tags
 
@@ -609,6 +613,11 @@ docker run --rm -v myproject_private:/data:ro -v "$PWD":/backup alpine tar czf /
 A backup restores onto a new host, or into a new project, the same way. The test
 suite runs these steps against a real site.
 
+To restore into a second project on the same host, to test a backup or to keep the
+old site running, copy the example's folder and change two lines in the copy's
+`docker-compose.yml`: `name:`, which sets the volume names, and the host port in
+`ports:`. If you leave `name:` unchanged, the copy uses the original site's volumes.
+
 1. Start only the database on the new host (`docker compose up -d db`), and wait for
    it to be healthy.
 2. Load the dump: `docker compose exec -T db mariadb -u root -p mukurtu < mukurtu.sql`.
@@ -682,6 +691,156 @@ To try the hosting example on your own machine, use names under `.localhost`
 authority, so your browser will warn. See [Sizing memory](#sizing-memory) for fitting
 more sites on a host, and [docker-build.md](docker-build.md#hosting-examples) for why
 the examples are laid out this way.
+
+## Hosting providers
+
+Step-by-step instructions for running the `single-site` example on a specific
+provider. They assume you have not used Docker or a cloud server before.
+
+### DigitalOcean droplet
+
+A droplet is a virtual server. These steps set up one site, which you open through
+a secure connection from your own computer. Making it public on a domain with
+HTTPS is the last step.
+
+Some commands run **on your computer**, and some run **on the droplet**. When you
+are connected to the droplet, the prompt shows its name, such as
+`root@mukurtu-1:~#`. Each step says which one to use.
+
+**1. Make an SSH key (on your computer, once).** A key signs you in to the droplet
+without a password. If `ls ~/.ssh/id_ed25519.pub` shows a file, you already have
+one; skip to step 2. Otherwise, run this and press Enter at each question:
+
+```
+ssh-keygen -t ed25519
+```
+
+**2. Create the droplet.** In the DigitalOcean control panel, click **Create >
+Droplets**, then choose:
+
+- **Region:** the one nearest the people who will use the site.
+- **Image:** Ubuntu 24.04 (LTS).
+- **Size:** Basic, Regular, 4 GB memory and 2 CPUs. The example limits each site to
+  about 1.5 GB (the site and its database), so this leaves room to run a second
+  copy when you test a backup.
+- **Authentication:** SSH Key. Click **New SSH Key**, and paste the output of `cat
+  ~/.ssh/id_ed25519.pub` from your computer.
+
+Click **Create Droplet**. When it's ready, copy its IPv4 address, such as
+`203.0.113.10`. The steps below call it `<droplet-ip>`.
+
+A droplet is billed until you destroy it, even when it is powered off.
+
+**3. Connect (on your computer).**
+
+```
+ssh root@<droplet-ip>
+```
+
+The first time, it asks whether you trust the host: type `yes`. The prompt changes to
+the droplet's name. You can also use **Access > Launch Droplet Console** in the
+control panel.
+
+**4. Install Docker (on the droplet).**
+
+```
+apt-get update
+apt-get install -y docker.io docker-compose-v2
+docker compose version
+```
+
+The last command prints a version number. Ubuntu's `docker.io` package doesn't
+include Compose, which is why the second package is needed.
+
+**5. Get the example (on the droplet).**
+
+```
+git clone --depth 1 --filter=blob:none --sparse --branch 4.0.8-r1 https://github.com/MukurtuCMS/Mukurtu-CMS.git mukurtu-docker
+cd mukurtu-docker && git sparse-checkout set examples/docker
+cd examples/docker/single-site
+```
+
+Your site's folder is now `/root/mukurtu-docker/examples/docker/single-site`. Run
+every `docker compose` command from this folder; elsewhere, it fails with `no
+configuration file provided`. To come back to it after you reconnect:
+
+```
+cd /root/mukurtu-docker/examples/docker/single-site
+```
+
+**6. Set up the site (on the droplet).**
+
+```
+./generate-secrets.sh
+```
+
+It prints the admin password. To see it again later, run `cat
+secrets/admin_password.txt`. Then open the settings file:
+
+```
+nano .env
+```
+
+Change two lines, and leave the rest as they are:
+
+- `MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.8-r1`, an exact version, so the site
+  only changes when you upgrade it.
+- `MUKURTU_ADMIN_EMAIL=`, your email address.
+
+Press **Ctrl+O** and **Enter** to save, then **Ctrl+X** to close.
+
+**7. Start the site (on the droplet).**
+
+```
+docker compose up -d
+docker compose logs -f mukurtu
+```
+
+The first start installs Mukurtu, which takes a few minutes. When the log shows
+`[mukurtu] starting`, press **Ctrl+C** to stop watching. The site keeps running.
+
+**8. Open the site (on your computer).** The example only answers on the droplet
+itself, so the site isn't public yet. Connect through SSH from a new terminal window
+on your computer, not on the droplet:
+
+```
+ssh -L 8080:localhost:8080 root@<droplet-ip>
+```
+
+Leave that window open, and browse to `http://localhost:8080`. Sign in as `admin`
+with the password from step 6. Before you can add media, even as admin, create a
+community and a protocol, and make yourself a steward of the protocol.
+
+**9. Back up.** Follow [Upgrades and backups](#upgrades-and-backups) from the site's
+folder. Copy the backup off the droplet, for example from your computer with `scp -r
+root@<droplet-ip>:/root/<backup-folder> .`. DigitalOcean's own droplet backups copy the
+whole disk while the site is running, so they don't replace these.
+
+**10. Mail.** DigitalOcean blocks the usual mail ports (25, 465, and 587) on droplets,
+so password resets and notifications can't be sent through most mail providers. Choose
+a provider that also accepts port 2525 and set `MUKURTU_SMTP_PORT` to `2525`, or ask
+DigitalOcean support to unblock the ports. See [Mail](#mail) for the settings. Until
+mail works, mail errors in the log are expected.
+
+**11. Make the site public.** Point your domain's A record at `<droplet-ip>`, then put
+a reverse proxy that provides HTTPS in front of the site; see [Behind a reverse
+proxy](#behind-a-reverse-proxy), or use the `multi-tenant` example, which gets
+certificates automatically ([Hosting many sites](#hosting-many-sites)). In the control
+panel, add a **Cloud Firewall** that allows only SSH (22), HTTP (80), and HTTPS (443)
+in.
+
+**When something goes wrong:**
+
+| What you see | Why, and what to do |
+| --- | --- |
+| `unknown shorthand flag: 'd' in -d` | Compose isn't installed. Do step 4. |
+| `no configuration file provided: not found` | You're in the wrong folder. `cd /root/mukurtu-docker/examples/docker/single-site` |
+| `cd: ... No such file or directory` | The folder is somewhere else. On the droplet, `docker inspect mukurtu-mukurtu-1 --format '{{ index .Config.Labels "com.docker.compose.project.working_dir" }}'` prints it. |
+| `Permission denied (publickey)` when you open the connection in step 8 | You ran the command on the droplet. Type `exit`, and run it on your computer. |
+| `bind: Address already in use` | Something on your computer already uses port 8080, such as an earlier connection. Close it, or use `ssh -L 8081:localhost:8080 root@<droplet-ip>` and browse to `http://localhost:8081`. |
+| `400 Bad Request` | Browse to `http://localhost:8080`, not `http://127.0.0.1:8080`. |
+| The browser can't connect | The connection from step 8 was closed. Open it again. |
+| Mail errors in the log | Expected until mail is set up. See step 10. |
 
 ## Reading the start-up log
 

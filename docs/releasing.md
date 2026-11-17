@@ -68,7 +68,8 @@ them from drifting apart again.
 3. **Compile SCSS** if the theme changed, without minifying `style.css`.
 4. **Bump the version** with `scripts/set-version.sh`, as above, and add the
    release's entry to `CHANGELOG.md`. Update the release in the `git clone`
-   command in [docker.md](docker.md#quick-start), "Quick start".
+   commands in [docker.md](docker.md#quick-start), "Quick start" and "DigitalOcean
+   droplet", and the image tag in "DigitalOcean droplet".
 5. **Merge to `main`.** If the release work is a stack of pull requests, confirm
    each one's base actually moved before merging the next — see
    [stacked-prs.md](stacked-prs.md), which documents three occasions where a
