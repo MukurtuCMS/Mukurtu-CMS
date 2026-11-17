@@ -1,4 +1,8 @@
-{{ attach_library('mukurtu_v4/media-glightbox') }}
+{# Articles show media without the Expand lightbox; see .full-node--article
+   in _full-node.scss, which hides the Expand button. #}
+{% if element['#bundle'] != 'article' %}
+  {{ attach_library('mukurtu_v4/media-glightbox') }}
+{% endif %}
 
 {% if items|length > 1 %}
   {{ attach_library('mukurtu_v4/media-carousel') }}
