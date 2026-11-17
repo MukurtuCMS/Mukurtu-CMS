@@ -8421,10 +8421,6 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
           margin-block-start: 0;
 }
 
-.community-page-listing {
-  padding-inline: 0;
-}
-
 .view-browse-by-community .community-page-browse {
   padding-inline: var(--layout-padding);
 }

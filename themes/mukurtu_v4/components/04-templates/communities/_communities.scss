@@ -2,12 +2,6 @@
 @use "../../00-base/layout/layout";
 @use "../../00-base/mixins/mixins";
 
-// Community browse page (/communities). The page grid (see _page.scss)
-// supplies the gutter.
-.community-page-listing {
-  padding-inline: 0;
-}
-
 // Communities block on landing pages.
 .view-browse-by-community .community-page-browse {
   padding-inline: var(--layout-padding);
