@@ -64,7 +64,10 @@ class PageNodeSuggestionTest extends KernelTestBase {
       'canonical' => ['entity.node.canonical', $node],
       'latest version' => ['entity.node.latest_version', [...$node, 'page__node__latest']],
       'preview' => ['entity.node.preview', ['page__node', 'page__node__preview', 'page__node__preview__full']],
-      'revision' => ['entity.node.revision', [...$node, 'page__node__revisions', 'page__node__revisions__2', 'page__node__revisions__2__view']],
+      'revision' => [
+        'entity.node.revision',
+        [...$node, 'page__node__revisions', 'page__node__revisions__2', 'page__node__revisions__2__view'],
+      ],
       'Layout Builder' => ['layout_builder.overrides.node.view', [...$node, 'page__node__layout']],
       'multipage' => ['mukurtu_multipage_items.multipage_node_view', [...$node, 'page__node__multipage']],
     ];
@@ -85,10 +88,18 @@ class PageNodeSuggestionTest extends KernelTestBase {
     $node = ['page__node', 'page__node__%', 'page__node__1'];
     return [
       'Found In' => ['mukurtu_core.content_found_in', [...$node, 'page__node__found_in'], []],
-      'Add to Collection' => ['mukurtu_collection.add_item_to_collection', [...$node, 'page__node__collection', 'page__node__collection__add'], []],
+      'Add to Collection' => [
+        'mukurtu_collection.add_item_to_collection',
+        [...$node, 'page__node__collection', 'page__node__collection__add'],
+        [],
+      ],
       'delete form' => ['entity.node.delete_form', [...$node, 'page__node__delete'], []],
       '/node listing' => ['view.frontpage.page_1', ['page__node'], []],
-      'other suggestions kept' => ['entity.node.delete_form', ['page__front', ...$node, 'page__nodes'], ['page__front', 'page__nodes']],
+      'other suggestions kept' => [
+        'entity.node.delete_form',
+        ['page__front', ...$node, 'page__nodes'],
+        ['page__front', 'page__nodes'],
+      ],
     ];
   }
 
