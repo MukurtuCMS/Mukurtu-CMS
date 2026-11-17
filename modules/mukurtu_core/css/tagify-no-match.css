@@ -1,0 +1,16 @@
+/**
+ * @file
+ * Keeps Tagify's "No matching suggestions" row readable (#2727).
+ *
+ * The Tagify module (css/tagify.css) fades the row to half opacity, which
+ * takes its text, and the typed text it repeats, below 4.5:1 (WCAG 1.4.3):
+ * 3.02:1 plain in Gin, about 2:1 highlighted. The italic text and the
+ * message itself still set it apart from real suggestions.
+ *
+ * Scoped to the list so it outranks the module's single-class rule
+ * whichever stylesheet loads last.
+ */
+
+.tagify__dropdown .tagify--dropdown-item-no-match {
+  opacity: 1;
+}

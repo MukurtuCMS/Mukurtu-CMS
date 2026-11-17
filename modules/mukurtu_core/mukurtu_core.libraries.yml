@@ -20,6 +20,7 @@ tagify-override:
   css:
     component:
       css/tagify-reorder.css: {}
+      css/tagify-no-match.css: {}
   dependencies:
     - core/drupal
     - core/drupal.announce
