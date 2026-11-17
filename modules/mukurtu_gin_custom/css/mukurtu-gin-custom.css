@@ -1596,9 +1596,11 @@ body.path-visitors .layout-row.layout-row {
    Dashboards and the rest) are a fill cut to shape with a mask. Forced colors
    repaints the fill with the bar's own color, so the icons vanished. Fill
    them with the link color, as Gin does for its own masked icons in forced
-   colors. html outranks Gin's rule, which loads after this file. */
+   colors. html outranks Gin's rule, which loads after this file, and the
+   states repeat Gin's own hover, focus and open-tray rules. */
 @media (forced-colors: active) {
-  html .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon::before {
+  html .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon::before,
+  html .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:is(:hover, :focus, .is-active)::before {
     background-color: LinkText;
   }
 }

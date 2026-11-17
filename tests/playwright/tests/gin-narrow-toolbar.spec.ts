@@ -32,5 +32,9 @@ test.describe('Gin narrow toolbar', () => {
     // The icon is drawn in its fill color, which must differ from the bar.
     expect(fill).not.toBe(bar);
     expect(fill).not.toMatch(/rgba\(255, 255, 255/);
+
+    // Gin's hover rule outranks a plain one, so check a hovered icon too.
+    await manage.hover();
+    await expect.poll(() => manage.evaluate((element) => getComputedStyle(element, '::before').backgroundColor)).toBe(fill);
   });
 });
