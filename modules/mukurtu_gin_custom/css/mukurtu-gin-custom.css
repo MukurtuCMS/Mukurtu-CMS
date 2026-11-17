@@ -1584,6 +1584,25 @@ body.path-visitors .layout-row.layout-row {
   }
 }
 
+/* WCAG 2.4.7 (#2742): Gin hides its toolbar logo link, which has no visible
+   content, with `.toolbar-menu__logo { display: none }`. Core's toolbar CSS
+   has `.toolbar { & a { display: block } }`, which outranks it, so on narrow
+   screens the link was in the tab order at 0px tall, with no visible focus. */
+.toolbar .toolbar-menu__logo {
+  display: none;
+}
+
+/* WCAG 1.4.11 (#2743): the narrow toolbar's icons (Manage, Shortcuts,
+   Dashboards and the rest) are a fill cut to shape with a mask. Forced colors
+   repaints the fill with the bar's own color, so the icons vanished. Fill
+   them with the link color, as Gin does for its own masked icons in forced
+   colors. html outranks Gin's rule, which loads after this file. */
+@media (forced-colors: active) {
+  html .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon::before {
+    background-color: LinkText;
+  }
+}
+
 /* Visitors report, Gin dark mode: keep the chart on a light plate.
 
    charts_chartjs paints its title and legend onto the <canvas>, and neither
