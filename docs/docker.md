@@ -78,8 +78,10 @@ A site that holds real community material needs more than a running container. B
 you go live, make sure each of these is in place. The image doesn't do them for you.
 
 1. **Backups run automatically, are copied off the server, and you have restored
-   one.** Back up the database, both volumes, the `custom` folder, and the `secrets`
-   folder and `.env`; see [Upgrades and backups](#upgrades-and-backups). Keep copies
+   one.** In the `single-site` example, `backup.sh` backs up everything and can run
+   every night; see its [README](../examples/docker/single-site/README.md#backups). For
+   other setups, back up the database, both volumes, the `custom` folder, and the
+   `secrets` folder and `.env`; see [Upgrades and backups](#upgrades-and-backups). Keep copies
    somewhere other than the server: if the server or the hosting account is lost, so
    are the backups on it. Test one by restoring it into a second project ([Moving a
    site to another host](#moving-a-site-to-another-host)).
@@ -853,10 +855,11 @@ Leave that window open, and browse to `http://localhost:8080`. Sign in as `admin
 with the password from step 6. Before you can add media, even as admin, create a
 community and a protocol, and make yourself a steward of the protocol.
 
-**9. Back up.** Follow [Upgrades and backups](#upgrades-and-backups) from the site's
-folder. Copy the backup off the droplet, for example from your computer with `scp -r
-root@<droplet-ip>:/root/<backup-folder> .`. DigitalOcean's own droplet backups copy the
-whole disk while the site is running, so they don't replace these.
+**9. Back up every night.** Follow Backups in the [single-site
+README](../examples/docker/single-site/README.md#backups): run `./backup.sh` once, add
+the nightly `crontab` line, and copy the backups to your computer with `rsync`.
+DigitalOcean's own droplet backups copy the whole disk while the site is running, so
+they don't replace these.
 
 **10. Mail.** DigitalOcean blocks the usual mail ports (25, 465, and 587) on droplets,
 so password resets and notifications can't be sent through most mail providers. Choose

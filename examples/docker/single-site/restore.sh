@@ -40,7 +40,8 @@ tables="$(echo 'SHOW TABLES' | db | wc -l)" || fail "can't connect to the databa
 [[ "$tables" -eq 0 ]] || fail "the database already has a site in it. Restore into a new, empty site instead (see README.md)"
 
 echo "restore: loading the database"
-gzip -dc "$BACKUP/mukurtu.sql.gz" | db || fail "loading the database"
+gzip -dc "$BACKUP/mukurtu.sql.gz" | db \
+  || fail "loading the database. To start again, run docker compose down -v in this folder (it deletes only this new site), then ./restore.sh again."
 
 for files in public private; do
   echo "restore: unpacking the $files files"
