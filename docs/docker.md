@@ -30,10 +30,10 @@ prints a version number. If it doesn't, install the plugin; see Docker's
 `docker.io` package doesn't include it; `apt-get install docker-compose-v2` adds it.
 
 The ready-to-run examples are in [`examples/docker/`](../examples/docker). Get the ones
-for the release you run, such as 4.0.8-r1:
+for the release you run, such as 4.0.9-r1:
 
 ```
-git clone --depth 1 --filter=blob:none --sparse --branch 4.0.8-r1 https://github.com/MukurtuCMS/Mukurtu-CMS.git mukurtu-docker
+git clone --depth 1 --filter=blob:none --sparse --branch 4.0.9-r1 https://github.com/MukurtuCMS/Mukurtu-CMS.git mukurtu-docker
 cd mukurtu-docker && git sparse-checkout set examples/docker
 ```
 
@@ -568,10 +568,10 @@ official one, with
 3. Build it on the exact Mukurtu version you run, and give it a name of your own:
 
    ```
-   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.8-r1 -t my-mukurtu:4.0.8-r1 .
+   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.9-r1 -t my-mukurtu:4.0.9-r1 .
    ```
 
-4. Set `MUKURTU_IMAGE=my-mukurtu:4.0.8-r1` in your example's `.env` (in the
+4. Set `MUKURTU_IMAGE=my-mukurtu:4.0.9-r1` in your example's `.env` (in the
    minimal example, change the `image:` line), and run `docker compose up -d`.
 5. Turn the modules on in **Extend**.
 
@@ -792,7 +792,7 @@ include Compose, which is why the second package is needed.
 **5. Get the example (on the droplet).**
 
 ```
-git clone --depth 1 --filter=blob:none --sparse --branch 4.0.8-r1 https://github.com/MukurtuCMS/Mukurtu-CMS.git mukurtu-docker
+git clone --depth 1 --filter=blob:none --sparse --branch 4.0.9-r1 https://github.com/MukurtuCMS/Mukurtu-CMS.git mukurtu-docker
 cd mukurtu-docker && git sparse-checkout set examples/docker
 cd examples/docker/single-site
 ```
@@ -820,7 +820,7 @@ nano .env
 
 Change two lines, and leave the rest as they are:
 
-- `MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.8-r1`, an exact version, so the site
+- `MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.9-r1`, an exact version, so the site
   only changes when you upgrade it.
 - `MUKURTU_ADMIN_EMAIL=`, your email address.
 

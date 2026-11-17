@@ -8,10 +8,10 @@ simpler in the `custom` folders of the other examples.
 2. Build on the exact Mukurtu version you run:
 
    ```
-   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.8-r1 -t my-mukurtu:4.0.8-r1 .
+   docker build --build-arg MUKURTU_IMAGE=ghcr.io/mukurtucms/mukurtu:4.0.9-r1 -t my-mukurtu:4.0.9-r1 .
    ```
 
-3. Set `MUKURTU_IMAGE=my-mukurtu:4.0.8-r1` in your Compose example's `.env`, and run
+3. Set `MUKURTU_IMAGE=my-mukurtu:4.0.9-r1` in your Compose example's `.env`, and run
    `docker compose up -d`.
 
 Rebuild the image for every Mukurtu update. Details, including how updates work, are in
