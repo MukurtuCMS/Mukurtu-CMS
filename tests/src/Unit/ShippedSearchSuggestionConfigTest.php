@@ -71,6 +71,21 @@ class ShippedSearchSuggestionConfigTest extends UnitTestCase {
   }
 
   /**
+   * The index filters out items the viewer can't see.
+   *
+   * Word suggestions and the header's item counts rely on this processor;
+   * only the header's item list checks each item again.
+   */
+  #[DataProvider('searchProvider')]
+  public function testIndexChecksAccess(string $id, string $module): void {
+    $search = $this->shipped("modules/$module/config/install/search_api_autocomplete.search.$id.yml");
+    $index_module = $search['index_id'] === 'mukurtu_dictionary_index' ? 'mukurtu_dictionary' : 'mukurtu_browse';
+    $index = $this->shipped("modules/$index_module/config/install/search_api.index.{$search['index_id']}.yml");
+
+    $this->assertArrayHasKey('content_access', $index['processor_settings'], "{$search['index_id']} must check content access.");
+  }
+
+  /**
    * Suggestions are built from the view's query, so it must check access.
    *
    * With bypass_access on, Search API skips the content_access processor and
@@ -82,6 +97,15 @@ class ShippedSearchSuggestionConfigTest extends UnitTestCase {
     foreach ($view['display'] as $display_id => $display) {
       $this->assertNotTrue($display['display_options']['query']['options']['bypass_access'] ?? NULL, "$id display $display_id bypasses access.");
     }
+  }
+
+  /**
+   * New sites ship with both kinds of suggestions turned on.
+   */
+  public function testSuggestionsShipOn(): void {
+    $settings = $this->shipped('modules/mukurtu_search/config/install/mukurtu_search.settings.yml');
+    $this->assertTrue($settings['search_suggestions_enabled']);
+    $this->assertTrue($settings['header_suggestions_enabled']);
   }
 
   /**
