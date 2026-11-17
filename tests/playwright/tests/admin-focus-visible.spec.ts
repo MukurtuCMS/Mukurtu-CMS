@@ -171,6 +171,22 @@ test.describe('Focus visible (admin)', () => {
     }
   });
 
+  // Gin's navigation and breadcrumb also show on public pages, which have no
+  // data-gin-layout-density, so they are covered by their own containers.
+  test('Focus visible: the Gin toolbar keeps an outline in forced colors on public pages', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/');
+    await expect(page.locator('body')).not.toHaveAttribute('data-gin-layout-density');
+    for (const selector of ['a.toolbar-link--has-icon', '.gin-breadcrumb__link']) {
+      const element = page.locator(`${selector}:visible`).first();
+      await element.focus();
+      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
+      await expect(element, selector).toBeFocused();
+      await expect(element, selector).toHaveCSS('outline-style', 'solid');
+    }
+  });
+
   // The outline is limited by this attribute, because the public theme draws
   // its own focus ring and a second one would double it.
   test('Focus visible: public pages are outside the forced colors outline', async ({ page }) => {

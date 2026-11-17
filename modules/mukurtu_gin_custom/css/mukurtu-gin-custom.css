@@ -45,20 +45,22 @@ links, breadcrumbs, dropbuttons, summaries and the whole admin toolbar with
 no focus indicator at all (#2626, #2657, #2677). One outline for every
 focused element also replaces the outlines some elements draw themselves,
 such as Gin's dotted tabs, so none gets two rings. This file also loads on
-the public theme, which has its own focus styles, so data-gin-layout-density
-limits this to pages in Gin. Gin clears the outline with
-:is(#extra-specificity-hack), so this needs !important. */
+the public theme, which has its own focus styles, so this is limited to
+pages in Gin (data-gin-layout-density), Layout Builder (.glb-body), and the
+Gin toolbars, navigation and breadcrumb, which also show on public pages.
+Gin clears the outline with :is(#extra-specificity-hack), so this needs
+!important. */
 @media (forced-colors: active) {
-  [data-gin-layout-density] :focus-visible {
+  :is([data-gin-layout-density], .glb-body, #admin-toolbar, #toolbar-administration, .gin-secondary-toolbar) :focus-visible {
     outline: 2px solid Highlight !important;
     outline-offset: 2px;
   }
 
   /* Drawn inside where an outside ring would be cut off: by the sidebar,
-  which clips its overflow, or by the page edge for the skip link, the
-  sidebar itself and the toolbar that replaces the navigation on narrow
-  screens. */
-  [data-gin-layout-density] :is(#gin_sidebar, #gin_sidebar *, #gin-toolbar-bar *, .skip-link):focus-visible {
+  which clips its summaries' sides, by the media library's type tabs, or by
+  the page edge for skip links, the sidebar itself and the toolbar that
+  replaces the navigation on narrow screens. */
+  :is([data-gin-layout-density], .glb-body, #toolbar-administration) :is(#gin_sidebar, #gin_sidebar summary, #gin-toolbar-bar *, .media-library-menu__link, .visually-hidden.focusable):focus-visible {
     outline-offset: -2px;
   }
 }
