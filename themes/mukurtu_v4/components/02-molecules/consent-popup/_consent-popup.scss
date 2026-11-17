@@ -71,11 +71,11 @@ body.consent-popup-opened .klaro_toggle_dialog {
 }
 
 // Klaro's consent settings button floats over the bottom right of every page
-// (35px, fixed 25px from the corner, in vendor klaro-extend.css). Tabbing
-// scrolls a focused element only just into view, which leaves it at the
-// bottom of the screen, under the button, and a small control there can be
-// hidden completely (WCAG 2.4.11, #2712). Stop keyboard scrolling short of
-// the button so focused elements land above it.
+// (35px, fixed 25px from the corner, in vendor klaro-extend.css). A control
+// on screen behind it takes focus without the page scrolling, and a small
+// one can be hidden completely (WCAG 2.4.11, #2712). Padding the bottom of
+// the scroll area makes the browser treat that strip as out of view, so it
+// scrolls focused elements above the button.
 html:has(> body > .klaro_toggle_dialog) {
   scroll-padding-block-end: 4.5rem;
 }
