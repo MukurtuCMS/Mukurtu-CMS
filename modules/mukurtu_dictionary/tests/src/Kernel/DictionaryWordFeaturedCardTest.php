@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_dictionary\Kernel;
 
 use Drupal\Core\Template\Attribute;
+use Drupal\Core\Theme\ActiveTheme;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
@@ -290,6 +291,41 @@ class DictionaryWordFeaturedCardTest extends DictionaryTestBase {
       // A static image links to the word.
       $this->assertMatchesRegularExpression('#<a href="/dictionary-word/aloha" aria-hidden="true" tabindex="-1">\s*<img[^>]*CARD\.png#', $html, $view_mode);
     }
+  }
+
+  /**
+   * A warned thumbnail on a /dictionary teaser gets the card overlay (#1301).
+   */
+  public function testTeaserWrapsWarnedThumbnail(): void {
+    // The teaser includes an icon from the active theme's directory. The
+    // theme is not installed, so initTheme() would fall back to "core". An
+    // empty engine skips loading a theme extension we don't have; Twig still
+    // loads, since core always includes it.
+    $theme_path = $this->container->get('extension.list.theme')->getPath('mukurtu_v4');
+    $this->container->get('theme.manager')->setActiveTheme(new ActiveTheme([
+      'name' => 'mukurtu_v4',
+      'path' => $theme_path,
+      'engine' => '',
+    ]));
+    $context = [
+      'content_attributes' => new Attribute(),
+      'title_attributes' => new Attribute(),
+      'title_prefix' => [],
+      'title_suffix' => [],
+      'label' => 'aloha',
+      'url' => '/dictionary-word/aloha',
+    ];
+
+    $warned = ['#markup' => '<div class="media"><div class="mukurtu-content-warnings">Warning</div>THUMBNAIL</div>'];
+    $html = $this->renderTemplate('content/node--dictionary-word--teaser.html.twig', $context + ['content' => ['field_thumbnail' => $warned]]);
+    $this->assertMatchesRegularExpression('#<div class="card-media--content-warning" data-mukurtu-card-url="/dictionary-word/aloha">\s*<div class="media"><div class="mukurtu-content-warnings">#', $html);
+
+    $plain = ['#markup' => '<div class="media">THUMBNAIL</div>'];
+    $html = $this->renderTemplate('content/node--dictionary-word--teaser.html.twig', $context + ['content' => ['field_thumbnail' => $plain]]);
+    $this->assertStringContainsString('THUMBNAIL', $html);
+    $this->assertStringNotContainsString('card-media--content-warning', $html);
+    // Unwarned thumbnails stay unlinked, as before.
+    $this->assertMatchesRegularExpression('#<div class="dictionary-word__teaser-thumbnail">\s*<div class="media">THUMBNAIL#', $html);
   }
 
   /**

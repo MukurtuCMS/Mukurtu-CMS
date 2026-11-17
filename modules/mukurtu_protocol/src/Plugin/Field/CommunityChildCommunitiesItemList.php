@@ -28,16 +28,24 @@ class CommunityChildCommunitiesItemList extends EntityReferenceFieldItemList {
     /** @var \Drupal\mukurtu_protocol\Entity\CommunityInterface $community */
     $community = $this->getEntity();
 
+    $this->list = [];
+
+    // An unsaved community has no children. Its ID is NULL, and NULL loosely
+    // equals the 0 that marks a top-level community, so the comparison below
+    // would otherwise list every top-level community as its child.
+    if ($community->isNew() || $community->id() === NULL) {
+      return;
+    }
+
     $children = [];
 
-    foreach ($org as $id => $setting) {
-      if ($setting['parent'] == $community->id()) {
+    foreach ($org ?? [] as $id => $setting) {
+      if ((int) ($setting['parent'] ?? 0) === (int) $community->id()) {
         $children[$setting['weight']] = $id;
       }
     }
 
     $delta = 0;
-    $this->list = [];
     foreach ($children as $child) {
       $this->list[] = $this->createItem($delta++, $child);
     }

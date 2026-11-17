@@ -408,6 +408,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
         'Notification messages',
         'Analytics',
         'Analytics settings',
+        'Character palette',
       ],
     ];
     foreach ($expected as $menu_name => $titles) {
