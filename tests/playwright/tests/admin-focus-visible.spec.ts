@@ -187,8 +187,9 @@ test.describe('Focus visible (admin)', () => {
     }
   });
 
-  // The outline is limited by this attribute, because the public theme draws
-  // its own focus ring and a second one would double it.
+  // Apart from Gin's toolbar, navigation and breadcrumb, the outline is
+  // limited by this attribute, because the public theme draws its own focus
+  // ring.
   test('Focus visible: public pages are outside the forced colors outline', async ({ page }) => {
     await page.goto('/admin/config/system/site-information');
     await expect(page.locator('body')).toHaveAttribute('data-gin-layout-density');
