@@ -40,3 +40,12 @@ facet-focus:
     - core/drupal.announce
     - core/drupalSettings
     - core/once
+
+search-suggest:
+  version: 1.x
+  js:
+    js/search-suggest.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/once

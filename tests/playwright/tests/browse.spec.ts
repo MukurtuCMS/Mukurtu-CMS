@@ -126,7 +126,7 @@ test('Browse tests - Enter in the search box applies and keeps focus there', asy
 test('Browse tests - choosing a search suggestion does not reload the page', async ({ page }) => {
   await gotoReady(page, '/browse');
   const search = page.locator(`${FILTERS} input[name="search_api_fulltext"]`).first();
-  const item = page.locator('.ui-autocomplete li:visible').first();
+  const item = page.locator('.mukurtu-search-suggest__list [role="option"]:visible').first();
   let found = false;
   for (const letters of ['sam', 'wov', 'mul', 'the']) {
     await search.fill('');
