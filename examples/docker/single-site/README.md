@@ -3,7 +3,12 @@
 One Mukurtu site and its MariaDB database, with the passwords in secret files, a read-only
 container, memory limits and rotated logs.
 
+Copy this folder to a place of its own first, such as `/opt/mukurtu`, and run everything
+there. It holds the site's settings and passwords; Mukurtu itself runs from the image. The
+paths below assume `/opt/mukurtu`.
+
 ```
+cp -r examples/docker/single-site /opt/mukurtu && cd /opt/mukurtu
 ./generate-secrets.sh     # creates .env and secrets/ (random passwords); prints the admin password
 docker compose up -d      # the first start installs Mukurtu: a few minutes
 ```
@@ -25,7 +30,7 @@ time, and deletes backups older than 14 days (`KEEP_DAYS=30 ./backup.sh` keeps 3
 **Every night.** Run `crontab -e`, and add this line with the full path of this folder:
 
 ```
-30 3 * * * /root/mukurtu-docker/examples/docker/single-site/backup.sh >>/var/log/mukurtu-backup.log 2>&1
+30 3 * * * /opt/mukurtu/backup.sh >>/var/log/mukurtu-backup.log 2>&1
 ```
 
 It runs at 3:30 every morning, server time. Check `/var/log/mukurtu-backup.log` now and
@@ -36,7 +41,7 @@ backups on it are lost too. For example, every week or after big changes, on you
 (not the server), run this; it copies only the new backups:
 
 ```
-rsync -a root@<server>:/root/mukurtu-docker/examples/docker/single-site/backups/ mukurtu-backups/
+rsync -a root@<server>:/opt/mukurtu/backups/ mukurtu-backups/
 ```
 
 The backups hold the site's passwords, so keep the copies private.

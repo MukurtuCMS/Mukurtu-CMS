@@ -54,10 +54,15 @@ answers `400 Bad Request`, because the address is not in `MUKURTU_TRUSTED_HOSTS`
 passwords are throwaway.
 
 **Run a site properly.** The `single-site` example keeps the passwords in secret files and
-hardens the container:
+hardens the container. Copy it out of the download into a folder of its own first.
+`/opt/mukurtu` suits a server (it needs `sudo` if you aren't `root`); on your own computer,
+any folder works. That folder holds the site's settings, passwords and your own modules,
+but no Mukurtu code, which is in the image. Keep it and back it up; you can delete the
+download afterwards.
 
 ```
-cd examples/docker/single-site
+cp -r examples/docker/single-site /opt/mukurtu    # from the mukurtu-docker folder
+cd /opt/mukurtu
 ./generate-secrets.sh        # creates .env and secrets/ with random passwords
 # edit .env: the image version, the host name, the admin email
 docker compose up -d
@@ -801,15 +806,18 @@ include Compose, which is why the second package is needed.
 ```
 git clone --depth 1 --filter=blob:none --sparse --branch 4.0.9-r1 https://github.com/MukurtuCMS/Mukurtu-CMS.git mukurtu-docker
 cd mukurtu-docker && git sparse-checkout set examples/docker
-cd examples/docker/single-site
+cp -r examples/docker/single-site /opt/mukurtu
+cd /opt/mukurtu
+rm -rf /root/mukurtu-docker
 ```
 
-Your site's folder is now `/root/mukurtu-docker/examples/docker/single-site`. Run
-every `docker compose` command from this folder; elsewhere, it fails with `no
-configuration file provided`. To come back to it after you reconnect:
+Your site's folder is now `/opt/mukurtu`. It holds the site's settings and passwords;
+Mukurtu itself runs from the image, so the download isn't needed any more. Run every
+`docker compose` command from this folder; elsewhere, it fails with `no configuration
+file provided`. To come back to it after you reconnect:
 
 ```
-cd /root/mukurtu-docker/examples/docker/single-site
+cd /opt/mukurtu
 ```
 
 **6. Set up the site (on the droplet).**
@@ -882,7 +890,7 @@ checklist](#a-production-checklist).
 | What you see | Why, and what to do |
 | --- | --- |
 | `unknown shorthand flag: 'd' in -d` | Compose isn't installed. Do step 4. |
-| `no configuration file provided: not found` | You're in the wrong folder. `cd /root/mukurtu-docker/examples/docker/single-site` |
+| `no configuration file provided: not found` | You're in the wrong folder. `cd /opt/mukurtu` |
 | `cd: ... No such file or directory` | The folder is somewhere else. On the droplet, `docker inspect mukurtu-mukurtu-1 --format '{{ index .Config.Labels "com.docker.compose.project.working_dir" }}'` prints it. |
 | `Permission denied (publickey)` when you run `ssh`, `rsync`, or `scp` | You ran the command on the droplet. Type `exit`, and run it on your computer. |
 | `bind: Address already in use` | Something on your computer already uses port 8080, such as an earlier connection. Close it, or use `ssh -L 8081:localhost:8080 root@<droplet-ip>` and browse to `http://localhost:8081`. |
