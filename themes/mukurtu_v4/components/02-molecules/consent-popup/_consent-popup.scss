@@ -76,7 +76,7 @@ body.consent-popup-opened .klaro_toggle_dialog {
 // bottom of the screen, under the button, and a small control there can be
 // hidden completely (WCAG 2.4.11, #2712). Stop keyboard scrolling short of
 // the button so focused elements land above it.
-html:has(.klaro_toggle_dialog) {
+html:has(> body > .klaro_toggle_dialog) {
   scroll-padding-block-end: 4.5rem;
 }
 

@@ -1536,7 +1536,7 @@ body.consent-popup-opened .klaro_toggle_dialog {
   display: none;
 }
 
-html:has(.klaro_toggle_dialog) {
+html:has(> body > .klaro_toggle_dialog) {
   scroll-padding-block-end: 4.5rem;
 }
 
