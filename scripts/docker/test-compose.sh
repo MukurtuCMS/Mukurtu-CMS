@@ -48,6 +48,10 @@ done
 ignore="$(cat "$EX/.gitignore" 2>/dev/null)"
 assert_contains "$ignore" ".env" "examples/docker/.gitignore keeps the generated .env files out of git"
 assert_contains "$ignore" "secrets" "examples/docker/.gitignore keeps the generated secrets out of git"
+assert_contains "$ignore" "backups/" "examples/docker/.gitignore keeps backups (which hold the secrets) out of git"
+for f in backup.sh restore.sh; do
+  [[ -x "$EX/single-site/$f" ]] && pass "single-site/$f is executable" || fail "single-site/$f is executable"
+done
 for name in single-site multi-tenant; do
   for f in .env.example generate-secrets.sh; do
     [[ -e "$EX/$name/$f" ]] && pass "$name/$f exists" || fail "$name/$f exists"
@@ -190,9 +194,10 @@ if ! runtime_image "$IMAGE_TAG"; then
   fail "image builds"; tail -20 "$BUILD_LOG"; finish; exit 1
 fi
 
-# live_single <name>: bring up an example on port 8080 and wait for the login page.
+# live_single <name> [check]: bring up an example on port 8080, wait for the login page,
+# and run the check (a function) on the running site before taking it down.
 live_single() {
-  local name="$1" ok=false
+  local name="$1" check="${2:-}" ok=false
   dc "$name" up -d >/dev/null 2>&1
   for _ in $(seq 1 300); do
     if curl -sf -o /dev/null -H 'Host: localhost' "http://127.0.0.1:8080/user/login"; then ok=true; break; fi
@@ -202,12 +207,68 @@ live_single() {
     fail "$name installs and serves pages"
     dc "$name" logs --tail 40 mukurtu 2>&1
   fi
+  if $ok && [[ -n "$check" ]]; then "$check"; fi
   dc "$name" down -v >/dev/null 2>&1
+}
+
+# backup_restore: back up the running single-site example with backup.sh, delete the
+# site, and restore it with restore.sh, as its README says.
+login_up() {
+  for _ in $(seq 1 150); do
+    curl -sf -o /dev/null -H 'Host: localhost' "http://127.0.0.1:8080/user/login" && return 0
+    sleep 2
+  done
+  return 1
+}
+backup_restore() {
+  local d="$WORK/single-site" b out before
+  # The scripts run plain `docker compose` in their folder; point it at the test's project.
+  export COMPOSE_PROJECT_NAME="$PROJECT-single-site"
+  dc single-site exec -T mukurtu sh -c 'echo public-ok > /var/www/files/public/backup.txt; mkdir -p /var/www/files/private/sub; echo private-ok > /var/www/files/private/sub/backup.txt'
+  dc single-site exec -T mukurtu drush user:create backupuser --mail=backup@example.org --password=B4ckup-pass >/dev/null 2>&1
+  mkdir -p "$d/backups/2020-01-01-000000" "$d/backups/2099-12-31-000000"
+  touch -d 2020-01-01 "$d/backups/2020-01-01-000000"
+
+  if out="$("$d/backup.sh" 2>&1)"; then pass "backup.sh backs up the running site"; else fail "backup.sh backs up the running site"; echo "$out"; fi
+  b="$(find "$d/backups" -mindepth 1 -maxdepth 1 -type d -name '20??-??-??-??????' ! -name 2020-01-01-000000 ! -name 2099-12-31-000000 | head -1)"
+  for f in mukurtu.sql.gz public.tgz private.tgz site.tgz; do
+    [[ -s "$b/$f" ]] && pass "the backup has $f" || fail "the backup has $f"
+  done
+  assert_contains "$(gzip -dc "$b/mukurtu.sql.gz" | tail -n 1)" "Dump completed" "the database dump is complete"
+  assert_contains "$(tar tzf "$b/site.tgz")" "secrets/hash_salt.txt" "the backup keeps the hash salt"
+  assert_eq "600" "$(stat -c %a "$b/site.tgz")" "the backup is readable only by its owner"
+  [[ ! -e "$d/backups/2020-01-01-000000" ]] && pass "backups older than KEEP_DAYS are deleted" || fail "backups older than KEEP_DAYS are deleted"
+  [[ -d "$d/backups/2099-12-31-000000" ]] && pass "newer backups are kept" || fail "newer backups are kept"
+
+  dc single-site stop mukurtu >/dev/null 2>&1
+  mkdir -p "$d/backups/2020-02-02-000000"
+  touch -d 2020-02-02 "$d/backups/2020-02-02-000000"
+  before="$(ls -A "$d/backups")"
+  "$d/backup.sh" >/dev/null 2>&1 && fail "backup.sh fails when the site is stopped" || pass "backup.sh fails when the site is stopped"
+  assert_eq "$before" "$(ls -A "$d/backups")" "a failed backup leaves no partial backup and deletes nothing"
+
+  # A new, empty site: the same folder, with its volumes deleted.
+  dc single-site down -v >/dev/null 2>&1
+  tar xzf "$b/site.tgz" -C "$d"
+  if out="$("$d/restore.sh" "$b" 2>&1)"; then pass "restore.sh restores the backup"; else fail "restore.sh restores the backup"; echo "$out"; fi
+  login_up && pass "the restored site serves pages" || fail "the restored site serves pages"
+  out="$(dc single-site logs mukurtu 2>&1)"
+  assert_contains "$out" "existing installation found" "the restored site is found, not installed"
+  assert_not_contains "$out" "Installing Mukurtu" "the restored site is not installed over"
+  assert_eq "public-ok" "$(curl -s -H 'Host: localhost' http://127.0.0.1:8080/sites/default/files/backup.txt)" "public files are restored"
+  assert_eq "private-ok" "$(dc single-site exec -T mukurtu cat /var/www/files/private/sub/backup.txt 2>&1)" "private files are restored"
+  assert_eq "1000" "$(dc single-site exec -T mukurtu stat -c %u /var/www/files/private/sub/backup.txt 2>&1)" "restored files belong to the site's user"
+  dc single-site exec -T mukurtu drush user:information backupuser >/dev/null 2>&1 && pass "users are restored" || fail "users are restored"
+
+  "$d/restore.sh" "$b" >/dev/null 2>&1 && fail "restore.sh refuses while the site runs" || pass "restore.sh refuses while the site runs"
+  dc single-site stop mukurtu >/dev/null 2>&1
+  assert_contains "$("$d/restore.sh" "$b" 2>&1)" "already has a site" "restore.sh refuses a database that has a site in it"
+  unset COMPOSE_PROJECT_NAME
 }
 echo "examples: the minimal example brings up a working site"
 [[ -d "$WORK/minimal" ]] && live_single minimal
-echo "examples: the single-site example brings up a working site (read-only root, tmpfs, secrets)"
-[[ -d "$WORK/single-site" ]] && live_single single-site
+echo "examples: the single-site example brings up a working site (read-only root, tmpfs, secrets), and backs up and restores it"
+[[ -d "$WORK/single-site" ]] && live_single single-site backup_restore
 
 echo "examples: the multi-tenant example brings up two sites behind Caddy"
 if [[ -d "$WORK/multi-tenant" ]]; then

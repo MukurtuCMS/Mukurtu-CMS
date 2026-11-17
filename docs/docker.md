@@ -626,6 +626,11 @@ release notes: some releases must be passed through rather than
 skipped. To go back, restore the backup and run the previous tag; databases are
 not downgraded.
 
+The `single-site` example includes `backup.sh`, which makes all of the backup below
+while the site runs and can run every night, and `restore.sh`; see its
+[README](../examples/docker/single-site/README.md#backups). The steps here are what
+they do, for other setups.
+
 **Back up** three things together, taken at the same moment if you can (stop the
 site first for a consistent copy: `docker compose stop mukurtu`):
 
