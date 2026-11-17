@@ -88,13 +88,17 @@ you go live, make sure each of these is in place. The image doesn't do them for 
    other setups, back up the database, both volumes, the `custom` folder, and the
    `secrets` folder and `.env`; see [Upgrades and backups](#upgrades-and-backups). Keep copies
    somewhere other than the server: if the server or the hosting account is lost, so
-   are the backups on it. Test one by restoring it into a second project ([Moving a
-   site to another host](#moving-a-site-to-another-host)).
+   are the backups on it. A backup holds every restricted item and all the site's
+   passwords, so keep copies only on encrypted storage, such as a Mac with FileVault
+   turned on. Test one by restoring it into a second project ([Moving a site to another
+   host](#moving-a-site-to-another-host)).
 2. **Someone applies updates.** The image never updates itself. A security release
    protects the site only after someone changes `MUKURTU_IMAGE` and restarts it; see
    [Upgrades and backups](#upgrades-and-backups). To hear about releases, open the
    [Mukurtu CMS repository](https://github.com/MukurtuCMS/Mukurtu-CMS) on GitHub and
-   click **Watch > Custom > Releases**. The server needs updates too: Ubuntu installs
+   click **Watch > Custom > Releases**. Drupal's own update instructions don't apply:
+   the site can't change its own code, so a security fix for Drupal or Mukurtu always
+   arrives as a new image. The server needs updates too: Ubuntu installs
    security updates automatically, and when you sign in and see `System restart
    required`, restart the server.
 3. **The site uses HTTPS on its domain.** See [Behind a reverse
@@ -114,6 +118,10 @@ you go live, make sure each of these is in place. The image doesn't do them for 
 7. **You'll know when the site is down.** Set up an uptime check that loads the home
    page and emails you when it fails. Most hosting providers offer one, or use an
    external service.
+8. **Someone updates the modules and themes you added.** Code in the `custom` folders
+   isn't covered by the image's security checks or by Mukurtu's image releases. Watch
+   each project's page on Drupal.org for security releases, and replace its folder when
+   one comes out; see [Adding modules and themes](#adding-modules-and-themes).
 
 ## Images and tags
 
