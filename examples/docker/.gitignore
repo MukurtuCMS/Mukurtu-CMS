@@ -2,3 +2,5 @@
 # Never commit these.
 .env
 secrets/
+# Written by single-site/backup.sh: a copy of the site, including the passwords.
+backups/
