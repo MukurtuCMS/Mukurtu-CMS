@@ -165,6 +165,19 @@ test.describe('Tagify Escape and aria-expanded', () => {
     await expect(keywords(page)).toHaveText('bas');
   });
 
+  test('Escape that cancels an input method character leaves the text', async ({ page }) => {
+    await keywords(page).click();
+    await page.keyboard.type('bas');
+    await page.waitForTimeout(150);
+    await page.keyboard.press('Escape');
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(false);
+    await page.waitForTimeout(150);
+    await keywords(page).evaluate((el) => el.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Escape', isComposing: true, bubbles: true, cancelable: true,
+    })));
+    await expect(keywords(page)).toHaveText('bas');
+  });
+
   test('Escape still reaches a dialog around the field', async ({ page }) => {
     await keywords(page).click();
     await page.keyboard.press('Escape');

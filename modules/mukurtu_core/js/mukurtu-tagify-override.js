@@ -90,6 +90,16 @@
   }
 
   /**
+   * Whether a Tagify suggestion list is showing.
+   *
+   * Tagify's own flag stays on while suggestions load, with the list off the
+   * page, and for a moment after the list closes.
+   */
+  function isListShowing(instance) {
+    return Boolean(instance.state.dropdown.visible) && instance.DOM.dropdown.isConnected;
+  }
+
+  /**
    * Keep focus in the field when Escape is pressed with the list closed.
    *
    * Tagify blurs its input then, so focus fell to the page body and keyboard
@@ -115,12 +125,10 @@
       if (event.target !== input || Object.prototype.hasOwnProperty.call(input, 'blur')) {
         return;
       }
+      // An Escape that is closing the list leaves the text alone, and one
+      // that cancels a character in an input method belongs to it.
       dismissed = true;
-      // An Escape that is closing the list leaves the text alone. Tagify's
-      // flag stays on while suggestions load and the list is off the page,
-      // so the list counts as open only when it's showing too.
-      const listOpen = instance.state.dropdown.visible && instance.DOM.dropdown.isConnected;
-      if (!listOpen && input.textContent.trim()) {
+      if (!event.isComposing && !isListShowing(instance) && input.textContent.trim()) {
         instance.input.set.call(instance, '');
       }
       input.blur = () => {};
@@ -326,7 +334,7 @@
         // holds the instance. The wrapper's aria-expanded is removed (#2720).
         const instance = tagsElement.nextElementSibling?.__tagify;
         if ((event.key === 'ArrowDown' || event.key === 'Down')
-          && instance && !instance.state.dropdown.visible) {
+          && instance && !isListShowing(instance)) {
           input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         }
       });
