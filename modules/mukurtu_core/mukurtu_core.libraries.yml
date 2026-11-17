@@ -17,8 +17,10 @@ tagify-override:
     js/mukurtu-tagify-override.js: {}
     js/tagify-reorder.js: {}
     js/tagify-combobox.js: {}
+    js/tagify-list-placement.js: {}
   css:
     component:
+      css/tagify-list-placement.css: {}
       css/tagify-reorder.css: {}
   dependencies:
     - core/drupal
