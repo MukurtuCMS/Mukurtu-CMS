@@ -1652,11 +1652,11 @@ function mukurtu_core_library_info_alter(&$libraries, $extension) {
     $libraries['leaflet-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-circle-display.js'] = [];
   }
 
-  // Put Klaro's consent settings button after the skip link, so the skip
-  // link is the first Tab stop (#2747). Must load after klaro.drupal.js,
-  // which adds the button.
+  // Keyboard fixes for Klaro (#2747): put its consent settings button after
+  // the skip link, and keep focus inside its consent window while it's open.
+  // Must load after klaro.drupal.js, which adds the button.
   if ($extension === 'klaro' && isset($libraries['klaro'])) {
-    $libraries['klaro']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/klaro-button-order.js'] = [];
+    $libraries['klaro']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/klaro-keyboard.js'] = [];
     $libraries['klaro']['dependencies'][] = 'core/drupal';
   }
 
