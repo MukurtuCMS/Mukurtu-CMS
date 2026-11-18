@@ -45,9 +45,18 @@
           }
           const real = copy.nextElementSibling?.querySelector('thead th.select-all input');
           if (real) {
-            setTimeout(() => real.focus());
+            setTimeout(() => real.focus({ preventScroll: true }));
           }
         }, true);
+
+        // The real row only takes the pointer while it has keyboard focus
+        // (see the CSS). A mouse press there would move focus to a control
+        // without a visible focus state, which brings the copy back before
+        // the button is released and loses the click. Keep focus where it is.
+        const realHeader = copy.nextElementSibling?.querySelector('thead');
+        if (realHeader) {
+          realHeader.addEventListener('mousedown', (event) => event.preventDefault());
+        }
       });
     },
   };
