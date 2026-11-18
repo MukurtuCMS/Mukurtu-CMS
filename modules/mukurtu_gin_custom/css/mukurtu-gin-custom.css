@@ -54,6 +54,21 @@ with no focus indicator at all in forced colors (#2657). */
   }
 }
 
+/* WCAG 2.4.7: the Tagify suggestion picked with the arrow keys is marked only
+by its background, which forced colors removes, so it looked like the others
+(#2744). Use the system highlight colors, as the public theme does (#2668).
+The Tagify module's Gin skin sets its colors with !important, including a
+.gin--dark-mode rule, hence the html prefix and !important. Group headings
+inside an item get their own color from that skin, so they're included. */
+@media (forced-colors: active) {
+  html [data-gin-layout-density] .tagify__dropdown__item--active,
+  html [data-gin-layout-density] .tagify__dropdown__item--active * {
+    forced-color-adjust: none;
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+}
+
 /* The password confirm widget's "Passwords match: yes/no" message
 (.password-match-message / .password-match-message__text, built at runtime
 by core's user.js) is styled by Claro's own form--password-confirm.css using
