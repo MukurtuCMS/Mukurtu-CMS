@@ -18,13 +18,6 @@
  * Focus leaves the dialog, and core's dialog.ajax.js then moves it to the
  * dialog's first focusable element, the "All media" link. This turns core's
  * refocus off for those buttons and focuses the replacement button instead.
- *
- * Focus on close (WCAG 2.4.3, #2772): jQuery UI returns focus to whatever had
- * it when the dialog opened. Drupal's AJAX disables the "Add media" button
- * while the library loads, so by then focus has already fallen to the page
- * body, and closing the dialog without inserting left it there. This
- * remembers the button and focuses it again after the dialog closes, when
- * nothing else has focus. Core already handles focus after an insert.
  */
 ((Drupal, once, $) => {
   const modal = '.media-library-widget-modal';
@@ -34,38 +27,6 @@
 
   // Set when a filter button is used, so the next attach knows to refocus.
   let refocusFilters = false;
-
-  // The data-drupal-selector of the "Add media" button that opened the
-  // library. AJAX can replace the button, so it's found again by selector.
-  let openerSelector = null;
-  const openButton = '.js-media-library-open-button';
-
-  ['mousedown', 'keydown', 'click'].forEach((type) => {
-    document.addEventListener(type, (event) => {
-      const button = event.target.closest?.(openButton);
-      if (button) {
-        openerSelector = button.getAttribute('data-drupal-selector');
-      }
-    }, true);
-  });
-
-  window.addEventListener('dialog:afterclose', (event) => {
-    const selector = openerSelector;
-    if (!selector || !event.target.closest?.(modal)) {
-      return;
-    }
-    openerSelector = null;
-    setTimeout(() => {
-      const active = document.activeElement;
-      if (active && active !== document.body) {
-        return;
-      }
-      const button = document.querySelector(`${openButton}[data-drupal-selector="${CSS.escape(selector)}"]`);
-      if (button && !button.disabled) {
-        button.focus();
-      }
-    }, 0);
-  });
 
   document.addEventListener('dialogContentResize', (event) => {
     const $content = $(event.target);
