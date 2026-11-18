@@ -114,13 +114,53 @@ short fields themselves. Shrink it in these dialogs specifically. */
   outline-offset: -3px;
 }
 
-/* MW: fixes paragraph titles being cut off in forms. */
-.js .paragraph-type-title {
-    flex-basis: 25%;
-    min-width: 80px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: visible !important;
+/*
+ * Paragraphs widget: wrap the paragraph type label instead of cutting it off
+ * or letting it run under the buttons. This file loads in the base group,
+ * before Paragraphs and Gin, so the selectors start with html.js to win.
+ */
+html.js .paragraph-type-title {
+  flex-basis: 25%;
+  min-width: 0;
+}
+
+html.js .paragraph-top .paragraph-type,
+html.js .paragraph-top .paragraph-type-label {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/*
+ * Narrow screens (#2757): put the label and icons on the first row, and the
+ * summary and buttons on the second, so the buttons can't cover the label.
+ * 600px matches the Paragraphs widget's own breakpoint.
+ */
+@media (max-width: 599.98px) {
+  html.js .paragraph-top {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  html.js .paragraph-top .paragraph-type {
+    grid-row: 1;
+    grid-column: 1;
+  }
+
+  html.js .paragraph-top .paragraph-info {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  html.js .paragraph-top .paragraph-summary {
+    grid-row: 2;
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  html.js .paragraph-top .paragraphs-actions {
+    grid-row: 2;
+    grid-column: 2;
+  }
 }
 
 /* Content browser modal: thumbnail column */
