@@ -133,3 +133,12 @@ function mukurtu_dictionary_update_40048() {
     ])->save();
   }
 }
+
+/**
+ * Make dictionary filters wait for Apply instead of reloading the page.
+ */
+function mukurtu_dictionary_update_40049() {
+  // Shared with the browse pages (#2619); mukurtu_browse is a dependency.
+  \Drupal::moduleHandler()->loadInclude('mukurtu_browse', 'install');
+  mukurtu_browse_turn_off_filter_autosubmit(['mukurtu_dictionary']);
+}
