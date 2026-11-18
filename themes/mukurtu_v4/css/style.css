@@ -1748,11 +1748,11 @@ a .mukurtu-content-warnings__actions {
 }
 
 @media (forced-colors: active) {
-  .contextual-region .contextual .trigger:focus-visible {
+  html .contextual-region .contextual .trigger:focus-visible {
     outline: 2px solid CanvasText;
     outline-offset: 2px;
   }
-  .contextual-region .contextual .contextual-links li a:focus-visible {
+  html .contextual-region .contextual .contextual-links li a:focus-visible {
     outline: 2px solid CanvasText;
     outline-offset: -2px;
   }
