@@ -7,8 +7,11 @@ import { gotoReady } from '~helpers/preview';
  * only by its background, which forced colors removes, so it looked like the
  * others (WCAG 2.4.7, #2744). It now uses the system highlight colors.
  *
- * The term merge form's picker lists every category term on Down Arrow, and
- * a fresh site has at least two.
+ * The term merge form's picker lists every category term on Down Arrow. The
+ * highlighted one must use the system Highlight and HighlightText colors.
+ * Comparing it with the other suggestions isn't enough: in dark mode
+ * Chromium reports different background values that forced colors paints
+ * the same.
  */
 
 const MERGE_URL = '/admin/structure/taxonomy/manage/category/merge';
@@ -16,20 +19,27 @@ const SLOW = { timeout: 20000 };
 
 async function colorsOf(page: Page) {
   const textbox = page.locator('tags.tagify .tagify__input');
-  const options = page.locator('.tagify__dropdown [role=option]');
   const active = page.locator('.tagify__dropdown .tagify__dropdown__item--active');
 
   await textbox.focus();
   await page.keyboard.press('ArrowDown');
-  await expect(options.nth(1), 'the list opens with at least two terms').toBeVisible(SLOW);
-  await expect(active).toHaveCount(1);
+  await expect(active, 'the list opens with the first term highlighted').toBeVisible(SLOW);
 
   const style = (element: Element) => {
     const computed = getComputedStyle(element);
     return { background: computed.backgroundColor, color: computed.color };
   };
-  const other = page.locator('.tagify__dropdown [role=option]:not(.tagify__dropdown__item--active)').first();
-  return { active: await active.evaluate(style), other: await other.evaluate(style) };
+  // What the system colors resolve to on this page.
+  const system = await page.evaluate(() => {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'forced-color-adjust: none; background: Highlight; color: HighlightText;';
+    document.body.append(probe);
+    const computed = getComputedStyle(probe);
+    const colors = { background: computed.backgroundColor, color: computed.color };
+    probe.remove();
+    return colors;
+  });
+  return { active: await active.evaluate(style), system };
 }
 
 test.describe('Gin Tagify highlight in forced colors', () => {
@@ -45,10 +55,9 @@ test.describe('Gin Tagify highlight in forced colors', () => {
         await page.evaluate(() => document.documentElement.classList.add('gin--dark-mode'));
       }
 
-      const { active, other } = await colorsOf(page);
-      expect(active.background, 'the highlight has a fill').not.toBe('rgba(0, 0, 0, 0)');
-      expect(active.background, 'the highlight differs from the other suggestions').not.toBe(other.background);
-      expect(active.color, 'its text differs from its fill').not.toBe(active.background);
+      const { active, system } = await colorsOf(page);
+      expect(system.background).not.toBe(system.color);
+      expect(active).toEqual(system);
     });
   }
 });
