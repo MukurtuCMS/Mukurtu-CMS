@@ -61,10 +61,13 @@ The Tagify module's Gin skin sets its colors with !important, including a
 .gin--dark-mode rule, hence the html prefix and !important. Group headings
 inside an item get their own color from that skin, so they're included. */
 @media (forced-colors: active) {
-  html [data-gin-layout-density] .tagify__dropdown__item--active,
-  html [data-gin-layout-density] .tagify__dropdown__item--active * {
+  html [data-gin-layout-density] .tagify__dropdown__item--active {
     forced-color-adjust: none;
     background: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  html [data-gin-layout-density] .tagify__dropdown__item--active * {
     color: HighlightText !important;
   }
 }
