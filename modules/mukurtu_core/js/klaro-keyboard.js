@@ -43,13 +43,15 @@
    * Manages focus while the consent window is open.
    */
   function manageWindow() {
-    // The element outside Klaro that last had focus opens the window.
+    // The element outside the window that last had focus opens it. That
+    // can be inside Klaro, such as a blocked embed's "Manage privacy
+    // settings" link.
     let lastOutside = null;
     let opener = null;
     let open = null;
 
     document.addEventListener('focusin', (event) => {
-      if (!event.target.closest('.klaro')) {
+      if (!event.target.closest('.cookie-modal')) {
         if (open && open.isConnected) {
           // Focus can't leave an open modal dialog.
           controlsOf(open)[0]?.focus();

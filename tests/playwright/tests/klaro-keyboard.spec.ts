@@ -36,6 +36,8 @@ test('Focus stays in the consent window and returns to the button', async ({ pag
   // Opens on its first control, the Close button.
   const close = window.locator('.hide');
   await expect(close).toBeFocused();
+  // Klaro's own ring is white on the window's near-white background.
+  await expect(close).toHaveCSS('outline-style', 'solid');
 
   // Shift+Tab from the first control wraps to the last, and Tab from the
   // last wraps back, so focus never leaves while the window is open.
