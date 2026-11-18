@@ -88,6 +88,26 @@ function mukurtu_v4_preprocess_node(&$variables) {
     $variables['card_media_bundle'] = isset($variables['card_media']['#media']) ? $variables['card_media']['#media']->bundle() : 'image';
   }
 
+  // Browse cards show one media item. Flag items whose full page has more, so
+  // visitors know to open it (#1806). See _card-media.html.twig.
+  $browse_view_modes = ['browse', 'grid_browse', 'map_browse'];
+  $multiple_media_fields = [
+    'digital_heritage' => ['field_media_assets'],
+    'person' => ['field_media_assets'],
+    'place' => ['field_media_assets'],
+    // A word's card plays its first recording, so any more recordings and
+    // all of its media assets are only on the word's page.
+    'dictionary_word' => ['field_recording', 'field_media_assets'],
+  ];
+  if (in_array($variables['view_mode'] ?? '', $browse_view_modes, TRUE) && isset($multiple_media_fields[$node->bundle()])) {
+    $cacheability = new CacheableMetadata();
+    $variables['has_multiple_media'] = _mukurtu_v4_has_multiple_media($node, $multiple_media_fields[$node->bundle()], $cacheability);
+    // Cache metadata set on $variables doesn't bubble. The card prints this
+    // empty element so the access results vary the card's cache.
+    $variables['multiple_media_cache'] = [];
+    $cacheability->applyTo($variables['multiple_media_cache']);
+  }
+
   // A dictionary word's card, in the Featured Content grid and carousel,
   // shows its translations: the word alone says little to most visitors.
   // The node here is already the translation for the current page.
@@ -141,6 +161,51 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
   }
 
+}
+
+/**
+ * Checks whether the viewer can see more than one media item on a node.
+ *
+ * Only media the viewer can view counts, so a card never hints that
+ * restricted media exists (#1806).
+ *
+ * @param \Drupal\node\NodeInterface $node
+ *   The node, on a browse card.
+ * @param string[] $field_names
+ *   The media reference fields to count across.
+ * @param \Drupal\Core\Cache\CacheableMetadata $cacheability
+ *   Collects the access results' cache metadata.
+ *
+ * @return bool
+ *   TRUE when the viewer can view two or more of the media items.
+ */
+function _mukurtu_v4_has_multiple_media($node, array $field_names, CacheableMetadata $cacheability): bool {
+  $ids = [];
+  foreach ($field_names as $field_name) {
+    if ($node->hasField($field_name)) {
+      foreach ($node->get($field_name) as $item) {
+        if ($item->target_id) {
+          $ids[] = $item->target_id;
+        }
+      }
+    }
+  }
+  // The same media item in two fields is still one item.
+  $ids = array_unique($ids);
+  if (count($ids) < 2) {
+    return FALSE;
+  }
+
+  $viewable = 0;
+  foreach (\Drupal::entityTypeManager()->getStorage('media')->loadMultiple($ids) as $media) {
+    $cacheability->addCacheableDependency($media);
+    $access = $media->access('view', NULL, TRUE);
+    $cacheability->addCacheableDependency($access);
+    if ($access->isAllowed() && ++$viewable >= 2) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
