@@ -316,6 +316,12 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
     // and the credential step saves them again before every run.
     static::deleteSourceCredentials();
 
+    // Lead with why the run stopped, before the generic failure messages.
+    if (!empty($results['stopped_by'])) {
+      \Drupal::messenger()->addError(t('The migration was stopped because some @migration items failed to migrate. The memberships and content that depend on them were not migrated. Fix the problems listed in the log, then run the migration again. Failed items will be retried.', [
+        '@migration' => $results['stopped_by'],
+      ]));
+    }
     if ($successes > 0) {
       \Drupal::messenger()->addStatus(\Drupal::translation()
         ->formatPlural($successes, 'Completed 1 migration task successfully', 'Completed @count migration tasks successfully'));
@@ -324,11 +330,6 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
       \Drupal::messenger()->addError(\Drupal::translation()
         ->formatPlural($failures, '1 migration failed', '@count migrations failed'));
       \Drupal::messenger()->addError(t('Migration process not completed'));
-    }
-    if (!empty($results['stopped_by'])) {
-      \Drupal::messenger()->addError(t('The migration was stopped because some @migration items failed to migrate. The memberships and content that depend on them were not migrated. Fix the problems listed in the log, then run the migration again. Failed items will be retried.', [
-        '@migration' => $results['stopped_by'],
-      ]));
     }
 
     // A migration task can report RESULT_COMPLETED while individual rows

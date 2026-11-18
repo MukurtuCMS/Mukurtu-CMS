@@ -197,7 +197,7 @@ class MukurtuMigrateImportBatchStopOnGroupFailureTest extends KernelTestBase {
     ], [], '1');
 
     $errors = array_map('strval', \Drupal::messenger()->all()['error'] ?? []);
-    $this->assertContains('The migration was stopped because some Cultural Protocols items failed to migrate. The memberships and content that depend on them were not migrated. Fix the problems listed in the log, then run the migration again. Failed items will be retried.', $errors);
+    $this->assertSame('The migration was stopped because some Cultural Protocols items failed to migrate. The memberships and content that depend on them were not migrated. Fix the problems listed in the log, then run the migration again. Failed items will be retried.', $errors[0], 'The reason the run stopped comes first.');
     $this->assertContains('Migration process not completed', $errors);
   }
 
