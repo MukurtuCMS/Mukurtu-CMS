@@ -9,23 +9,41 @@
  * Close button left focus there, and keyboard and screen reader users lost
  * their place in the form (WCAG 2.4.3, #2772).
  *
- * This remembers the button and focuses it again after the dialog closes,
- * when nothing else has focus. AJAX can replace the button, so it's found
- * again by its data-drupal-selector. When a dialog's own action already
- * placed focus, such as inserting media, it's left alone.
+ * This remembers the button when it's activated and focuses it again after
+ * the dialog closes, when nothing else has focus. Inserting or selecting
+ * rebuilds the field with AJAX, which replaces the button, so this waits for
+ * that to finish and finds the button again by its data-drupal-selector.
+ * When something else already has focus, it's left alone.
  */
-(() => {
+(($) => {
   const openers = '.js-media-library-open-button, [data-drupal-selector$="-entity-browser-open-modal"]';
   let openerSelector = null;
 
-  ['mousedown', 'keydown', 'click'].forEach((type) => {
-    document.addEventListener(type, (event) => {
-      const button = event.target.closest?.(openers);
-      if (button) {
-        openerSelector = button.getAttribute('data-drupal-selector');
-      }
-    }, true);
-  });
+  const remember = (event) => {
+    const button = event.target.closest?.(openers);
+    if (button) {
+      openerSelector = button.getAttribute('data-drupal-selector');
+    }
+  };
+  // Only activation counts: Tab passing over a button doesn't.
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      remember(event);
+    }
+  }, true);
+  document.addEventListener('mousedown', remember, true);
+  document.addEventListener('click', remember, true);
+
+  const refocus = (selector) => {
+    const active = document.activeElement;
+    if (active && active !== document.body) {
+      return;
+    }
+    const button = document.querySelector(`[data-drupal-selector="${CSS.escape(selector)}"]`);
+    if (button && !button.disabled) {
+      button.focus();
+    }
+  };
 
   window.addEventListener('dialog:afterclose', () => {
     const selector = openerSelector;
@@ -34,14 +52,12 @@
       return;
     }
     setTimeout(() => {
-      const active = document.activeElement;
-      if (active && active !== document.body) {
-        return;
+      if ($.active > 0) {
+        $(document).one('ajaxStop', () => setTimeout(() => refocus(selector), 0));
       }
-      const button = document.querySelector(`[data-drupal-selector="${CSS.escape(selector)}"]`);
-      if (button && !button.disabled) {
-        button.focus();
+      else {
+        refocus(selector);
       }
     }, 0);
   });
-})();
+})(jQuery);
