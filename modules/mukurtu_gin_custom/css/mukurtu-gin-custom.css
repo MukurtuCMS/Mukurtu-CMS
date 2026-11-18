@@ -114,16 +114,20 @@ short fields themselves. Shrink it in these dialogs specifically. */
   outline-offset: -3px;
 }
 
+/* MW: fixes paragraph titles being cut off in forms. */
+.js .paragraph-type-title {
+    flex-basis: 25%;
+    min-width: 80px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: visible !important;
+}
+
 /*
  * Paragraphs widget: wrap the paragraph type label instead of cutting it off
  * or letting it run under the buttons. This file loads in the base group,
  * before Paragraphs and Gin, so the selectors start with html.js to win.
  */
-html.js .paragraph-type-title {
-  flex-basis: 25%;
-  min-width: 0;
-}
-
 html.js .paragraph-top .paragraph-type,
 html.js .paragraph-top .paragraph-type-label {
   white-space: normal;
