@@ -51,6 +51,28 @@ test.describe('Gin sticky table header', () => {
     await expect(copy).toHaveCSS('visibility', 'visible');
   });
 
+  test('A click while focus is in the real row is not lost', async ({ page }) => {
+    await page.goto('/admin/content');
+    const realHeader = page.locator('.gin-table-scroll-wrapper table thead');
+    await expect(realHeader.locator('th.select-all input')).toHaveCount(1);
+    await realHeader.locator('th.select-all input').focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(page.locator('table.gin--sticky-table-header')).toHaveCSS('visibility', 'hidden');
+    await realHeader.locator('a[href*="order=title"]').click();
+    await expect(page).toHaveURL(/order=title/);
+  });
+
+  test('Clicking the copy select-all moves focus to the real one', async ({ page }) => {
+    await page.goto('/admin/content');
+    const copyBox = page.locator('table.gin--sticky-table-header th.select-all input');
+    const realBox = page.locator('.gin-table-scroll-wrapper table thead th.select-all input');
+    await expect(copyBox).toBeVisible();
+    await copyBox.click();
+    await expect(realBox).toBeFocused();
+    await expect(realBox).toBeChecked();
+  });
+
   test('The copy still takes clicks', async ({ page }) => {
     await page.goto('/admin/content');
     const link = page.locator('table.gin--sticky-table-header thead a[href*="order=title"]');

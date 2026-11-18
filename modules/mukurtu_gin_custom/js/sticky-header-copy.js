@@ -35,6 +35,19 @@
         copy.setAttribute('aria-hidden', 'true');
         removeTabStops(copy);
         new MutationObserver(() => removeTabStops(copy)).observe(copy, { childList: true, subtree: true });
+
+        // A click on the copy's select-all checkbox would leave focus in a
+        // row hidden from assistive technology, so move it to the real one.
+        // Capture phase: Gin's own click handler stops propagation.
+        copy.addEventListener('click', (event) => {
+          if (!event.target.closest('th.select-all input')) {
+            return;
+          }
+          const real = copy.nextElementSibling?.querySelector('thead th.select-all input');
+          if (real) {
+            setTimeout(() => real.focus());
+          }
+        }, true);
       });
     },
   };
