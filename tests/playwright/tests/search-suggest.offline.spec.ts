@@ -162,7 +162,7 @@ test('typing shows suggestions and announces how many', async ({ page }) => {
   expect(params.get('q')).toBe('buf');
 });
 
-test('arrow keys move through the list and Enter searches for the word', async ({ page }) => {
+test('arrow keys move through the list, Enter picks the word, and Enter again searches', async ({ page }) => {
   await openFixture(page);
   const input = box(page);
   await input.pressSequentially('buf');
@@ -191,6 +191,10 @@ test('arrow keys move through the list and Enter searches for the word', async (
   await expect(list(page)).toBeHidden();
   await expect(input).toHaveAttribute('aria-expanded', 'false');
   await expect(input).not.toHaveAttribute('aria-activedescendant');
+  // Picking fills in the box; the search waits for Enter or Apply (#2619).
+  expect(await submitted(page)).toEqual([]);
+
+  await input.press('Enter');
   expect(await submitted(page)).toEqual(['bufflehead']);
 });
 
@@ -250,14 +254,17 @@ test('Enter that finishes a character in an input method does not pick or search
   expect(await submitted(page)).toEqual([]);
 });
 
-test('clicking a suggestion searches for it', async ({ page }) => {
+test('clicking a suggestion fills in the box without searching', async ({ page }) => {
   await openFixture(page);
   await box(page).pressSequentially('bas');
   await list(page).getByRole('option', { name: 'basket' }).click();
 
   await expect(box(page)).toHaveValue('basket');
   await expect(box(page)).toBeFocused();
-  expect(await submitted(page)).toEqual(['basket']);
+  await expect(list(page)).toBeHidden();
+  // Longer than the stand-in auto-submit's delay.
+  await page.waitForTimeout(700);
+  expect(await submitted(page)).toEqual([]);
 });
 
 test('Escape closes the list, then clears the box', async ({ page }) => {
