@@ -519,6 +519,25 @@ function mukurtu_v4_theme_suggestions_page_alter(array &$suggestions, array $var
   if (in_array($route_name, $lc_directory_routes)) {
     $suggestions[] = 'page__local_contexts_site_project_directory';
   }
+
+  // Drupal suggests page--node for every path under /node, but that
+  // template only suits node displays, which bring their own grid. Other
+  // pages there (Found In, Add to Collection, the /node listing) fall back
+  // to page.html.twig, which places them on the page grid.
+  $node_display_routes = [
+    'entity.node.canonical',
+    'entity.node.latest_version',
+    'entity.node.preview',
+    'entity.node.revision',
+    'layout_builder.overrides.node.view',
+    'mukurtu_multipage_items.multipage_node_view',
+  ];
+  if (!in_array($route_name, $node_display_routes, TRUE)) {
+    $suggestions = array_values(array_filter(
+      $suggestions,
+      fn($suggestion) => $suggestion !== 'page__node' && !str_starts_with($suggestion, 'page__node__'),
+    ));
+  }
 }
 
 /**

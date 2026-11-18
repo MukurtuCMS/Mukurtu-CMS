@@ -2,15 +2,6 @@
 @use "../../00-base/layout/layout";
 @use "../../00-base/mixins/mixins";
 
-// Community browse page
-.community-page-listing {
-  padding-inline: var(--layout-padding);
-
-  @include include-media.media('>=lg') {
-    padding-inline: var(--layout-padding-m);
-  }
-}
-
 // Communities block on landing pages.
 .view-browse-by-community .community-page-browse {
   padding-inline: var(--layout-padding);

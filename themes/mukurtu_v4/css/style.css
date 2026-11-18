@@ -2361,44 +2361,6 @@ details.form-wrapper summary + div {
           margin-inline-start: 1.4ch;
 }
 
-:has(> .user-register-form),
-:has(> .user-login-form),
-:has(> .user-pass) {
-  display: grid;
-  grid-template-columns: var(--grid-6col);
-  padding-inline: var(--layout-padding) var(--layout-padding);
-  -webkit-column-gap: var(--gutter);
-     -moz-column-gap: var(--gutter);
-          column-gap: var(--gutter);
-}
-@media (min-width: 60rem) {
-  :has(> .user-register-form),
-  :has(> .user-login-form),
-  :has(> .user-pass) {
-    grid-template-columns: var(--grid-12col);
-  }
-}
-@media (min-width: 90rem) {
-  :has(> .user-register-form),
-  :has(> .user-login-form),
-  :has(> .user-pass) {
-    grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
-  }
-}
-
-.user-register-form,
-.user-login-form,
-.user-pass {
-  grid-column: 1/-1;
-}
-@media (min-width: 90rem) {
-  .user-register-form,
-  .user-login-form,
-  .user-pass {
-    grid-column: 2/-2;
-  }
-}
-
 label.form-required::after,
 .fieldset-legend.form-required::after {
   display: inline-block;
@@ -8153,6 +8115,9 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
     padding-inline: var(--layout-padding-m);
   }
 }
+.layout-content .category-grid {
+  padding-inline: 0;
+}
 .category-grid .category-card .category-teaser a {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -8517,15 +8482,6 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
           border-block-start: none;
   -webkit-margin-before: 0;
           margin-block-start: 0;
-}
-
-.community-page-listing {
-  padding-inline: var(--layout-padding);
-}
-@media (min-width: 60rem) {
-  .community-page-listing {
-    padding-inline: var(--layout-padding-m);
-  }
 }
 
 .view-browse-by-community .community-page-browse {
@@ -10087,9 +10043,6 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
 }
 
 .path-comment .layout-content {
-  max-width: 1280px;
-  margin-inline: auto;
-  padding-inline: var(--layout-padding);
   padding-block: var(--v-space-2xs);
 }
 .path-comment .comment {
@@ -10439,7 +10392,7 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   color: var(--color-error-dark);
   background-color: var(--color-error-light);
 }
-.layout-container .layout-content--404 {
+.layout-container .layout-content {
   display: grid;
   grid-template-columns: var(--grid-6col);
   padding-inline: var(--layout-padding) var(--layout-padding);
@@ -10448,25 +10401,35 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
           column-gap: var(--gutter);
 }
 @media (min-width: 60rem) {
-  .layout-container .layout-content--404 {
+  .layout-container .layout-content {
     grid-template-columns: var(--grid-12col);
   }
 }
 @media (min-width: 90rem) {
-  .layout-container .layout-content--404 {
+  .layout-container .layout-content {
     grid-template-columns: minmax(0, auto) var(--grid-12col-max-width) minmax(0, auto);
+  }
+}
+.layout-container .layout-content > .region {
+  grid-column: 1/-1;
+}
+@media (min-width: 90rem) {
+  .layout-container .layout-content > .region {
+    grid-column: 2/-2;
+  }
+}
+.layout-container .layout-content > .region {
+  --layout-padding: 0;
+}
+@media (min-width: 90rem) {
+  .layout-container .layout-content > .region .local-tasks,
+  .layout-container .layout-content > .region .taxonomy-term-page,
+  .layout-container .layout-content > .region .articles-listing--page {
+    margin-inline: calc(var(--gutter) * -1);
   }
 }
 .layout-container .layout-content--404 {
   text-align: center;
-}
-.layout-container .layout-content--404 > .region {
-  grid-column: 1/-1;
-}
-@media (min-width: 90rem) {
-  .layout-container .layout-content--404 > .region {
-    grid-column: 2/-2;
-  }
 }
 
 .entity-browser-form {
@@ -10531,9 +10494,6 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
 }
 
 .path-submit .layout-content {
-  max-width: 1280px;
-  margin-inline: auto;
-  padding-inline: var(--layout-padding);
   padding-block: var(--v-space-2xs);
 }
 .path-submit .form-item,

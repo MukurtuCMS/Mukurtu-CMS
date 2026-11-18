@@ -1,5 +1,3 @@
-@use "../../00-base/layout/layout";
-
 .form-item + .form-item {
   margin-block-start: 1rem;
 }
@@ -18,18 +16,6 @@ details.form-wrapper {
   summary + div {
     margin-inline-start: 1.4ch;
   }
-}
-
-:has(> .user-register-form),
-:has(> .user-login-form),
-:has(> .user-pass) {
-  @include layout.layout--full-width-grid;
-}
-
-.user-register-form,
-.user-login-form,
-.user-pass {
-  @include layout.layout--full-width-grid-item;
 }
 
 // Drupal core renders the required marker on a <label> for individual
