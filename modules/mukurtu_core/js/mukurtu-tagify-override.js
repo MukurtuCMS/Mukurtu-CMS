@@ -163,22 +163,34 @@
    * some assistive technology send keys that quickly. Clear the flag when
    * Down Arrow finds the list gone in that window. Outside it, the flag can
    * also mean suggestions are still loading, so it's left alone then.
+   *
+   * Tagify switches the flag off with a timer it doesn't cancel, so a list
+   * reopened in that window would be marked closed while showing, and the
+   * next Escape would close a dialog around the field (#2746). Set the flag
+   * back once that timer has run.
    */
   function reopenOnDownArrow(instance) {
-    let justHidden = false;
+    const flagDelay = 100;
+    let hiddenAt = -Infinity;
     instance.on('dropdown:hide', () => {
-      justHidden = true;
-      setTimeout(() => {
-        justHidden = false;
-      }, 150);
+      hiddenAt = Date.now();
     });
     instance.on('dropdown:show', () => {
-      justHidden = false;
+      const since = Date.now() - hiddenAt;
+      if (since >= flagDelay) {
+        return;
+      }
+      const { visible } = instance.state.dropdown;
+      setTimeout(() => {
+        if (instance.DOM.dropdown.isConnected && !instance.state.dropdown.visible) {
+          instance.state.dropdown.visible = visible || true;
+        }
+      }, flagDelay - since + 20);
     });
     instance.DOM.scope.addEventListener('keydown', (event) => {
-      if ((event.key === 'ArrowDown' || event.key === 'Down') && justHidden
+      if ((event.key === 'ArrowDown' || event.key === 'Down')
+        && Date.now() - hiddenAt < flagDelay
         && !instance.DOM.dropdown.isConnected) {
-        justHidden = false;
         instance.state.dropdown.visible = false;
       }
     }, true);

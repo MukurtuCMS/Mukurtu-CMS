@@ -221,6 +221,14 @@ test.describe('Tagify Escape and aria-expanded', () => {
     await page.keyboard.press('ArrowDown');
     await expect.poll(showing).toBe(true);
 
+    // Tagify's own timer from that close mustn't mark the reopened list
+    // closed: the next Escape still only closes the list (#2746).
+    await page.waitForTimeout(200);
+    expect(await listOpen(page, 'keywords')).toBe(true);
+    await page.keyboard.press('Escape');
+    expect(await page.evaluate(() => (window as any).dialogClosings)).toBe(0);
+    await page.keyboard.press('Escape');
+
     // The same on a show-all field.
     await page.keyboard.press('Escape');
     await wordType(page).focus();
@@ -230,6 +238,8 @@ test.describe('Tagify Escape and aria-expanded', () => {
     await page.keyboard.press('Escape');
     await page.keyboard.press('ArrowDown');
     await expect.poll(showing).toBe(true);
+    await page.waitForTimeout(200);
+    expect(await listOpen(page, 'type')).toBe(true);
   });
 
   test('blur works again after Escape', async ({ page }) => {
