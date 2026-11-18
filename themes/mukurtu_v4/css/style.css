@@ -1141,6 +1141,39 @@ a:not(.primary-nav__menu-link) svg.tel path {
           border-block-start: 5px solid var(--brand-secondary);
 }
 
+.vertical-card__media:has(> .card-media__multiple),
+.horizontal-card__media:has(> .card-media__multiple) {
+  position: relative;
+}
+
+.card-media__multiple {
+  position: absolute;
+  inset-block-start: var(--v-space-6xs);
+  inset-inline-end: var(--v-space-6xs);
+  z-index: 11;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 0.25rem;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  line-height: 0;
+  pointer-events: none;
+}
+@media (forced-colors: active) {
+  .card-media__multiple {
+    border: 1px solid CanvasText;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+}
+
+.card-media__multiple-icon {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+
 .splide__arrow--prev {
   inset-inline-start: 0.5em;
 }
@@ -7629,6 +7662,31 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
 .browse__main-content .browse-container .browse-facets .form-actions {
   -webkit-margin-before: var(--v-space-4xs);
           margin-block-start: var(--v-space-4xs);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: var(--v-space-5xs);
+  padding: var(--v-space-4xxs);
+  background-color: var(--mukurtu-panel-pane-content-background-color);
+  -webkit-border-before: 3px solid var(--brand-primary-dark);
+          border-block-start: 3px solid var(--brand-primary-dark);
+}
+.browse__main-content .browse-container .browse-facets .form-actions > * {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 0px;
+          flex: 1 1 0;
+  min-inline-size: 0;
+  margin: 0;
+  white-space: normal;
+}
+@media (min-width: 60rem) and (min-height: 40rem) {
+  .browse__main-content .browse-container .browse-facets .form-actions {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 1;
+    -webkit-box-shadow: 0 -4px 8px var(--color-greys-alpha-border);
+            box-shadow: 0 -4px 8px var(--color-greys-alpha-border);
+  }
 }
 .browse__main-content .browse-container .browse-facets details.form-item {
   background-color: var(--mukurtu-panel-pane-content-background-color);
@@ -7830,6 +7888,11 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   display: none;
 }
 
+@media (min-width: 60rem) and (min-height: 40rem) {
+  html:has(.browse-facets .form-actions) {
+    scroll-padding-block-end: 5rem;
+  }
+}
 .collections {
   grid-column: 1/-1;
   display: grid;
@@ -8803,6 +8866,9 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
           margin-block-start: 0;
 }
 .dictionary .browse-facets .views-exposed-form .form-actions {
+  display: contents;
+}
+.dictionary .browse-facets .views-exposed-form .form-actions [data-drupal-selector^=edit-reset] {
   display: none;
 }
 .dictionary .browse-facets h2,
@@ -8919,7 +8985,8 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   gap: var(--v-space-5xs);
 }
 .dictionary .browse-links a,
-.dictionary .browse-links button {
+.dictionary .browse-links button,
+.dictionary .browse-links input[type=submit] {
   background-color: var(--color-white);
   border: 1px solid var(--brand-primary-dark);
   color: var(--brand-primary-dark);
@@ -8931,16 +8998,19 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   letter-spacing: normal;
 }
 .dictionary .browse-links a:hover,
-.dictionary .browse-links button:hover {
+.dictionary .browse-links button:hover,
+.dictionary .browse-links input[type=submit]:hover {
   background-color: var(--brand-primary-dark);
   color: var(--color-white);
 }
 .dictionary .browse-links a:focus,
-.dictionary .browse-links button:focus {
+.dictionary .browse-links button:focus,
+.dictionary .browse-links input[type=submit]:focus {
   outline-offset: 1px;
 }
 .dictionary .browse-links a,
-.dictionary .browse-links button {
+.dictionary .browse-links button,
+.dictionary .browse-links input[type=submit] {
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
@@ -8956,7 +9026,8 @@ body.is-always-mobile-nav .header:not(:has(.header__logo-text)) {
   padding: var(--v-space-6xs) var(--v-space-5xs);
 }
 .dictionary .browse-links a:focus-visible,
-.dictionary .browse-links button:focus-visible {
+.dictionary .browse-links button:focus-visible,
+.dictionary .browse-links input[type=submit]:focus-visible {
   outline: 3px solid var(--brand-primary-dark);
   outline-offset: 2px;
 }
