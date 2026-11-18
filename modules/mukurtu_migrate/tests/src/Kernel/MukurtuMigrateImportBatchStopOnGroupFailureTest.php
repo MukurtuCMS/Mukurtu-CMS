@@ -8,7 +8,6 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\migrate_plus\Entity\Migration;
 use Drupal\mukurtu_migrate\Batch\MukurtuMigrateImportBatch;
-use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -18,8 +17,9 @@ use PHPUnit\Framework\Attributes\Group;
  * the batch stops when a group migration has failed rows, rather than
  * letting everything that depends on the group fail too.
  *
- * The migrations here import users from inline data. A name given as an
- * array makes the explode step throw, which fails that row.
+ * The migrations here import users from inline data. Each name is given as
+ * a one-item array; a plain string makes the extract step throw, which fails
+ * that row.
  */
 #[Group('mukurtu_migrate')]
 class MukurtuMigrateImportBatchStopOnGroupFailureTest extends KernelTestBase {
@@ -36,14 +36,12 @@ class MukurtuMigrateImportBatchStopOnGroupFailureTest extends KernelTestBase {
     'migrate_plus',
     'search_api',
     'mukurtu_migrate',
+    // The batch saves pathauto.settings.
+    'path_alias',
+    'token',
+    'ctools',
+    'pathauto',
   ];
-
-  /**
-   * The batch saves pathauto.settings, which has no schema here.
-   *
-   * {@inheritdoc}
-   */
-  protected $strictConfigSchema = FALSE;
 
   /**
    * {@inheritdoc}
@@ -73,11 +71,14 @@ class MukurtuMigrateImportBatchStopOnGroupFailureTest extends KernelTestBase {
       'label' => $id === 'mukurtu_cms_v3_cultural_protocols' ? 'Cultural Protocols' : $id,
       'process' => [
         'name' => [
-          ['plugin' => 'explode', 'source' => 'name', 'delimiter' => ','],
-          ['plugin' => 'extract', 'index' => [0]],
+          'plugin' => 'extract',
+          'source' => 'name',
+          'index' => [0],
         ],
       ],
       'destination' => ['plugin' => 'entity:user'],
+      'migration_tags' => [],
+      'migration_dependencies' => [],
     ]);
     $migration->set('source', [
       'plugin' => 'embedded_data',
@@ -119,11 +120,11 @@ class MukurtuMigrateImportBatchStopOnGroupFailureTest extends KernelTestBase {
    */
   public function testGroupFailureStopsRun(): void {
     $this->createUserMigration('mukurtu_cms_v3_cultural_protocols', [
-      ['id' => 1, 'name' => 'protocol_one'],
-      ['id' => 2, 'name' => ['broken']],
+      ['id' => 1, 'name' => ['protocol_one']],
+      ['id' => 2, 'name' => 'broken'],
     ]);
     $this->createUserMigration('test_after_groups', [
-      ['id' => 1, 'name' => 'member_one'],
+      ['id' => 1, 'name' => ['member_one']],
     ]);
 
     $context = $this->runBatch(['mukurtu_cms_v3_cultural_protocols', 'test_after_groups']);
@@ -140,10 +141,10 @@ class MukurtuMigrateImportBatchStopOnGroupFailureTest extends KernelTestBase {
    */
   public function testOtherFailureContinues(): void {
     $this->createUserMigration('test_before_groups', [
-      ['id' => 1, 'name' => ['broken']],
+      ['id' => 1, 'name' => 'broken'],
     ]);
     $this->createUserMigration('test_after_groups', [
-      ['id' => 1, 'name' => 'member_one'],
+      ['id' => 1, 'name' => ['member_one']],
     ]);
 
     $context = $this->runBatch(['test_before_groups', 'test_after_groups']);
@@ -159,7 +160,7 @@ class MukurtuMigrateImportBatchStopOnGroupFailureTest extends KernelTestBase {
    */
   public function testFailedRowIsRetried(): void {
     $this->createUserMigration('mukurtu_cms_v3_cultural_protocols', [
-      ['id' => 1, 'name' => ['broken']],
+      ['id' => 1, 'name' => 'broken'],
     ]);
     $this->runBatch(['mukurtu_cms_v3_cultural_protocols']);
 
@@ -169,7 +170,7 @@ class MukurtuMigrateImportBatchStopOnGroupFailureTest extends KernelTestBase {
 
     // The cause is fixed, and the migration is run again.
     $this->createUserMigration('mukurtu_cms_v3_cultural_protocols', [
-      ['id' => 1, 'name' => 'protocol_one'],
+      ['id' => 1, 'name' => ['protocol_one']],
     ]);
     $context = $this->runBatch(['mukurtu_cms_v3_cultural_protocols']);
 
