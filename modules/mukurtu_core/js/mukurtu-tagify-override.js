@@ -131,7 +131,7 @@
       // An Escape that is closing the list leaves the text alone, and one
       // that cancels a character in an input method belongs to it.
       dismissed = true;
-      if (isListShowing(instance)) {
+      if (!event.isComposing && isListShowing(instance)) {
         event.preventDefault();
       }
       if (!event.isComposing && !isListShowing(instance) && input.textContent.trim()) {
