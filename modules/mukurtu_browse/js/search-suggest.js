@@ -137,6 +137,9 @@
       form.requestSubmit(button || undefined);
     }
 
+    // Item suggestions are links, so picking one opens it. A word only fills
+    // in the box: like the filters, the search waits for Enter or Apply, so
+    // choosing a word doesn't reload the page (WCAG 3.2.2, #2619).
     function pick(option) {
       cancelRequest();
       close();
@@ -145,7 +148,6 @@
         return;
       }
       input.value = option.dataset.value;
-      submit();
     }
 
     function addOption(parent, tag, label, modifier) {

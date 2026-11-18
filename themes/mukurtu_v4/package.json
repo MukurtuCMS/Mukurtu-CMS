@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "globals": "^17.14.0",
     "gulp": "^5.0.1",
     "gulp-autoprefixer": "^10.0.0",
@@ -18,7 +18,7 @@
     "gulp-livereload": "^4.0.2",
     "gulp-sass": "^6.0.1",
     "gulp-sourcemaps": "^3.0.0",
-    "sass": "^1.108.1",
+    "sass": "^1.108.2",
     "stylelint": "^18.0.0",
     "stylelint-config-standard": "^41.0.0",
     "stylelint-config-standard-scss": "^18.0.0",
