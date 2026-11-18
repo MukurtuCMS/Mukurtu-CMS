@@ -85,6 +85,7 @@
       }
     });
     keepFocusOnEscape(instance);
+    reopenOnDownArrow(instance);
     removeWrapperExpanded(instance);
     instance.__mukurtuPatched = true;
   }
@@ -108,9 +109,11 @@
    * Its handler calls the input's blur(), so stand in a no-op blur() for the
    * length of the key press, and clear the typed text instead, as the ARIA
    * combobox pattern and the browse search box (#2473) do. The first Escape
-   * still just closes the list. The event itself still travels, so a dialog
-   * around the field can still close on Escape, and a tag being edited still
-   * handles it as before.
+   * still just closes the list, and is marked as handled, so a dialog around
+   * the field stays open (#2746). jQuery UI dialogs, like the media library,
+   * close on any Escape that isn't. With the list closed, the next Escape
+   * closes the dialog as usual. A tag being edited still handles Escape as
+   * before.
    */
   function keepFocusOnEscape(instance) {
     const { input } = instance.DOM;
@@ -128,6 +131,9 @@
       // An Escape that is closing the list leaves the text alone, and one
       // that cancels a character in an input method belongs to it.
       dismissed = true;
+      if (isListShowing(instance)) {
+        event.preventDefault();
+      }
       if (!event.isComposing && !isListShowing(instance) && input.textContent.trim()) {
         instance.input.set.call(instance, '');
       }
@@ -146,6 +152,36 @@
         setTimeout(() => instance.dropdown.hide(), 0);
       }
     });
+  }
+
+  /**
+   * Let Down Arrow reopen the list straight after it closes.
+   *
+   * Tagify leaves its "list showing" flag on for 100ms after it closes the
+   * list, and Down Arrow only opens a list that flag says is closed. So Down
+   * Arrow pressed soon after Escape did nothing (#2748). Fast typists and
+   * some assistive technology send keys that quickly. Clear the flag when
+   * Down Arrow finds the list gone in that window. Outside it, the flag can
+   * also mean suggestions are still loading, so it's left alone then.
+   */
+  function reopenOnDownArrow(instance) {
+    let justHidden = false;
+    instance.on('dropdown:hide', () => {
+      justHidden = true;
+      setTimeout(() => {
+        justHidden = false;
+      }, 150);
+    });
+    instance.on('dropdown:show', () => {
+      justHidden = false;
+    });
+    instance.DOM.scope.addEventListener('keydown', (event) => {
+      if ((event.key === 'ArrowDown' || event.key === 'Down') && justHidden
+        && !instance.DOM.dropdown.isConnected) {
+        justHidden = false;
+        instance.state.dropdown.visible = false;
+      }
+    }, true);
   }
 
   /**
