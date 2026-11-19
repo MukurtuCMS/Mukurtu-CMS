@@ -1784,6 +1784,16 @@ a .mukurtu-content-warnings__actions {
   outline-offset: 2px;
 }
 
+@media (forced-colors: active) {
+  html .contextual-region .contextual .trigger:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 2px;
+  }
+  html .contextual-region .contextual .contextual-links li a:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: -2px;
+  }
+}
 .block-featured-content {
   -webkit-padding-after: var(--v-space-s);
           padding-block-end: var(--v-space-s);
