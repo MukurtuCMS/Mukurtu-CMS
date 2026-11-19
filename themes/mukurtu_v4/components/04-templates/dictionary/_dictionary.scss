@@ -106,9 +106,14 @@
         }
       }
 
-      // Apply button — hidden by BEF auto-submit; collapse leftover whitespace.
+      // Apply sits in the row with List, Map and Reset (#2619). The row
+      // already has a Reset link, so hide the form's own.
       .form-actions {
-        display: none;
+        display: contents;
+
+        [data-drupal-selector^="edit-reset"] {
+          display: none;
+        }
       }
     }
 
@@ -217,7 +222,8 @@
     gap: var(--v-space-5xs);
 
     a,
-    button {
+    button,
+    input[type="submit"] {
       @include mixins.block-link;
       flex: 1;
       display: flex;

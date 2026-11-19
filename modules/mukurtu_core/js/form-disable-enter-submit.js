@@ -10,6 +10,9 @@
     if (form.querySelector('input[type="search"]')) return true;
     if (form.getAttribute('role') === 'search') return true;
     if (form.id === 'user-login-form') return true;
+    // Views exposed filters (the browse and dictionary filters) are search
+    // forms that wait for Apply, so Enter in their search box applies (#2619).
+    if (form.id && form.id.startsWith('views-exposed-form-')) return true;
     // Single visible text input: Enter-to-submit is the expected keyboard interaction.
     const visibleTextInputs = form.querySelectorAll(
       'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"])'
