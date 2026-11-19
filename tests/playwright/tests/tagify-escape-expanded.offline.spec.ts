@@ -8,6 +8,9 @@ import path = require('path');
  *   the typed text became a new term. It now clears the text instead.
  * - Tagify set aria-expanded on its <tags> wrapper, which has no role, so
  *   the attribute isn't allowed there (WCAG 4.1.2, #2720).
+ * - Escape that closed the list also closed a dialog around the field
+ *   (#2746). It's now marked as handled, which jQuery UI dialogs respect.
+ * - Down Arrow right after Escape didn't reopen the list (#2748).
  *
  * Runs the real Tagify library with the override and combobox files, and
  * the Tagify module's dropdown settings. Drupal is stubbed.
@@ -53,12 +56,16 @@ async function setUp(page: Page): Promise<void> {
     w.drupalSettings = {
       tagify: { information_message: { no_matching_suggestions: 'No matching suggestions found for:' } },
     };
-    // Stands in for a dialog around the field, such as Entity Browser's or
-    // Layout Builder's, which close on Escape as it bubbles.
+    // Stands in for a dialog around the field, such as the media library's.
+    // Like jQuery UI's, it closes on an Escape that isn't marked as handled.
     w.escapesReachedPage = 0;
+    w.dialogClosings = 0;
     document.getElementById('outer')!.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         w.escapesReachedPage += 1;
+        if (!event.defaultPrevented) {
+          w.dialogClosings += 1;
+        }
       }
     });
   });
@@ -184,6 +191,55 @@ test.describe('Tagify Escape and aria-expanded', () => {
     await page.keyboard.press('Escape');
     expect(await page.evaluate(() => (window as any).escapesReachedPage)).toBe(2);
     expect(await focusedName(page)).toBe('Keywords');
+  });
+
+  test('Escape that closes the list leaves a dialog open, and the next one closes it', async ({ page }) => {
+    const closings = () => page.evaluate(() => (window as any).dialogClosings);
+    await keywords(page).click();
+    await page.keyboard.type('bas');
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(true);
+    await page.waitForTimeout(150);
+
+    await page.keyboard.press('Escape');
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(false);
+    expect(await closings()).toBe(0);
+    expect(await focusedName(page)).toBe('Keywords');
+
+    await page.keyboard.press('Escape');
+    expect(await closings()).toBe(1);
+  });
+
+  test('Down Arrow right after Escape reopens the list', async ({ page }) => {
+    await keywords(page).click();
+    await page.keyboard.type('bas');
+    await expect.poll(() => listOpen(page, 'keywords')).toBe(true);
+    await page.waitForTimeout(150);
+    const showing = () => page.evaluate(() => Boolean(document.querySelector('.tagify__dropdown')?.isConnected));
+
+    // No wait between the keys.
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('ArrowDown');
+    await expect.poll(showing).toBe(true);
+
+    // Tagify's own timer from that close mustn't mark the reopened list
+    // closed: the next Escape still only closes the list (#2746).
+    await page.waitForTimeout(200);
+    expect(await listOpen(page, 'keywords')).toBe(true);
+    await page.keyboard.press('Escape');
+    expect(await page.evaluate(() => (window as any).dialogClosings)).toBe(0);
+    await page.keyboard.press('Escape');
+
+    // The same on a show-all field.
+    await page.keyboard.press('Escape');
+    await wordType(page).focus();
+    await page.keyboard.press('ArrowDown');
+    await expect.poll(() => listOpen(page, 'type')).toBe(true);
+    await page.waitForTimeout(150);
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('ArrowDown');
+    await expect.poll(showing).toBe(true);
+    await page.waitForTimeout(200);
+    expect(await listOpen(page, 'type')).toBe(true);
   });
 
   test('blur works again after Escape', async ({ page }) => {
