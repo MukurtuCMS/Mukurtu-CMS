@@ -24,6 +24,15 @@
   font-size: 0.875em;
 }
 
+/* The row's Edit link, on its own line so it doesn't read as part of the
+   title link. */
+.mukurtu-bulk-edit-grid__edit {
+  display: block;
+  margin-block-start: 0.25rem;
+  font-size: 0.875em;
+  text-decoration: underline;
+}
+
 .mukurtu-bulk-edit-grid__table input.form-text,
 .mukurtu-bulk-edit-grid__table textarea {
   width: 100%;

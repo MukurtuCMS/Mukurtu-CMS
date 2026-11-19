@@ -97,7 +97,7 @@ class BulkEditGridForm extends FormBase {
     $form['intro'] = [
       '#type' => 'html_tag',
       '#tag' => 'p',
-      '#value' => $this->t('Each row is one item. Change any cells, then save. Values use the same format as a CSV import: separate multiple values with a semicolon (;).'),
+      '#value' => $this->t('Each row is one item. Change any cells, then save. Values use the same format as a CSV import: separate multiple values with a semicolon (;).') . ' ' . $this->t("Use Edit to open an item's full edit form, for fields the grid doesn't show. Save your changes here first."),
     ];
 
     $this->buildColumnsPanel($form, $form_state, $available, $fields);
@@ -128,12 +128,23 @@ class BulkEditGridForm extends FormBase {
 
     foreach ($loaded as $key => $item) {
       $label = $item->label();
-      $form['grid'][$key]['item'] = [
+      $form['grid'][$key]['item']['title'] = [
         '#type' => 'link',
         '#title' => $label,
         '#url' => $item->toUrl(),
         '#suffix' => $item->isDefaultTranslation() ? '' : ' <span class="mukurtu-bulk-edit-grid__language">' . Html::escape($item->language()->getName()) . '</span>',
       ];
+      // The full edit form, for fields the grid leaves out. Saving it comes
+      // back here.
+      if ($item->hasLinkTemplate('edit-form')) {
+        $form['grid'][$key]['item']['edit'] = [
+          '#type' => 'link',
+          '#title' => $this->t('Edit <span class="visually-hidden">@item</span>', ['@item' => $label]),
+          '#url' => $item->toUrl('edit-form', ['query' => $this->getDestinationArray()]),
+          '#attributes' => ['class' => ['mukurtu-bulk-edit-grid__edit']],
+          '#prefix' => ' ',
+        ];
+      }
       foreach ($fields as $field) {
         $originals[$key][$field] ??= $cells->text($item, $field);
         // A sub-column such as "field_media_image/alt" is part of its field.
