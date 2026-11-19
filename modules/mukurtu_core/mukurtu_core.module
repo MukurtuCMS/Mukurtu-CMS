@@ -1668,6 +1668,14 @@ function mukurtu_core_library_info_alter(&$libraries, $extension) {
     $libraries['leaflet-drupal']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/mukurtu-leaflet-circle-display.js'] = [];
   }
 
+  // Keyboard fixes for Klaro (#2747): put its consent settings button after
+  // the skip link, and keep focus inside its consent window while it's open.
+  // Must load after klaro.drupal.js, which adds the button.
+  if ($extension === 'klaro' && isset($libraries['klaro'])) {
+    $libraries['klaro']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_core') . '/js/klaro-keyboard.js'] = [];
+    $libraries['klaro']['dependencies'][] = 'core/drupal';
+  }
+
   // Keep an Entity Browser item fully opaque while it is dragged to reorder
   // the list (#808), and add arrow buttons that reorder it without dragging
   // (#2498). Both scripts must load after entity_browser.entity_reference.js,

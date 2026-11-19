@@ -131,6 +131,14 @@ html:has(> body > .klaro_toggle_dialog) {
     text-decoration: underline;
   }
 
+  // Klaro rings its consent window's Close button with `outline: auto` in
+  // white, on the window's near-white background, so its focus couldn't be
+  // seen (WCAG 2.4.7). The window opens with focus on it (#2747).
+  .cookie-modal .cm-modal .hide:focus-visible {
+    outline: 2px solid var(--brand-primary-dark);
+    outline-offset: 2px;
+  }
+
   .context-notice p.cm-buttons {
     // Klaro's default centering for this paragraph relies on text-align,
     // which stops applying to the buttons once this is switched to a flex
