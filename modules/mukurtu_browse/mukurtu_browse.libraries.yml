@@ -31,6 +31,16 @@ map-browse-bounding-box-query:
     - core/jquery
     - core/jquery.once
 
+facet-focus:
+  version: 1.x
+  js:
+    js/facet-focus.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupalSettings
+    - core/once
+
 search-suggest:
   version: 1.x
   js:

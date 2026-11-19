@@ -1,0 +1,65 @@
+/**
+ * @file
+ * Arrow buttons that reorder paragraphs without dragging (#2738).
+ *
+ * The same buttons as entity-browser-reorder.css, stacked above and below
+ * the drag handle.
+ */
+
+.mukurtu-paragraphs-move {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 32px clears the 24px minimum target size (WCAG 2.5.8). The border is
+ * #767676, 4.54:1 on white, for the 3:1 a control's edge needs (1.4.11). */
+.mukurtu-paragraphs-move__button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  padding: 0;
+  border: 1px solid #767676;
+  border-radius: 50%;
+  background-color: var(--gin-bg-layer, Canvas);
+  color: var(--gin-color-text, CanvasText);
+  cursor: pointer;
+}
+
+.mukurtu-paragraphs-move__button:hover:not(:disabled) {
+  background-color: var(--gin-bg-item-hover, Canvas);
+}
+
+/* Gin draws focus as a box-shadow, which forced colors removes, leaving no
+ * focus indicator at all (WCAG 2.4.7). Gin's ring stays in normal modes. The
+ * extra class outranks Gin's `:where(*) .page-wrapper :focus` reset, which
+ * loads later and sets outline: none. */
+@media (forced-colors: active) {
+  .field--widget-paragraphs .mukurtu-paragraphs-move__button:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+/* Disabled controls are exempt from contrast minimums, and fading these makes
+ * it clear the paragraph is already at that end of the list. */
+.mukurtu-paragraphs-move__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The chevrons point toward the start and end of a line; turn them to point
+ * up and down the list. */
+.mukurtu-paragraphs-move__button svg {
+  transform: rotate(90deg);
+}
+
+/* With row weights shown, tabledrag hides the handles; the arrows go too, as
+ * the weight lists do the same job. */
+.mukurtu-paragraphs-move:has(> .tabledrag-handle[style*="display: none"]) .mukurtu-paragraphs-move__button {
+  display: none;
+}

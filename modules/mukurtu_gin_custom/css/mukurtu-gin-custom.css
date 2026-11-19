@@ -39,18 +39,29 @@ html:not(.gin--dark-mode) :is([data-drupal-messages], .mukurtu-super-admin-warni
   --gin-color-focus: #fff;
 }
 
-/* WCAG 2.4.7: Gin draws focus as a box-shadow, which forced colors mode
-removes, leaving form fields with only a small border change. This file also
-loads on the public theme, which has its own focus styles, so
-data-gin-layout-density limits this to pages in Gin. Gin clears the outline
-with :is(#extra-specificity-hack), so this needs !important. Links in
-messages are included because Gin gives links outline: none, which left them
-with no focus indicator at all in forced colors (#2657). */
+/* WCAG 2.4.7: Gin draws focus as a box-shadow and gives links, buttons and
+summaries outline: none. Forced colors mode removes box-shadows, which left
+links, breadcrumbs, dropbuttons, summaries and the whole admin toolbar with
+no focus indicator at all (#2626, #2657, #2677). One outline for every
+focused element also replaces the outlines some elements draw themselves,
+such as Gin's dotted tabs, so none gets two rings. This file also loads on
+the public theme, which has its own focus styles, so this is limited to
+pages in Gin (data-gin-layout-density), Layout Builder (.glb-body), and the
+Gin toolbars, navigation and breadcrumb, which also show on public pages.
+Gin clears the outline with :is(#extra-specificity-hack), so this needs
+!important. */
 @media (forced-colors: active) {
-  [data-gin-layout-density] :is(.form-element, .form-boolean, .button, .tagify__input):focus-visible,
-  [data-gin-layout-density] :is([data-drupal-messages], .mukurtu-super-admin-warning-wrapper) a:focus-visible {
+  :is([data-gin-layout-density], .glb-body, #admin-toolbar, #toolbar-administration, .gin-secondary-toolbar) :focus-visible {
     outline: 2px solid Highlight !important;
     outline-offset: 2px;
+  }
+
+  /* Drawn inside where an outside ring would be cut off: by the sidebar,
+  which clips its summaries' sides, by the media library's type tabs, or by
+  the page edge for skip links, the sidebar itself and the toolbar that
+  replaces the navigation on narrow screens. */
+  :is([data-gin-layout-density], .glb-body, #toolbar-administration) :is(#gin_sidebar, #gin_sidebar summary, #gin-toolbar-bar *, .media-library-menu__link, .visually-hidden.focusable):focus-visible {
+    outline-offset: -2px;
   }
 }
 
@@ -1584,6 +1595,27 @@ body.path-visitors .layout-row.layout-row {
   }
 }
 
+/* WCAG 2.4.7 (#2742): Gin hides its toolbar logo link, which has no visible
+   content, with `.toolbar-menu__logo { display: none }`. Core's toolbar CSS
+   has `.toolbar { & a { display: block } }`, which outranks it, so on narrow
+   screens the link was in the tab order at 0px tall, with no visible focus. */
+.toolbar .toolbar-menu__logo {
+  display: none;
+}
+
+/* WCAG 1.4.11 (#2743): the narrow toolbar's icons (Manage, Shortcuts,
+   Dashboards and the rest) are a fill cut to shape with a mask. Forced colors
+   repaints the fill with the bar's own color, so the icons vanished. Fill
+   them with the link color, as Gin does for its own masked icons in forced
+   colors. html outranks Gin's rule, which loads after this file, and the
+   states repeat Gin's own hover, focus and open-tray rules. */
+@media (forced-colors: active) {
+  html .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon::before,
+  html .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:is(:hover, :focus, .is-active)::before {
+    background-color: LinkText;
+  }
+}
+
 /* Visitors report, Gin dark mode: keep the chart on a light plate.
 
    charts_chartjs paints its title and legend onto the <canvas>, and neither
@@ -1636,6 +1668,22 @@ body.path-visitors .layout-row.layout-row {
    stylesheet rule regardless of selector specificity. */
 .visitors-main .gin--sticky-table-header {
   display: none !important;
+}
+
+/* Gin's sticky table header copy lies over the real header row. Keyboard
+   users use the real row (sticky-header-copy.js takes the copy out of the Tab
+   order), so hide the copy while focus is in the real row, or its focus
+   indicator would be covered (#2741). !important: Gin's tableheader.js sets
+   visibility inline. */
+table.gin--sticky-table-header:has(+ .gin-table-scroll-wrapper thead :focus-visible) {
+  visibility: hidden !important;
+}
+
+/* With the copy hidden, the real row is the one under the pointer, but Gin
+   turns off its pointer events, which would swallow the first click.
+   !important: Gin's rule uses an id selector. */
+.gin-table-scroll-wrapper thead:has(:focus-visible) {
+  pointer-events: auto !important;
 }
 
 /* Design settings: put the custom-palette colour fieldset and the live
@@ -1910,4 +1958,13 @@ the only requirement is that the selector matches, which it does. */
    already passes. */
 html:not(.gin--dark-mode) .field--widget-paragraphs .field-multiple-table thead .paragraphs-actions .button {
   color: var(--gin-color-primary-hover);
+}
+
+/* Klaro's consent settings button floats over the bottom right of every page,
+and a control on screen behind it takes focus without the page scrolling
+(WCAG 2.4.11, #2712). Padding the bottom of the scroll area makes the
+browser scroll focused elements above it, as the public theme does in
+_consent-popup.scss. */
+html:has(> body[data-gin-layout-density] > .klaro_toggle_dialog) {
+  scroll-padding-block-end: 4.5rem;
 }
