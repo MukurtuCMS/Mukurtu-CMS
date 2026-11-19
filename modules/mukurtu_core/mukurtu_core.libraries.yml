@@ -22,6 +22,7 @@ tagify-override:
     component:
       css/tagify-list-placement.css: {}
       css/tagify-reorder.css: {}
+      css/tagify-no-match.css: {}
   dependencies:
     - core/drupal
     - core/drupal.announce
@@ -222,6 +223,22 @@ visitors-country-map:
     - core/jquery
     - core/drupal
     - leaflet/leaflet-drupal
+
+bulk_edit_columns:
+  version: 1.x
+  css:
+    component:
+      css/bulk-edit-columns.css: {}
+
+bulk_edit_selection_count:
+  version: 1.x
+  js:
+    js/bulk-edit-selection-count.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupal.announce
+    - core/drupalSettings
 
 character_palette:
   version: 1.x

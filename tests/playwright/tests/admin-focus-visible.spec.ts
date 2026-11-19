@@ -119,8 +119,77 @@ test.describe('Focus visible (admin)', () => {
     await expect(link).toHaveCSS('outline-style', 'solid');
   });
 
-  // The outline is limited by this attribute, because the public theme draws
-  // its own focus ring and a second one would double it.
+  // Gin gives links, buttons and summaries outline: none, so in forced colors
+  // most of a Gin page had no focus indicator (#2677). Tabs draw their own
+  // dotted outline; one solid outline replaces it, so there is one ring.
+  // Shift+Tab then Tab focuses each element from the keyboard, so
+  // :focus-visible applies.
+  test('Focus visible: links, tabs, breadcrumbs and dropbuttons keep an outline in forced colors', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/admin/people');
+    for (const selector of [
+      '.views-table thead a',
+      '.views-table tbody td a',
+      '.tabs__link',
+      '.gin-breadcrumb__link',
+      '.dropbutton__toggle',
+      'a.toolbar-link--has-icon',
+    ]) {
+      const element = page.locator(`${selector}:visible`).first();
+      await element.focus();
+      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
+      await expect(element, selector).toBeFocused();
+      await expect(element, selector).toHaveCSS('outline-style', 'solid');
+    }
+  });
+
+  test('Focus visible: details summaries keep an outline in forced colors', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/node/add/digital_heritage');
+    // Gin sets the sidebar's starting state once its scripts run, which
+    // would close a sidebar opened before then.
+    await page.waitForLoadState('networkidle');
+    if ((await page.locator('body').getAttribute('data-meta-sidebar')) !== 'open') {
+      await page.locator('.meta-sidebar__trigger:visible').first().click();
+    }
+    await expect(page.locator('body')).toHaveAttribute('data-meta-sidebar', 'open');
+    await expect(page.locator('#gin_sidebar')).toBeVisible();
+    // The sidebar clips its overflow, so its outlines are drawn inside.
+    for (const [selector, offset] of [
+      ['.layout-region-node-main summary:visible', '2px'],
+      ['#gin_sidebar summary', '-2px'],
+    ]) {
+      const summary = page.locator(selector).first();
+      await expect(summary, selector).toBeVisible();
+      await summary.focus();
+      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
+      await expect(summary, selector).toBeFocused();
+      await expect(summary, selector).toHaveCSS('outline-style', 'solid');
+      await expect(summary, selector).toHaveCSS('outline-offset', offset);
+    }
+  });
+
+  // Gin's navigation and breadcrumb also show on public pages, which have no
+  // data-gin-layout-density, so they are covered by their own containers.
+  test('Focus visible: the Gin toolbar keeps an outline in forced colors on public pages', async ({ page }) => {
+    await page.emulateMedia({ forcedColors: 'active' });
+    await page.goto('/');
+    await expect(page.locator('body')).not.toHaveAttribute('data-gin-layout-density');
+    for (const selector of ['a.toolbar-link--has-icon', '.gin-breadcrumb__link']) {
+      const element = page.locator(`${selector}:visible`).first();
+      await element.focus();
+      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
+      await expect(element, selector).toBeFocused();
+      await expect(element, selector).toHaveCSS('outline-style', 'solid');
+    }
+  });
+
+  // Apart from Gin's toolbar, navigation and breadcrumb, the outline is
+  // limited by this attribute, because the public theme draws its own focus
+  // ring.
   test('Focus visible: public pages are outside the forced colors outline', async ({ page }) => {
     await page.goto('/admin/config/system/site-information');
     await expect(page.locator('body')).toHaveAttribute('data-gin-layout-density');
