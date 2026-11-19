@@ -4,7 +4,8 @@ import path = require('path');
 /**
  * Tagify's default highlighted suggestion (white on #3595f6, about 3.1:1)
  * and placeholder grays (2.8:1 or lower) fail WCAG 1.4.3 in the public
- * theme, which has no Gin skin to replace them (#2668).
+ * theme, which has no Gin skin to replace them (#2668). The Tagify module
+ * also fades its "No matching suggestions" row below 4.5:1 (#2727).
  *
  * Runs the real Tagify library with the compiled theme CSS and each shipped
  * palette, so it needs no site and runs in the `offline` project.
@@ -14,6 +15,19 @@ const ROOT = path.join(__dirname, '../../..');
 const THEME = path.join(ROOT, 'themes/mukurtu_v4');
 const TAGIFY_JS = path.join(ROOT, 'libraries/tagify/dist/tagify.js');
 const TAGIFY_CSS = path.join(ROOT, 'libraries/tagify/dist/tagify.css');
+const NO_MATCH_CSS = path.join(ROOT, 'modules/mukurtu_core/css/tagify-no-match.css');
+
+// The Tagify module's rules for its list items and "No matching
+// suggestions" row (css/tagify.css), copied because vendor/ isn't installed
+// in the offline job. They fade the row to half opacity and push the typed
+// text to the far edge (#2727).
+const MODULE_NO_MATCH_RULE = `.tagify__dropdown__item { display: flex; align-items: center; justify-content: space-between; }
+.tagify--dropdown-item-no-match {
+  display: grid; grid-template-columns: 1fr auto !important; align-items: center;
+  padding: var(--tagify-dd-item-pad); opacity: 0.5; font-style: italic;
+}
+.tagify--dropdown-item-no-match p { grid-column: 1; font-size: 0.8em; }
+.tagify--dropdown-item-no-match .tagify--value { grid-column: 2; font-size: 0.9em; }`;
 
 const PALETTES: [string, string | null][] = [
   ['default', null],
@@ -28,6 +42,8 @@ async function setUp(page: Page, palette: string | null): Promise<void> {
   </body></html>`);
   // The library CSS is attached before the theme's, as on a real page.
   await page.addStyleTag({ path: TAGIFY_CSS });
+  await page.addStyleTag({ content: MODULE_NO_MATCH_RULE });
+  await page.addStyleTag({ path: NO_MATCH_CSS });
   await page.addStyleTag({ path: path.join(THEME, 'css/style.css') });
   if (palette) {
     await page.addStyleTag({ path: path.join(THEME, palette) });
@@ -38,6 +54,11 @@ async function setUp(page: Page, palette: string | null): Promise<void> {
     new Tagify(document.getElementById('keywords'), {
       whitelist: ['Mary Jane Smith', 'Mary Jones'],
       dropdown: { enabled: 1, highlightFirst: true },
+      // The module's "no match" row (js/tagify.js).
+      templates: {
+        dropdownItemNoMatch: (data: any) => `<div class="tagify__dropdown__item tagify--dropdown-item-no-match" value="noMatch" tabindex="0" role="option">
+          <p>No matching suggestions found for:</p><strong class="tagify--value">${data.value}</strong></div>`,
+      },
     });
   });
 }
@@ -92,6 +113,60 @@ for (const [name, palette] of PALETTES) {
     test('Highlighted suggestion text has 4.5:1 contrast', async ({ page }) => {
       await openSuggestions(page);
       expect(await contrast(page, '.tagify__dropdown__item--active')).toBeGreaterThanOrEqual(4.5);
+    });
+
+    test('"No matching suggestions" is not faded and has 4.5:1 contrast', async ({ page }) => {
+      await page.locator('.tagify__input').click();
+      await page.keyboard.type('zqx');
+      const row = page.locator('.tagify--dropdown-item-no-match');
+      await expect(row).toBeVisible();
+      // contrast() reads colors, not opacity, so check the fade separately.
+      await expect(row).toHaveCSS('opacity', '1');
+      // As the only row it's highlighted; check it plain too.
+      for (const highlighted of [true, false]) {
+        await row.evaluate((element, on) => element.classList.toggle('tagify__dropdown__item--active', on), highlighted);
+        for (const part of ['p', '.tagify--value']) {
+          expect(await contrast(page, `.tagify--dropdown-item-no-match ${part}`), `${part}, highlighted: ${highlighted}`).toBeGreaterThanOrEqual(4.5);
+        }
+      }
+    });
+
+    test('Typed text follows the "No matching suggestions" message', async ({ page }) => {
+      // The fixture field is narrow enough to wrap the message; widen it to
+      // the size of a field on the edit form.
+      await page.addStyleTag({ content: 'tags.tagify { inline-size: 40rem; }' });
+      await page.locator('.tagify__input').click();
+      await page.keyboard.type('zqx');
+      // Measures the text, not the boxes, which can stretch to fill the row.
+      // Measured together: the list slides into place as it opens.
+      const [message, value] = await page.locator('.tagify--dropdown-item-no-match').evaluate((row) =>
+        ['p', '.tagify--value'].map((part) => {
+          const range = document.createRange();
+          range.selectNodeContents(row.querySelector(part)!);
+          return range.getBoundingClientRect().toJSON();
+        }));
+      // On the message's line, a short gap after it, not at the far edge.
+      expect(value.x - message.right).toBeGreaterThanOrEqual(0);
+      expect(value.x - message.right).toBeLessThan(16);
+      const middle = value.y + value.height / 2;
+      expect(middle).toBeGreaterThan(message.y);
+      expect(middle).toBeLessThan(message.y + message.height);
+    });
+
+    test('"No matching suggestions" row grows to fit when it wraps', async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 640 });
+      // WCAG 1.4.12 text spacing, which makes the wrapped row taller still.
+      await page.addStyleTag({ content: '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important; } p { margin-block-end: 2em !important; }' });
+      await page.locator('.tagify__input').click();
+      await page.keyboard.type('zqxzqxzqx');
+      const row = page.locator('.tagify--dropdown-item-no-match');
+      await expect(row).toBeVisible();
+      const [rowBox, value] = await row.evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element.querySelector('.tagify--value')!);
+        return [element.getBoundingClientRect().toJSON(), range.getBoundingClientRect().toJSON()];
+      });
+      expect(value.bottom).toBeLessThanOrEqual(rowBox.bottom);
     });
 
     test('Placeholder text has 4.5:1 contrast', async ({ page }) => {
