@@ -85,6 +85,7 @@
       }
     });
     keepFocusOnEscape(instance);
+    reopenOnDownArrow(instance);
     removeWrapperExpanded(instance);
     instance.__mukurtuPatched = true;
   }
@@ -108,9 +109,11 @@
    * Its handler calls the input's blur(), so stand in a no-op blur() for the
    * length of the key press, and clear the typed text instead, as the ARIA
    * combobox pattern and the browse search box (#2473) do. The first Escape
-   * still just closes the list. The event itself still travels, so a dialog
-   * around the field can still close on Escape, and a tag being edited still
-   * handles it as before.
+   * still just closes the list, and is marked as handled, so a dialog around
+   * the field stays open (#2746). jQuery UI dialogs, like the media library,
+   * close on any Escape that isn't. With the list closed, the next Escape
+   * closes the dialog as usual. A tag being edited still handles Escape as
+   * before.
    */
   function keepFocusOnEscape(instance) {
     const { input } = instance.DOM;
@@ -128,6 +131,9 @@
       // An Escape that is closing the list leaves the text alone, and one
       // that cancels a character in an input method belongs to it.
       dismissed = true;
+      if (!event.isComposing && isListShowing(instance)) {
+        event.preventDefault();
+      }
       if (!event.isComposing && !isListShowing(instance) && input.textContent.trim()) {
         instance.input.set.call(instance, '');
       }
@@ -146,6 +152,48 @@
         setTimeout(() => instance.dropdown.hide(), 0);
       }
     });
+  }
+
+  /**
+   * Let Down Arrow reopen the list straight after it closes.
+   *
+   * Tagify leaves its "list showing" flag on for 100ms after it closes the
+   * list, and Down Arrow only opens a list that flag says is closed. So Down
+   * Arrow pressed soon after Escape did nothing (#2748). Fast typists and
+   * some assistive technology send keys that quickly. Clear the flag when
+   * Down Arrow finds the list gone in that window. Outside it, the flag can
+   * also mean suggestions are still loading, so it's left alone then.
+   *
+   * Tagify switches the flag off with a timer it doesn't cancel, so a list
+   * reopened in that window would be marked closed while showing, and the
+   * next Escape would close a dialog around the field (#2746). Set the flag
+   * back once that timer has run.
+   */
+  function reopenOnDownArrow(instance) {
+    const flagDelay = 100;
+    let hiddenAt = -Infinity;
+    instance.on('dropdown:hide', () => {
+      hiddenAt = Date.now();
+    });
+    instance.on('dropdown:show', () => {
+      const since = Date.now() - hiddenAt;
+      if (since >= flagDelay) {
+        return;
+      }
+      const { visible } = instance.state.dropdown;
+      setTimeout(() => {
+        if (instance.DOM.dropdown.isConnected && !instance.state.dropdown.visible) {
+          instance.state.dropdown.visible = visible || true;
+        }
+      }, flagDelay - since + 20);
+    });
+    instance.DOM.scope.addEventListener('keydown', (event) => {
+      if ((event.key === 'ArrowDown' || event.key === 'Down')
+        && Date.now() - hiddenAt < flagDelay
+        && !instance.DOM.dropdown.isConnected) {
+        instance.state.dropdown.visible = false;
+      }
+    }, true);
   }
 
   /**
