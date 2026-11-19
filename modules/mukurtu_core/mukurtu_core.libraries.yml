@@ -17,9 +17,12 @@ tagify-override:
     js/mukurtu-tagify-override.js: {}
     js/tagify-reorder.js: {}
     js/tagify-combobox.js: {}
+    js/tagify-list-placement.js: {}
   css:
     component:
+      css/tagify-list-placement.css: {}
       css/tagify-reorder.css: {}
+      css/tagify-no-match.css: {}
   dependencies:
     - core/drupal
     - core/drupal.announce
@@ -68,6 +71,20 @@ paragraphs_widget_focus:
     js/paragraphs-widget-focus.js: {}
   dependencies:
     - core/drupal
+    - core/once
+
+# Arrow buttons that reorder paragraphs without dragging (#2738).
+paragraphs_reorder:
+  version: 1.x
+  js:
+    js/paragraphs-reorder.js: {}
+  css:
+    component:
+      css/paragraphs-reorder.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.tabledrag
     - core/once
 
 entity_browser_form:
@@ -220,6 +237,22 @@ visitors-country-map:
     - core/jquery
     - core/drupal
     - leaflet/leaflet-drupal
+
+bulk_edit_columns:
+  version: 1.x
+  css:
+    component:
+      css/bulk-edit-columns.css: {}
+
+bulk_edit_selection_count:
+  version: 1.x
+  js:
+    js/bulk-edit-selection-count.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupal.announce
+    - core/drupalSettings
 
 character_palette:
   version: 1.x

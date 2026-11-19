@@ -29,4 +29,4 @@ options:
   show_count: false
   delay: 0
   submit_button_selector: ':submit'
-  autosubmit: true
+  autosubmit: false
