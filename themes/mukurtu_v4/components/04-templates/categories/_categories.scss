@@ -18,6 +18,13 @@
     padding-inline: var(--layout-padding-m);
   }
 
+  // On the /categories page itself the page grid (see _page.scss) already
+  // supplies the gutter; the padding above is for the category blocks
+  // placed on landing pages.
+  .layout-content & {
+    padding-inline: 0;
+  }
+
   // Individual cards layout.
   .category-card .category-teaser a { // views-row
     display: flex;

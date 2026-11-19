@@ -5,6 +5,15 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## 4.0.10
+
+A security release. Update as soon as you can. It requires Drupal core 11.4.13
+or later, which fixes the critical remote code execution issue SA-CORE-2026-017
+and the moderately critical issue SA-CORE-2026-018.
+
+To update, back up your site, run `composer update`, and then run database
+updates (`drush updb`). This release has no database updates.
+
 ## 4.0.9
 
 A feature and maintenance release. It adds search suggestions, XLSX and ODS import and export, a floating character palette for entering characters without the proper keyboard layout, manual ordering for the Collections page, and redesigned article tools. It also tightens several access checks and fixes accessibility issues.

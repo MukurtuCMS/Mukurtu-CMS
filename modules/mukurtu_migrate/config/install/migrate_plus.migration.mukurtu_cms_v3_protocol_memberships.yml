@@ -32,10 +32,16 @@ process:
     plugin: default_value
     default_value: protocol
   entity_id:
-    plugin: migration_lookup
-    migration:
-      - mukurtu_cms_v3_cultural_protocols
-    source: gid
+    -
+      plugin: migration_lookup
+      migration:
+        - mukurtu_cms_v3_cultural_protocols
+      source: gid
+      no_stub: true
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Membership not created: source protocol could not be matched to a migrated protocol.'
   roles:
     -
       plugin: static_map
@@ -64,4 +70,5 @@ migration_dependencies:
     - mukurtu_cms_v3_users
     - mukurtu_cms_v3_users_uid1
     - mukurtu_cms_v3_community_memberships
+    - mukurtu_cms_v3_cultural_protocols
 include: null
