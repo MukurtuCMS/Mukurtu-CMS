@@ -28,16 +28,21 @@ final class GridStrategy extends MukurtuImportStrategy {
    * Returns a one-row migration definition that updates an existing item.
    *
    * @param array<string, string> $row
-   *   Source values keyed by target: the entity ID, the langcode for a
-   *   translation row, and the changed fields' cell text.
-   * @param string[] $fields
-   *   The changed fields.
+   *   Source values: the entity ID and, for a translation row, the langcode,
+   *   each keyed by its own name, then the changed cells' text.
+   * @param array<string, string> $targets
+   *   The cells' targets, keyed by source name. A sub-column such as
+   *   "field_image/alt" has a source name without the slash, which a source
+   *   name would read as nesting.
    * @param string $log
    *   The revision log message.
    */
-  public function rowDefinition(array $row, array $fields, string $log): array {
+  public function rowDefinition(array $row, array $targets, string $log): array {
     $entity_type_id = $this->getTargetEntityTypeId();
-    $mapping = array_map(fn($key) => ['source' => $key, 'target' => $key], array_keys($row));
+    $mapping = [];
+    foreach (array_keys($row) as $key) {
+      $mapping[] = ['source' => $key, 'target' => $targets[$key] ?? $key];
+    }
     $this->setMapping($mapping);
 
     // Translation rows send their langcode; the importer then leaves fields
@@ -45,10 +50,11 @@ final class GridStrategy extends MukurtuImportStrategy {
     // they update the item itself, shared fields included.
     $ids = [];
     foreach (array_keys($row) as $key) {
-      if (!in_array($key, $fields, TRUE)) {
+      if (!isset($targets[$key])) {
         $ids[$key] = ['type' => 'string'];
       }
     }
+    $fields = array_values(array_unique(array_map(fn($target) => explode('/', $target, 2)[0], $targets)));
 
     $destination = [
       'plugin' => "mukurtu_grid_entity:$entity_type_id",
