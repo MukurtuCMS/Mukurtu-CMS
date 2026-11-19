@@ -73,6 +73,20 @@ paragraphs_widget_focus:
     - core/drupal
     - core/once
 
+# Arrow buttons that reorder paragraphs without dragging (#2738).
+paragraphs_reorder:
+  version: 1.x
+  js:
+    js/paragraphs-reorder.js: {}
+  css:
+    component:
+      css/paragraphs-reorder.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.tabledrag
+    - core/once
+
 entity_browser_form:
   version: 1.x
   css:
