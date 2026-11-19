@@ -11,6 +11,7 @@ use Drupal\node\NodeTypeInterface;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Item\Field;
 use Drupal\search_api\Plugin\views\query\SearchApiQuery;
+use Drupal\views\ViewExecutable;
 
 /**
  * Implements hook_theme().
@@ -29,6 +30,9 @@ function mukurtu_browse_theme($existing, $type, $theme, $path) {
       'variables' => [
         'show_all_pages' => TRUE,
         'show_community_records' => FALSE,
+        // Whether each setting is in the URL, so the form keeps it.
+        'mpi_in_url' => FALSE,
+        'cr_in_url' => FALSE,
       ],
     ],
   ];
@@ -200,6 +204,25 @@ function mukurtu_browse_build_quick_actions(array &$variables, NodeInterface $no
     'icon_actions' => $icon_actions,
     'overflow_actions' => $overflow_actions,
   ];
+}
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Gives the page the number of results in the list, so after Apply reloads
+ * it, screen readers hear how many results there are (#2619). The grid and
+ * map show the same filtered results, so the list's total stands for all.
+ */
+function mukurtu_browse_views_pre_render(ViewExecutable $view): void {
+  $list_displays = [
+    'mukurtu_browse' => 'mukurtu_browse_block',
+    'mukurtu_digital_heritage_browse' => 'mukurtu_digital_heritage_browse_block',
+    'mukurtu_dictionary' => 'mukurtu_dictionary_block',
+  ];
+  if (($list_displays[$view->id()] ?? NULL) !== $view->current_display || !isset($view->total_rows)) {
+    return;
+  }
+  $view->element['#attached']['drupalSettings']['mukurtuBrowse']['resultCount'] = (int) $view->total_rows;
 }
 
 /**
@@ -510,6 +533,10 @@ function mukurtu_browse_preprocess_block(&$variables) {
   $toggle['#weight'] = $is_dictionary ? 100 : -5;
   $variables['content']['search_collapse_toggle'] = $toggle;
 
+  // Applying the filters reloads the page; keep focus where it was (#2522,
+  // #2619).
+  $variables['#attached']['library'][] = 'mukurtu_browse/facet-focus';
+
   // On the dictionary page, inject a separator and the list/map view toggle.
   if ($is_dictionary) {
     $variables['content']['facets_group_separator'] = [
@@ -518,8 +545,11 @@ function mukurtu_browse_preprocess_block(&$variables) {
     ];
     $variables['content']['browse_links'] = [
       '#type' => 'inline_template',
-      '#template' => '<div class="browse-links"><button data-browse-mode="list" aria-label="{{ list_label }}" class="active-toggle">{{ list_text }}</button><button data-browse-mode="map" aria-label="{{ map_label }}">{{ map_text }}</button><a href="{{ reset_url }}" class="filter-reset">{{ reset_text }}</a></div>',
+      '#template' => '<div class="browse-links"><button data-browse-mode="list" aria-label="{{ list_label }}" class="active-toggle">{{ list_text }}</button><button data-browse-mode="map" aria-label="{{ map_label }}">{{ map_text }}</button>{{ apply }}<a href="{{ reset_url }}" class="filter-reset">{{ reset_text }}</a></div>',
       '#context' => [
+        // The form's Apply button, beside Reset. It's still rendered inside
+        // the form, so it still submits it (#2619).
+        'apply' => $variables['content']['actions'] ?? [],
         'list_label' => t('Switch to list view'),
         'list_text' => t('List'),
         'map_label' => t('Switch to map view'),
@@ -529,5 +559,6 @@ function mukurtu_browse_preprocess_block(&$variables) {
       ],
       '#weight' => 101,
     ];
+    unset($variables['content']['actions']);
   }
 }
