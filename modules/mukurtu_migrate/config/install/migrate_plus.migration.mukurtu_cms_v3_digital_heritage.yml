@@ -183,8 +183,11 @@ process:
       plugin: media_embed
   field_coverage/geo_type:
     -
-      plugin: callback
+      plugin: skip_on_empty
+      method: process
       source: field_coverage/0/geo_type
+    -
+      plugin: callback
       callable: ucfirst
   field_coverage/lat:
     -

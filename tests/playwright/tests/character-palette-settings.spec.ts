@@ -95,6 +95,18 @@ test.describe('Character palette settings: reordering', () => {
     await expect(group.locator('input[type="number"]').first()).toBeHidden();
   });
 
+  test('A combining mark on its own shows in its Character box', async ({ page }) => {
+    // With no letter before it, the mark is drawn just before where the text
+    // starts, so without an indent the box cuts it off and looks empty.
+    const group = await fillLanguage(page);
+    const box = group.locator('tbody tr').first().locator('input[name$="[character]"]');
+    await box.fill('̲');
+
+    await expect(box).toHaveValue('̲');
+    const indent = await box.evaluate((input) => parseFloat(getComputedStyle(input).textIndent));
+    expect(indent).toBeGreaterThan(0);
+  });
+
   test('Add new row keeps unsaved moves, and saving keeps the order', async ({ page }) => {
     const group = await fillLanguage(page);
     const rows = group.locator('tbody tr');
