@@ -1,0 +1,39 @@
+// The icon on a browse card whose item has more than one media item (#1806).
+// See templates/content/_card-media.html.twig.
+
+.vertical-card__media,
+.horizontal-card__media {
+  &:has(> .card-media__multiple) {
+    position: relative;
+  }
+}
+
+.card-media__multiple {
+  position: absolute;
+  inset-block-start: var(--v-space-6xs);
+  inset-inline-end: var(--v-space-6xs);
+  // Above the content warning overlay, so the icon still shows while the
+  // media is hidden.
+  z-index: 11;
+  display: flex;
+  padding: 0.25rem;
+  border-radius: 4px;
+  // A dark chip, like the content warning overlay, so the white icon keeps
+  // its contrast over any image (WCAG 1.4.11).
+  background-color: rgba(0 0 0 / 75%);
+  color: #fff;
+  line-height: 0;
+  // The icon is not interactive. Clicks reach the media or player below.
+  pointer-events: none;
+
+  @media (forced-colors: active) {
+    border: 1px solid CanvasText;
+    background-color: Canvas;
+    color: CanvasText;
+  }
+}
+
+.card-media__multiple-icon {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}

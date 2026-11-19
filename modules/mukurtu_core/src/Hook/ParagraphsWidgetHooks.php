@@ -19,6 +19,8 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * - Each button is replaced by its opposite when clicked, which drops focus
  *   to the page. The replacement is marked for
  *   js/paragraphs-widget-focus.js to focus instead.
+ * - Paragraphs could only be reordered by dragging, so
+ *   js/paragraphs-reorder.js adds arrow buttons beside each drag handle.
  */
 class ParagraphsWidgetHooks {
 
@@ -65,6 +67,7 @@ class ParagraphsWidgetHooks {
    */
   #[Hook('field_widget_complete_paragraphs_form_alter')]
   public function headerButtons(array &$field_widget_complete_form, FormStateInterface $form_state, array $context): void {
+    $field_widget_complete_form['#attached']['library'][] = 'mukurtu_core/paragraphs_reorder';
     // While items are collapsed Expand all is the main action and Collapse
     // all sits in the dropdown; while they are open it's the other way
     // around.

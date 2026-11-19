@@ -1,0 +1,28 @@
+/**
+ * @file
+ * Keeps Tagify's "No matching suggestions" row readable (#2727).
+ *
+ * The Tagify module (css/tagify.css) fades the row to half opacity, which
+ * takes its text, and the typed text it repeats, below 4.5:1 (WCAG 1.4.3):
+ * 3.02:1 plain in Gin, about 2:1 highlighted. The italic text and the
+ * message itself still set it apart from real suggestions.
+ *
+ * The module also pushes the typed text to the far edge of the list, with a
+ * grid column and with space-between on every list item. A wrapping flex
+ * row keeps it right after the message instead, and moves it to the next
+ * line when the list is narrow. The library caps list items at 60px, which
+ * would cut that second line off (WCAG 1.4.10, 1.4.12).
+ *
+ * Scoped to the list so it outranks the module's single-class rule
+ * whichever stylesheet loads last.
+ */
+
+.tagify__dropdown .tagify--dropdown-item-no-match {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0 0.5ch;
+  max-height: none;
+  opacity: 1;
+}
