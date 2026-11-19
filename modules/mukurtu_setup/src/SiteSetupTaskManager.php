@@ -90,7 +90,7 @@ class SiteSetupTaskManager {
       new SiteSetupTask(
         self::TASK_MIGRATE,
         (string) $this->t('Migrate from Mukurtu CMS 3'),
-        Markup::create((string) $this->t('Bring over content from a Mukurtu CMS 3 site. Run this before adding any content. If you aren\'t migrating, dismiss this task. Learn more at <a href="https://docs.mukurtu.org/migration/00MigrationOverview/">Migration Overview</a>.')),
+        Markup::create((string) $this->t('Bring over content from a Mukurtu CMS 3 site. Run this before adding any content. If you aren\'t migrating, dismiss this task. Learn more at <a href="https://docs.mukurtu.org/migration/">Migration Overview</a>.')),
         self::GROUP_REQUIRED,
         TRUE,
         '/admin/migrate',
