@@ -84,7 +84,86 @@
         instance.DOM.input.focus();
       }
     });
+    keepFocusOnEscape(instance);
+    removeWrapperExpanded(instance);
     instance.__mukurtuPatched = true;
+  }
+
+  /**
+   * Whether a Tagify suggestion list is showing.
+   *
+   * Tagify's own flag stays on while suggestions load, with the list off the
+   * page, and for a moment after the list closes.
+   */
+  function isListShowing(instance) {
+    return Boolean(instance.state.dropdown.visible) && instance.DOM.dropdown.isConnected;
+  }
+
+  /**
+   * Keep focus in the field when Escape is pressed with the list closed.
+   *
+   * Tagify blurs its input then, so focus fell to the page body and keyboard
+   * and screen reader users lost their place (WCAG 2.4.3, #2719). On fields
+   * that create terms, the blur also added the typed text as a new term.
+   * Its handler calls the input's blur(), so stand in a no-op blur() for the
+   * length of the key press, and clear the typed text instead, as the ARIA
+   * combobox pattern and the browse search box (#2473) do. The first Escape
+   * still just closes the list. The event itself still travels, so a dialog
+   * around the field can still close on Escape, and a tag being edited still
+   * handles it as before.
+   */
+  function keepFocusOnEscape(instance) {
+    const { input } = instance.DOM;
+    // Set once Escape has closed the list or cleared the field, until the
+    // person clicks or presses another key.
+    let dismissed = false;
+    instance.DOM.scope.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' && event.key !== 'Esc') {
+        dismissed = false;
+        return;
+      }
+      if (event.target !== input || Object.prototype.hasOwnProperty.call(input, 'blur')) {
+        return;
+      }
+      // An Escape that is closing the list leaves the text alone, and one
+      // that cancels a character in an input method belongs to it.
+      dismissed = true;
+      if (!event.isComposing && !isListShowing(instance) && input.textContent.trim()) {
+        instance.input.set.call(instance, '');
+      }
+      input.blur = () => {};
+      setTimeout(() => {
+        delete input.blur;
+      }, 0);
+    }, true);
+    instance.DOM.scope.addEventListener('mousedown', () => {
+      dismissed = false;
+    });
+    // Suggestions requested before Escape can still arrive, and the Tagify
+    // module opens the list for them. Close it again.
+    instance.on('dropdown:show', () => {
+      if (dismissed) {
+        setTimeout(() => instance.dropdown.hide(), 0);
+      }
+    });
+  }
+
+  /**
+   * Keep aria-expanded off Tagify's <tags> wrapper.
+   *
+   * Tagify sets it there when the list opens and closes, but the wrapper has
+   * no role, so the attribute isn't allowed (WCAG 4.1.2, #2720). The input
+   * inside is the combobox and carries its own aria-expanded
+   * (tagify-combobox.js).
+   */
+  function removeWrapperExpanded(instance) {
+    const { scope } = instance.DOM;
+    scope.removeAttribute('aria-expanded');
+    new MutationObserver(() => {
+      if (scope.hasAttribute('aria-expanded')) {
+        scope.removeAttribute('aria-expanded');
+      }
+    }).observe(scope, { attributes: true, attributeFilter: ['aria-expanded'] });
   }
 
   /**
@@ -251,8 +330,11 @@
         // Only open the list when it is closed. Re-clicking while it is open
         // refetches the suggestions and resets the highlight, so Down Arrow
         // could never move past the first option.
+        // Tagify inserts the wrapper just before the original element, which
+        // holds the instance. The wrapper's aria-expanded is removed (#2720).
+        const instance = tagsElement.nextElementSibling?.__tagify;
         if ((event.key === 'ArrowDown' || event.key === 'Down')
-          && tagsElement.getAttribute('aria-expanded') !== 'true') {
+          && instance && !isListShowing(instance)) {
           input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         }
       });

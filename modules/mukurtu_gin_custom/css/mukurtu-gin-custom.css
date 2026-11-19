@@ -1649,6 +1649,22 @@ body.path-visitors .layout-row.layout-row {
   display: none !important;
 }
 
+/* Gin's sticky table header copy lies over the real header row. Keyboard
+   users use the real row (sticky-header-copy.js takes the copy out of the Tab
+   order), so hide the copy while focus is in the real row, or its focus
+   indicator would be covered (#2741). !important: Gin's tableheader.js sets
+   visibility inline. */
+table.gin--sticky-table-header:has(+ .gin-table-scroll-wrapper thead :focus-visible) {
+  visibility: hidden !important;
+}
+
+/* With the copy hidden, the real row is the one under the pointer, but Gin
+   turns off its pointer events, which would swallow the first click.
+   !important: Gin's rule uses an id selector. */
+.gin-table-scroll-wrapper thead:has(:focus-visible) {
+  pointer-events: auto !important;
+}
+
 /* Design settings: put the custom-palette colour fieldset and the live
    contrast readout side by side, each taking half the row, once there is
    room for two columns. Below that they stay stacked (plain block flow,

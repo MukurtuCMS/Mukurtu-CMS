@@ -76,8 +76,11 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
     }
     $entity = $event->entity;
     $field_name = $event->field_name;
+    // A caller may pass its own unsaved settings instead of a saved preset.
     /** @var \Drupal\mukurtu_export\Entity\CsvExporter $config */
-    $config = $this->entityTypeManager->getStorage('csv_exporter')->load($event->context['results']['config_id']);
+    $config = ($event->context['results']['config'] ?? NULL) instanceof CsvExporter
+      ? $event->context['results']['config']
+      : $this->entityTypeManager->getStorage('csv_exporter')->load($event->context['results']['config_id']);
 
     // Virtual field: reverse lookup of nodes that reference this media item.
     if ($entity->getEntityTypeId() === 'media' && $field_name === 'field_found_in') {

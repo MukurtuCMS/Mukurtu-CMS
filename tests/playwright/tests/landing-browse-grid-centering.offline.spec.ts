@@ -85,9 +85,20 @@ const FIXTURES: Fixture[] = [
   },
 ];
 
-async function render(page: Page, width: number, body: string): Promise<void> {
+async function setContent(page: Page, width: number, main: string): Promise<void> {
   await page.setViewportSize({ width, height: 900 });
-  await page.setContent(`<!DOCTYPE html><html><head><title>Browse grid fixture</title><style>${THEME_CSS}</style></head><body><main role="main"><div class="layout layout--onecol"><div class="layout__region layout__region--content">${body}</div></div></main></body></html>`);
+  await page.setContent(`<!DOCTYPE html><html><head><title>Browse grid fixture</title><style>${THEME_CSS}</style></head><body><div class="layout-container"><main role="main">${main}</main></div></body></html>`);
+}
+
+// A landing page block, in a one-column Layout Builder section.
+async function render(page: Page, width: number, body: string): Promise<void> {
+  await setContent(page, width, `<div class="layout layout--onecol"><div class="layout__region layout__region--content">${body}</div></div>`);
+}
+
+// A listing page, in the content region of page.html.twig, which puts it on
+// the page grid (#2749).
+async function renderPage(page: Page, width: number, body: string): Promise<void> {
+  await setContent(page, width, `<div class="layout-content"><div class="region">${body}</div></div>`);
 }
 
 interface Measurement {
@@ -125,7 +136,7 @@ for (const fixture of FIXTURES) {
   for (const { width, columns } of LAYOUTS) {
     test(`${fixture.name} block: cards keep their grid width at ${width}px`, async ({ page }) => {
       // A full row on the listing page gives the grid's column width.
-      await render(page, width, fixture.page(columns));
+      await renderPage(page, width, fixture.page(columns));
       const grid = await measure(page, fixture);
       await render(page, width, fixture.block(columns));
       const block = await measure(page, fixture);
@@ -141,7 +152,7 @@ for (const fixture of FIXTURES) {
     const partialCounts = columns === 1 ? [] : Array.from({ length: columns - 1 }, (_, i) => i + 1).concat(columns + 1);
     for (const count of partialCounts) {
       test(`${fixture.name} block: ${count} card(s) centered at ${width}px`, async ({ page }) => {
-        await render(page, width, fixture.page(columns));
+        await renderPage(page, width, fixture.page(columns));
         const cardWidth = (await measure(page, fixture)).cards[0].width;
 
         await render(page, width, fixture.block(count));
@@ -162,7 +173,7 @@ for (const fixture of FIXTURES) {
   }
 
   test(`${fixture.name} page: a short row still starts at the inline start`, async ({ page }) => {
-    await render(page, 1280, fixture.page(1));
+    await renderPage(page, 1280, fixture.page(1));
     const listing = await measure(page, fixture);
     expect(Math.abs(listing.cards[0].left - listing.left)).toBeLessThanOrEqual(1);
     const display = await page.locator(fixture.container).first().evaluate((el) => getComputedStyle(el).display);
