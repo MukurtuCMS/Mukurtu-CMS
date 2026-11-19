@@ -19,6 +19,13 @@ td.mukurtu-character-move {
   white-space: nowrap;
 }
 
+/* A combining mark with no letter before it is drawn just before where the
+ * text starts, which the box cuts off, so the row looks empty. The indent
+ * leaves room for it. */
+.mukurtu-character-table input[name$="[character]"] {
+  text-indent: 0.5em;
+}
+
 /* 32px clears the 24px minimum target size (WCAG 2.5.8). The border is
  * #767676, 4.54:1 on white, for the 3:1 a control's edge needs (1.4.11). */
 .mukurtu-character-move__button {

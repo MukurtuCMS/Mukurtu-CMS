@@ -529,3 +529,15 @@ function mukurtu_import_update_40404(): ?string {
 
   return (string) t('Mapped the Language code column in the default language import template.');
 }
+
+/**
+ * Turn on Mukurtu Export, which bulk editing one by one needs.
+ */
+function mukurtu_import_update_40405(): string {
+  // The per-item bulk edit grid shows each cell as the CSV export writes it.
+  if (\Drupal::moduleHandler()->moduleExists('mukurtu_export')) {
+    return (string) t('Mukurtu Export is already on; nothing to change.');
+  }
+  \Drupal::service('module_installer')->install(['mukurtu_export']);
+  return (string) t('Turned on Mukurtu Export.');
+}
