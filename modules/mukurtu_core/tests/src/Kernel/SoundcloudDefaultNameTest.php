@@ -120,7 +120,7 @@ class SoundcloudDefaultNameTest extends KernelTestBase {
     $this->assertSame('Song of the River', Media::load($media->id())->get('name')->value);
     // The name and the thumbnail share the statically cached oEmbed response.
     $this->assertCount(1, $this->requestHistory);
-    $this->assertSame(0, $this->mockHandler->count());
+    $this->assertCount(0, $this->mockHandler);
   }
 
   /**
