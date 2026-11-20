@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_media;
 
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\media_library\MediaLibraryState;
 use Drupal\media_library\MediaLibraryUiBuilder;
@@ -18,11 +19,32 @@ use Drupal\media_library\MediaLibraryUiBuilder;
  *   "All media" tab is always first and active here, so that workaround is
  *   not needed.
  *
+ * - Explains why there is no add form when the person can't add any of the
+ *   allowed media types (they have no cultural protocol that allows it).
+ *
  * The "All media" flag is stored in opener_parameters so it is included in
  * the HMAC hash and survives every AJAX round-trip, including exposed-filter
  * submits whose action URL is built from the hash-signed state.
  */
 class MukurtuMediaLibraryUiBuilder extends MediaLibraryUiBuilder {
+
+  /**
+   * Explains why the person can't add media.
+   */
+  protected ?MediaCreateNotice $mediaCreateNotice = NULL;
+
+  /**
+   * The person using the media library.
+   */
+  protected ?AccountInterface $currentUser = NULL;
+
+  /**
+   * Sets the service that explains why the person can't add media.
+   */
+  public function setMediaCreateNotice(MediaCreateNotice $notice, AccountInterface $current_user): void {
+    $this->mediaCreateNotice = $notice;
+    $this->currentUser = $current_user;
+  }
 
   /**
    * Returns TRUE when the state is in "All media" mode.
@@ -156,11 +178,13 @@ class MukurtuMediaLibraryUiBuilder extends MediaLibraryUiBuilder {
   /**
    * {@inheritdoc}
    *
-   * Suppresses the add form on the "All media" tab.
+   * - Suppresses the add form on the "All media" tab.
+   * - Explains why there is no add form when the person can't add any of the
+   *   allowed media types.
    */
   protected function buildLibraryContent(MediaLibraryState $state) {
     if ($this->isAllMediaMode($state)) {
-      return [
+      $content = [
         '#type' => 'container',
         '#theme_wrappers' => ['container__media_library_content'],
         '#attributes' => ['id' => 'media-library-content'],
@@ -168,7 +192,14 @@ class MukurtuMediaLibraryUiBuilder extends MediaLibraryUiBuilder {
         'view' => $this->buildMediaLibraryView($state),
       ];
     }
-    return parent::buildLibraryContent($state);
+    else {
+      $content = parent::buildLibraryContent($state);
+    }
+
+    if ($this->mediaCreateNotice && $this->mediaCreateNotice->appliesTo($this->currentUser, $state->getAllowedTypeIds())) {
+      $content = ['media_create_notice' => $this->mediaCreateNotice->build($this->currentUser)] + $content;
+    }
+    return $content;
   }
 
   /**
