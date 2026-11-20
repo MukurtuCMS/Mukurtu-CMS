@@ -60,12 +60,12 @@ class MediaAddAccessDeniedSubscriber implements EventSubscriberInterface {
     if (!in_array($this->routeMatch->getRouteName(), self::ROUTES, TRUE)) {
       return;
     }
-    $bundle = NULL;
+    $bundles = NULL;
     $media_type = $this->routeMatch->getRawParameter('media_type');
     if ($media_type !== NULL) {
-      $bundle = [(string) $media_type];
+      $bundles = [(string) $media_type];
     }
-    if (!$this->notice->appliesTo($this->currentUser, $bundle)) {
+    if (!$this->notice->appliesTo($this->currentUser, $bundles)) {
       return;
     }
     $this->messenger->addWarning($this->notice->getMessage($this->currentUser));

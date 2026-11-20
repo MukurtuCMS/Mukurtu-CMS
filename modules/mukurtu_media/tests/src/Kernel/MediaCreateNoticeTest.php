@@ -190,7 +190,10 @@ class MediaCreateNoticeTest extends MukurtuMediaTestBase {
 
     mukurtu_media_preprocess_entity_add_list($variables);
 
-    $this->assertStringContainsString('Ask a community manager or protocol steward for access.', (string) $variables['add_bundle_message']);
+    $this->assertStringContainsString('Ask a community manager or protocol steward for access.', (string) $variables['add_bundle_message']['#markup']);
+    // Creating a protocol or joining one changes the message.
+    $this->assertContains('protocol_list', $variables['add_bundle_message']['#cache']['tags']);
+    $this->assertContains('og_membership_list', $variables['add_bundle_message']['#cache']['tags']);
   }
 
   /**

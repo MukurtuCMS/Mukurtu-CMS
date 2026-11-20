@@ -134,7 +134,10 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
     $notice = \Drupal::service('mukurtu_media.create_notice');
     $account = \Drupal::currentUser();
     if ($notice->appliesTo($account)) {
-      $variables['add_bundle_message'] = $notice->getMessage($account);
+      $variables['add_bundle_message'] = [
+        '#markup' => $notice->getMessage($account),
+        '#cache' => $notice->getCacheability(),
+      ];
     }
     return;
   }

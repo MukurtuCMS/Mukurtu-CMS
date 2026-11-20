@@ -85,6 +85,7 @@ class MediaCreateNotice {
     // A plain box styled like a message rather than the status_messages
     // theme: some admin themes turn that into a toast that disappears, and
     // its data-drupal-messages wrapper would collect unrelated messages.
+    //
     // Same header as core's warning messages, so it gets the theme's icon and
     // screen readers hear that it is a warning.
     $title_id = Html::getUniqueId('mukurtu-media-create-notice-title');
@@ -112,10 +113,23 @@ class MediaCreateNotice {
         '#attributes' => ['class' => ['messages__content']],
         '#value' => $this->getMessage($account),
       ],
-      '#cache' => [
-        'contexts' => ['user'],
-        'tags' => ['protocol_list', 'og_membership_list'],
-      ],
+      '#cache' => $this->getCacheability(),
+    ];
+  }
+
+  /**
+   * Returns the cache metadata for the message.
+   *
+   * The message depends on the person, their protocol memberships, and
+   * whether the site has any protocols yet.
+   *
+   * @return array
+   *   A #cache array.
+   */
+  public function getCacheability(): array {
+    return [
+      'contexts' => ['user'],
+      'tags' => ['protocol_list', 'og_membership_list'],
     ];
   }
 
