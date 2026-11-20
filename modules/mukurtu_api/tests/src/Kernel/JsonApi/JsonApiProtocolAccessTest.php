@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_api\Kernel\JsonApi;
 
+use Drupal\Core\PageCache\ResponsePolicy\KillSwitch;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\field\Entity\FieldConfig;
@@ -11,6 +12,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\media\Entity\Media;
+use Drupal\mukurtu_multipage_items\Entity\MultipageItem;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
@@ -27,6 +29,7 @@ use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Audits what core JSON:API exposes across cultural protocols (#400).
@@ -59,12 +62,18 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
     'jsonapi',
     'leaflet',
     'media',
+    'mukurtu_collection',
     'mukurtu_core',
+    'mukurtu_drafts',
+    'mukurtu_local_contexts',
+    'mukurtu_multipage_items',
     'mukurtu_protocol',
     'node',
     'og',
     'options',
     'paragraphs',
+    'path',
+    'path_alias',
     'serialization',
     'system',
     'taxonomy',
@@ -91,6 +100,11 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
   protected array $fixtures = [];
 
   /**
+   * The response to the most recent get().
+   */
+  protected ?Response $lastResponse = NULL;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUpFilesystem(): void {
@@ -107,8 +121,8 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
 
     $this->installConfig(['field', 'system', 'image', 'file', 'og', 'media', 'taxonomy', 'node', 'filter']);
     $entityTypes = [
-      'community', 'file', 'media', 'node', 'og_membership',
-      'paragraph', 'protocol', 'taxonomy_term', 'user', 'workflow',
+      'community', 'file', 'media', 'multipage_item', 'node', 'og_membership',
+      'paragraph', 'path_alias', 'protocol', 'taxonomy_term', 'user', 'workflow',
     ];
     foreach ($entityTypes as $entityType) {
       $this->installEntitySchema($entityType);
@@ -148,6 +162,10 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
    */
   protected function createContentModel(): void {
     NodeType::create(['type' => 'thing', 'name' => 'Thing'])->save();
+    NodeType::create(['type' => 'collection', 'name' => 'Collection'])->save();
+    $this->config('mukurtu_multipage_items.settings')
+      ->set('bundles_config', ['thing' => TRUE])
+      ->save();
     Vocabulary::create(['vid' => 'keywords', 'name' => 'Keywords'])->save();
     ParagraphsType::create(['id' => 'text_block', 'label' => 'Text block'])->save();
     $this->createMediaType('file', ['id' => 'document']);
@@ -158,9 +176,9 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
 
     $fields = [
       ['paragraph', 'text_block', 'field_text', 'string', []],
-      ['node', 'thing', 'field_keywords', 'entity_reference', ['target_type' => 'taxonomy_term']],
-      ['node', 'thing', 'field_media', 'entity_reference', ['target_type' => 'media']],
-      ['node', 'thing', 'field_blocks', 'entity_reference_revisions', ['target_type' => 'paragraph']],
+      ['node', 'thing', 'field_test_keywords', 'entity_reference', ['target_type' => 'taxonomy_term']],
+      ['node', 'thing', 'field_test_media', 'entity_reference', ['target_type' => 'media']],
+      ['node', 'thing', 'field_test_blocks', 'entity_reference_revisions', ['target_type' => 'paragraph']],
     ];
     foreach ($fields as [$entityType, $bundle, $name, $type, $settings]) {
       FieldStorageConfig::create([
@@ -243,9 +261,9 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
         'title' => "$label node",
         'status' => 1,
         'uid' => $this->container->get('current_user')->id(),
-        'field_keywords' => [$term],
-        'field_media' => [$media],
-        'field_blocks' => [$paragraph],
+        'field_test_keywords' => [$term],
+        'field_test_media' => [$media],
+        'field_test_blocks' => [$paragraph],
       ]);
       $node->setSharingSetting('any');
       $node->setProtocols([$protocol]);
@@ -255,7 +273,7 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
         "{$key}_file" => $file,
         "{$key}_media" => $media,
         "{$key}_term" => $term,
-        "{$key}_paragraph" => $node->get('field_blocks')->entity,
+        "{$key}_paragraph" => $node->get('field_test_blocks')->entity,
         "{$key}_node" => $node,
       ];
     }
@@ -266,12 +284,29 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
       'type' => 'thing',
       'title' => 'Public node with restricted media',
       'status' => 1,
-      'field_media' => [$this->fixtures['secret_media']],
+      'field_test_media' => [$this->fixtures['secret_media']],
     ]);
     $mixed->setSharingSetting('any');
     $mixed->setProtocols([$open]);
     $mixed->save();
     $this->fixtures['mixed_node'] = $mixed;
+
+    // Collections: mukurtu_collection_entity_access() allows viewing every
+    // collection, so only the protocol access handler can keep this hidden.
+    $collection = Node::create(['type' => 'collection', 'title' => 'SECRET collection', 'status' => 1]);
+    $collection->setSharingSetting('any');
+    $collection->setProtocols([$strict]);
+    $collection->save();
+    $this->fixtures['secret_collection'] = $collection;
+
+    // A multipage item takes its access from its first page.
+    $multipage = MultipageItem::create([
+      'title' => 'SECRET multipage',
+      'field_pages' => [$this->fixtures['secret_node']],
+      'status' => 1,
+    ]);
+    $multipage->save();
+    $this->fixtures['secret_multipage'] = $multipage;
   }
 
   /**
@@ -281,11 +316,33 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
    *   The status code and the raw response body.
    */
   protected function get(string $path, AccountInterface $account): array {
+    $this->resetRequestState();
     $this->container->get('current_user')->setAccount($account);
     $request = Request::create($path);
     $request->headers->set('Accept', 'application/vnd.api+json');
-    $response = $this->container->get('http_kernel')->handle($request);
-    return [$response->getStatusCode(), (string) $response->getContent()];
+    $this->lastResponse = $this->container->get('http_kernel')->handle($request);
+    return [$this->lastResponse->getStatusCode(), (string) $this->lastResponse->getContent()];
+  }
+
+  /**
+   * Clears what a real site would not carry from one request to the next.
+   *
+   * A Kernel test runs every request in one PHP process, so in-memory caches,
+   * queued messages and the page cache kill switch otherwise leak between
+   * requests. Persistent caches, such as the dynamic page cache, are kept.
+   */
+  protected function resetRequestState(): void {
+    $this->container->get('messenger')->deleteAll();
+    $this->container->set('page_cache_kill_switch', new KillSwitch());
+    $this->container->get('entity.memory_cache')->deleteAll();
+    $this->container->get('cache.static')->deleteAll();
+    $entityTypeManager = $this->container->get('entity_type.manager');
+    foreach (array_keys($entityTypeManager->getDefinitions()) as $entityTypeId) {
+      if ($entityTypeManager->hasHandler($entityTypeId, 'access')) {
+        $entityTypeManager->getAccessControlHandler($entityTypeId)->resetCache();
+      }
+    }
+    drupal_static_reset();
   }
 
   /**
@@ -350,7 +407,11 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
    * Individual restricted items return 403 with nothing in the body.
    */
   public function testIndividualResources(): void {
-    foreach (['secret_node', 'secret_media', 'secret_paragraph', 'secret_file', 'secret_protocol', 'secret_community'] as $key) {
+    $keys = [
+      'secret_node', 'secret_media', 'secret_paragraph', 'secret_file',
+      'secret_protocol', 'secret_community', 'secret_collection', 'secret_multipage',
+    ];
+    foreach ($keys as $key) {
       foreach ($this->nonMembers() as $who => $account) {
         [$status, $body] = $this->get($this->resourcePath($key), $account);
         $this->assertSame(403, $status, "$who: $key");
@@ -368,10 +429,24 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
   }
 
   /**
-   * Protocol and community lists leave out strict protocols.
+   * Collection and multipage item lists leave out restricted ones.
    */
-  public function testProtocolCollections(): void {
+  public function testCollectionAndMultipageCollections(): void {
+    $this->assertSame([], $this->leaksTo('/jsonapi/node/collection'));
+    $this->assertSame([], $this->leaksTo('/jsonapi/multipage_item/multipage_item'));
+  }
+
+  /**
+   * The protocol list leaves out strict protocols.
+   */
+  public function testProtocolCollection(): void {
     $this->assertSame([], $this->leaksTo('/jsonapi/protocol/protocol'));
+  }
+
+  /**
+   * The community list leaves out community-only communities.
+   */
+  public function testCommunityCollection(): void {
     $this->assertSame([], $this->leaksTo('/jsonapi/community/community'));
   }
 
@@ -416,7 +491,7 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
    * Including a restricted relationship doesn't reveal it.
    */
   public function testIncludeRestrictedMedia(): void {
-    $this->assertSame([], $this->leaksTo($this->resourcePath('mixed_node') . '?include=field_media,field_media.field_media_file'));
+    $this->assertSame([], $this->leaksTo($this->resourcePath('mixed_node') . '?include=field_test_media,field_test_media.field_media_file'));
   }
 
   /**
@@ -452,8 +527,8 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
    * changes the result, someone can guess names one at a time.
    */
   public function testFilterOnRestrictedRelationship(): void {
-    $hit = '/jsonapi/node/thing?filter[field_media.name]=' . rawurlencode('SECRET media');
-    $miss = '/jsonapi/node/thing?filter[field_media.name]=' . rawurlencode('No such media');
+    $hit = '/jsonapi/node/thing?filter[field_test_media.name]=' . rawurlencode('SECRET media');
+    $miss = '/jsonapi/node/thing?filter[field_test_media.name]=' . rawurlencode('No such media');
     // Control: the filter works for a member, who gets both items that use it.
     [$status, $body] = $this->get($hit, $this->member);
     $this->assertSame(200, $status, $body);
