@@ -1956,24 +1956,39 @@ before the hover style shows it, place a zero-width box, and leave the shown
 tooltip running off the edge. !important is needed to beat Floating UI's
 inline style.
 
-Gin transitions every property, which would slide the tooltip in from the
-start of its container, so only its fade is transitioned. !important beats
-Gin's id-level selector. */
+Gin fades tooltips over 0.3s and transitions every property, which would
+slide a tooltip in from the start of its container and flash it there while
+it fades out. So the position doesn't animate: it applies at once when the
+tooltip is shown, and the pin waits until the fade-out ends. Gin only
+transitions when motion is allowed. !important beats Gin's id-level
+selector. */
 [data-gin-tooltip]:not(:hover, :focus) + .gin-tooltip {
   inset-inline-start: 0 !important;
 }
 
-.gin-tooltip {
-  transition-property: opacity, visibility !important;
+@media (prefers-reduced-motion: no-preference) {
+  .gin-tooltip {
+    transition-property: opacity, visibility, inset-inline-start !important;
+    transition-duration: 0.3s, 0.3s, 0s !important;
+    transition-delay: 0s, 0s, 0.3s !important;
+  }
+
+  [data-gin-tooltip]:is(:hover, :focus) + .gin-tooltip {
+    transition-delay: 0s !important;
+  }
 }
 
 /* A multi-value field's table can't get narrower than its drag handle,
 narrowest text box and Remove button, and a one-word button can't wrap. In
 a narrow tab, such as the dictionary word's Translation field, it was wider
-than the page. Let it scroll inside its own box, as Gin's other tables do. */
+than the page. Let it scroll inside its own box, as Gin's other tables do.
+The padding keeps focus rings at the box's edges from being cut off, and the
+negative margin keeps the contents where they were. */
 @media (max-width: 48rem) {
   .form-item--multiple:has(> .field-multiple-table) {
     overflow-x: auto;
+    padding: 0.25rem;
+    margin-inline: -0.25rem;
   }
 }
 
