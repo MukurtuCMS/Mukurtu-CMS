@@ -20,5 +20,12 @@
 /phpunit.xml        export-ignore
 /phpunit.ddev.xml   export-ignore
 
+# The container image: its Dockerfile, its support files, and the Compose examples. A site
+# installing the profile as a composer package has no use for them.
+/Dockerfile         export-ignore
+/.dockerignore      export-ignore
+/docker             export-ignore
+/examples           export-ignore
+
 # Per-module PHPUnit suites.
 modules/*/tests     export-ignore

@@ -141,6 +141,23 @@ a `LogicException`) and must stay procedural in a `.install` file. Neither
 `#[Hook]` classes under `src/Hook/`. Update-phase code is still safer left
 procedural, since it runs while the container may not reflect the code on disk.
 
+## Removing a module or theme
+
+When a release removes a module or theme from Mukurtu and an update hook takes
+it out of `core.extension`, two checks run before that hook can:
+
+- **Drupal's update requirements.** Core reports the missing code as an
+  error-severity `invalid_module` requirement before any update runs. Add a
+  `hook_update_requirements_alter()` that removes that error for exactly the
+  removed extension, or the cleanup hook is never reached.
+- **The container image's startup check.** The entrypoint stops when an enabled
+  module or theme has no code, before it runs `drush updatedb`. Add the
+  extension's machine name to `mukurtu_removed_extensions` in `mukurtu.info.yml`,
+  or sites running the image can't start the release that removes it.
+
+Keep both for as long as a site could still be upgrading from a release that
+had the extension.
+
 ## Further reading
 
 - https://git.drupalcode.org/project/drupal/-/blob/main/core/modules/system/system.install?ref_type=heads#L42
