@@ -1941,6 +1941,57 @@ or pushed off screen at any width from 320px to 1920px. */
   max-width: 100%;
 }
 
+/* Text spacing (WCAG 1.4.12) made node forms scroll sideways at 320px
+(#2763), from two causes.
+
+Gin's tooltips stay in the layout while hidden, and Floating UI only places
+them on hover, focus or when the trigger resizes. Extra letter spacing widens
+a hidden tooltip without moving it, so the "Show sidebar panel" one in the
+sticky Save bar ran 14px past the edge. While hidden, pin it to the start of
+its container, where it fits. Floating UI's own position applies again once
+it's shown.
+
+display: none would be simpler, but Floating UI can measure the tooltip
+before the hover style shows it, place a zero-width box, and leave the shown
+tooltip running off the edge. !important is needed to beat Floating UI's
+inline style.
+
+Gin fades tooltips over 0.3s and transitions every property, which would
+slide a tooltip in from the start of its container and flash it there while
+it fades out. So the position doesn't animate: it applies at once when the
+tooltip is shown, and the pin waits until the fade-out ends. Gin only
+transitions when motion is allowed. !important beats Gin's id-level
+selector. */
+[data-gin-tooltip]:not(:hover, :focus) + .gin-tooltip {
+  inset-inline-start: 0 !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gin-tooltip {
+    transition-property: opacity, visibility, inset-inline-start !important;
+    transition-duration: 0.3s, 0.3s, 0s !important;
+    transition-delay: 0s, 0s, 0.3s !important;
+  }
+
+  [data-gin-tooltip]:is(:hover, :focus) + .gin-tooltip {
+    transition-delay: 0s !important;
+  }
+}
+
+/* A multi-value field's table can't get narrower than its drag handle,
+narrowest text box and Remove button, and a one-word button can't wrap. In
+a narrow tab, such as the dictionary word's Translation field, it was wider
+than the page. Let it scroll inside its own box, as Gin's other tables do.
+The padding keeps focus rings at the box's edges from being cut off, and the
+negative margin keeps the contents where they were. */
+@media (max-width: 48rem) {
+  .form-item--multiple:has(> .field-multiple-table) {
+    overflow-x: auto;
+    padding: 0.25rem;
+    margin-inline: -0.25rem;
+  }
+}
+
 /* Fourth and last cause of the admin reflow failures in #2336, on the
 submission form settings page.
 
