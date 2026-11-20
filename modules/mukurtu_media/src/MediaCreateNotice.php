@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_media;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -84,11 +85,26 @@ class MediaCreateNotice {
     // A plain box styled like a message rather than the status_messages
     // theme: some admin themes turn that into a toast that disappears, and
     // its data-drupal-messages wrapper would collect unrelated messages.
+    // Same header as core's warning messages, so it gets the theme's icon and
+    // screen readers hear that it is a warning.
+    $title_id = Html::getUniqueId('mukurtu-media-create-notice-title');
     return [
       '#type' => 'container',
       '#attributes' => [
         'class' => ['messages', 'messages--warning', 'mukurtu-media-create-notice'],
         'role' => 'status',
+        'aria-labelledby' => $title_id,
+      ],
+      'header' => [
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => ['class' => ['messages__header']],
+        'title' => [
+          '#type' => 'html_tag',
+          '#tag' => 'h2',
+          '#attributes' => ['id' => $title_id, 'class' => ['messages__title']],
+          '#value' => $this->t('Warning message'),
+        ],
       ],
       'message' => [
         '#type' => 'html_tag',
