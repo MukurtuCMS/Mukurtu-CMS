@@ -1947,9 +1947,13 @@ or pushed off screen at any width from 320px to 1920px. */
 Gin's tooltips stay in the layout while hidden, and Floating UI only places
 them on hover, focus or when the trigger resizes. Extra letter spacing widens
 a hidden tooltip without moving it, so the "Show sidebar panel" one in the
-sticky Save bar ran 14px past the edge. While hidden, pin it to the start of
-its container, where it fits. Floating UI's own position applies again once
-it's shown.
+sticky Save bar ran 14px past the edge. While hidden, pin it to the end of
+its container. Its far edge is then the container's, which is on screen, and
+anything wider spills toward the start, which never scrolls the page (left in
+left-to-right, right in right-to-left). Pinning to the start instead only
+works for a trigger near the start of its bar: "More actions" sits near the
+end, and its tooltip ran 4px past the edge at 320px. Floating UI's own
+position applies again once it's shown.
 
 display: none would be simpler, but Floating UI can measure the tooltip
 before the hover style shows it, place a zero-width box, and leave the shown
@@ -1957,20 +1961,21 @@ tooltip running off the edge. !important is needed to beat Floating UI's
 inline style.
 
 Gin fades tooltips over 0.3s and transitions every property, which would
-slide a tooltip in from the start of its container and flash it there while
+slide a tooltip in from the end of its container and flash it there while
 it fades out. So the position doesn't animate: it applies at once when the
 tooltip is shown, and the pin waits until the fade-out ends. Gin only
 transitions when motion is allowed. !important beats Gin's id-level
 selector. */
 [data-gin-tooltip]:not(:hover, :focus) + .gin-tooltip {
-  inset-inline-start: 0 !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: 0 !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .gin-tooltip {
-    transition-property: opacity, visibility, inset-inline-start !important;
-    transition-duration: 0.3s, 0.3s, 0s !important;
-    transition-delay: 0s, 0s, 0.3s !important;
+    transition-property: opacity, visibility, inset-inline-start, inset-inline-end !important;
+    transition-duration: 0.3s, 0.3s, 0s, 0s !important;
+    transition-delay: 0s, 0s, 0.3s, 0.3s !important;
   }
 
   [data-gin-tooltip]:is(:hover, :focus) + .gin-tooltip {
