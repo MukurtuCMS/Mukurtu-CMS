@@ -1,0 +1,5 @@
+services:
+  mukurtu_api.resource_type_allowlist:
+    class: Drupal\mukurtu_api\EventSubscriber\ResourceTypeAllowlist
+    tags:
+      - { name: event_subscriber }
