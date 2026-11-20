@@ -81,10 +81,21 @@ class MediaCreateNotice {
    *   A render array.
    */
   public function build(AccountInterface $account): array {
+    // A plain box styled like a message rather than the status_messages
+    // theme: some admin themes turn that into a toast that disappears, and
+    // its data-drupal-messages wrapper would collect unrelated messages.
     return [
-      '#theme' => 'status_messages',
-      '#message_list' => ['warning' => [$this->getMessage($account)]],
-      '#status_headings' => ['warning' => $this->t('Warning message')],
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['messages', 'messages--warning', 'mukurtu-media-create-notice'],
+        'role' => 'status',
+      ],
+      'message' => [
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => ['class' => ['messages__content']],
+        '#value' => $this->getMessage($account),
+      ],
       '#cache' => [
         'contexts' => ['user'],
         'tags' => ['protocol_list', 'og_membership_list'],

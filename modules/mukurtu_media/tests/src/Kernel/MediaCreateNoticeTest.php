@@ -181,6 +181,31 @@ class MediaCreateNoticeTest extends MukurtuMediaTestBase {
   }
 
   /**
+   * The add media list explains why it is empty, instead of core's message.
+   */
+  public function testEmptyAddListExplainsWhy(): void {
+    $this->setCurrentUser($this->createUser(['access content']));
+    $this->pushRouteRequest('entity.media.add_page');
+    $variables = ['bundles' => [], 'add_bundle_message' => 'There is no media type yet.'];
+
+    mukurtu_media_preprocess_entity_add_list($variables);
+
+    $this->assertStringContainsString('Ask a community manager or protocol steward for access.', (string) $variables['add_bundle_message']);
+  }
+
+  /**
+   * Someone who can add media keeps core's empty list message.
+   */
+  public function testEmptyAddListUnchangedForMember(): void {
+    $this->pushRouteRequest('entity.media.add_page');
+    $variables = ['bundles' => [], 'add_bundle_message' => 'There is no media type yet.'];
+
+    mukurtu_media_preprocess_entity_add_list($variables);
+
+    $this->assertSame('There is no media type yet.', $variables['add_bundle_message']);
+  }
+
+  /**
    * Dispatches an access denied exception for a route.
    *
    * Through the HTTP kernel, core goes on to render the access denied page,
@@ -188,20 +213,30 @@ class MediaCreateNoticeTest extends MukurtuMediaTestBase {
    * Calling the subscriber directly leaves it there.
    */
   protected function dispatchAccessDenied(string $route_name, array $parameters = [], string $format = 'html'): void {
+    $request = $this->pushRouteRequest($route_name, $parameters);
+    $request->setRequestFormat($format);
+
+    $event = new ExceptionEvent($this->container->get('http_kernel'), $request, HttpKernelInterface::MAIN_REQUEST, new AccessDeniedHttpException());
+    \Drupal::service('mukurtu_media.media_add_access_denied_subscriber')->onException($event);
+  }
+
+  /**
+   * Makes a request for a route the current request.
+   *
+   * The request shares the test's session, which the messenger needs.
+   */
+  protected function pushRouteRequest(string $route_name, array $parameters = []): Request {
     $route = $this->container->get('router.route_provider')->getRouteByName($route_name);
     $request = Request::create($route->getPath());
-    $request->setRequestFormat($format);
     $request->attributes->add([
       RouteObjectInterface::ROUTE_NAME => $route_name,
       RouteObjectInterface::ROUTE_OBJECT => $route,
       '_raw_variables' => new InputBag($parameters),
     ] + $parameters);
-    $this->container->get('request_stack')->push($request);
-
-    $event = new ExceptionEvent($this->container->get('http_kernel'), $request, HttpKernelInterface::MAIN_REQUEST, new AccessDeniedHttpException());
-    \Drupal::service('mukurtu_media.media_add_access_denied_subscriber')->onException($event);
-
-    $this->container->get('request_stack')->pop();
+    $request_stack = $this->container->get('request_stack');
+    $request->setSession($request_stack->getCurrentRequest()->getSession());
+    $request_stack->push($request);
+    return $request;
   }
 
   /**
