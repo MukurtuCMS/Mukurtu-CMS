@@ -143,13 +143,19 @@ short fields themselves. Shrink it in these dialogs specifically. */
   outline-offset: -3px;
 }
 
-/* MW: fixes paragraph titles being cut off in forms. */
-.js .paragraph-type-title {
-    flex-basis: 25%;
-    min-width: 80px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: visible !important;
+/*
+ * Classic Paragraphs widget (entity_reference_paragraphs, used by Knowledge
+ * Keepers): Paragraphs keeps the label on one line in a 25% wide box, so it
+ * spilled out of the box, ran under the Remove button and made the page
+ * scroll sideways at 320px (WCAG 1.4.10, #2762). Let it take the free space
+ * and wrap.
+ */
+html.js .paragraph-type-top .paragraph-type-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: break-word;
 }
 
 /*
@@ -195,6 +201,28 @@ html.js .paragraph-top .paragraph-type-label {
   html.js .paragraph-top .paragraphs-actions {
     grid-row: 2;
     grid-column: 2 / 4;
+  }
+}
+
+/*
+ * Paragraphs actions menu (⋮): Paragraphs anchors it with right: 0, so in
+ * right-to-left languages it opened past the left edge of narrow screens
+ * (WCAG 1.4.10, #2761). Anchor it to the inline end instead.
+ */
+html .paragraphs-dropdown-actions {
+  right: auto;
+  inset-inline-end: 0;
+}
+
+/*
+ * Paragraphs actions button (⋮): Gin draws the icon as a fill cut to shape
+ * with a mask, and forced colors repainted the fill to match the button, so
+ * it vanished (WCAG 1.4.11, #2760). Paint it in the button text color.
+ */
+@media (forced-colors: active) {
+  html .paragraphs-dropdown-toggle::after,
+  html .paragraphs-dropdown-toggle:is(:hover, :active, :focus)::after {
+    background-color: ButtonText;
   }
 }
 
