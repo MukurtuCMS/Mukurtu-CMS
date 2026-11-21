@@ -1,0 +1,39 @@
+register:
+  js:
+    js/register.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+
+save:
+  js:
+    js/save.js: {}
+  css:
+    component:
+      css/pwa.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - mukurtu_pwa/register
+
+offline:
+  js:
+    js/offline.js: {}
+  css:
+    component:
+      css/pwa.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - mukurtu_pwa/register
+
+spike:
+  js:
+    js/spike.js: {}
+  css:
+    component:
+      css/pwa.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - mukurtu_pwa/register
