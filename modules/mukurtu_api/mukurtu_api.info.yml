@@ -1,0 +1,9 @@
+name: 'Mukurtu API (experimental)'
+type: module
+description: 'Research spike for Mukurtu Mobile. Adds a site manifest endpoint and tests JSON:API protocol access. Not for production sites.'
+core_version_requirement: '^10 || ^11'
+package: 'Experimental'
+hidden: true
+dependencies:
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_design:mukurtu_design'

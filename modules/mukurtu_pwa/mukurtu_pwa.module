@@ -1,0 +1,93 @@
+<?php
+
+/**
+ * @file
+ * Makes a Mukurtu site installable and lets people save items (#400 spike).
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Session\AnonymousUserSession;
+use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Links the web app manifest and icons, and registers the service worker.
+ */
+function mukurtu_pwa_page_attachments(array &$attachments): void {
+  $design = \Drupal::config('mukurtu_design.settings');
+  CacheableMetadata::createFromRenderArray($attachments)
+    ->addCacheableDependency($design)
+    ->applyTo($attachments);
+
+  $manifest = [
+    'rel' => 'manifest',
+    'href' => Url::fromRoute('mukurtu_pwa.manifest')->toString(),
+  ];
+  $icon = [
+    'rel' => 'apple-touch-icon',
+    'href' => Url::fromRoute('mukurtu_pwa.icon', ['size' => 180])->toString(),
+  ];
+  $themeColor = [
+    '#tag' => 'meta',
+    '#attributes' => [
+      'name' => 'theme-color',
+      'content' => (string) ($design->get('colors.brand_primary') ?? '#ac143a'),
+    ],
+  ];
+  $attachments['#attached']['html_head_link'][] = [$manifest];
+  $attachments['#attached']['html_head_link'][] = [$icon];
+  $attachments['#attached']['html_head'][] = [$themeColor, 'mukurtu_pwa_theme_color'];
+  $attachments['#attached']['library'][] = 'mukurtu_pwa/register';
+  $attachments['#attached']['drupalSettings']['mukurtuPwa'] = [
+    'serviceWorker' => Url::fromRoute('mukurtu_pwa.service_worker')->toString(),
+    'scope' => base_path(),
+    'reportUrl' => Url::fromRoute('mukurtu_pwa.report')->toString(),
+    'tokenUrl' => Url::fromRoute('system.csrftoken')->toString(),
+  ];
+}
+
+/**
+ * Implements hook_node_view().
+ *
+ * Adds "Save to this device" to the full view of every item. The button
+ * stays hidden unless the browser supports service workers.
+ */
+function mukurtu_pwa_node_view(array &$build, NodeInterface $node, EntityViewDisplayInterface $display, string $view_mode): void {
+  if ($view_mode !== 'full') {
+    return;
+  }
+  // Open items stay readable offline; restricted ones expire unless the
+  // person visits again with a connection and still has access.
+  $anonymousAccess = $node->access('view', new AnonymousUserSession(), TRUE);
+  $build['mukurtu_pwa_save'] = [
+    '#type' => 'container',
+    '#weight' => -50,
+    '#attributes' => [
+      'class' => ['mukurtu-pwa-save'],
+      'hidden' => 'hidden',
+      'data-offline-access' => $anonymousAccess->isAllowed() ? 'open' : 'restricted',
+      'data-offline-title' => $node->label(),
+    ],
+    'button' => [
+      '#type' => 'html_tag',
+      '#tag' => 'button',
+      '#value' => t('Save to this device'),
+      '#attributes' => ['type' => 'button', 'class' => ['button', 'mukurtu-pwa-save__button']],
+    ],
+    'status' => [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => '',
+      '#attributes' => ['role' => 'status', 'class' => ['mukurtu-pwa-save__status']],
+    ],
+    '#attached' => ['library' => ['mukurtu_pwa/save']],
+  ];
+  CacheableMetadata::createFromRenderArray($build)
+    ->addCacheableDependency($anonymousAccess)
+    ->applyTo($build);
+}

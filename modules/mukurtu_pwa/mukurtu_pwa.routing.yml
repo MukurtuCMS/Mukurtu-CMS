@@ -1,0 +1,79 @@
+mukurtu_pwa.manifest:
+  path: '/manifest.webmanifest'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\PwaController::manifest'
+  methods: [GET]
+  requirements:
+    # Public: browsers read it to install the site.
+    _access: 'TRUE'
+
+mukurtu_pwa.icon:
+  path: '/pwa-icon/{size}'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\PwaController::icon'
+  methods: [GET]
+  requirements:
+    # Public: home-screen icons, made from the public logo.
+    _access: 'TRUE'
+    size: '180|192|512'
+
+mukurtu_pwa.service_worker:
+  path: '/pwa-sw.js'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\PwaController::serviceWorker'
+  methods: [GET]
+  requirements:
+    # Public: every visitor's browser loads the worker.
+    _access: 'TRUE'
+
+mukurtu_pwa.offline:
+  path: '/offline'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\PwaController::offline'
+    _title: 'No internet connection'
+  requirements:
+    # Public: the worker stores it for anyone who goes offline.
+    _access: 'TRUE'
+
+mukurtu_pwa.status:
+  path: '/pwa-spike/status'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\SpikeController::status'
+    _title: 'Offline test status'
+  requirements:
+    # Public: testers check storage before and after signing in.
+    _access: 'TRUE'
+
+mukurtu_pwa.outbox:
+  path: '/pwa-spike/outbox'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\SpikeController::outbox'
+    _title: 'Offline upload test'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+
+mukurtu_pwa.outbox_upload:
+  path: '/pwa-spike/outbox/upload'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\SpikeController::upload'
+  methods: [POST]
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _csrf_request_header_token: 'TRUE'
+
+mukurtu_pwa.report:
+  path: '/pwa-spike/report'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\SpikeController::report'
+  methods: [POST]
+  requirements:
+    _user_is_logged_in: 'TRUE'
+    _csrf_request_header_token: 'TRUE'
+
+mukurtu_pwa.results:
+  path: '/pwa-spike/results'
+  defaults:
+    _controller: '\Drupal\mukurtu_pwa\Controller\SpikeController::results'
+  methods: [GET]
+  requirements:
+    _permission: 'administer site configuration'

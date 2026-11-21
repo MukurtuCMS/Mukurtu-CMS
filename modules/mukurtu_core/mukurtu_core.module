@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\genpass\GenpassInterface;
 use Drupal\mukurtu_core\BaseFieldOverride;
+use Drupal\mukurtu_core\MukurtuVersion;
 use Drupal\node\Entity\NodeType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -1242,19 +1243,7 @@ function mukurtu_core_menu_links_discovered_alter(&$links) {
   // *.links.menu.yml file because the version number will change, so the text
   // must be generated dynamically.
 
-  // Get the version number from the VERSION.md file.
-  //
-  // fclose() has to stay inside the guard. Called outside it, a missing or
-  // unreadable VERSION.md leaves $version_file undefined and fclose(NULL)
-  // raises a TypeError on PHP 8, fataling the whole dashboard menu build.
-  $version = '';
-  $version_path = \Drupal::service('extension.list.profile')->getPath('mukurtu') . '/VERSION.md';
-  if (file_exists($version_path)) {
-    if ($version_file = fopen($version_path, 'r')) {
-      $version = trim(fgets($version_file));
-      fclose($version_file);
-    }
-  }
+  $version = MukurtuVersion::get();
 
   $links['mukurtu_core.mukurtu_version_dashboard'] = [
     'title' => t('Mukurtu Version: @version', ['@version' => $version]),

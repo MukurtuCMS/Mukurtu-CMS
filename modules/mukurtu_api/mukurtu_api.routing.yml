@@ -1,0 +1,9 @@
+mukurtu_api.site_manifest:
+  path: '/api/mukurtu/manifest'
+  defaults:
+    _controller: '\Drupal\mukurtu_api\Controller\SiteManifestController::manifest'
+  methods: [GET]
+  requirements:
+    # Public on purpose: an app needs the site's name, logo and languages to
+    # draw its sign-in screen before anyone has signed in.
+    _access: 'TRUE'

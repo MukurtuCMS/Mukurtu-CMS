@@ -1,0 +1,30 @@
+/**
+ * @file
+ * Minimal layout for the #400 PWA spike. Colors come from the theme.
+ */
+
+.mukurtu-pwa-save {
+  margin-block: 1rem;
+}
+
+.mukurtu-pwa-save__status:empty,
+.mukurtu-pwa-spike__message:empty {
+  display: none;
+}
+
+.mukurtu-pwa-offline__list,
+.mukurtu-pwa-status__facts,
+.mukurtu-pwa-outbox__list {
+  padding-inline-start: 1.25rem;
+}
+
+.mukurtu-pwa-status__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+
+.mukurtu-pwa-outbox__form .form-item {
+  margin-block-end: 1rem;
+}
