@@ -177,7 +177,8 @@
                 "Ensure empty paragraphs register as empty": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/paragraphs-118.patch"
             },
             "drupal/media_entity_soundcloud": {
-                "Add support for secret URL embeds": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/media_entity_soundcloud-secret-token-3272077.patch"
+                "Add support for secret URL embeds": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/03c3074c9cfaef093456c2a0072ea4c772862bc9/patches/media_entity_soundcloud-secret-token-3272077.patch",
+                "Default the media name to the oEmbed title (#1388)": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/54c0cb3dcc35cbf34469c664366ebab22077897a/patches/media_entity_soundcloud-default-name.patch"
             },
             "drupal/og": {
                 "Remove bulk option to remove a user's roles": "https://raw.githubusercontent.com/MukurtuCMS/Mukurtu-CMS/b9cc77302d1a471dbc1d5c5eb6921285d2da0806/patches/832-disallow-og-role-removal.patch"
