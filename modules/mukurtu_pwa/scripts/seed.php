@@ -4,11 +4,14 @@
  * @file
  * Seeds test items and accounts for the #400 PWA spike.
  *
- * Run with `drush php:script` after the accessibility_demo_content recipe,
- * which provides the community, open protocol and category used here. Safe
- * to run again: anything that already exists is reused.
+ * Run with `drush php:script`. Safe to run again: anything that already
+ * exists is reused. Creates its own community, protocols and category rather
+ * than using a demo recipe, so Playwright's default content stays the only
+ * other content on the site.
  *
  * Creates:
+ * - "Offline test community", with "Offline test: open protocol" and the
+ *   "Offline test category" category.
  * - "Offline test: small item": open, a photo and 5 MB of audio.
  * - "Offline test: large item 1" to 3: open, 25 MB of audio each, for the
  *   storage tests.
@@ -22,23 +25,17 @@ use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
+use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\node\Entity\Node;
+use Drupal\taxonomy\Entity\Term;
 use Drupal\user\Entity\User;
 
-$entityRepository = \Drupal::service('entity.repository');
 $fileSystem = \Drupal::service('file_system');
 
-// Run as the site owner, who manages the demo community and protocol.
-\Drupal::currentUser()->setAccount(User::load(1));
-
-$openProtocol = $entityRepository->loadEntityByUuid('protocol', '1008afed-c70c-419e-bc55-eb37451a1b69');
-$category = $entityRepository->loadEntityByUuid('taxonomy_term', '298c0286-34f6-4b00-8495-bc0e840be802');
-if (!$openProtocol || !$category) {
-  echo "The accessibility_demo_content recipe must be applied first.\n";
-  return;
-}
-$communityId = $openProtocol->get('field_communities')->target_id;
+// Run as the site owner, who manages the test community and protocols.
+$owner = User::load(1);
+\Drupal::currentUser()->setAccount($owner);
 
 /**
  * Loads one entity by a field value, or NULL.
@@ -51,6 +48,36 @@ $findOne = function (string $entityType, string $field, string $value) {
     ->execute();
   return $ids ? \Drupal::entityTypeManager()->getStorage($entityType)->load(reset($ids)) : NULL;
 };
+
+$community = $findOne('community', 'name', 'Offline test community');
+if (!$community) {
+  $community = Community::create([
+    'name' => 'Offline test community',
+    'user_id' => 1,
+    'field_access_mode' => 'public',
+  ]);
+  $community->save();
+}
+// Creating a protocol needs the creator to manage its community.
+$community->addMember($owner, ['community_manager']);
+$communityId = $community->id();
+
+$openProtocol = $findOne('protocol', 'name', 'Offline test: open protocol');
+if (!$openProtocol) {
+  $openProtocol = Protocol::create([
+    'name' => 'Offline test: open protocol',
+    'user_id' => 1,
+    'field_communities' => [$communityId],
+    'field_access_mode' => 'open',
+  ]);
+  $openProtocol->save();
+}
+
+$category = $findOne('taxonomy_term', 'name', 'Offline test category');
+if (!$category) {
+  $category = Term::create(['vid' => 'category', 'name' => 'Offline test category']);
+  $category->save();
+}
 
 $password = getenv('PWA_SPIKE_PASSWORD') ?: 'pwa-spike';
 $accounts = [];

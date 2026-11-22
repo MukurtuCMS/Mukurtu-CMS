@@ -178,7 +178,6 @@ services:
           # #400 PWA spike, on the 400-mobile-api-spike research branch only.
           # Every push rebuilds the site, so the test items come from a
           # repeatable script. Don't push during a storage-retention test.
-          sudo -E -u www-data ./vendor/bin/drush recipe $TUGBOAT_ROOT/recipes/accessibility_demo_content
           sudo -E -u www-data ./vendor/bin/drush en -y mukurtu_pwa
           sudo -E -u www-data ./vendor/bin/drush php:script $TUGBOAT_ROOT/modules/mukurtu_pwa/scripts/seed.php
       update:

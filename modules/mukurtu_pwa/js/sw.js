@@ -90,6 +90,16 @@ function isStaticAsset(url) {
     /^sites\/[^/]+\/files\/(css|js)\//.test(path)
   );
 }
+// Files a saved item can include. Other requests, such as API and AJAX
+// calls, go straight to the network without the service worker.
+function isFile(url) {
+  const path = url.pathname.slice(CONFIG.basePath.length);
+  return (
+    isStaticAsset(url) ||
+    /^sites\/[^/]+\/files\//.test(path) ||
+    path.startsWith('pwa-icon/')
+  );
+}
 
 function isExpired(item) {
   return (
@@ -527,7 +537,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(handleNavigation(request, url));
   } else if (isPrivateFile(url)) {
     event.respondWith(handlePrivateFile(request, url));
-  } else {
+  } else if (isFile(url)) {
     event.respondWith(handleAsset(request, url));
   }
 });
