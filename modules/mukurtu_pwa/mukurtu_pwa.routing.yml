@@ -67,7 +67,10 @@ mukurtu_pwa.report:
     _controller: '\Drupal\mukurtu_pwa\Controller\SpikeController::report'
   methods: [POST]
   requirements:
-    _user_is_logged_in: 'TRUE'
+    # Open to signed-out devices, so reports keep arriving after a rebuild
+    # signs the phones out. Core still requires the CSRF token whenever the
+    # request has a session.
+    _access: 'TRUE'
     _csrf_request_header_token: 'TRUE'
 
 mukurtu_pwa.results:

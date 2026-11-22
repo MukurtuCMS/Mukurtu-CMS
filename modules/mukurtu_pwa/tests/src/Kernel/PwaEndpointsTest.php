@@ -165,6 +165,15 @@ class PwaEndpointsTest extends KernelTestBase {
   }
 
   /**
+   * Reads the results file the way a Tugboat rebuild leaves it.
+   */
+  protected function results(): array {
+    $path = 'private://pwa-spike/results.json';
+    $this->assertFileExists($path);
+    return json_decode((string) file_get_contents($path), TRUE);
+  }
+
+  /**
    * Uploads need a signed-in person, valid input, and are idempotent.
    */
   public function testUpload(): void {
@@ -180,32 +189,62 @@ class PwaEndpointsTest extends KernelTestBase {
     $again = json_decode((string) $this->send($this->uploadRequest($id), $tester)->getContent(), TRUE);
     $this->assertSame(['ok' => TRUE, 'duplicate' => TRUE], $again);
 
-    $received = $this->container->get('keyvalue')->get('mukurtu_pwa_spike')->get('received');
+    $received = $this->results()['received'];
     $this->assertCount(1, $received);
     $this->assertSame((int) $tester->id(), $received[$id]['uid']);
     $this->assertFileExists("private://pwa-spike/$id.bin");
   }
 
   /**
-   * Reports keep only known keys, and results are for administrators.
+   * Builds a report request from one device.
    */
-  public function testReportsAndResults(): void {
-    $report = Request::create('/pwa-spike/report', 'POST', [], [], [], [], json_encode([
-      'deviceId' => '1b4e28ba-2fa1-41d2-883f-0016d3cca427',
+  protected function reportRequest(string $deviceId): Request {
+    return Request::create('/pwa-spike/report', 'POST', [], [], [], [], json_encode([
+      'deviceId' => $deviceId,
       'itemsTotal' => 2,
       'itemsFound' => 2,
       'unexpected' => 'dropped',
     ]));
-    $this->assertSame(403, $this->send(clone $report)->getStatusCode());
+  }
+
+  /**
+   * Reports keep only known keys, signed in or not, and all are kept.
+   *
+   * Signed-out reports matter because a Tugboat rebuild signs every phone out.
+   */
+  public function testReports(): void {
+    $phone = '1b4e28ba-2fa1-41d2-883f-0016d3cca427';
+    $other = '6f1c2d3e-4b5a-4c7d-8e9f-0a1b2c3d4e5f';
+    $this->assertSame(400, $this->send(Request::create('/pwa-spike/report', 'POST', [], [], [], [], '{}'))->getStatusCode());
+    $this->assertSame(200, $this->send($this->reportRequest($phone))->getStatusCode());
     $tester = $this->tester();
-    $this->assertSame(200, $this->send(clone $report, $tester)->getStatusCode());
+    $this->assertSame(200, $this->send($this->reportRequest($phone), $tester)->getStatusCode());
+    $this->assertSame(200, $this->send($this->reportRequest($other), $tester)->getStatusCode());
 
-    $stored = $this->container->get('keyvalue')->get('mukurtu_pwa_spike')->get('reports');
-    $this->assertCount(1, $stored);
-    $this->assertArrayNotHasKey('unexpected', $stored[0]);
-    $this->assertSame(2, $stored[0]['itemsFound']);
+    $reports = $this->results()['reports'];
+    $this->assertCount(3, $reports);
+    $this->assertSame([$phone, $phone, $other], array_column($reports, 'deviceId'));
+    $this->assertSame([0, (int) $tester->id(), (int) $tester->id()], array_column($reports, 'uid'));
+    $this->assertArrayNotHasKey('unexpected', $reports[0]);
+    $this->assertSame(2, $reports[0]['itemsFound']);
+  }
 
+  /**
+   * Results are for administrators, and come from the file.
+   */
+  public function testResults(): void {
+    $this->send($this->reportRequest('1b4e28ba-2fa1-41d2-883f-0016d3cca427'));
+    $tester = $this->tester();
     $this->assertSame(403, $this->send(Request::create('/pwa-spike/results'), $tester)->getStatusCode());
+
+    Role::create(['id' => 'spike_admin', 'label' => 'Spike admin'])
+      ->grantPermission('administer site configuration')
+      ->save();
+    $admin = User::create(['name' => 'spike-admin', 'status' => 1, 'roles' => ['spike_admin']]);
+    $admin->save();
+    $response = $this->send(Request::create('/pwa-spike/results'), $admin);
+    $this->assertSame(200, $response->getStatusCode());
+    $this->assertSame($this->results(), json_decode((string) $response->getContent(), TRUE));
   }
 
 }

@@ -9,8 +9,6 @@ use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
-use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,14 +19,16 @@ use Symfony\Component\HttpFoundation\Request;
  * Tester pages and result endpoints for the #400 PWA spike. Not for release.
  *
  * Results go to the server, not only the device: if a phone deletes the
- * app's storage, its own record of the test goes with it.
+ * app's storage, its own record of the test goes with it. They're kept in a
+ * private file rather than the database, because a Tugboat rebuild reinstalls
+ * the site but leaves private files in place.
  */
 final class SpikeController implements ContainerInjectionInterface {
 
   use StringTranslationTrait;
 
   /**
-   * The most reports kept, so a runaway device can't fill the database.
+   * The most reports kept, so a runaway device can't fill the disk.
    */
   const MAX_REPORTS = 5000;
 
@@ -37,8 +37,12 @@ final class SpikeController implements ContainerInjectionInterface {
    */
   const MAX_UPLOAD = 20 * 1024 * 1024;
 
+  /**
+   * Where reports, received drafts and their photos are kept.
+   */
+  const DIRECTORY = 'private://pwa-spike';
+
   public function __construct(
-    protected KeyValueFactoryInterface $keyValue,
     protected FileSystemInterface $fileSystem,
     protected AccountInterface $currentUser,
     protected TimeInterface $time,
@@ -49,7 +53,6 @@ final class SpikeController implements ContainerInjectionInterface {
    */
   public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('keyvalue'),
       $container->get('file_system'),
       $container->get('current_user'),
       $container->get('datetime.time'),
@@ -57,10 +60,50 @@ final class SpikeController implements ContainerInjectionInterface {
   }
 
   /**
-   * The spike's result store.
+   * Reads the results file.
+   *
+   * @return array{reports: array, received: array}
+   *   Every report and received draft.
    */
-  protected function store(): KeyValueStoreInterface {
-    return $this->keyValue->get('mukurtu_pwa_spike');
+  public function readResults(): array {
+    $path = self::DIRECTORY . '/results.json';
+    $data = is_file($path) ? json_decode((string) file_get_contents($path), TRUE) : NULL;
+    return (is_array($data) ? $data : []) + ['reports' => [], 'received' => []];
+  }
+
+  /**
+   * Changes the results file under an exclusive lock.
+   *
+   * The lock stops two phones reporting at the same moment from overwriting
+   * each other's results.
+   *
+   * @param callable $change
+   *   Receives the results by reference and returns a value to pass back.
+   *
+   * @return mixed
+   *   Whatever $change returned.
+   */
+  protected function updateResults(callable $change): mixed {
+    $directory = self::DIRECTORY;
+    $this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
+    $handle = fopen("$directory/results.json", 'c+');
+    if (!$handle || !flock($handle, LOCK_EX)) {
+      throw new \RuntimeException('Unable to lock the spike results file.');
+    }
+    try {
+      $data = json_decode((string) stream_get_contents($handle), TRUE);
+      $data = (is_array($data) ? $data : []) + ['reports' => [], 'received' => []];
+      $result = $change($data);
+      ftruncate($handle, 0);
+      rewind($handle);
+      fwrite($handle, (string) json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+      fflush($handle);
+      return $result;
+    }
+    finally {
+      flock($handle, LOCK_UN);
+      fclose($handle);
+    }
   }
 
   /**
@@ -232,28 +275,29 @@ final class SpikeController implements ContainerInjectionInterface {
       return new JsonResponse(['error' => 'invalid'], 400);
     }
 
-    $received = $this->store()->get('received', []);
-    if (isset($received[$clientId])) {
-      return new JsonResponse(['ok' => TRUE, 'duplicate' => TRUE]);
-    }
-
-    $directory = 'private://pwa-spike';
-    $this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
-    $this->fileSystem->copy($photo->getPathname(), "$directory/$clientId.bin", FileExists::Replace);
-
-    $received[$clientId] = [
-      'title' => mb_substr($title, 0, 255),
-      'uid' => (int) $this->currentUser->id(),
-      'bytes' => (int) $photo->getSize(),
-      'created' => (int) $request->request->get('created'),
-      'received' => $this->time->getRequestTime(),
-    ];
-    $this->store()->set('received', $received);
-    return new JsonResponse(['ok' => TRUE, 'duplicate' => FALSE]);
+    $duplicate = $this->updateResults(function (array &$data) use ($clientId, $title, $photo, $request): bool {
+      if (isset($data['received'][$clientId])) {
+        return TRUE;
+      }
+      $this->fileSystem->copy($photo->getPathname(), self::DIRECTORY . "/$clientId.bin", FileExists::Replace);
+      $data['received'][$clientId] = [
+        'title' => mb_substr($title, 0, 255),
+        'uid' => (int) $this->currentUser->id(),
+        'bytes' => (int) $photo->getSize(),
+        'created' => (int) $request->request->get('created'),
+        'received' => $this->time->getRequestTime(),
+      ];
+      return FALSE;
+    });
+    return new JsonResponse(['ok' => TRUE, 'duplicate' => $duplicate]);
   }
 
   /**
    * Records one app open from a device.
+   *
+   * Signed-out devices can report too: a Tugboat rebuild signs every phone
+   * out, and the retention test must keep counting through that. The device
+   * ID ties one phone's reports together.
    */
   public function report(Request $request): JsonResponse {
     $data = json_decode((string) $request->getContent(), TRUE);
@@ -269,9 +313,10 @@ final class SpikeController implements ContainerInjectionInterface {
     $report['uid'] = (int) $this->currentUser->id();
     $report['received'] = $this->time->getRequestTime();
 
-    $reports = $this->store()->get('reports', []);
-    $reports[] = $report;
-    $this->store()->set('reports', array_slice($reports, -self::MAX_REPORTS));
+    $this->updateResults(function (array &$data) use ($report): void {
+      $data['reports'][] = $report;
+      $data['reports'] = array_slice($data['reports'], -self::MAX_REPORTS);
+    });
     return new JsonResponse(['ok' => TRUE]);
   }
 
@@ -279,10 +324,7 @@ final class SpikeController implements ContainerInjectionInterface {
    * Returns every report and received draft, for writing up the results.
    */
   public function results(): JsonResponse {
-    return new JsonResponse([
-      'reports' => $this->store()->get('reports', []),
-      'received' => $this->store()->get('received', []),
-    ]);
+    return new JsonResponse($this->readResults());
   }
 
 }

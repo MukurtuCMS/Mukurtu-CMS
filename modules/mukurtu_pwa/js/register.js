@@ -87,14 +87,20 @@
       standalone: Drupal.mukurtuPwa.standalone(),
       ...storage,
     });
-    const token = await Drupal.mukurtuPwa.token();
-    if (!token || !navigator.onLine) {
+    if (!navigator.onLine) {
       return;
+    }
+    // Signed-out devices report without a token, so a rebuild that signs
+    // everyone out doesn't stop the check-ins.
+    const token = await Drupal.mukurtuPwa.token();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['X-CSRF-Token'] = token;
     }
     await fetch(settings.reportUrl, {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
+      headers,
       body: JSON.stringify({
         ...report,
         userAgent: navigator.userAgent,
