@@ -28,3 +28,36 @@
 .mukurtu-pwa-outbox__form .form-item {
   margin-block-end: 1rem;
 }
+
+.mukurtu-pwa-tester-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  padding: 0.5rem 1rem;
+  border-block-end: 1px solid currentcolor;
+}
+
+.mukurtu-pwa-tester-bar__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mukurtu-pwa-tester-bar__list a {
+  display: inline-block;
+  min-block-size: 24px;
+  text-decoration: underline;
+}
+
+.mukurtu-pwa-tester-bar__list li {
+  list-style: none;
+}
+
+.mukurtu-pwa-tester-bar__list li + li {
+  padding-inline-start: 1rem;
+  border-inline-start: 1px solid currentcolor;
+}

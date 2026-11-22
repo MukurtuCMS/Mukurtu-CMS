@@ -247,4 +247,18 @@ class PwaEndpointsTest extends KernelTestBase {
     $this->assertSame($this->results(), json_decode((string) $response->getContent(), TRUE));
   }
 
+  /**
+   * Every page links to the tester pages, which an installed app can't type.
+   */
+  public function testTesterBar(): void {
+    $page_top = [];
+    mukurtu_pwa_page_top($page_top);
+    $html = (string) $this->container->get('renderer')->renderInIsolation($page_top);
+
+    $this->assertStringContainsString('<nav class="mukurtu-pwa-tester-bar" aria-label="Offline testing">', $html);
+    $this->assertStringContainsString('href="/pwa-spike/status">Status</a>', $html);
+    $this->assertStringContainsString('href="/pwa-spike/outbox">Upload test</a>', $html);
+    $this->assertStringContainsString('href="/browse?search_api_fulltext=Offline%20test">Test items</a>', $html);
+  }
+
 }

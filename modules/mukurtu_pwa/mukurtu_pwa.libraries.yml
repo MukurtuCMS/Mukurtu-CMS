@@ -37,3 +37,8 @@ spike:
     - core/drupal
     - core/once
     - mukurtu_pwa/register
+
+tester_bar:
+  css:
+    component:
+      css/pwa.css: {}
