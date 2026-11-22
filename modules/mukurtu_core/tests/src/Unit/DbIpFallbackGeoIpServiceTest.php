@@ -7,6 +7,7 @@ namespace Drupal\Tests\mukurtu_core\Unit;
 use Drupal\Tests\UnitTestCase;
 use Drupal\mukurtu_core\Service\DbIpDatabaseLocator;
 use Drupal\mukurtu_core\Service\DbIpFallbackGeoIpService;
+use Drupal\visitors_geoip\GeoIpCity;
 use Drupal\visitors_geoip\VisitorsGeoIpInterface;
 use GeoIp2\Exception\AddressNotFoundException;
 use GeoIp2\Model\City;
@@ -86,12 +87,13 @@ class DbIpFallbackGeoIpServiceTest extends UnitTestCase {
       'location' => ['latitude' => 37.422, 'longitude' => -122.085],
     ]));
 
-    $this->assertSame('California', $record->subdivisions[0]->isoCode);
-    $this->assertSame('Mountain View', $record->city->names['en']);
-    $this->assertSame('NA', $record->continent->code);
-    $this->assertSame('US', $record->country->isoCode);
-    $this->assertSame(37.422, $record->location->latitude);
-    $this->assertSame(-122.085, $record->location->longitude);
+    $this->assertInstanceOf(GeoIpCity::class, $record);
+    $this->assertSame('California', $record->regionCode);
+    $this->assertSame('Mountain View', $record->city);
+    $this->assertSame('NA', $record->continentCode);
+    $this->assertSame('US', $record->countryCode);
+    $this->assertSame(37.422, $record->latitude);
+    $this->assertSame(-122.085, $record->longitude);
   }
 
   /**
@@ -105,8 +107,8 @@ class DbIpFallbackGeoIpServiceTest extends UnitTestCase {
       'city' => ['names' => ['en' => 'Mountain View', 'de' => 'Mountain View']],
     ]));
 
-    $this->assertSame('CA', $record->subdivisions[0]->isoCode);
-    $this->assertSame('Mountain View', $record->city->names['en']);
+    $this->assertSame('CA', $record->regionCode);
+    $this->assertSame('Mountain View', $record->city);
   }
 
   /**
@@ -120,10 +122,11 @@ class DbIpFallbackGeoIpServiceTest extends UnitTestCase {
       'registered_country' => ['iso_code' => 'SG'],
     ]));
 
-    $this->assertSame('', $record->continent->code);
-    $this->assertSame('SG', $record->country->isoCode, 'A missing country should fall back to the registered country.');
-    $this->assertSame('', $record->subdivisions[0]->isoCode);
-    $this->assertSame('', $record->city->names['en']);
+    $this->assertSame('', $record->continentCode);
+    $this->assertSame('SG', $record->countryCode, 'A missing country should fall back to the registered country.');
+    $this->assertSame('', $record->regionCode);
+    $this->assertSame('', $record->city);
+    $this->assertNull($record->latitude);
   }
 
   /**
@@ -135,21 +138,29 @@ class DbIpFallbackGeoIpServiceTest extends UnitTestCase {
       'city' => ['names' => ['ja' => '東京']],
     ]));
 
-    $this->assertSame('東京都', $record->subdivisions[0]->isoCode);
-    $this->assertSame('東京', $record->city->names['en']);
+    $this->assertSame('東京都', $record->regionCode);
+    $this->assertSame('東京', $record->city);
   }
 
   /**
-   * The inner (MaxMind) service's records are normalized too.
+   * The inner (MaxMind) service's GeoIpCity results are normalized too.
+   *
+   * The visitors_geoip GeoIpService returns a GeoIpCity whose missing values
+   * are NULL; they become empty strings, and the rest is kept.
    */
   public function testInnerRecordIsNormalized(): void {
     $inner = $this->createMock(VisitorsGeoIpInterface::class);
-    $inner->method('city')->willReturn(new City(['country' => ['iso_code' => 'FR']]));
+    $inner->method('city')->willReturn(new GeoIpCity(NULL, 'FR', NULL, NULL, 48.86, 2.35));
 
     $record = $this->fallbackService($inner)->city('8.8.8.8');
 
-    $this->assertSame('FR', $record->country->isoCode);
-    $this->assertSame('', $record->subdivisions[0]->isoCode);
+    $this->assertInstanceOf(GeoIpCity::class, $record);
+    $this->assertSame('', $record->continentCode);
+    $this->assertSame('FR', $record->countryCode);
+    $this->assertSame('', $record->regionCode);
+    $this->assertSame('', $record->city);
+    $this->assertSame(48.86, $record->latitude);
+    $this->assertSame(2.35, $record->longitude);
   }
 
   /**
@@ -166,7 +177,7 @@ class DbIpFallbackGeoIpServiceTest extends UnitTestCase {
   }
 
   /**
-   * hasLibrary()/hasExtension() pass straight through to the inner service.
+   * Environment checks pass straight through to the inner service.
    *
    * These describe the PHP environment (the geoip2 library, the maxminddb
    * extension), not which specific database is in use, so there is nothing
