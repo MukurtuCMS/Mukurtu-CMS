@@ -26,9 +26,12 @@ documentation on how to use @include media(). */
 @use '01-atoms/translation-status-badge/translation-status-badge';
 @use '02-molecules/altcha/altcha';
 @use '02-molecules/callout/callout';
+@use '02-molecules/card-media/card-media';
 @use '02-molecules/carousels/carousels';
+@use '02-molecules/character-palette/character-palette';
 @use '02-molecules/consent-popup/consent-popup';
 @use '02-molecules/content-warning/content-warning';
+@use '02-molecules/contextual-links/contextual-links';
 @use '02-molecules/featured-items/featured-items';
 @use '02-molecules/featured-carousel/featured-carousel';
 @use '02-molecules/form/form';
@@ -44,6 +47,7 @@ documentation on how to use @include media(). */
 @use '02-molecules/menus/menu';
 @use '02-molecules/messages/messages';
 @use '02-molecules/quick-actions/quick-actions';
+@use '02-molecules/search-suggest/search-suggest';
 @use '02-molecules/vertical-card/vertical-card';
 @use '03-organisms/breadcrumbs/breadcrumbs';
 @use '03-organisms/footer/footer';
@@ -52,6 +56,7 @@ documentation on how to use @include media(). */
 @use '03-organisms/related-content/related-content';
 @use '03-organisms/related-content/related-content-preview';
 @use '04-templates/access-denied/access-denied';
+@use '04-templates/articles/articles';
 @use '04-templates/browse-pages/browse';
 @use '04-templates/browse-pages/collections';
 @use '04-templates/categories/categories';

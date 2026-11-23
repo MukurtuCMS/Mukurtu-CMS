@@ -39,18 +39,47 @@ html:not(.gin--dark-mode) :is([data-drupal-messages], .mukurtu-super-admin-warni
   --gin-color-focus: #fff;
 }
 
-/* WCAG 2.4.7: Gin draws focus as a box-shadow, which forced colors mode
-removes, leaving form fields with only a small border change. This file also
-loads on the public theme, which has its own focus styles, so
-data-gin-layout-density limits this to pages in Gin. Gin clears the outline
-with :is(#extra-specificity-hack), so this needs !important. Links in
-messages are included because Gin gives links outline: none, which left them
-with no focus indicator at all in forced colors (#2657). */
+/* WCAG 2.4.7: Gin draws focus as a box-shadow and gives links, buttons and
+summaries outline: none. Forced colors mode removes box-shadows, which left
+links, breadcrumbs, dropbuttons, summaries and the whole admin toolbar with
+no focus indicator at all (#2626, #2657, #2677). One outline for every
+focused element also replaces the outlines some elements draw themselves,
+such as Gin's dotted tabs, so none gets two rings. This file also loads on
+the public theme, which has its own focus styles, so this is limited to
+pages in Gin (data-gin-layout-density), Layout Builder (.glb-body), and the
+Gin toolbars, navigation and breadcrumb, which also show on public pages.
+Gin clears the outline with :is(#extra-specificity-hack), so this needs
+!important. */
 @media (forced-colors: active) {
-  [data-gin-layout-density] :is(.form-element, .form-boolean, .button, .tagify__input):focus-visible,
-  [data-gin-layout-density] :is([data-drupal-messages], .mukurtu-super-admin-warning-wrapper) a:focus-visible {
+  :is([data-gin-layout-density], .glb-body, #admin-toolbar, #toolbar-administration, .gin-secondary-toolbar) :focus-visible {
     outline: 2px solid Highlight !important;
     outline-offset: 2px;
+  }
+
+  /* Drawn inside where an outside ring would be cut off: by the sidebar,
+  which clips its summaries' sides, by the media library's type tabs, or by
+  the page edge for skip links, the sidebar itself and the toolbar that
+  replaces the navigation on narrow screens. */
+  :is([data-gin-layout-density], .glb-body, #toolbar-administration) :is(#gin_sidebar, #gin_sidebar summary, #gin-toolbar-bar *, .media-library-menu__link, .visually-hidden.focusable):focus-visible {
+    outline-offset: -2px;
+  }
+}
+
+/* WCAG 2.4.7: the Tagify suggestion picked with the arrow keys is marked only
+by its background, which forced colors removes, so it looked like the others
+(#2744). Use the system highlight colors, as the public theme does (#2668).
+The Tagify module's Gin skin sets its colors with !important, including a
+.gin--dark-mode rule, hence the html prefix and !important. Group headings
+inside an item get their own color from that skin, so they're included. */
+@media (forced-colors: active) {
+  html [data-gin-layout-density] .tagify__dropdown__item--active {
+    forced-color-adjust: none;
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  html [data-gin-layout-density] .tagify__dropdown__item--active * {
+    color: HighlightText !important;
   }
 }
 
@@ -114,13 +143,87 @@ short fields themselves. Shrink it in these dialogs specifically. */
   outline-offset: -3px;
 }
 
-/* MW: fixes paragraph titles being cut off in forms. */
-.js .paragraph-type-title {
-    flex-basis: 25%;
-    min-width: 80px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: visible !important;
+/*
+ * Classic Paragraphs widget (entity_reference_paragraphs, used by Knowledge
+ * Keepers): Paragraphs keeps the label on one line in a 25% wide box, so it
+ * spilled out of the box, ran under the Remove button and made the page
+ * scroll sideways at 320px (WCAG 1.4.10, #2762). Let it take the free space
+ * and wrap.
+ */
+html.js .paragraph-type-top .paragraph-type-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: break-word;
+}
+
+/*
+ * Paragraphs widget: wrap the paragraph type label instead of cutting it off
+ * or letting it run under the buttons. This file loads in the base group,
+ * before Paragraphs and Gin, so the selectors start with html.js to win.
+ */
+html.js .paragraph-top .paragraph-type,
+html.js .paragraph-top .paragraph-type-label {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/*
+ * Narrow screens (#2757): put the label and icons on the first row, and the
+ * summary and buttons on the second, so the buttons can't cover the label.
+ * The buttons span the last two columns, so they never share a column with
+ * the icons and squeeze the label, even in nested paragraphs. 600px matches
+ * the Paragraphs widget's own breakpoint.
+ */
+@media (max-width: 599.98px) {
+  html.js .paragraph-top {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+  }
+
+  html.js .paragraph-top .paragraph-type {
+    grid-row: 1;
+    grid-column: 1 / 3;
+  }
+
+  html.js .paragraph-top .paragraph-info {
+    grid-row: 1;
+    grid-column: 3;
+  }
+
+  html.js .paragraph-top .paragraph-summary {
+    grid-row: 2;
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  html.js .paragraph-top .paragraphs-actions {
+    grid-row: 2;
+    grid-column: 2 / 4;
+  }
+}
+
+/*
+ * Paragraphs actions menu (⋮): Paragraphs anchors it with right: 0, so in
+ * right-to-left languages it opened past the left edge of narrow screens
+ * (WCAG 1.4.10, #2761). Anchor it to the inline end instead.
+ */
+html .paragraphs-dropdown-actions {
+  right: auto;
+  inset-inline-end: 0;
+}
+
+/*
+ * Paragraphs actions button (⋮): Gin draws the icon as a fill cut to shape
+ * with a mask, and forced colors repainted the fill to match the button, so
+ * it vanished (WCAG 1.4.11, #2760). Paint it in the button text color.
+ */
+@media (forced-colors: active) {
+  html .paragraphs-dropdown-toggle::after,
+  html .paragraphs-dropdown-toggle:is(:hover, :active, :focus)::after {
+    background-color: ButtonText;
+  }
 }
 
 /* Content browser modal: thumbnail column */
@@ -1584,6 +1687,27 @@ body.path-visitors .layout-row.layout-row {
   }
 }
 
+/* WCAG 2.4.7 (#2742): Gin hides its toolbar logo link, which has no visible
+   content, with `.toolbar-menu__logo { display: none }`. Core's toolbar CSS
+   has `.toolbar { & a { display: block } }`, which outranks it, so on narrow
+   screens the link was in the tab order at 0px tall, with no visible focus. */
+.toolbar .toolbar-menu__logo {
+  display: none;
+}
+
+/* WCAG 1.4.11 (#2743): the narrow toolbar's icons (Manage, Shortcuts,
+   Dashboards and the rest) are a fill cut to shape with a mask. Forced colors
+   repaints the fill with the bar's own color, so the icons vanished. Fill
+   them with the link color, as Gin does for its own masked icons in forced
+   colors. html outranks Gin's rule, which loads after this file, and the
+   states repeat Gin's own hover, focus and open-tray rules. */
+@media (forced-colors: active) {
+  html .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon::before,
+  html .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:is(:hover, :focus, .is-active)::before {
+    background-color: LinkText;
+  }
+}
+
 /* Visitors report, Gin dark mode: keep the chart on a light plate.
 
    charts_chartjs paints its title and legend onto the <canvas>, and neither
@@ -1636,6 +1760,22 @@ body.path-visitors .layout-row.layout-row {
    stylesheet rule regardless of selector specificity. */
 .visitors-main .gin--sticky-table-header {
   display: none !important;
+}
+
+/* Gin's sticky table header copy lies over the real header row. Keyboard
+   users use the real row (sticky-header-copy.js takes the copy out of the Tab
+   order), so hide the copy while focus is in the real row, or its focus
+   indicator would be covered (#2741). !important: Gin's tableheader.js sets
+   visibility inline. */
+table.gin--sticky-table-header:has(+ .gin-table-scroll-wrapper thead :focus-visible) {
+  visibility: hidden !important;
+}
+
+/* With the copy hidden, the real row is the one under the pointer, but Gin
+   turns off its pointer events, which would swallow the first click.
+   !important: Gin's rule uses an id selector. */
+.gin-table-scroll-wrapper thead:has(:focus-visible) {
+  pointer-events: auto !important;
 }
 
 /* Design settings: put the custom-palette colour fieldset and the live
@@ -1801,6 +1941,62 @@ or pushed off screen at any width from 320px to 1920px. */
   max-width: 100%;
 }
 
+/* Text spacing (WCAG 1.4.12) made node forms scroll sideways at 320px
+(#2763), from two causes.
+
+Gin's tooltips stay in the layout while hidden, and Floating UI only places
+them on hover, focus or when the trigger resizes. Extra letter spacing widens
+a hidden tooltip without moving it, so the "Show sidebar panel" one in the
+sticky Save bar ran 14px past the edge. While hidden, pin it to the end of
+its container. Its far edge is then the container's, which is on screen, and
+anything wider spills toward the start, which never scrolls the page (left in
+left-to-right, right in right-to-left). Pinning to the start instead only
+works for a trigger near the start of its bar: "More actions" sits near the
+end, and its tooltip ran 4px past the edge at 320px. Floating UI's own
+position applies again once it's shown.
+
+display: none would be simpler, but Floating UI can measure the tooltip
+before the hover style shows it, place a zero-width box, and leave the shown
+tooltip running off the edge. !important is needed to beat Floating UI's
+inline style.
+
+Gin fades tooltips over 0.3s and transitions every property, which would
+slide a tooltip in from the end of its container and flash it there while
+it fades out. So the position doesn't animate: it applies at once when the
+tooltip is shown, and the pin waits until the fade-out ends. Gin only
+transitions when motion is allowed. !important beats Gin's id-level
+selector. */
+[data-gin-tooltip]:not(:hover, :focus) + .gin-tooltip {
+  inset-inline-start: auto !important;
+  inset-inline-end: 0 !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gin-tooltip {
+    transition-property: opacity, visibility, inset-inline-start, inset-inline-end !important;
+    transition-duration: 0.3s, 0.3s, 0s, 0s !important;
+    transition-delay: 0s, 0s, 0.3s, 0.3s !important;
+  }
+
+  [data-gin-tooltip]:is(:hover, :focus) + .gin-tooltip {
+    transition-delay: 0s !important;
+  }
+}
+
+/* A multi-value field's table can't get narrower than its drag handle,
+narrowest text box and Remove button, and a one-word button can't wrap. In
+a narrow tab, such as the dictionary word's Translation field, it was wider
+than the page. Let it scroll inside its own box, as Gin's other tables do.
+The padding keeps focus rings at the box's edges from being cut off, and the
+negative margin keeps the contents where they were. */
+@media (max-width: 48rem) {
+  .form-item--multiple:has(> .field-multiple-table) {
+    overflow-x: auto;
+    padding: 0.25rem;
+    margin-inline: -0.25rem;
+  }
+}
+
 /* Fourth and last cause of the admin reflow failures in #2336, on the
 submission form settings page.
 
@@ -1910,4 +2106,13 @@ the only requirement is that the selector matches, which it does. */
    already passes. */
 html:not(.gin--dark-mode) .field--widget-paragraphs .field-multiple-table thead .paragraphs-actions .button {
   color: var(--gin-color-primary-hover);
+}
+
+/* Klaro's consent settings button floats over the bottom right of every page,
+and a control on screen behind it takes focus without the page scrolling
+(WCAG 2.4.11, #2712). Padding the bottom of the scroll area makes the
+browser scroll focused elements above it, as the public theme does in
+_consent-popup.scss. */
+html:has(> body[data-gin-layout-density] > .klaro_toggle_dialog) {
+  scroll-padding-block-end: 4.5rem;
 }

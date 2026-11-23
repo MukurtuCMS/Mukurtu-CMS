@@ -15,8 +15,17 @@ tagify-override:
   version: 1.x
   js:
     js/mukurtu-tagify-override.js: {}
+    js/tagify-reorder.js: {}
+    js/tagify-combobox.js: {}
+    js/tagify-list-placement.js: {}
+  css:
+    component:
+      css/tagify-list-placement.css: {}
+      css/tagify-reorder.css: {}
+      css/tagify-no-match.css: {}
   dependencies:
     - core/drupal
+    - core/drupal.announce
     - core/drupalSettings
 
 splide:
@@ -62,6 +71,20 @@ paragraphs_widget_focus:
     js/paragraphs-widget-focus.js: {}
   dependencies:
     - core/drupal
+    - core/once
+
+# Arrow buttons that reorder paragraphs without dragging (#2738).
+paragraphs_reorder:
+  version: 1.x
+  js:
+    js/paragraphs-reorder.js: {}
+  css:
+    component:
+      css/paragraphs-reorder.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.tabledrag
     - core/once
 
 entity_browser_form:
@@ -145,6 +168,20 @@ reset-refused-upload:
     - core/drupal.ajax
     - core/drupal.announce
 
+sequential-upload:
+  version: 1.x
+  js:
+    js/sequential-upload.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
+    - core/once
+    - core/drupal.ajax
+    - core/drupal.announce
+    - core/drupal.message
+    - file/drupal.file
+
 focus-file-field:
   version: 1.x
   js:
@@ -178,6 +215,20 @@ entity_reference_role_tagify:
     - core/once
     - core/sortable
 
+character_palette_settings:
+  version: 1.x
+  js:
+    js/character-palette-settings.js: {}
+  css:
+    component:
+      css/character-palette-settings.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.announce
+    - core/drupal.tabledrag
+    - core/jquery
+    - core/once
+
 visitors-country-map:
   version: 1.x
   js:
@@ -186,3 +237,32 @@ visitors-country-map:
     - core/jquery
     - core/drupal
     - leaflet/leaflet-drupal
+
+bulk_edit_columns:
+  version: 1.x
+  css:
+    component:
+      css/bulk-edit-columns.css: {}
+
+bulk_edit_selection_count:
+  version: 1.x
+  js:
+    js/bulk-edit-selection-count.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupal.announce
+    - core/drupalSettings
+
+character_palette:
+  version: 1.x
+  css:
+    component:
+      css/character-palette.css: {}
+  js:
+    js/character-palette.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/drupal.announce
+    - core/once

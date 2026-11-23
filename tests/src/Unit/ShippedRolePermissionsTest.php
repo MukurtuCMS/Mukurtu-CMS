@@ -131,6 +131,7 @@ class ShippedRolePermissionsTest extends UnitTestCase {
     yield 'cookie and consent settings' => ['administer klaro'];
     yield 'not found page' => ['administer mukurtu not found page'];
     yield 'Turnstile route protection' => ['administer turnstile'];
+    yield 'bulk editing' => ['use mukurtu bulk edit'];
     yield 'content revision history' => ['view all revisions'];
   }
 
@@ -169,6 +170,31 @@ class ShippedRolePermissionsTest extends UnitTestCase {
       $permission,
       self::effectivePermissions('authenticated'),
       "The authenticated role does not hold '$permission' on a fresh install."
+    );
+  }
+
+  /**
+   * Everyone who can use a search box gets its word suggestions.
+   *
+   * The 40011 update in mukurtu_search grants these on existing sites.
+   */
+  public static function searchSuggestionPermissionProvider(): \Generator {
+    foreach (['anonymous', 'authenticated'] as $role) {
+      foreach (['mukurtu_browse', 'mukurtu_dictionary', 'mukurtu_digital_heritage_browse'] as $search) {
+        yield "$role $search" => [$role, "use search_api_autocomplete for $search"];
+      }
+    }
+  }
+
+  /**
+   * A role holds the permission to get suggestions from a search box.
+   */
+  #[DataProvider('searchSuggestionPermissionProvider')]
+  public function testRoleGetsSearchSuggestions(string $role, string $permission): void {
+    $this->assertContains(
+      $permission,
+      self::effectivePermissions($role),
+      "The $role role does not hold '$permission' on a fresh install, so its search box would get no suggestions."
     );
   }
 
@@ -244,6 +270,16 @@ class ShippedRolePermissionsTest extends UnitTestCase {
       $reviewer,
       'Reviewers must not also be able to administer the submission settings.'
     );
+  }
+
+  /**
+   * The Bulk Editor role ships with bulk editing and nothing else.
+   *
+   * Bulk editing only opens the tools; which items an editor can change still
+   * comes from their protocol memberships.
+   */
+  public function testBulkEditorRoleShipsWithBulkEditOnly(): void {
+    $this->assertSame(['use mukurtu bulk edit'], self::effectivePermissions('mukurtu_bulk_editor'));
   }
 
   /**

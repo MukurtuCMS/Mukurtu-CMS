@@ -76,7 +76,9 @@ class ImportMigrationLookup extends ProcessPluginBase implements ContainerFactor
     $matches = [];
 
     foreach ($migration_ids as $migration_id) {
-      $table = 'migrate_map_' . $migration_id;
+      // Match the name core's Sql ID map gives the table, which is
+      // lowercased and truncated to fit MySQL's identifier limit.
+      $table = mb_substr('migrate_map_' . mb_strtolower($migration_id), 0, 63 - strlen($this->database->getPrefix()));
       if (!$schema->tableExists($table)) {
         continue;
       }
