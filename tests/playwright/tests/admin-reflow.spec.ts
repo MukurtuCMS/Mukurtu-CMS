@@ -26,6 +26,7 @@ test.describe('Reflow (admin)', () => {
     '/admin',
     '/admin/structure',
     '/admin/import',
+    '/admin/config/mukurtu/character-palette',
     '/admin/config/mukurtu/content-warnings',
     '/admin/config/mukurtu/submissions',
     '/admin/import-templates/add',
@@ -81,5 +82,39 @@ test.describe('Reflow (admin)', () => {
     await page.setViewportSize({ width: 320, height: 720 });
     await page.goto('/admin/structure');
     await expect(page.getByRole('link', { name: /shortcuts/i }).first()).toBeAttached();
+  });
+
+  // A collapsed paragraph's buttons covered its type label at 320px (#2757).
+  // Uses the Person form's Biography sections, which every site has.
+  test('Reflow: collapsed paragraph buttons stay clear of the type label at 320px', async ({ page }) => {
+    // Open the Biography tab at desktop width, where it is a link, then narrow.
+    await page.goto('/node/add/person');
+    const tab = page.locator('a[href="#edit-group-biography"]:visible').first();
+    if (await tab.count()) {
+      await tab.click();
+    }
+    await page.setViewportSize({ width: 320, height: 720 });
+    const field = page.locator('.field--name-field-sections').first();
+    await field.locator('input[name$="[subform][field_title][0][value]"]').first().fill('Childhood');
+    const collapse = field.locator('input[name="field_sections_0_collapse"]');
+    await collapse.focus();
+    await page.keyboard.press('Enter');
+    const expand = field.locator('input[name="field_sections_0_edit"]');
+    await expect(expand).toBeVisible();
+
+    const top = field.locator('.paragraph-top').first();
+    const label = await top.locator('.paragraph-type-label').boundingBox();
+    const buttons = await top.locator('.paragraphs-actions :is(input, button):visible').evaluateAll(
+      (elements) => elements.map((element) => {
+        const box = element.getBoundingClientRect();
+        return { x: box.x, y: box.y, width: box.width, height: box.height };
+      }),
+    );
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const button of buttons) {
+      const overlaps = button.x < label!.x + label!.width && label!.x < button.x + button.width
+        && button.y < label!.y + label!.height && label!.y < button.y + button.height;
+      expect(overlaps, 'a button covers the paragraph type label').toBe(false);
+    }
   });
 });

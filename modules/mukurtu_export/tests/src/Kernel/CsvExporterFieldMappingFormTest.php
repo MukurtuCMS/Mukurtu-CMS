@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_export\Kernel;
 
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Render\Element;
 use Drupal\mukurtu_export\Entity\CsvExporter;
@@ -227,6 +228,31 @@ class CsvExporterFieldMappingFormTest extends ProtocolAwareEntityTestBase {
     $form = $this->buildEntityForm('field_mapping', 'node__protocol_aware_content');
     $bundle_label = (string) $sections['node__protocol_aware_content']['items'][0]['label'];
     $this->assertSame("$bundle_label fields", (string) $form['mapping']['node__protocol_aware_content']['fields']['#caption']);
+  }
+
+  /**
+   * Export settings labels don't name a file format.
+   *
+   * Export also writes .xlsx and .ods, so labels that apply to every format
+   * must not say "CSV" (#2784).
+   */
+  public function testLabelsDoNotNameCsv(): void {
+    $entity_type = $this->container->get('entity_type.manager')->getDefinition('csv_exporter');
+    $this->assertSame('Export setting', (string) $entity_type->getLabel());
+    $this->assertSame('Saved export settings', (string) $entity_type->getCollectionLabel());
+
+    $edit_form = $this->buildEntityForm('edit');
+    $this->assertSame('File format settings', (string) $edit_form['csv']['#title']);
+    $this->assertStringContainsString('set their column header labels', (string) $edit_form['field_mapping']['#description']);
+
+    $node_form = $this->buildEntityForm('field_mapping', 'node__protocol_aware_content');
+    $table = $node_form['mapping']['node__protocol_aware_content']['fields'];
+    $this->assertSame('Column header label', (string) $table['#header'][3]);
+    $this->assertSame('Column header label for Title', (string) $table['title']['csv_header_label']['#title']);
+
+    $module_path = $this->container->get('extension.list.module')->getPath('mukurtu_export');
+    $menu_links = Yaml::decode(file_get_contents("$module_path/mukurtu_export.links.menu.yml"));
+    $this->assertSame('Export taxonomy terms.', $menu_links['mukurtu_export.taxonomy_export']['description']);
   }
 
   /**

@@ -209,10 +209,15 @@ test.use({ storageState: ADMIN_STATE });
 
 test.beforeEach(async ({ page }, testInfo) => {
   // Check if default content already exists, and if so, skip recreation.
+  // Looks for this file's first community by name, not for any community:
+  // a preview can have other content, such as the accessibility demo recipe,
+  // and skipping then leaves later tests without the content they expect.
   if (testContentExists === null) {
     await gotoReady(page, '/communities');
-    const getStartedVisible = !await page.locator('.communities__item').first().isVisible();
-    testContentExists = (getStartedVisible === false);
+    testContentExists = await page
+      .locator('.communities__item', { hasText: defaultContentSpec.community[0].name })
+      .first()
+      .isVisible();
   }
   // The membership test is exempt. Whether content was seeded on this run
   // is a separate question from whether the accessibility accounts are
