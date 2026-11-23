@@ -126,6 +126,22 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
     return;
   }
 
+  // Someone who can add media types, but not media, still reaches this page.
+  // Core then says there are no media types, which isn't the problem: they
+  // have no cultural protocol that lets them add media. Say that instead.
+  if (empty($variables['bundles'])) {
+    /** @var \Drupal\mukurtu_media\MediaCreateNotice $notice */
+    $notice = \Drupal::service('mukurtu_media.create_notice');
+    $account = \Drupal::currentUser();
+    if ($notice->appliesTo($account)) {
+      $variables['add_bundle_message'] = [
+        '#markup' => $notice->getMessage($account),
+        '#cache' => $notice->getCacheability(),
+      ];
+    }
+    return;
+  }
+
   $bulk_items = [
     'bulk_upload_image' => [
       'bundle' => 'image',

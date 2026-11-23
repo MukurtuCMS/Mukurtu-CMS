@@ -1,0 +1,18 @@
+/**
+ * @file
+ * Positions Tagify's suggestion list inside its field (#2721).
+ *
+ * js/tagify-list-placement.js adds the list to the field's wrapper, which
+ * Tagify positions it against (position: relative). Tagify then adds the
+ * page's scroll offset to its top, so on a scrolled page the list opened
+ * far below the field. Put it right under the field, or right above it when
+ * Tagify places it on top (it moves itself up with a transform).
+ */
+
+tags.tagify > .tagify__dropdown {
+  top: 100% !important;
+}
+
+tags.tagify > .tagify__dropdown[placement="top"] {
+  top: 0 !important;
+}

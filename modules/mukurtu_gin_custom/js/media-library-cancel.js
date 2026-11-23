@@ -90,6 +90,11 @@
       // The row already exposes selection state via aria-selected; leaving the
       // checkbox reachable creates a redundant second control for the same state.
       $row.find('.views-field-media-library-select-form').attr('aria-hidden', 'true');
+      // WCAG 2.4.7 (#2745): the checkbox is hidden, so taking focus there
+      // showed nothing, an extra Tab stop on every row. The row is the
+      // control: it takes focus with a visible outline, and Space or Enter
+      // toggles the checkbox.
+      $row.find('input[type="checkbox"]').attr('tabindex', '-1');
 
       $row.append(
         '<td class="mukurtu-edit-col">' +

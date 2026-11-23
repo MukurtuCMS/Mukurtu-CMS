@@ -13,8 +13,8 @@ use Drupal\user\UserInterface;
  */
 #[ConfigEntityType(
   id: 'csv_exporter',
-  label: new TranslatableMarkup('CSV Exporter Setting'),
-  label_collection: new TranslatableMarkup('CSV Exporter Settings'),
+  label: new TranslatableMarkup('Export setting'),
+  label_collection: new TranslatableMarkup('Saved export settings'),
   config_prefix: 'csv_exporter',
   entity_keys: [
     'id' => 'id',

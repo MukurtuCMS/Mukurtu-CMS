@@ -1,0 +1,36 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.grid_browse
+    - node.type.article
+  module:
+    - user
+id: node.article.grid_browse
+targetEntityType: node
+bundle: article
+mode: grid_browse
+content: {  }
+hidden:
+  body: true
+  field_all_related_content: true
+  field_article_tags: true
+  field_citation: true
+  field_communities: true
+  field_in_collection: true
+  field_multipage_page_of: true
+  field_page_media_assets: true
+  field_representative_media: true
+  field_title: true
+  flag_email_node: true
+  flag_email_og: true
+  flag_export_content: true
+  flag_mukurtu_email_content: true
+  flag_mukurtu_email_node: true
+  flag_mukurtu_email_og: true
+  flag_mukurtu_follow_content: true
+  flag_subscribe_node: true
+  flag_subscribe_og: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

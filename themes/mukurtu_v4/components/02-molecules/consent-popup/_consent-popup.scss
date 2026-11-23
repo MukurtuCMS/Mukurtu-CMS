@@ -70,6 +70,16 @@ body.consent-popup-opened .klaro_toggle_dialog {
   display: none;
 }
 
+// Klaro's consent settings button floats over the bottom right of every page
+// (35px, fixed 25px from the corner, in vendor klaro-extend.css). A control
+// on screen behind it takes focus without the page scrolling, and a small
+// one can be hidden completely (WCAG 2.4.11, #2712). Padding the bottom of
+// the scroll area makes the browser treat that strip as out of view, so it
+// scrolls focused elements above the button.
+html:has(> body > .klaro_toggle_dialog) {
+  scroll-padding-block-end: 4.5rem;
+}
+
 // Restyle Klaro's blocked-embed placeholder (.context-notice, shown in
 // place of a gated YouTube/Vimeo/SoundCloud embed in browse and full-content
 // views) to match Mukurtu's design system instead of Klaro's unstyled
@@ -119,6 +129,14 @@ body.consent-popup-opened .klaro_toggle_dialog {
   // directly to match the site's other buttons' hover treatment.
   .cm-btn:hover {
     text-decoration: underline;
+  }
+
+  // Klaro rings its consent window's Close button with `outline: auto` in
+  // white, on the window's near-white background, so its focus couldn't be
+  // seen (WCAG 2.4.7). The window opens with focus on it (#2747).
+  .cookie-modal .cm-modal .hide:focus-visible {
+    outline: 2px solid var(--brand-primary-dark);
+    outline-offset: 2px;
   }
 
   .context-notice p.cm-buttons {

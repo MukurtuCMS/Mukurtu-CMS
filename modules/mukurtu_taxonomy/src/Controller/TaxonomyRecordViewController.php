@@ -10,8 +10,10 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Http\Exception\CacheableNotFoundHttpException;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\mukurtu_core\Service\EntityTranslationResolver;
+use Drupal\mukurtu_core\Service\TermVisibility;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
 use Drupal\views\Views;
@@ -36,10 +38,13 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *   The entity field manager service.
    * @param \Drupal\mukurtu_core\Service\EntityTranslationResolver $translationResolver
    *   Resolves entities to the current content language.
+   * @param \Drupal\mukurtu_core\Service\TermVisibility $termVisibility
+   *   Decides which terms the current user can see.
    */
   public function __construct(
     protected EntityFieldManagerInterface $entityFieldManager,
     protected EntityTranslationResolver $translationResolver,
+    protected TermVisibility $termVisibility,
   ) {
     $this->mukurtuTaxonomySettings = $this->config('mukurtu_taxonomy.settings');
   }
@@ -51,6 +56,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     return new static(
       $container->get('entity_field.manager'),
       $container->get('mukurtu_core.entity_translation_resolver'),
+      $container->get('mukurtu_core.term_visibility'),
     );
   }
 
@@ -63,6 +69,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    * Custom site vocabularies not in this list fall back to the admin label.
    */
   const VOCABULARY_LABEL_MAP = [
+    'article_tags' => 'Article Tag',
     'category' => 'Category',
     'community_type' => 'Community Type',
     'contributor' => 'Contributor',
@@ -119,6 +126,14 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *   A redirect to the record, or the full taxonomy term render array.
    */
   public function build(TermInterface $taxonomy_term): array|TrustedRedirectResponse {
+    // A term's name can be sensitive, and it's in the title and alias of this
+    // page. A 404 doesn't confirm that a term with that name exists (#2643).
+    $visibility = $this->termVisibility->getCacheability($taxonomy_term->bundle())
+      ->addCacheableDependency($taxonomy_term);
+    if (!$this->termVisibility->isVisible($taxonomy_term)) {
+      throw new CacheableNotFoundHttpException($visibility);
+    }
+
     $record = $this->getSingleRecord($taxonomy_term, 'person', 'field_other_names', 'person_records_enabled_vocabularies')
       ?? $this->getSingleRecord($taxonomy_term, 'place', 'field_other_place_names', 'place_records_enabled_vocabularies');
     if ($record) {
@@ -137,6 +152,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       $cache->addCacheContexts(['user.node_grants:view']);
       $cache->addCacheableDependency($taxonomy_term);
       $cache->addCacheableDependency($record);
+      $cache->addCacheableDependency($visibility);
       $response->addCacheableDependency($cache);
       return $response;
     }
@@ -238,7 +254,8 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     // tag would require a custom cache tag strategy.
     $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
     $place_vocabularies = $this->mukurtuTaxonomySettings->get('place_records_enabled_vocabularies') ?? [];
-    $cache = CacheableMetadata::createFromRenderArray($build)->merge($cache);
+    $cache = CacheableMetadata::createFromRenderArray($build)->merge($cache)
+      ->addCacheableDependency($visibility);
     // The nested terms list changes when a term in the vocabulary moves.
     $cache->addCacheTags(['taxonomy_term_list:' . $taxonomy_term->bundle()]);
     if (in_array($taxonomy_term->bundle(), $person_vocabularies)) {
