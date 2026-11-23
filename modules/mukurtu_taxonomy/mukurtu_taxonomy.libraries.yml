@@ -3,3 +3,10 @@ nested-term-options:
   css:
     component:
       css/nested-term-options.css: {}
+
+term-panel:
+  js:
+    js/term-panel.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

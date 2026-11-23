@@ -1,4 +1,32 @@
+{% set has_panel = nested_terms or sibling_terms %}
+{% if has_panel %}
+  {{ attach_library('mukurtu_taxonomy/term-panel') }}
+{% endif %}
 <div class="taxonomy-term-page">
+  <div class="taxonomy-term-layout{{ has_panel ? ' taxonomy-term-layout--panel' }}">
+  {# First in the page so it stays above the content on a small screen. #}
+  {% if has_panel %}
+    <aside class="taxonomy-term-panel" aria-labelledby="taxonomy-term-panel-heading">
+      {% if nested_terms %}
+        <h2 id="taxonomy-term-panel-heading" class="taxonomy-term-panel__heading">{{ 'Narrower terms'|t }}</h2>
+        <ul class="taxonomy-term-panel__list">
+          {% for nested_term in nested_terms %}
+            <li>{{ link(nested_term.name, nested_term.url) }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if sibling_terms %}
+        <h2 id="{{ nested_terms ? 'taxonomy-term-siblings-heading' : 'taxonomy-term-panel-heading' }}" class="taxonomy-term-panel__heading">{{ sibling_terms.heading }}</h2>
+        <ul class="taxonomy-term-panel__list">
+          {% for sibling_term in sibling_terms.terms %}
+            <li>{{ link(sibling_term.name, sibling_term.url) }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </aside>
+  {% endif %}
+
+  <div class="taxonomy-term-main">
   {% if term_description %}
     <div class="taxonomy-term-description">{{ term_description }}</div>
   {% endif %}
@@ -34,8 +62,11 @@
   {% endif %}
 
   {% if referenced_content is not empty %}
-    <div class="referenced-content grid{% if term_description %} referenced-content--divided{% endif %}" aria-label="{{ 'Referenced content'|t }}">
+    <h2 class="taxonomy-term-main__heading">{{ 'Content'|t }}</h2>
+    <div class="referenced-content grid" aria-label="{{ 'Referenced content'|t }}">
       {{ referenced_content }}
     </div>
   {% endif %}
+  </div>
+  </div>
 </div>
