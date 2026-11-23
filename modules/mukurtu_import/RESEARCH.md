@@ -345,10 +345,11 @@ A custom Drupal plugin type that provides a strategy pattern for converting diff
 - Resolution order:
   1. If numeric → load by file ID.
   2. If string → query by filename within the import's upload location (`STARTS_WITH` condition on URI).
-- Returns `NULL` if not found.
+- A blank cell returns `NULL` (no file).
+- Any other value that matches no file, or more than one, throws a `MigrateException`, so the row fails with "Could not find a file matching ..." or "More than one uploaded file is named ...". See `UploadedFileLookupTrait`.
 
 ### `mukurtu_imageitem` (id: `mukurtu_imageitem`)
-- Identical logic to `mukurtu_fileitem` but returns `[]` (empty array) on failure instead of `NULL`.
+- Same lookup as `mukurtu_fileitem` (`UploadedFileLookupTrait`).
 
 ### `label_lookup` (id: `label_lookup`)
 - For `list_string` fields: looks up the machine name key from a human-readable label.
@@ -449,7 +450,7 @@ Lists all importable entity types (node, media, community, protocol, paragraph, 
 ### `batchFinishedImport()`
 
 - Stores results in the tempstore.
-- Parses migration IDs to extract file IDs (format: `{uid}__{fid}__{entity_type}__{bundle}`).
+- Migration IDs are `{run token}__{uid}__{fid}__{entity_type}__{bundle}`: `ExecuteImportForm` prefixes `toDefinition()`'s ID with a token unique to each submission, so overlapping runs of the same file never share ID map tables.
 - Associates error messages with the file that caused them.
 - Cleans up process pipeline error messages for readability by stripping the migration plugin ID prefix.
 

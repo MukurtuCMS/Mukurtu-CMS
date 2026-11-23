@@ -22,3 +22,11 @@ services:
     arguments:
       - '@entity_type.manager'
       - '@entity_type.bundle.info'
+  logger.channel.mukurtu_export:
+    parent: logger.channel_base
+    arguments: ['mukurtu_export']
+  mukurtu_export.workbook_writer:
+    class: Drupal\mukurtu_export\SpreadsheetWorkbookWriter
+    arguments:
+      - '@file_system'
+      - '@logger.channel.mukurtu_export'

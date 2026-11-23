@@ -65,7 +65,153 @@
     if (instance.DOM.originalInput?.classList.contains('tagify--autocreate')) {
       highlightExactMatchOnly(instance);
     }
+    // Tagify moves focus from a tag's remove button straight to the input,
+    // so Tab could never get past a tag to the remove buttons or the reorder
+    // arrows (#2710). Let them keep focus, and put focus on the input
+    // after a removal instead, as Tagify meant to. Only when the removed tag
+    // took focus with it, so removals the editor didn't make (on load, or
+    // from another widget) don't pull focus into the field.
+    instance.settings.focusInputOnRemove = false;
+    let lastFocused = null;
+    instance.DOM.scope.addEventListener('focusin', (event) => {
+      lastFocused = event.target;
+    });
+    instance.on('remove', () => {
+      const active = document.activeElement;
+      const lost = !active || active === document.body;
+      if (lost && lastFocused && !lastFocused.isConnected) {
+        lastFocused = null;
+        instance.DOM.input.focus();
+      }
+    });
+    keepFocusOnEscape(instance);
+    reopenOnDownArrow(instance);
+    removeWrapperExpanded(instance);
     instance.__mukurtuPatched = true;
+  }
+
+  /**
+   * Whether a Tagify suggestion list is showing.
+   *
+   * Tagify's own flag stays on while suggestions load, with the list off the
+   * page, and for a moment after the list closes.
+   */
+  function isListShowing(instance) {
+    return Boolean(instance.state.dropdown.visible) && instance.DOM.dropdown.isConnected;
+  }
+
+  /**
+   * Keep focus in the field when Escape is pressed with the list closed.
+   *
+   * Tagify blurs its input then, so focus fell to the page body and keyboard
+   * and screen reader users lost their place (WCAG 2.4.3, #2719). On fields
+   * that create terms, the blur also added the typed text as a new term.
+   * Its handler calls the input's blur(), so stand in a no-op blur() for the
+   * length of the key press, and clear the typed text instead, as the ARIA
+   * combobox pattern and the browse search box (#2473) do. The first Escape
+   * still just closes the list, and is marked as handled, so a dialog around
+   * the field stays open (#2746). jQuery UI dialogs, like the media library,
+   * close on any Escape that isn't. With the list closed, the next Escape
+   * closes the dialog as usual. A tag being edited still handles Escape as
+   * before.
+   */
+  function keepFocusOnEscape(instance) {
+    const { input } = instance.DOM;
+    // Set once Escape has closed the list or cleared the field, until the
+    // person clicks or presses another key.
+    let dismissed = false;
+    instance.DOM.scope.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' && event.key !== 'Esc') {
+        dismissed = false;
+        return;
+      }
+      if (event.target !== input || Object.prototype.hasOwnProperty.call(input, 'blur')) {
+        return;
+      }
+      // An Escape that is closing the list leaves the text alone, and one
+      // that cancels a character in an input method belongs to it.
+      dismissed = true;
+      if (!event.isComposing && isListShowing(instance)) {
+        event.preventDefault();
+      }
+      if (!event.isComposing && !isListShowing(instance) && input.textContent.trim()) {
+        instance.input.set.call(instance, '');
+      }
+      input.blur = () => {};
+      setTimeout(() => {
+        delete input.blur;
+      }, 0);
+    }, true);
+    instance.DOM.scope.addEventListener('mousedown', () => {
+      dismissed = false;
+    });
+    // Suggestions requested before Escape can still arrive, and the Tagify
+    // module opens the list for them. Close it again.
+    instance.on('dropdown:show', () => {
+      if (dismissed) {
+        setTimeout(() => instance.dropdown.hide(), 0);
+      }
+    });
+  }
+
+  /**
+   * Let Down Arrow reopen the list straight after it closes.
+   *
+   * Tagify leaves its "list showing" flag on for 100ms after it closes the
+   * list, and Down Arrow only opens a list that flag says is closed. So Down
+   * Arrow pressed soon after Escape did nothing (#2748). Fast typists and
+   * some assistive technology send keys that quickly. Clear the flag when
+   * Down Arrow finds the list gone in that window. Outside it, the flag can
+   * also mean suggestions are still loading, so it's left alone then.
+   *
+   * Tagify switches the flag off with a timer it doesn't cancel, so a list
+   * reopened in that window would be marked closed while showing, and the
+   * next Escape would close a dialog around the field (#2746). Set the flag
+   * back once that timer has run.
+   */
+  function reopenOnDownArrow(instance) {
+    const flagDelay = 100;
+    let hiddenAt = -Infinity;
+    instance.on('dropdown:hide', () => {
+      hiddenAt = Date.now();
+    });
+    instance.on('dropdown:show', () => {
+      const since = Date.now() - hiddenAt;
+      if (since >= flagDelay) {
+        return;
+      }
+      const { visible } = instance.state.dropdown;
+      setTimeout(() => {
+        if (instance.DOM.dropdown.isConnected && !instance.state.dropdown.visible) {
+          instance.state.dropdown.visible = visible || true;
+        }
+      }, flagDelay - since + 20);
+    });
+    instance.DOM.scope.addEventListener('keydown', (event) => {
+      if ((event.key === 'ArrowDown' || event.key === 'Down')
+        && Date.now() - hiddenAt < flagDelay
+        && !instance.DOM.dropdown.isConnected) {
+        instance.state.dropdown.visible = false;
+      }
+    }, true);
+  }
+
+  /**
+   * Keep aria-expanded off Tagify's <tags> wrapper.
+   *
+   * Tagify sets it there when the list opens and closes, but the wrapper has
+   * no role, so the attribute isn't allowed (WCAG 4.1.2, #2720). The input
+   * inside is the combobox and carries its own aria-expanded
+   * (tagify-combobox.js).
+   */
+  function removeWrapperExpanded(instance) {
+    const { scope } = instance.DOM;
+    scope.removeAttribute('aria-expanded');
+    new MutationObserver(() => {
+      if (scope.hasAttribute('aria-expanded')) {
+        scope.removeAttribute('aria-expanded');
+      }
+    }).observe(scope, { attributes: true, attributeFilter: ['aria-expanded'] });
   }
 
   /**
@@ -195,6 +341,11 @@
           textbox.removeAttribute(attribute);
         }
       });
+      // The original input is hidden from screen readers (#2710), and a
+      // plain required attribute isn't copied above, so say it here.
+      if (original.required) {
+        textbox.setAttribute('aria-required', 'true');
+      }
     });
   }
 
@@ -227,8 +378,11 @@
         // Only open the list when it is closed. Re-clicking while it is open
         // refetches the suggestions and resets the highlight, so Down Arrow
         // could never move past the first option.
+        // Tagify inserts the wrapper just before the original element, which
+        // holds the instance. The wrapper's aria-expanded is removed (#2720).
+        const instance = tagsElement.nextElementSibling?.__tagify;
         if ((event.key === 'ArrowDown' || event.key === 'Down')
-          && tagsElement.getAttribute('aria-expanded') !== 'true') {
+          && instance && !isListShowing(instance)) {
           input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         }
       });
@@ -296,6 +450,124 @@
     });
   }
 
+  /**
+   * Adds or removes one ID in an element's aria-describedby list.
+   */
+  function toggleDescribedBy(element, id, add) {
+    const ids = (element.getAttribute('aria-describedby') || '')
+      .split(/\s+/)
+      .filter((value) => value && value !== id);
+    if (add) {
+      ids.push(id);
+    }
+    if (ids.length) {
+      element.setAttribute('aria-describedby', ids.join(' '));
+    }
+    else {
+      element.removeAttribute('aria-describedby');
+    }
+  }
+
+  /**
+   * Shows the browser's "required" check as an error on the visible field.
+   *
+   * The original input keeps its required attribute so the browser still
+   * blocks an empty submit, but it's hidden, so the browser's own message
+   * would point at nothing a screen reader can reach. Show Drupal's message
+   * under the field instead, tie it to the visible input, and move focus
+   * there when it's the form's first problem. With browser validation
+   * turned off (enable_html5_validation = FALSE), this never runs and
+   * Drupal's server-side error is mirrored by labelTagifyInputs().
+   */
+  function showRequiredError(event, original) {
+    if (!original.validity.valueMissing) {
+      return;
+    }
+    event.preventDefault();
+
+    let error = original.__mukurtuRequiredError;
+    if (!error) {
+      error = document.createElement('div');
+      error.id = `${original.id}--required-error`;
+      error.className = 'form-item__error-message';
+      original.__mukurtuRequiredError = error;
+    }
+    const label = document.querySelector(`label[for="${original.id}"]`);
+    // Drupal.t() escapes "@" placeholders; decode them for textContent.
+    error.textContent = new DOMParser().parseFromString(
+      Drupal.t('@name field is required.', {
+        '@name': label ? label.textContent.trim() : '',
+      }),
+      'text/html',
+    ).documentElement.textContent;
+    if (!error.isConnected) {
+      // After the original input, keeping it right after Tagify's <tags>
+      // box, which tagify.css relies on to hide it.
+      original.insertAdjacentElement('afterend', error);
+    }
+    original.setAttribute('aria-invalid', 'true');
+    toggleDescribedBy(original, error.id, true);
+    labelTagifyInputs(original.parentElement);
+
+    // The browser focuses the first invalid control whose message it
+    // shows. This one's message is cancelled, so focus it here, but only
+    // if nothing before it in the form is invalid too.
+    const first = original.form && Array.from(original.form.elements)
+      .find((element) => element.willValidate && !element.validity.valid);
+    const textbox = original.previousElementSibling?.querySelector('.tagify__input');
+    if (first === original && textbox) {
+      setTimeout(() => textbox.focus(), 0);
+    }
+  }
+
+  /**
+   * Clears the required error once the field has a tag.
+   */
+  function clearRequiredError(original) {
+    const error = original.__mukurtuRequiredError;
+    if (!error || !error.isConnected) {
+      return;
+    }
+    error.remove();
+    original.removeAttribute('aria-invalid');
+    toggleDescribedBy(original, error.id, false);
+    labelTagifyInputs(original.parentElement);
+  }
+
+  /**
+   * Hides each original input from assistive technology (#2710).
+   *
+   * Tagify draws its own field over the original input and hides the
+   * original only visually (tagify.css), so screen readers found a second
+   * field with the same label and a JSON value. The original stays in the
+   * form, out of the tab order, so it's still submitted and its required
+   * attribute still stops an empty submit.
+   */
+  function hideOriginalInputs(context) {
+    const root = context && context.querySelectorAll ? context : document;
+    root.querySelectorAll('input.tagify-widget[id]').forEach((original) => {
+      const tagsElement = original.previousElementSibling;
+      if (original.__mukurtuHidden || !original.__tagify
+        || !tagsElement || tagsElement.tagName !== 'TAGS') {
+        return;
+      }
+      original.__mukurtuHidden = true;
+      original.setAttribute('aria-hidden', 'true');
+      original.addEventListener('invalid', (event) => showRequiredError(event, original));
+      original.__tagify.on('add', () => clearRequiredError(original));
+      // A click on the field's label would focus the hidden original input,
+      // where nothing shows and typing goes nowhere. Focus Tagify's input.
+      const label = document.querySelector(`label[for="${original.id}"]`);
+      label?.addEventListener('click', (event) => {
+        const textbox = tagsElement.querySelector('.tagify__input');
+        if (textbox) {
+          event.preventDefault();
+          textbox.focus();
+        }
+      });
+    });
+  }
+
   Drupal.behaviors.mukurtuTagifyOverride = {
     attach(context) {
       // Run immediately and again at end-of-tick in case Tagify initializes
@@ -305,6 +577,7 @@
         labelTagifyInputs(ctx);
         makeShowAllKeyboardReachable(ctx);
         announceTagChanges(ctx);
+        hideOriginalInputs(ctx);
       };
       runAll(context);
       setTimeout(() => runAll(context), 0);

@@ -124,7 +124,10 @@ final class DesignPalette implements ContainerInjectionInterface {
     $palette = $config->get('palette') ?? 'red-bone';
     $attachments['#attached']['library'][] = 'mukurtu_v4/palette.' . $palette;
 
-    CacheableMetadata::createFromObject($config)->applyTo($attachments);
+    // applyTo() replaces #cache, so this keeps what earlier hooks added.
+    CacheableMetadata::createFromRenderArray($attachments)
+      ->addCacheableDependency($config)
+      ->applyTo($attachments);
   }
 
   /**

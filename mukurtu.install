@@ -6,6 +6,7 @@
  */
 
 use Drupal\block\Entity\Block;
+use Drupal\Core\Config\FileStorage;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\user\Entity\Role;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
@@ -13,6 +14,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\shortcut\Entity\Shortcut;
 use Drupal\captcha\Entity\CaptchaPoint;
+use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeAccessRebuild;
 
 /**
@@ -295,6 +297,9 @@ function mukurtu_install() {
     'access comments',
     'access content',
     'access site-wide contact form',
+    'use search_api_autocomplete for mukurtu_browse',
+    'use search_api_autocomplete for mukurtu_dictionary',
+    'use search_api_autocomplete for mukurtu_digital_heritage_browse',
     'view media',
     'view published community entities',
   ];
@@ -302,6 +307,9 @@ function mukurtu_install() {
     'access comments',
     'post comments',
     'access content',
+    'use search_api_autocomplete for mukurtu_browse',
+    'use search_api_autocomplete for mukurtu_dictionary',
+    'use search_api_autocomplete for mukurtu_digital_heritage_browse',
     'access mukurtu_collection_browser entity browser pages',
     'access mukurtu_community_and_protocol_user_browser entity browser pages',
     'access mukurtu_community_select entity browser pages',
@@ -365,6 +373,7 @@ function mukurtu_install() {
     'access user contact forms',
     'access user profiles',
     'add community entities',
+    'administer altcha',
     'administer account settings',
     'administer block content',
     'administer block_content display',
@@ -387,6 +396,7 @@ function mukurtu_install() {
     'administer dictionary glossary order',
     'administer display modes',
     'administer embed buttons',
+    'administer facet bot blocker',
     'administer facets',
     'administer filters',
     'administer flagging display',
@@ -394,7 +404,10 @@ function mukurtu_install() {
     'administer flagging form display',
     'administer flaggings',
     'administer flags',
+    'administer google_tag_container',
+    'administer honeypot',
     'administer image styles',
+    'administer klaro',
     'administer media display',
     'administer media fields',
     'administer media form display',
@@ -406,6 +419,7 @@ function mukurtu_install() {
     'administer messages',
     'administer modules',
     'administer mukurtu design settings',
+    'administer mukurtu not found page',
     'administer mukurtu_import_strategy',
     'administer multipage item',
     'administer node display',
@@ -440,6 +454,7 @@ function mukurtu_install() {
     'administer term merge from entities',
     'administer term merge into entities',
     'administer themes',
+    'administer turnstile',
     'administer url aliases',
     'administer user display',
     'administer user fields',
@@ -456,6 +471,7 @@ function mukurtu_install() {
     'create mukurtu_single_node_update message',
     'create article content',
     'create page content',
+    'create terms in article_tags',
     'create terms in category',
     'create terms in community_type',
     'create terms in contributor',
@@ -486,6 +502,7 @@ function mukurtu_install() {
     'delete any article content',
     'delete own article content',
     'delete own page content',
+    'delete terms in article_tags',
     'delete terms in category',
     'delete terms in community_type',
     'delete terms in contributor',
@@ -508,6 +525,7 @@ function mukurtu_install() {
     'edit any article content',
     'edit own article content',
     'edit own page content',
+    'edit terms in article_tags',
     'edit terms in category',
     'edit terms in community_type',
     'edit terms in contributor',
@@ -538,6 +556,7 @@ function mukurtu_install() {
     'update mukurtu_single_node_insert message',
     'update mukurtu_single_node_update message',
     'update tokens',
+    'use mukurtu bulk edit',
     'use text format full_html',
     'view all community revisions',
     // Content revision history is for administrators and managers (#2580).
@@ -572,6 +591,9 @@ function mukurtu_install() {
     'create mukurtu_import_strategy',
     'edit own mukurtu_import_strategy',
     'delete own mukurtu_import_strategy',
+  ];
+  $roles['mukurtu_bulk_editor'] = [
+    'use mukurtu bulk edit',
   ];
   foreach ($roles as $role_name => $permissions) {
     $role = Role::load($role_name);
@@ -936,4 +958,233 @@ function mukurtu_update_40034(): string {
 
   $role->grantPermission('access geocoder api endpoints')->save();
   return (string) t('Logged-in users can now search for addresses on map fields.');
+}
+
+/**
+ * Add bulk actions to add items to, and remove them from, collections and word lists.
+ */
+function mukurtu_update_40035(): string {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_manage_all_content');
+  if ($config->isNew()) {
+    return (string) t('The Manage content view is not installed on this site; nothing to change.');
+  }
+
+  // Merge into whatever actions the site already offers rather than replacing
+  // the list, so sites that removed or added actions keep their choices.
+  // Removing is harder to notice than adding, so those actions ask first.
+  $wanted = [
+    'mukurtu_add_to_collection_action' => [],
+    'mukurtu_add_to_word_list_action' => [],
+    'mukurtu_remove_from_collection_action' => ['add_confirmation' => TRUE],
+    'mukurtu_remove_from_word_list_action' => ['add_confirmation' => TRUE],
+  ];
+  $added = [];
+  $displays = $config->get('display') ?? [];
+  foreach ($displays as $display_id => $display) {
+    $path = "display.$display_id.display_options.fields.views_bulk_operations_bulk_form.selected_actions";
+    $actions = $config->get($path);
+    if (!is_array($actions)) {
+      continue;
+    }
+    $present = array_column($actions, 'action_id');
+    foreach ($wanted as $action_id => $preconfiguration) {
+      if (!in_array($action_id, $present, TRUE)) {
+        $actions[$actions ? max(array_keys($actions)) + 1 : 0] = ['action_id' => $action_id] + ($preconfiguration ? ['preconfiguration' => $preconfiguration] : []);
+        $added[$action_id] = TRUE;
+      }
+    }
+    $config->set($path, $actions);
+  }
+
+  if (!$added) {
+    return (string) t('The Manage content view already offers these actions, or has no bulk operations; nothing to change.');
+  }
+
+  $config->save();
+  return (string) t('Added bulk actions to add items to, and remove them from, collections and word lists on Manage content.');
+}
+
+/**
+ * Add the Bulk Editor role and let Mukurtu Managers use bulk editing.
+ */
+function mukurtu_update_40036(): string {
+  $messages = [];
+
+  if (!Role::load('mukurtu_bulk_editor')) {
+    // Import the shipped role rather than rebuilding it here, so the update
+    // and a fresh install can't drift apart.
+    $source = new FileStorage(\Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install');
+    Role::create($source->read('user.role.mukurtu_bulk_editor'))->save();
+    $messages[] = (string) t('Added the Bulk Editor role.');
+  }
+
+  $manager = Role::load('mukurtu_manager');
+  if ($manager && !$manager->hasPermission('use mukurtu bulk edit')) {
+    $manager->grantPermission('use mukurtu bulk edit')->save();
+    $messages[] = (string) t('Mukurtu Managers can now use bulk editing.');
+  }
+
+  return $messages ? implode(' ', $messages) : (string) t('The Bulk Editor role and permission are already in place; nothing to change.');
+}
+
+/**
+ * Add the bulk edit page, one tab per content type.
+ */
+function mukurtu_update_40037(): string {
+  $storage = \Drupal::entityTypeManager()->getStorage('view');
+  if ($storage->load('mukurtu_bulk_edit_content')) {
+    return (string) t('The bulk edit page is already installed; nothing to change.');
+  }
+
+  // Import the shipped view rather than rebuilding it here, so the update
+  // and a fresh install can't drift apart.
+  $source = new FileStorage(\Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install');
+  $storage->create($source->read('views.view.mukurtu_bulk_edit_content'))->save();
+  return (string) t('Added the bulk edit page.');
+}
+
+/**
+ * Turn on bulk field editing for the bulk edit page.
+ */
+function mukurtu_update_40038(): string {
+  $messages = [];
+
+  if (!\Drupal::moduleHandler()->moduleExists('views_bulk_edit')) {
+    \Drupal::service('module_installer')->install(['views_bulk_edit']);
+    $messages[] = (string) t('Enabled Views Bulk Edit.');
+  }
+
+  // The form mode, then each content type's bulk_edit form, from the module
+  // that ships it. Sites that already have one keep theirs.
+  $extensions = \Drupal::service('extension.list.module');
+  $displays = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+  $modes = \Drupal::entityTypeManager()->getStorage('entity_form_mode');
+  if (!$modes->load('node.bulk_edit')) {
+    $source = new FileStorage($extensions->getPath('mukurtu_core') . '/config/install');
+    $modes->create($source->read('core.entity_form_mode.node.bulk_edit'))->save();
+  }
+  $added = [];
+  foreach ([
+    'digital_heritage' => 'mukurtu_digital_heritage',
+    'dictionary_word' => 'mukurtu_dictionary',
+    'word_list' => 'mukurtu_dictionary',
+    'collection' => 'mukurtu_collection',
+    'person' => 'mukurtu_person',
+    'place' => 'mukurtu_place',
+  ] as $type => $module) {
+    if ($displays->load("node.$type.bulk_edit") || !\Drupal::moduleHandler()->moduleExists($module) || !NodeType::load($type)) {
+      continue;
+    }
+    $source = new FileStorage($extensions->getPath($module) . '/config/install');
+    $displays->create($source->read("core.entity_form_display.node.$type.bulk_edit"))->save();
+    $added[] = $type;
+  }
+  if ($added) {
+    $messages[] = (string) t('Added bulk edit forms for @types.', ['@types' => implode(', ', $added)]);
+  }
+
+  // Offer the action on the bulk edit page, keeping any site changes.
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_bulk_edit_content');
+  $path = 'display.default.display_options.fields.views_bulk_operations_bulk_form.selected_actions';
+  $actions = $config->get($path);
+  if (is_array($actions) && !in_array('views_bulk_edit', array_column($actions, 'action_id'), TRUE)) {
+    $actions[$actions ? max(array_keys($actions)) + 1 : 0] = [
+      'action_id' => 'views_bulk_edit',
+      'preconfiguration' => ['add_confirmation' => TRUE],
+    ];
+    $config->set($path, $actions)->save();
+    $messages[] = (string) t('Added field editing to the bulk edit page.');
+  }
+
+  return $messages ? implode(' ', $messages) : (string) t('Bulk field editing is already set up; nothing to change.');
+}
+
+/**
+ * Add the cultural protocol actions to the bulk edit page.
+ */
+function mukurtu_update_40039(): string {
+  $config = \Drupal::configFactory()->getEditable('views.view.mukurtu_bulk_edit_content');
+  $path = 'display.default.display_options.fields.views_bulk_operations_bulk_form.selected_actions';
+  $actions = $config->get($path);
+  if (!is_array($actions)) {
+    return (string) t("There's no bulk edit page; nothing to change.");
+  }
+
+  // Add only the missing ones, keeping any site changes.
+  $present = array_column($actions, 'action_id');
+  $added = FALSE;
+  foreach (['mukurtu_add_protocol_action', 'mukurtu_remove_protocol_action', 'mukurtu_change_sharing_action'] as $action_id) {
+    if (!in_array($action_id, $present, TRUE)) {
+      $actions[$actions ? max(array_keys($actions)) + 1 : 0] = ['action_id' => $action_id];
+      $added = TRUE;
+    }
+  }
+  if (!$added) {
+    return (string) t('The bulk edit page already has the cultural protocol actions; nothing to change.');
+  }
+  $config->set($path, $actions)->save();
+  return (string) t('Added the cultural protocol actions to the bulk edit page.');
+}
+
+/**
+ * Add the bulk edit media page.
+ */
+function mukurtu_update_40040(): string {
+  $changed = FALSE;
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  // The form mode, then each media type's bulk_edit form. Sites that already
+  // have one keep theirs.
+  if (\Drupal::moduleHandler()->moduleExists('mukurtu_media')) {
+    $source = new FileStorage(\Drupal::service('extension.list.module')->getPath('mukurtu_media') . '/config/install');
+    $modes = $entity_type_manager->getStorage('entity_form_mode');
+    if (!$modes->load('media.bulk_edit')) {
+      $modes->create($source->read('core.entity_form_mode.media.bulk_edit'))->save();
+      $changed = TRUE;
+    }
+    $displays = $entity_type_manager->getStorage('entity_form_display');
+    $media_types = $entity_type_manager->getStorage('media_type');
+    foreach (['audio', 'document', 'external_embed', 'image', 'remote_video', 'soundcloud', 'video'] as $type) {
+      if (!$media_types->load($type) || $displays->load("media.$type.bulk_edit")) {
+        continue;
+      }
+      $displays->create($source->read("core.entity_form_display.media.$type.bulk_edit"))->save();
+      $changed = TRUE;
+    }
+  }
+
+  // Import the shipped view rather than rebuilding it here, so the update
+  // and a fresh install can't drift apart.
+  $views = $entity_type_manager->getStorage('view');
+  if (!$views->load('mukurtu_bulk_edit_media')) {
+    $source = new FileStorage(\Drupal::service('extension.list.profile')->getPath('mukurtu') . '/config/install');
+    $views->create($source->read('views.view.mukurtu_bulk_edit_media'))->save();
+    $changed = TRUE;
+  }
+
+  return $changed
+    ? (string) t('Added the bulk edit media page.')
+    : (string) t('The bulk edit media page is already installed; nothing to change.');
+}
+
+/**
+ * Add one-by-one editing to the bulk edit pages.
+ */
+function mukurtu_update_40041(): string {
+  $path = 'display.default.display_options.fields.views_bulk_operations_bulk_form.selected_actions';
+  $added = FALSE;
+  foreach (['views.view.mukurtu_bulk_edit_content', 'views.view.mukurtu_bulk_edit_media'] as $name) {
+    $config = \Drupal::configFactory()->getEditable($name);
+    $actions = $config->get($path);
+    // Add only where missing, keeping any site changes.
+    if (!is_array($actions) || in_array('mukurtu_edit_items_grid_action', array_column($actions, 'action_id'), TRUE)) {
+      continue;
+    }
+    $actions[$actions ? max(array_keys($actions)) + 1 : 0] = ['action_id' => 'mukurtu_edit_items_grid_action'];
+    $config->set($path, $actions)->save();
+    $added = TRUE;
+  }
+  return $added
+    ? (string) t('Added one-by-one editing to the bulk edit pages.')
+    : (string) t('The bulk edit pages already have one-by-one editing; nothing to change.');
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_core\Service;
 
+use Drupal\visitors_geoip\GeoIpCity;
 use Drupal\visitors_geoip\VisitorsGeoIpInterface;
 use GeoIp2\Database\Reader;
 use GeoIp2\Exception\GeoIp2Exception;
@@ -12,7 +13,7 @@ use GeoIp2\Model\City;
 /**
  * Falls back to a bundled, license-free DB-IP database when MaxMind has none.
  *
- * visitors_geoip's own GeoIpService only ever resolves a visit's precise
+ * The visitors_geoip GeoIpService only ever resolves a visit's precise
  * coordinates from a MaxMind GeoLite2-City/GeoIP2-City database, which needs
  * a (free, but separately registered) MaxMind license key most sites never
  * set up -- see docs/visitors-geoip-setup.md. Without one, every visit falls
@@ -100,18 +101,22 @@ final class DbIpFallbackGeoIpService implements VisitorsGeoIpInterface {
   }
 
   /**
-   * Fills in the record fields visitors_geoip writes to NOT NULL columns.
+   * Converts a lookup result to the GeoIpCity that visitors_geoip expects.
    *
-   * Visitors::doLocation() and RebuildLocationService::rebuild() copy
-   * continent->code, country->isoCode, subdivisions[0]->isoCode and
-   * city->names['en'] straight into the visitors table, whose columns for
-   * them are all NOT NULL. Any of the four can be missing from a record, and
-   * one always is with DB-IP: its City Lite database has subdivision names
-   * but no subdivision ISO codes at all, so every address it resolves would
-   * insert a NULL location_region. Under MySQL's strict mode that is an
-   * integrity constraint violation, which fails the tracking request and
-   * loses the visit entirely -- the more precisely DB-IP can place a
-   * visitor, the more certain the visit is to be dropped.
+   * Since visitors 2.34, Visitors::doLocation() and
+   * RebuildLocationService::rebuild() read the flat properties of a
+   * \Drupal\visitors_geoip\GeoIpCity, not a GeoIp2 City model. visitors_geoip's
+   * own GeoIpService returns one, but the DB-IP reader here returns a raw
+   * City model, which those callers cannot read.
+   *
+   * The continent, country, region and city values go into NOT NULL columns
+   * of the visitors table, and GeoIpCity leaves any of them NULL when the
+   * record lacks it. One always is with DB-IP: its City Lite database has
+   * subdivision names but no subdivision ISO codes at all, so every address
+   * it resolves would insert a NULL location_region. Under MySQL's strict
+   * mode that is an integrity constraint violation, which fails the tracking
+   * request and loses the visit entirely -- the more precisely DB-IP can
+   * place a visitor, the more certain the visit is to be dropped.
    *
    * A missing subdivision code falls back to the subdivision's English
    * name, which the Region report then shows as-is ("California" rather
@@ -119,19 +124,41 @@ final class DbIpFallbackGeoIpService implements VisitorsGeoIpInterface {
    * reports already show as "Unknown".
    *
    * @param mixed $record
-   *   A lookup result; anything other than a City model is returned as-is.
+   *   A lookup result: a GeoIp2 City model or a GeoIpCity. Anything else is
+   *   returned as-is.
    *
    * @return mixed
-   *   The normalized record.
+   *   A GeoIpCity with no NULL text values, or $record unchanged.
    */
   public static function normalize(mixed $record): mixed {
-    if (!$record instanceof City) {
+    if ($record instanceof City) {
+      $record = GeoIpCity::fromLibrary(static::fillCityModel($record));
+    }
+
+    if (!$record instanceof GeoIpCity) {
       return $record;
     }
 
+    return new GeoIpCity(
+      $record->continentCode ?? '',
+      $record->countryCode ?? '',
+      $record->regionCode ?? '',
+      $record->city ?? '',
+      $record->latitude,
+      $record->longitude,
+    );
+  }
+
+  /**
+   * Fills a City model's missing values from the other data it holds.
+   *
+   * GeoIpCity only reads the subdivision's ISO code and the city's name, so
+   * the fallbacks to names and to the registered country happen here, while
+   * the full record is still available.
+   */
+  private static function fillCityModel(City $record): City {
     $raw = $record->jsonSerialize();
 
-    $raw['continent']['code'] ??= '';
     $raw['country']['iso_code'] ??= $raw['registered_country']['iso_code'] ?? '';
 
     $subdivision = $raw['subdivisions'][0] ?? [];
