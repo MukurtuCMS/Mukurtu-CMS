@@ -32,6 +32,7 @@ const SPLIDE_CSS = read('modules/mukurtu_core/libraries/splide/splide.min.css');
 const SPLIDE_JS = read('modules/mukurtu_core/libraries/splide/splide.min.js');
 const MEDIA_CAROUSEL_JS = read('themes/mukurtu_v4/js/media-asset-carousel.js');
 const MULTIPAGE_JS = read('modules/mukurtu_multipage_items/js/multipage-nav.js');
+const QUICK_ACTIONS_JS = read('themes/mukurtu_v4/components/02-molecules/quick-actions/quick-actions-menu.js');
 const COLLAPSE_JS = read('themes/mukurtu_v4/components/02-molecules/local-tasks/local-tasks-collapse.js');
 
 const DRUPAL_STUB = `
@@ -126,6 +127,21 @@ for (const [width, dir] of [[320, 'ltr'], [390, 'ltr'], [390, 'rtl']] as const) 
   });
 }
 
+test('More actions menu closes when focus leaves it', async ({ page: p }) => {
+  // Otherwise Tab past the last link moves focus under the open menu
+  // (WCAG 2.4.11).
+  const html = BROWSE_CARD.replace('</body>', `<button>After</button><script>${QUICK_ACTIONS_JS}</script><script>Drupal.behaviors.quickActionsMenu.attach(document);</script></body>`);
+  await open(p, html, 390);
+  await p.locator('.quick-actions__overflow-toggle').focus();
+  await p.keyboard.press('Enter');
+  await expect(p.locator('.quick-actions__overflow')).toHaveAttribute('open');
+  for (let i = 0; i < 6; i++) {
+    await p.keyboard.press('Tab');
+  }
+  await expect(p.getByRole('button', { name: 'After' })).toBeFocused();
+  await expect(p.locator('.quick-actions__overflow')).not.toHaveAttribute('open');
+});
+
 test('More actions menu still opens back from the end corner at md and up', async ({ page: p }) => {
   // At >=md the toggle floats in the card's end corner, so the menu keeps
   // lining up with its end edge, as it did before.
@@ -218,6 +234,14 @@ for (const width of [320, 390]) {
     await p.keyboard.press('Escape');
     await expect(p.locator('.local-tasks__more')).not.toHaveAttribute('open');
     await expect(p.locator('.local-tasks__more-toggle')).toBeFocused();
+
+    // Tabbing out past the last link closes it too, so focus never lands
+    // under the open menu (WCAG 2.4.11).
+    await p.keyboard.press('Enter');
+    for (let i = 0; i < 8; i++) {
+      await p.keyboard.press('Tab');
+    }
+    await expect(p.locator('.local-tasks__more')).not.toHaveAttribute('open');
   });
 }
 

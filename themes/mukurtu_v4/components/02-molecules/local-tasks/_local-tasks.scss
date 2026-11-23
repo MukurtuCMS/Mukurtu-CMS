@@ -321,6 +321,17 @@
     outline: 2px solid var(--brand-primary);
     outline-offset: 2px;
   }
+
+  // Forced colors keeps an SVG's brand fill, which can drop below 3:1 on a
+  // dark system background (WCAG 1.4.11).
+  @media (forced-colors: active) {
+    svg,
+    &:hover svg,
+    &:focus-visible svg,
+    .local-tasks__more[open] > & svg {
+      fill: ButtonText;
+    }
+  }
 }
 
 .local-tasks .local-tasks__more-menu {

@@ -20,6 +20,15 @@
         });
       });
 
+      // Focus leaving a menu: close it, or Tab past its last link would move
+      // focus to content the open menu covers (WCAG 2.4.11).
+      document.addEventListener('focusout', function (e) {
+        var details = e.target.closest && e.target.closest('.quick-actions__overflow[open]');
+        if (details && !details.contains(e.relatedTarget)) {
+          details.removeAttribute('open');
+        }
+      });
+
       // Escape key: close the open menu and return focus to its summary.
       // WCAG 2.1.1 - all functionality must be operable via keyboard.
       document.addEventListener('keydown', function (e) {

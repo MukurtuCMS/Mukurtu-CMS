@@ -117,6 +117,13 @@
         more.open = false;
       }
     });
+    // Also close once focus leaves the menu, or Tab past its last link
+    // would move focus underneath it (WCAG 2.4.11).
+    more.addEventListener('focusout', (event) => {
+      if (more.open && !more.contains(event.relatedTarget)) {
+        more.open = false;
+      }
+    });
     more.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && more.open) {
         more.open = false;

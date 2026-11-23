@@ -3929,6 +3929,11 @@ label.form-required::after,
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
+@media (forced-colors: active) {
+  .local-tasks__more-toggle svg, .local-tasks__more-toggle:hover svg, .local-tasks__more-toggle:focus-visible svg, .local-tasks__more[open] > .local-tasks__more-toggle svg {
+    fill: ButtonText;
+  }
+}
 
 .local-tasks .local-tasks__more-menu {
   position: absolute;
@@ -5841,6 +5846,11 @@ body.is-fixed {
 .quick-actions__icon-link:focus-visible, .quick-actions__overflow-toggle:focus-visible {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .quick-actions__icon-link svg, .quick-actions__overflow-toggle svg {
+    fill: ButtonText;
+  }
 }
 .quick-actions__overflow {
   position: relative;
