@@ -417,6 +417,108 @@ class TermVisibilityTest extends KernelTestBase {
   }
 
   /**
+   * Whether core's access check lets someone see a term, with fresh caches.
+   */
+  protected function canAccess(TermInterface $term, AccountInterface $account, string $operation = 'view'): bool {
+    $this->container->set('mukurtu_core.term_visibility', NULL);
+    $this->container->get('entity_type.manager')->getAccessControlHandler('taxonomy_term')->resetCache();
+    return $term->access($operation, $account);
+  }
+
+  /**
+   * Core's access check hides a term's name like the term's page (#2785).
+   */
+  public function testAccessHidesRestrictedTerms(): void {
+    $sensitive = $this->createTerm('Sensitive');
+    $this->tag($sensitive, $this->strict);
+    $public = $this->createTerm('Public');
+    $this->tag($public, $this->open);
+
+    foreach (['view', 'view label'] as $operation) {
+      $this->assertFalse($this->canAccess($sensitive, User::getAnonymousUser(), $operation));
+      $this->assertFalse($this->canAccess($sensitive, $this->visitor, $operation));
+      $this->assertTrue($this->canAccess($sensitive, $this->member, $operation));
+      $this->assertTrue($this->canAccess($public, User::getAnonymousUser(), $operation));
+    }
+
+    $result = $this->container->get('mukurtu_core.term_visibility')->access($sensitive, User::getAnonymousUser());
+    $this->assertTrue($result->isForbidden());
+    $this->assertContains('mukurtu_memberships', $result->getCacheContexts());
+    $this->assertContains('node_list', $result->getCacheTags());
+  }
+
+  /**
+   * The access check only decides who can see a term, not who can change it.
+   */
+  public function testAccessLeavesOtherOperations(): void {
+    $term = $this->createTerm('Sensitive');
+    $this->tag($term, $this->strict);
+    Role::load('authenticated')->grantPermission('edit terms in keywords')->save();
+    $visitor = User::load($this->visitor->id());
+
+    $this->assertTrue($this->canAccess($term, $visitor, 'update'));
+    $this->assertTrue($this->canAccess($term, $visitor));
+  }
+
+  /**
+   * Terms in vocabularies not used on content are left to core.
+   */
+  public function testAccessLeavesNonContentVocabularies(): void {
+    Vocabulary::create(['vid' => 'media_tag', 'name' => 'Media tags'])->save();
+    $term = Term::create(['vid' => 'media_tag', 'name' => 'Unused']);
+    $term->save();
+
+    $this->assertTrue($this->canAccess($term, User::getAnonymousUser()));
+  }
+
+  /**
+   * People who manage all terms see every term.
+   */
+  public function testAccessForTaxonomyAdministrators(): void {
+    $term = $this->createTerm('Sensitive');
+    $this->tag($term, $this->strict);
+    Role::load('authenticated')->grantPermission('administer taxonomy')->save();
+
+    $this->assertTrue($this->canAccess($term, User::load($this->visitor->id())));
+  }
+
+  /**
+   * People who can edit media using a vocabulary see all its terms.
+   *
+   * The submission reviewer role can edit media it can't create, and opens
+   * pending media whose terms aren't on anything published yet.
+   */
+  public function testMediaEditorsSeeAllTerms(): void {
+    $term = $this->createTerm('Pending');
+    $this->createMedia($term, $this->strict, FALSE);
+    $this->assertFalse($this->canSee($term, $this->visitor));
+
+    Role::load('authenticated')->grantPermission('edit any recording media')->save();
+    $this->assertTrue($this->canSee($term, User::load($this->visitor->id())));
+    $this->assertFalse($this->canSee($term, User::getAnonymousUser()));
+  }
+
+  /**
+   * A protocol role that can edit but not create content counts too.
+   */
+  public function testProtocolEditorsSeeAllTerms(): void {
+    $term = $this->createTerm('Sensitive');
+    $this->tag($term, $this->strict);
+    $this->assertFalse($this->canSee($term, $this->visitor));
+
+    $role = OgRole::create([
+      'name' => 'editor',
+      'label' => 'Editor',
+      'permissions' => ['edit any thing content'],
+    ]);
+    $role->setGroupType('protocol');
+    $role->setGroupBundle('protocol');
+    $role->save();
+    $this->open->addMember($this->visitor, ['editor']);
+    $this->assertTrue($this->canSee($term, User::load($this->visitor->id())));
+  }
+
+  /**
    * Cached results clear when media or paragraphs change.
    */
   public function testCacheability(): void {
