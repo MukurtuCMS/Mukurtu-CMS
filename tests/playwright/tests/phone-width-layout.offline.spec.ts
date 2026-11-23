@@ -185,6 +185,7 @@ const localTasks = (withScript: boolean) => page(`
         </div>
       </div>
     </div>
+    <a href="#">After</a>
   </div></div></div>
   ${withScript ? `<script>${COLLAPSE_JS}</script><script>Drupal.behaviors.mukurtuLocalTasksCollapse.attach(document);</script>` : ''}
 `, 'path-node');
@@ -241,7 +242,19 @@ for (const width of [320, 390]) {
     for (let i = 0; i < 8; i++) {
       await p.keyboard.press('Tab');
     }
+    await expect(p.getByRole('link', { name: 'After' })).toBeFocused();
     await expect(p.locator('.local-tasks__more')).not.toHaveAttribute('open');
+  });
+
+  test(`More actions menu stays open when focus goes nowhere at ${width}px`, async ({ page: p }) => {
+    // Safari and Firefox on macOS don't focus a clicked link, so pressing
+    // on one blurs the toggle with nothing focused next. Closing the menu
+    // then would swallow the click. blur() stands in for that press.
+    await open(p, localTasks(true), width);
+    await p.locator('.local-tasks__more-toggle').focus();
+    await p.keyboard.press('Enter');
+    await p.locator('.local-tasks__more-toggle').evaluate((el) => el.blur());
+    await expect(p.locator('.local-tasks__more')).toHaveAttribute('open');
   });
 }
 

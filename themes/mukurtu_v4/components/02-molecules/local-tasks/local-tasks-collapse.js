@@ -117,10 +117,12 @@
         more.open = false;
       }
     });
-    // Also close once focus leaves the menu, or Tab past its last link
-    // would move focus underneath it (WCAG 2.4.11).
+    // Also close once focus moves to something outside the menu, or Tab
+    // past its last link would land underneath it (WCAG 2.4.11). Not when
+    // focus goes nowhere (relatedTarget null): Safari and Firefox on macOS
+    // don't focus a clicked link, so closing then would swallow the click.
     more.addEventListener('focusout', (event) => {
-      if (more.open && !more.contains(event.relatedTarget)) {
+      if (more.open && event.relatedTarget && !more.contains(event.relatedTarget)) {
         more.open = false;
       }
     });

@@ -20,11 +20,13 @@
         });
       });
 
-      // Focus leaving a menu: close it, or Tab past its last link would move
-      // focus to content the open menu covers (WCAG 2.4.11).
+      // Focus moving outside a menu: close it, or Tab past its last link
+      // would land on content the open menu covers (WCAG 2.4.11). Not when
+      // focus goes nowhere (relatedTarget null): Safari and Firefox on macOS
+      // don't focus a clicked link, so closing then would swallow the click.
       document.addEventListener('focusout', function (e) {
         var details = e.target.closest && e.target.closest('.quick-actions__overflow[open]');
-        if (details && !details.contains(e.relatedTarget)) {
+        if (details && e.relatedTarget && !details.contains(e.relatedTarget)) {
           details.removeAttribute('open');
         }
       });
