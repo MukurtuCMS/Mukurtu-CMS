@@ -45,6 +45,13 @@ class TermVisibility {
   const MAX_PARAGRAPH_DEPTH = 10;
 
   /**
+   * The most IDs put in one IN condition.
+   *
+   * Each ID is its own placeholder, and MySQL allows 65,535 per statement.
+   */
+  const CHUNK_SIZE = 1000;
+
+  /**
    * Visible term IDs, keyed by vocabulary ID and then user ID.
    */
   protected array $visible = [];
@@ -246,15 +253,18 @@ class TermVisibility {
       return [];
     }
 
-    $query = $this->database->select('node_field_data', 'nfd');
-    $query->addField('nfd', 'nid');
-    $query->condition('nfd.nid', array_unique($hosts), 'IN');
-    $query->condition('nfd.default_langcode', 1);
-    $query->condition('nfd.status', 1);
-    if ($account) {
-      $this->addNodeAccess($query, $account);
+    $viewable = [];
+    foreach (array_chunk(array_unique($hosts), static::CHUNK_SIZE) as $nids) {
+      $query = $this->database->select('node_field_data', 'nfd');
+      $query->addField('nfd', 'nid');
+      $query->condition('nfd.nid', $nids, 'IN');
+      $query->condition('nfd.default_langcode', 1);
+      $query->condition('nfd.status', 1);
+      if ($account) {
+        $this->addNodeAccess($query, $account);
+      }
+      $viewable += array_fill_keys(array_map('intval', $query->execute()->fetchCol()), TRUE);
     }
-    $viewable = array_fill_keys(array_map('intval', $query->execute()->fetchCol()), TRUE);
 
     $tids = [];
     foreach ($hosts as $pid => $nid) {
@@ -307,12 +317,15 @@ class TermVisibility {
    *   [parent entity type ID, parent ID] pairs, keyed by paragraph ID.
    */
   protected function getParagraphParents(array $pids): array {
-    $rows = $this->database->select('paragraphs_item_field_data', 'p')
-      ->fields('p', ['id', 'parent_type', 'parent_id', 'parent_field_name'])
-      ->condition('p.id', $pids, 'IN')
-      ->condition('p.default_langcode', 1)
-      ->execute()
-      ->fetchAll();
+    $rows = [];
+    foreach (array_chunk($pids, static::CHUNK_SIZE) as $chunk) {
+      $rows = array_merge($rows, $this->database->select('paragraphs_item_field_data', 'p')
+        ->fields('p', ['id', 'parent_type', 'parent_id', 'parent_field_name'])
+        ->condition('p.id', $chunk, 'IN')
+        ->condition('p.default_langcode', 1)
+        ->execute()
+        ->fetchAll());
+    }
 
     // Paragraphs to confirm, grouped by the parent field that should hold them.
     $claims = [];
@@ -332,15 +345,17 @@ class TermVisibility {
           continue;
         }
         $column = $table_mapping->getFieldColumnName($storage_definition, 'target_id');
-        $query = $this->database->select($table_mapping->getDedicatedDataTableName($storage_definition), 'f');
-        $query->addField('f', 'entity_id');
-        $query->addField('f', $column, 'pid');
-        $query->condition("f.$column", array_keys($claimed), 'IN');
-        $query->condition('f.deleted', 0);
-        foreach ($query->execute() as $row) {
-          $pid = (int) $row->pid;
-          if (($claimed[$pid] ?? NULL) === (int) $row->entity_id) {
-            $parents[$pid] = [$type, (int) $row->entity_id];
+        foreach (array_chunk(array_keys($claimed), static::CHUNK_SIZE) as $chunk) {
+          $query = $this->database->select($table_mapping->getDedicatedDataTableName($storage_definition), 'f');
+          $query->addField('f', 'entity_id');
+          $query->addField('f', $column, 'pid');
+          $query->condition("f.$column", $chunk, 'IN');
+          $query->condition('f.deleted', 0);
+          foreach ($query->execute() as $row) {
+            $pid = (int) $row->pid;
+            if (($claimed[$pid] ?? NULL) === (int) $row->entity_id) {
+              $parents[$pid] = [$type, (int) $row->entity_id];
+            }
           }
         }
       }
