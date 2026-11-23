@@ -1,0 +1,8 @@
+/**
+ * @file
+ * Indents the nested terms of term checkboxes and radios (#2523).
+ */
+
+.mukurtu-nested-term-options__group {
+  margin-inline-start: 1.5rem;
+}
