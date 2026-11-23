@@ -17,7 +17,7 @@ Media content warnings settings can be found on the dashboard under Site Configu
 ### Taxonomy term (Media Tags) warnings
 1. Enable the Media Tags vocabulary at `/admin/config/mukurtu/person-records`. (todo: enable this by default and remove this step after)
 2. Add one or more trigger terms to the Media Tags vocabulary.
-3. Customize your content warnings at `/admin/config/mukurtu/content-warnings`. The media tags on your site are the terms you can choose from. You can customize the warning text for each term.
+3. Customize your content warnings at `/admin/config/mukurtu/content-warnings`. The media tags on your site are the terms you can choose from. You can customize the warning text for each term. A warning also applies to media tagged with any term nested under its term.
 4. Attach this term to a media item's `Media Tags` field.
 5. Add this media item to any content item's media assets field to see the content warning overlay.
 
