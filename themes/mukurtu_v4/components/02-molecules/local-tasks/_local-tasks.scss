@@ -11,6 +11,10 @@
       font-family: var(--font-display-face);
       font-size: var(--font-size-2xs);
       font-weight: var(--text-bold);
+      // inline-block keeps each tab one box. As a plain inline element, a
+      // label that wraps on a narrow screen split its border and padding
+      // across lines.
+      display: inline-block;
       text-decoration: none;
       padding: var(--v-space-5xs);
       border: 1px solid var(--brand-primary);
@@ -55,11 +59,26 @@
     @include layout.layout--full-width-grid-item;
   }
 
+  // The tab list. Flex with a gap (rather than inline-block items with a
+  // trailing margin) so wrapped rows get the same spacing as the columns.
+  > ul,
+  &__tabs > ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-6xs);
+    margin-block: 0;
+
+    > li {
+      margin: 0;
+    }
+  }
+
   &__inner {
     @include layout.layout--full-width-grid-item;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--gutter);
+    gap: var(--v-space-6xs) var(--gutter);
 
     // At lg+, dissolve into the parent grid so __tabs and __export can use
     // the same grid columns as full-node__main and full-node__list.
@@ -74,8 +93,10 @@
   }
 
   &__tabs {
-    // On mobile, fill available flex space and push __export right.
-    flex: 1;
+    // Below lg, fill available flex space and push __export right. The
+    // basis lets __export wrap onto its own row once the tabs would get
+    // narrower than this, instead of squeezing every tab label.
+    flex: 1 1 20rem;
     min-width: 0;
 
     @include include-media.media('>=lg') {
