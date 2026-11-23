@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_core\Service;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\SelectInterface;
@@ -13,6 +15,8 @@ use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\mukurtu_protocol\CulturalProtocols;
+use Drupal\og\Og;
 use Drupal\taxonomy\TermInterface;
 
 /**
@@ -24,9 +28,9 @@ use Drupal\taxonomy\TermInterface;
  * paragraph on a content item that uses it, or that uses any term nested
  * under it, because many parents have no content of their own.
  *
- * People who can create content that uses a vocabulary see all of its terms.
- * The term field's suggestions already offer them every term as they type,
- * and a new term on their own draft must not show as restricted.
+ * People who can create or edit content that uses a vocabulary see all of its
+ * terms. The term field's suggestions already offer them every term as they
+ * type, and a term on a draft they work on must not show as restricted.
  */
 class TermVisibility {
 
@@ -86,6 +90,25 @@ class TermVisibility {
     $account ??= $this->currentUser;
     return $term->access('update', $account)
       || in_array((int) $term->id(), $this->getVisibleTermIds($term->bundle(), $account), TRUE);
+  }
+
+  /**
+   * Decides whether someone can see a term, for hook_ENTITY_TYPE_access().
+   *
+   * Core checks 'view' for a term's name too, so this covers every place the
+   * name is shown, including JSON:API and term reference fields. Terms in
+   * vocabularies that aren't used on content are left to core (#2785).
+   */
+  public function access(TermInterface $term, AccountInterface $account): AccessResultInterface {
+    $vid = $term->bundle();
+    if (!$this->isPublicVocabulary($vid)) {
+      return AccessResult::neutral();
+    }
+    $cacheability = $this->getCacheability($vid)->addCacheableDependency($term);
+    if ($this->isVisible($term, $account)) {
+      return AccessResult::neutral()->addCacheableDependency($cacheability);
+    }
+    return AccessResult::forbidden()->addCacheableDependency($cacheability);
   }
 
   /**
@@ -364,19 +387,55 @@ class TermVisibility {
   }
 
   /**
-   * Whether someone can create content or media that uses a vocabulary.
+   * Whether someone can create or edit content or media using a vocabulary.
+   *
+   * Editing counts too, for roles such as the submission reviewer that can
+   * edit media they can't create.
    */
   protected function canTag(string $vid, AccountInterface $account): bool {
-    foreach (['node', 'media'] as $entity_type_id) {
+    foreach (['node' => 'content', 'media' => 'media'] as $entity_type_id => $noun) {
       if (!$this->entityTypeManager->hasDefinition($entity_type_id)) {
         continue;
       }
       $handler = $this->entityTypeManager->getAccessControlHandler($entity_type_id);
       foreach ($this->getTermFields($entity_type_id, $vid) as [, , $bundles]) {
         foreach ($bundles as $bundle) {
-          if ($handler->createAccess($bundle, $account)) {
+          if ($handler->createAccess($bundle, $account)
+            || $account->hasPermission("edit any $bundle $noun")
+            || $account->hasPermission("edit own $bundle $noun")
+            || $this->canEditViaProtocol($entity_type_id, $bundle, $account)) {
             return TRUE;
           }
+        }
+      }
+    }
+    return FALSE;
+  }
+
+  /**
+   * Whether a protocol role lets someone edit content or media of a type.
+   *
+   * Content and media access in Mukurtu follow protocol roles, which name the
+   * permission "edit" for content and "update" for media.
+   */
+  protected function canEditViaProtocol(string $entity_type_id, string $bundle, AccountInterface $account): bool {
+    if (!class_exists(Og::class) || !class_exists(CulturalProtocols::class) || !$this->entityTypeManager->hasDefinition('og_membership')) {
+      return FALSE;
+    }
+    $permissions = $entity_type_id === 'node'
+      ? ["edit any $bundle content", "edit own $bundle content"]
+      : ["update any $bundle media", "update own $bundle media"];
+    foreach (Og::getMemberships($account) as $membership) {
+      if ($membership->getGroupEntityType() !== 'protocol') {
+        continue;
+      }
+      $protocol = $membership->getGroup();
+      if (!$protocol || CulturalProtocols::isUserBlockedFromProtocolViaCommunity($account, $protocol)) {
+        continue;
+      }
+      foreach ($permissions as $permission) {
+        if ($membership->hasPermission($permission)) {
+          return TRUE;
         }
       }
     }
