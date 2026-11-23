@@ -2,6 +2,16 @@ services:
   media_library.ui_builder:
     class: Drupal\mukurtu_media\MukurtuMediaLibraryUiBuilder
     arguments: ['@entity_type.manager', '@request_stack', '@views.executable', '@form_builder', '@media_library.opener_resolver']
+    calls:
+      - [setMediaCreateNotice, ['@mukurtu_media.create_notice', '@current_user']]
+  mukurtu_media.create_notice:
+    class: Drupal\mukurtu_media\MediaCreateNotice
+    arguments: ['@entity_type.manager']
+  mukurtu_media.media_add_access_denied_subscriber:
+    class: Drupal\mukurtu_media\EventSubscriber\MediaAddAccessDeniedSubscriber
+    arguments: ['@mukurtu_media.create_notice', '@current_user', '@current_route_match', '@messenger']
+    tags:
+      - { name: event_subscriber }
   mukurtu_media.route_subscriber:
     class: Drupal\mukurtu_media\Routing\RouteSubscriber
     tags:

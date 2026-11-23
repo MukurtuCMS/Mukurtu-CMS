@@ -1,0 +1,24 @@
+diff --git a/src/Plugin/media/Source/Soundcloud.php b/src/Plugin/media/Source/Soundcloud.php
+index 507296c..b753157 100644
+--- a/src/Plugin/media/Source/Soundcloud.php
++++ b/src/Plugin/media/Source/Soundcloud.php
+@@ -98,6 +98,19 @@ class Soundcloud extends MediaSourceBase {
+   public function getMetadata(MediaInterface $media, $attribute_name) {
+     $file_system = \Drupal::service('file_system');
+     $content_url = $this->getMediaUrl($media);
++
++    // Default the media name to the track or playlist title from oEmbed. The
++    // oEmbed response is statically cached per URL, so this reuses the request
++    // made for the thumbnail. Fall back to the generic default name when the
++    // title is unavailable.
++    if ($attribute_name === 'default_name') {
++      $data = $content_url ? $this->oEmbed($content_url) : FALSE;
++      if (is_array($data) && isset($data['title']) && is_string($data['title']) && trim($data['title']) !== '') {
++        return trim($data['title']);
++      }
++      return parent::getMetadata($media, $attribute_name);
++    }
++
+     if ($content_url === FALSE) {
+       return FALSE;
+     }

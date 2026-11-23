@@ -197,7 +197,7 @@ class CsvExporterFormBase extends EntityForm {
     $form['csv'] = [
       '#type' => 'details',
       '#open' => FALSE,
-      '#title' => $this->t("CSV File Format Settings")
+      '#title' => $this->t("File format settings"),
     ];
 
     $form['csv']['separator'] = [

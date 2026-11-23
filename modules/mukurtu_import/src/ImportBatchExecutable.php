@@ -6,6 +6,7 @@ namespace Drupal\mukurtu_import;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Utility\Error;
+use Drupal\migrate\Event\MigrateMapSaveEvent;
 use Drupal\migrate_tools\MigrateBatchExecutable;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
@@ -14,6 +15,24 @@ use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
  * Defines an import executable class for batch import via migrate API.
  */
 class ImportBatchExecutable extends MigrateBatchExecutable {
+
+  /**
+   * Seconds of row processing per batch request before handing back.
+   *
+   * Keeps each request well under typical PHP and proxy timeouts on shared
+   * hosting, and keeps the progress bar moving on large files.
+   */
+  const TIME_LIMIT = 5;
+
+  /**
+   * Seconds this import() call may process rows, or NULL for no limit.
+   */
+  protected ?float $timeLimit = NULL;
+
+  /**
+   * When the current import() call started, from microtime().
+   */
+  protected ?float $importStartedAt = NULL;
 
   /**
    * Batch import from a set of migration definitions rather than plugins.
@@ -84,6 +103,10 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $migration_plugin_manager,
       $options,
     );
+    // Core no longer calls migrate_tools' checkStatus(), so its per-request
+    // batch limit never applies and a whole file would import in a single
+    // request. Stop between rows once the time limit is reached instead.
+    $executable->timeLimit = (float) ($options['time_limit'] ?? self::TIME_LIMIT);
     if (empty($context['sandbox']['total'])) {
       $context['sandbox']['total'] = $executable->getSource()->count();
       $context['sandbox']['batch_limit'] = $executable->calculateBatchLimit($context);
@@ -112,6 +135,13 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Make sure we know our batch context.
     $executable->setBatchContext($context);
 
+    // import() resets the status to idle on every normal exit, so a
+    // non-idle status here means another run is using this migration ID
+    // right now. import() refuses to start in that case. The ID map tables
+    // then belong to the other run: don't report its row messages as ours,
+    // and don't destroy its tables when this batch finishes.
+    $started_busy = $migration->getStatus() !== MigrationInterface::STATUS_IDLE;
+
     // Do the import. import() only catches MigrateException and
     // MigrateSkipRowException around row processing; any other \Throwable
     // (e.g. a TypeError from a process plugin given an unexpected NULL
@@ -139,16 +169,23 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // Save the messages for this migration only, so errors stay attributed
     // to the file that produced them rather than being flattened across all
     // files in the batch.
-    $context['results'][$migration->id()]['messages'] = array_merge(
-      $context['results'][$migration->id()]['messages'],
-      iterator_to_array($executable->getIdMap()->getMessages())
-    );
+    if (!$started_busy) {
+      $context['results'][$migration->id()]['messages'] = array_merge(
+        $context['results'][$migration->id()]['messages'],
+        iterator_to_array($executable->getIdMap()->getMessages())
+      );
+      // A large file takes several requests. Clear what was just collected
+      // so the next request doesn't collect the same messages again.
+      $executable->getIdMap()->clearMessages();
+    }
     foreach ($message->getErrorMessages() as $error_message) {
-      $context['results'][$migration->id()]['messages'][] = (object) ['message' => $error_message, 'src_ID' => NULL];
+      $context['results'][$migration->id()]['messages'][] = (object) ['message' => $error_message];
     }
 
     // Store the definition for ID map cleanup after the batch completes.
-    $context['results']['definitions'][$migration->id()] = $migration_definition;
+    if (!$started_busy) {
+      $context['results']['definitions'][$migration->id()] = $migration_definition;
+    }
 
     // Pull the true per-row created/updated status from the destination
     // plugin, keyed by whether the destination entity itself already
@@ -197,9 +234,14 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // report a false success.
     elseif ($result === MigrationInterface::RESULT_FAILED && empty($context['results'][$migration->id()]['@failures'])) {
       $context['results'][$migration->id()]['@failures'] = 1;
-      $context['results'][$migration->id()]['messages'][] = (object) [
-        'message' => (string) t('The import for this file failed before any rows could be processed. Check that your file\'s columns match the selected import template, or use "Customize Settings" to map the columns manually.'),
-      ];
+      // A busy migration already has import()'s own "busy" message above,
+      // and the column-mismatch advice below would point the user at the
+      // wrong cause.
+      if (!$started_busy) {
+        $context['results'][$migration->id()]['messages'][] = (object) [
+          'message' => (string) t('The import for this file failed before any rows could be processed. Check that your file\'s columns match the selected import template, or use "Customize Settings" to map the columns manually.'),
+        ];
+      }
     }
 
     // Do some housekeeping.
@@ -273,14 +315,14 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $file_message_texts = [];
       $details = $migration_result['row_details'] ?? [];
       foreach ($migration_result['messages'] ?? [] as $raw_message) {
-        $source_id = $raw_message->src_ID ?? NULL;
-        $message = $source_id
-          ? (string) t("Problem with ID @source_id: @message", ['@source_id' => $source_id, '@message' => $raw_message->message])
+        $row = static::spreadsheetRow($raw_message);
+        $message = $row
+          ? (string) t('Row @row: @message', ['@row' => $row, '@message' => $raw_message->message])
           : $raw_message->message;
         $messages[] = ['fid' => $fid, 'message' => $message];
         $file_message_texts[] = $message;
         $details[] = [
-          'source_id' => $source_id,
+          'source_id' => $row,
           'status' => 'failed',
           'message' => $raw_message->message,
         ];
@@ -326,9 +368,10 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       if (!is_array($data) || !isset($data['@created'])) {
         continue;
       }
-      // Migration IDs are formatted as "{uid}__{fid}__{entity_type}__{bundle}".
+      // Migration IDs end in "__{entity_type}__{bundle}"; prefer the entity
+      // type recorded from the definition over parsing the ID.
       $parts = explode('__', (string) $migration_id);
-      $entity_type_id = $parts[2] ?? NULL;
+      $entity_type_id = ($data['entity_type_id'] ?? NULL) ?: ($parts[count($parts) - 2] ?? NULL);
       if (!$entity_type_id) {
         continue;
       }
@@ -362,13 +405,39 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       mukurtu_notifications_notify_batch_import_report($imported_count, static::buildResultsSummary($per_migration_summary, $messages));
     }
 
-    // Clean up ID map tables for all migrations in this batch.
-    // These are no longer needed after the import is complete.
+    // Clean up ID map tables and per-migration state for all migrations in
+    // this batch. Each run has its own migration IDs, so none of this is
+    // used again after the import is complete.
     $migration_plugin_manager = \Drupal::service('plugin.manager.migration');
-    foreach ($results['definitions'] ?? [] as $definition) {
+    foreach ($results['definitions'] ?? [] as $migration_id => $definition) {
       $migration = $migration_plugin_manager->createStubMigration($definition);
       $migration->getIdMap()->destroy();
+      foreach (['migrate_status', 'migrate_interruption_result', 'migrate_last_imported'] as $collection) {
+        \Drupal::keyValue($collection)->delete((string) $migration_id);
+      }
     }
+  }
+
+  /**
+   * Gets the spreadsheet row a migrate message belongs to.
+   *
+   * Core's ID map names each source ID column "src_{key}", where the key is
+   * the CSV column name. MukurtuImportStrategy::toDefinition() adds the CSV
+   * source's _record_number as a source ID, which counts data rows from 1,
+   * so add 1 for the header row to match the row number the user sees in a
+   * spreadsheet application.
+   *
+   * @param object $raw_message
+   *   A message row from the ID map, or a message object built in
+   *   batchProcessImportDefinition().
+   *
+   * @return int|null
+   *   The spreadsheet row number, or NULL when the message isn't tied to a
+   *   row.
+   */
+  protected static function spreadsheetRow(object $raw_message): ?int {
+    $record_number = $raw_message->src__record_number ?? NULL;
+    return is_numeric($record_number) ? (int) $record_number + 1 : NULL;
   }
 
   /**
@@ -401,6 +470,44 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       '#items' => array_map(static fn (array $message) => $message['message'], $messages),
     ];
     return $summary . (string) \Drupal::service('renderer')->renderInIsolation($error_build);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function import() {
+    $this->importStartedAt = microtime(TRUE);
+    try {
+      return parent::import();
+    }
+    finally {
+      // migrate_tools removes this executable's event listeners on
+      // POST_IMPORT, which a crash or a busy migration never reaches. Make
+      // sure a leftover listener can't interrupt a later import() of the
+      // same migration in this request.
+      $this->importStartedAt = NULL;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Every processed row, including failed and ignored ones, is saved to the
+   * ID map, so this runs once per row. Once the time limit is reached, ask
+   * import() to stop after this row. The next batch request starts a new
+   * import(), whose source skips the rows already in the ID map.
+   */
+  public function onMapSave(MigrateMapSaveEvent $event) {
+    parent::onMapSave($event);
+    if ($this->timeLimit === NULL || $this->importStartedAt === NULL) {
+      return;
+    }
+    if ($event->getMap()->getQualifiedMapTableName() !== $this->migration->getIdMap()->getQualifiedMapTableName()) {
+      return;
+    }
+    if (microtime(TRUE) - $this->importStartedAt >= $this->timeLimit) {
+      $this->migration->interruptMigration(MigrationInterface::RESULT_INCOMPLETE);
+    }
   }
 
   /**

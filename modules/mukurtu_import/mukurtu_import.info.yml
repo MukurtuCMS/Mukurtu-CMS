@@ -15,6 +15,7 @@ dependencies:
   - 'migrate_source_csv:migrate_source_csv'
   - 'migrate_tools:migrate_tools'
   - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_export:mukurtu_export'
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_protocol:mukurtu_protocol'
 version: 4.x-dev
