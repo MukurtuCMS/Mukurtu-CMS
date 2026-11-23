@@ -9,7 +9,9 @@ import path = require('path');
  *   screen below md, because it was anchored to the end edge of a toggle
  *   that sits at the start of the card there.
  * - A local-task tab whose label wrapped split its border and padding across
- *   lines, and the export buttons squeezed the tabs instead of wrapping.
+ *   lines, and the export buttons squeezed the tabs instead of wrapping. On
+ *   phones the tabs now also collapse behind a "more actions" menu, which
+ *   these fixed rules still lay out when JavaScript doesn't run.
  * - The thumbnail strip cut thumbnails off at <=600px (the JS shrinks the
  *   strip to 44px but the images kept a 100px cap), and the prev/next arrows
  *   of the thumbnail and multipage carousels covered the first and last
@@ -30,6 +32,7 @@ const SPLIDE_CSS = read('modules/mukurtu_core/libraries/splide/splide.min.css');
 const SPLIDE_JS = read('modules/mukurtu_core/libraries/splide/splide.min.js');
 const MEDIA_CAROUSEL_JS = read('themes/mukurtu_v4/js/media-asset-carousel.js');
 const MULTIPAGE_JS = read('modules/mukurtu_multipage_items/js/multipage-nav.js');
+const COLLAPSE_JS = read('themes/mukurtu_v4/components/02-molecules/local-tasks/local-tasks-collapse.js');
 
 const DRUPAL_STUB = `
   window.Drupal = { behaviors: {}, mukurtuStopMedia: function () {}, t: function (s) { return s; }, announce: function () {} };
@@ -135,32 +138,44 @@ test('More actions menu still opens back from the end corner at md and up', asyn
 
 // Mirrors block--mukurtu-v4-local-tasks.html.twig with core's
 // menu-local-tasks.html.twig, as an editor sees it on an item.
-const LOCAL_TASKS = page(`
+const TABS: Array<[string, string]> = [
+  ['View', 'node/7'],
+  ['Edit', 'node/7/edit'],
+  ['Delete', 'node/7/delete'],
+  ['Add Community Record', 'node/7/community-record/add'],
+  ['Create Multipage Item', 'node/7/new-multipage'],
+  ['Add to Collection', 'node/7/collection/add'],
+  ['Add to Personal Collection', 'node/7/personal-collection/add'],
+];
+const localTasks = (withScript: boolean) => page(`
   <div class="node"><div class="node__main-content"><div class="region">
-    <div class="local-tasks"><div class="local-tasks__inner">
-      <div class="local-tasks__tabs">
-        <h2 class="visually-hidden">Primary tabs</h2>
-        <ul>
-          <li><a href="#" class="is-active" aria-current="page">View</a></li>
-          <li><a href="#">Edit</a></li>
-          <li><a href="#">Delete</a></li>
-          <li><a href="#">Add Community Record</a></li>
-          <li><a href="#">Create Multipage Item</a></li>
-          <li><a href="#">Add to Collection</a></li>
-          <li><a href="#">Add to Personal Collection</a></li>
-        </ul>
+    <div class="local-tasks">
+      <template class="local-tasks__more-template">
+        <details class="local-tasks__more">
+          <summary class="local-tasks__more-toggle" aria-label="More actions">...</summary>
+          <ul class="local-tasks__more-menu"></ul>
+        </details>
+      </template>
+      <div class="local-tasks__inner">
+        <div class="local-tasks__tabs">
+          <h2 class="visually-hidden">Primary tabs</h2>
+          <ul>
+            ${TABS.map(([title, path], i) => `<li><a href="/${path}" data-drupal-link-system-path="${path}"${i === 0 ? ' class="is-active" aria-current="page"' : ''}>${title}</a></li>`).join('')}
+          </ul>
+        </div>
+        <div class="local-tasks__export">
+          <a href="#" class="button button--small">Export</a>
+          <a href="#">Add to export list</a>
+        </div>
       </div>
-      <div class="local-tasks__export">
-        <a href="#" class="button button--small">Export</a>
-        <a href="#">Add to export list</a>
-      </div>
-    </div></div>
+    </div>
   </div></div></div>
+  ${withScript ? `<script>${COLLAPSE_JS}</script><script>Drupal.behaviors.mukurtuLocalTasksCollapse.attach(document);</script>` : ''}
 `, 'path-node');
 
 for (const width of [320, 390]) {
-  test(`Local task tabs stay whole at ${width}px`, async ({ page: p }) => {
-    await open(p, LOCAL_TASKS, width);
+  test(`Local task tabs stay whole without JavaScript at ${width}px`, async ({ page: p }) => {
+    await open(p, localTasks(false), width);
     const split = await p.locator('.local-tasks__tabs a').evaluateAll((links) =>
       links.filter((a) => a.getClientRects().length > 1).map((a) => a.textContent));
     expect(split, 'no tab breaks into separate boxes').toEqual([]);
@@ -173,6 +188,52 @@ for (const width of [320, 390]) {
     expect(overflow, 'no horizontal scroll').toBeLessThanOrEqual(0);
   });
 }
+
+const rowItems = (p: Page) => p.locator('.local-tasks__tabs > ul > li').evaluateAll((items) =>
+  items.map((li) => (li.querySelector('summary') ? '...' : li.textContent!.trim())));
+const menuItems = (p: Page) => p.locator('.local-tasks__more-menu a').allTextContents();
+
+for (const width of [320, 390]) {
+  test(`Local task tabs collapse into a more actions menu at ${width}px`, async ({ page: p }) => {
+    await open(p, localTasks(true), width);
+    expect(await rowItems(p)).toEqual(['View', 'Edit', '...']);
+    expect(await menuItems(p)).toEqual([...TABS.slice(2).map(([title]) => title), 'Export', 'Add to export list']);
+    await expect(p.locator('.local-tasks__export')).toBeHidden();
+
+    // One row.
+    const row = (await p.locator('.local-tasks__tabs > ul').boundingBox())!;
+    expect(row.height, 'tabs fit on one row').toBeLessThan(60);
+
+    // Opens from the keyboard, inside the screen.
+    await p.locator('.local-tasks__more-toggle').focus();
+    await p.keyboard.press('Enter');
+    const menu = (await p.locator('.local-tasks__more-menu').boundingBox())!;
+    expect(menu.x).toBeGreaterThanOrEqual(0);
+    expect(menu.x + menu.width).toBeLessThanOrEqual(width);
+    await expect(p.getByRole('link', { name: 'Delete' })).toBeVisible();
+
+    // Escape closes it and puts focus back on the toggle.
+    await p.keyboard.press('Tab');
+    await expect(p.getByRole('link', { name: 'Delete' })).toBeFocused();
+    await p.keyboard.press('Escape');
+    await expect(p.locator('.local-tasks__more')).not.toHaveAttribute('open');
+    await expect(p.locator('.local-tasks__more-toggle')).toBeFocused();
+  });
+}
+
+test('Local task tabs return to the row, in order, at md and up', async ({ page: p }) => {
+  await open(p, localTasks(true), 390);
+  expect(await rowItems(p)).toEqual(['View', 'Edit', '...']);
+
+  await p.setViewportSize({ width: 1280, height: 844 });
+  await expect.poll(() => rowItems(p)).toEqual(TABS.map(([title]) => title));
+  await expect(p.locator('.local-tasks__export')).toBeVisible();
+  expect(await p.locator('.local-tasks__export a').allTextContents()).toEqual(['Export', 'Add to export list']);
+
+  // And collapse again on the way back down.
+  await p.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => rowItems(p)).toEqual(['View', 'Edit', '...']);
+});
 
 // The arrows sit outside the track, so they can't cover a slide.
 async function expectArrowsOutsideTrack(p: Page, root: string): Promise<void> {

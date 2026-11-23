@@ -262,6 +262,125 @@
   }
 }
 
+// The "more actions" menu local-tasks-collapse.js builds below md: the
+// first, active, and Edit tabs stay in the row and the rest move here.
+.local-tasks--collapsed {
+  // The menu opens from the start of the tab row rather than from the
+  // toggle, which can sit far enough along the row to push it off screen.
+  > ul,
+  .local-tasks__tabs > ul {
+    position: relative;
+  }
+}
+
+.local-tasks__more {
+  block-size: 100%;
+
+  summary {
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::marker {
+      content: '';
+    }
+  }
+}
+
+// Sized and bordered like the tabs beside it, so it reads as one of them.
+.local-tasks__more-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: 2.75rem;
+  block-size: 100%;
+  padding-inline: var(--v-space-5xs);
+  border: 1px solid var(--brand-primary);
+  background-color: var(--color-white);
+  cursor: pointer;
+
+  svg {
+    fill: var(--brand-primary);
+  }
+
+  &:hover,
+  &:focus-visible,
+  .local-tasks__more[open] > & {
+    background-color: var(--brand-primary);
+
+    svg {
+      fill: var(--color-white);
+    }
+  }
+
+  &:focus-visible {
+    // Same inverted-fill case as the tabs (#2199).
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+  }
+}
+
+.local-tasks .local-tasks__more-menu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 10;
+  // Size to the longest label, but never wider than the screen.
+  inline-size: max-content;
+  min-inline-size: 12rem;
+  max-inline-size: calc(100vw - 2 * var(--gutter));
+  margin: var(--v-space-5xs) 0 0;
+  padding: var(--v-space-5xs) 0;
+  list-style: none;
+  background-color: var(--color-white);
+  border: 1px solid var(--mukurtu-view-row-divider-color);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+
+  li {
+    display: block;
+    margin: 0;
+    list-style: none;
+  }
+}
+
+// Menu items are the same tab and export links, so undo their tab and
+// button looks. (0,4,1) to beat the tab rule's (0,3,1).
+.local-tasks:not(.glb-body .local-tasks) .local-tasks__more-menu a {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  padding-block: var(--v-space-6xs);
+  padding-inline: var(--v-space-2xs);
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  // --brand-primary is ~4.0:1 on white, short of 4.5:1 for text (1.4.3).
+  color: var(--brand-primary-dark);
+  font-size: var(--font-size-2xs);
+  letter-spacing: normal;
+  text-align: start;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: none;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--brand-light);
+    color: var(--brand-primary-dark);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--brand-primary-dark);
+    outline-offset: -3px;
+  }
+}
+
 // Styles "add collection" button link.
 .local-actions {
   @include layout.layout--full-width-grid;
