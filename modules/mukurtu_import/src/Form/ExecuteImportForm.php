@@ -272,6 +272,14 @@ class ExecuteImportForm extends ImportBaseForm {
     // Phase 3: Build the final migration definitions.
     $migration_definitions = [];
     $identifier_warnings = [];
+    // Running the same file again (another tab, or "Return to Uploaded
+    // Files" while the first run is still going) would otherwise reuse the
+    // same migration ID, so both runs would share one status, ID map, and
+    // message table, and whichever finished first would drop the other's
+    // tables mid-import. A token unique to this submission keeps runs apart.
+    // It goes first because core truncates ID map table names to 63
+    // characters, which would cut a trailing token off a long bundle name.
+    $run_token = bin2hex(random_bytes(4));
     foreach ($metadata_files as $fid) {
       $config = $configs_by_fid[$fid];
       $file = $files_by_fid[$fid];
@@ -290,6 +298,7 @@ class ExecuteImportForm extends ImportBaseForm {
         'mukurtu_import_bundle' => $config->getTargetBundle(),
         'mukurtu_import_uid' => (int) $this->currentUser()->id(),
       ];
+      $definition['id'] = $run_token . '__' . $definition['id'];
 
       $migration_definitions[$fid] = $definition;
 

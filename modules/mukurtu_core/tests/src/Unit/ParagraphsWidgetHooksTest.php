@@ -199,15 +199,26 @@ class ParagraphsWidgetHooksTest extends UnitTestCase {
   }
 
   /**
-   * A widget with a single item has no header actions, and nothing is added.
+   * A widget with a single item has no header actions, and none are added.
    */
   public function testNoHeaderActions(): void {
     $form = ['widget' => ['#type' => 'container']];
-    $before = $form;
+    $before = $form['widget'];
 
     $this->hooks()->headerButtons($form, $this->triggeredBy(), []);
 
-    $this->assertSame($before, $form);
+    $this->assertSame($before, $form['widget']);
+  }
+
+  /**
+   * Every widget gets the arrow buttons that reorder without dragging.
+   */
+  public function testReorderArrowsAttached(): void {
+    $form = ['widget' => ['#type' => 'container']];
+
+    $this->hooks()->headerButtons($form, $this->triggeredBy(), []);
+
+    $this->assertContains('mukurtu_core/paragraphs_reorder', $form['#attached']['library']);
   }
 
 }

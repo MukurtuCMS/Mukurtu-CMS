@@ -334,6 +334,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       ],
       'dashboard-content' => [
         'Manage Content',
+        'Bulk edit content',
         'Add collection',
         'Add dictionary word',
         'Add digital heritage item',
@@ -343,6 +344,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
       ],
       'dashboard-media' => [
         'Manage Media',
+        'Bulk edit media',
         'Add Media',
         'Manage media tags',
         'Media download settings',
@@ -406,6 +408,7 @@ class DashboardLinkCleanupTest extends KernelTestBase {
         'Notification messages',
         'Analytics',
         'Analytics settings',
+        'Character palette',
       ],
     ];
     foreach ($expected as $menu_name => $titles) {

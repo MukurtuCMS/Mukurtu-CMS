@@ -21,3 +21,10 @@ mukurtu_core.add_content:
   title: 'Add content'
   appears_on:
     - mukurtu_core.manage_content
+mukurtu_core.bulk_edit_media_from_media:
+  route_name: mukurtu_core.bulk_edit_media
+  title: 'Bulk edit media'
+  appears_on:
+    # The media list's view takes over the media collection route.
+    - entity.media.collection
+    - view.mukurtu_media.media_page_list

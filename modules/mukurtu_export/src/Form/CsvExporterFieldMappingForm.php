@@ -98,7 +98,7 @@ class CsvExporterFieldMappingForm extends EntityForm {
         $this->t('Export'),
         $this->t('Field name'),
         $this->t('Field label'),
-        $this->t('CSV header label'),
+        $this->t('Column header label'),
         $this->t('Weight'),
       ],
       '#tabledrag' => [
@@ -136,7 +136,7 @@ class CsvExporterFieldMappingForm extends EntityForm {
       ];
       $row['csv_header_label'] = [
         '#type' => 'textfield',
-        '#title' => $this->t('CSV header label for @field', ['@field' => $mapped_field['field_label']]),
+        '#title' => $this->t('Column header label for @field', ['@field' => $mapped_field['field_label']]),
         '#title_display' => 'invisible',
         '#default_value' => $mapped_field['csv_header_label'],
       ];
