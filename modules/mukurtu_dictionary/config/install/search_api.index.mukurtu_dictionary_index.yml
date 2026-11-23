@@ -104,6 +104,33 @@ field_settings:
     dependencies:
       module:
         - mukurtu_local_contexts
+  keyword_tid:
+    label: 'Keywords » Term ID'
+    datasource_id: 'entity:node'
+    property_path: field_keywords
+    type: integer
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  language_tid:
+    label: 'Language » Term ID'
+    datasource_id: 'entity:node'
+    property_path: field_dictionary_word_language
+    type: integer
+    dependencies:
+      module:
+        - node
+        - taxonomy
+  word_type_tid:
+    label: 'Word Type » Term ID'
+    datasource_id: 'entity:node'
+    property_path: field_word_type
+    type: integer
+    dependencies:
+      module:
+        - node
+        - taxonomy
   keyword:
     label: Keywords
     datasource_id: 'entity:node'
@@ -245,6 +272,13 @@ processor_settings:
       - Pf
       - Pi
       - Sk
+  hierarchy:
+    weights:
+      preprocess_index: -45
+    fields:
+      keyword_tid: taxonomy_term-parent
+      language_tid: taxonomy_term-parent
+      word_type_tid: taxonomy_term-parent
   ignorecase:
     weights:
       preprocess_index: -20
