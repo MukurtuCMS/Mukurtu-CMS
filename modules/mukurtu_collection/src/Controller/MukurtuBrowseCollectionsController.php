@@ -147,6 +147,10 @@ class MukurtuBrowseCollectionsController extends ControllerBase {
     }
 
     $view->setDisplay('default');
+    // Menus run this check on other pages, and a view reads its exposed input
+    // from the current URL by default. Any non-empty input stops that, so another
+    // page's filters and sort can't affect the result or show an error (#2621).
+    $view->setExposedInput(['access_check' => TRUE]);
     $view->execute();
 
     // Which collections a user can see depends on their protocols. The

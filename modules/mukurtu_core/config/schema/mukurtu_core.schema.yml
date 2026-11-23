@@ -549,6 +549,17 @@ mukurtu.settings:
     mukurtu_related_content_display:
       type: string
       label: 'Related content display method'
+    related_content_preview:
+      type: sequence
+      label: 'Sidebar related content preview, keyed by node bundle machine name'
+      sequence:
+        type: string
+        label: 'Preview mode'
+        constraints:
+          Choice:
+            - 'off'
+            - jump_link
+            - thumbnails
     citation_templates:
       type: sequence
       label: 'Citation field templates, keyed by node bundle machine name'
@@ -646,6 +657,14 @@ views.filter.mukurtu_media_tag_filter:
   type: views.filter.in_operator
   label: 'Media tag filter'
 
+views.filter.mukurtu_visible_terms:
+  type: views_filter
+  label: 'Visible terms filter'
+  mapping:
+    vocabulary:
+      type: string
+      label: 'Vocabulary'
+
 views_bulk_operations.action_config.mukurtu_change_moderation_state_action:
   type: views_bulk_operations_action_config
   label: 'Change moderation state action preconfiguration'
@@ -720,3 +739,44 @@ mukurtu_core.consent_popup_text:
         decline_url_text:
           type: string
           label: 'Decline link text'
+
+mukurtu_core.character_palette:
+  type: config_object
+  label: 'Character palette settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Show the character palette'
+    groups:
+      type: sequence
+      label: 'Character groups'
+      sequence:
+        type: mapping
+        label: 'Character group'
+        mapping:
+          label:
+            type: label
+            label: 'Group name'
+          characters:
+            type: sequence
+            label: 'Characters'
+            sequence:
+              type: mapping
+              label: 'Character'
+              mapping:
+                character:
+                  type: string
+                  label: 'Character'
+                name:
+                  type: label
+                  label: 'Name'
+
+# The Latest Articles block's settings: the Views block settings, plus the
+# toggle LatestArticlesBlock adds.
+block.settings.views_block:mukurtu_articles-latest_articles_block:
+  type: views_block
+  label: 'Latest Articles block'
+  mapping:
+    show_more_link:
+      type: boolean
+      label: 'Show "View all articles" link'

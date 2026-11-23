@@ -43,7 +43,16 @@
   &-media {
     display: flex;
     gap: var(--v-space-4xxs);
-    align-items: start;
+
+    // Stacked on small screens: side by side, the thumbnail gets a third of
+    // the row, too small to see or to hold a content warning (#1301).
+    flex-direction: column;
+    align-items: stretch;
+
+    @include include-media.media('>=md') {
+      flex-direction: row;
+      align-items: start;
+    }
 
     .field--name-field-recording {
       flex: 2;
@@ -54,6 +63,14 @@
   &-thumbnail {
     flex: 1;
     min-inline-size: 0;
+
+    // Stacked, no wider than its image style (small_250px_w_), which would
+    // otherwise be scaled up and blurred on tablets.
+    max-inline-size: 250px;
+
+    @include include-media.media('>=md') {
+      max-inline-size: none;
+    }
 
     img {
       block-size: auto;
