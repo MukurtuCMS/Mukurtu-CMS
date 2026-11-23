@@ -48,6 +48,7 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
 function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
   if ($entity->getEntityTypeId() === 'taxonomy_vocabulary') {
     $vocabs = [
+      'article_tags',
       'category',
       'community_type',
       'contributor',
@@ -86,6 +87,7 @@ function mukurtu_taxonomy_entity_access(EntityInterface $entity, $operation, Acc
  */
 function mukurtu_taxonomy_form_taxonomy_term_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
   static $mukurtu_vocabs = [
+    'article_tags',
     'category',
     'community_type',
     'contributor',

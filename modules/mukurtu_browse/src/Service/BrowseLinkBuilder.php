@@ -74,6 +74,23 @@ class BrowseLinkBuilder {
   }
 
   /**
+   * Builds a link to /browse searching for keys within one content type.
+   *
+   * @param string $bundle
+   *   The content type's machine name.
+   * @param string $keys
+   *   The search keys.
+   *
+   * @return \Drupal\Core\Url
+   *   The browse URL, filtered to the content type and searching for keys.
+   */
+  public function getTypeBrowseUrl(string $bundle, string $keys): Url {
+    $url = $this->buildFacetUrl('mukurtu_browse.browse_page', 'type', 'browse_solr_content_type', $bundle);
+    $url->setOption('query', ['search_api_fulltext' => $keys] + ($url->getOption('query') ?? []));
+    return $url;
+  }
+
+  /**
    * Builds a URL pre-filtered to a single facet value, for either backend.
    *
    * On the DB backend, filters are embedded Views exposed filters rendered

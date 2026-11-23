@@ -2,6 +2,7 @@
 
 namespace Drupal\mukurtu_core\Entity;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\mukurtu_core\BaseFieldDefinition;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -34,6 +35,21 @@ class FormattedTextWithTitle extends Paragraph {
       ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Paragraphs only summarizes configurable fields, and every field on this
+   * bundle is code-defined, so add the title ourselves.
+   */
+  public function getSummaryItems(array $options = []) {
+    $summary = parent::getSummaryItems($options);
+    $title = Unicode::truncate(trim($this->get('field_title')->value ?? ''), 150, TRUE, TRUE);
+    if ($title !== '') {
+      array_unshift($summary['content'], $title);
+    }
+    return $summary;
   }
 
 }

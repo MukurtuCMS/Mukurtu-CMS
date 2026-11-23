@@ -14,6 +14,14 @@
         {{ show_all_pages ? 'checked' : '' }}>
       <span class="search-collapse-toggle__switch" aria-hidden="true"></span>
       <span class="search-collapse-toggle__label">{{ 'Show all pages'|t }}</span>
+      {# The value the form submits. Named only once the setting is in the URL
+         or changed, so the default doesn't clutter every URL (#2619). #}
+      <input
+        type="hidden"
+        class="search-collapse-toggle__value"
+        data-value-for="mpi_collapse"
+        {{ mpi_in_url ? 'name=mpi_collapse' : '' }}
+        value="{{ show_all_pages ? 0 : 1 }}">
     </label>
     <label class="search-collapse-toggle__item">
       {# checked = show community records (on-value 0 = collapse off; off-value 1 = collapse on) #}
@@ -26,6 +34,14 @@
         {{ show_community_records ? 'checked' : '' }}>
       <span class="search-collapse-toggle__switch" aria-hidden="true"></span>
       <span class="search-collapse-toggle__label">{{ 'Show community records'|t }}</span>
+      {# The value the form submits. Named only once the setting is in the URL
+         or changed, so the default doesn't clutter every URL (#2619). #}
+      <input
+        type="hidden"
+        class="search-collapse-toggle__value"
+        data-value-for="cr_collapse"
+        {{ cr_in_url ? 'name=cr_collapse' : '' }}
+        value="{{ show_community_records ? 0 : 1 }}">
     </label>
   </div>
 </fieldset>

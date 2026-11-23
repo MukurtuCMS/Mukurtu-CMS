@@ -2,15 +2,6 @@
 @use "../../00-base/layout/layout";
 @use "../../00-base/mixins/mixins";
 
-// Community browse page
-.community-page-listing {
-  padding-inline: var(--layout-padding);
-
-  @include include-media.media('>=lg') {
-    padding-inline: var(--layout-padding-m);
-  }
-}
-
 // Communities block on landing pages.
 .view-browse-by-community .community-page-browse {
   padding-inline: var(--layout-padding);
@@ -73,6 +64,12 @@
 }
 
 
+// The Browse by Community landing page block: same card widths, but a row
+// that isn't full is centered, as the Featured Content block does. The
+// /communities page uses .community-page-listing instead and keeps its grid.
+.view-browse-by-community .communities {
+  @include layout.layout--centered-card-row('.communities__item');
+}
 
 .community--browse--wrapper {
   .community-page-browse {

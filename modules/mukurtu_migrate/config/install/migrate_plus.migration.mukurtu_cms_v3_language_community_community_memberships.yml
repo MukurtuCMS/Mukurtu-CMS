@@ -32,10 +32,16 @@ process:
     plugin: default_value
     default_value: community
   entity_id:
-    plugin: migration_lookup
-    migration:
-      - mukurtu_cms_v3_language_communities
-    source: gid
+    -
+      plugin: migration_lookup
+      migration:
+        - mukurtu_cms_v3_language_communities
+      source: gid
+      no_stub: true
+    -
+      plugin: skip_on_empty
+      method: row
+      message: 'Membership not created: source language community could not be matched to a migrated language community.'
   roles:
     -
       plugin: static_map
