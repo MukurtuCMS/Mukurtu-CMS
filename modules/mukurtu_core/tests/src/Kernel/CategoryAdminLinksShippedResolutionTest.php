@@ -43,6 +43,8 @@ class CategoryAdminLinksShippedResolutionTest extends KernelTestBase {
       . '/config/install/views.view.mukurtu_categories.yml';
     $values = Yaml::decode(file_get_contents($config_path));
     unset($values['dependencies'], $values['_core']);
+    // This filter needs mukurtu_core, which this test leaves out.
+    unset($values['display']['default']['display_options']['filters']['mukurtu_visible_terms']);
     View::create($values)->save();
   }
 

@@ -17,7 +17,7 @@ mukurtu_export.export_lists:
 
 mukurtu_export.taxonomy_export:
   title: 'Export Taxonomy'
-  description: 'Export taxonomy terms to CSV.'
+  description: 'Export taxonomy terms.'
   menu_name: dashboard-roundtrip
   parent: mukurtu_dashboard
   route_name: mukurtu_export.taxonomy_export_start

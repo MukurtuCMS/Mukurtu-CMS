@@ -88,6 +88,26 @@ function mukurtu_v4_preprocess_node(&$variables) {
     $variables['card_media_bundle'] = isset($variables['card_media']['#media']) ? $variables['card_media']['#media']->bundle() : 'image';
   }
 
+  // Browse cards show one media item. Flag items whose full page has more, so
+  // visitors know to open it (#1806). See _card-media.html.twig.
+  $browse_view_modes = ['browse', 'grid_browse', 'map_browse'];
+  $multiple_media_fields = [
+    'digital_heritage' => ['field_media_assets'],
+    'person' => ['field_media_assets'],
+    'place' => ['field_media_assets'],
+    // A word's card plays its first recording, so any more recordings and
+    // all of its media assets are only on the word's page.
+    'dictionary_word' => ['field_recording', 'field_media_assets'],
+  ];
+  if (in_array($variables['view_mode'] ?? '', $browse_view_modes, TRUE) && isset($multiple_media_fields[$node->bundle()])) {
+    $cacheability = new CacheableMetadata();
+    $variables['has_multiple_media'] = _mukurtu_v4_has_multiple_media($node, $multiple_media_fields[$node->bundle()], $cacheability);
+    // Cache metadata set on $variables doesn't bubble. The card prints this
+    // empty element so the access results vary the card's cache.
+    $variables['multiple_media_cache'] = [];
+    $cacheability->applyTo($variables['multiple_media_cache']);
+  }
+
   // A dictionary word's card, in the Featured Content grid and carousel,
   // shows its translations: the word alone says little to most visitors.
   // The node here is already the translation for the current page.
@@ -99,6 +119,32 @@ function mukurtu_v4_preprocess_node(&$variables) {
         'values' => array_column($translations->getValue(), 'value'),
       ];
     }
+  }
+
+  // Article cards on the Articles page and the Latest Articles block. See
+  // node--article--grid-browse.html.twig.
+  if ($node->bundle() === 'article' && ($variables['view_mode'] ?? '') === 'grid_browse') {
+    // h3 under the Latest Articles block's title, h2 on the Articles page.
+    // See mukurtu_v4_preprocess_views_view_unformatted__mukurtu_articles().
+    $variables['card_heading'] = ($variables['elements']['#mukurtu_card_heading'] ?? '') === 'h3' ? 'h3' : 'h2';
+    $variables['card_media'] = _mukurtu_v4_article_card_media($node);
+    // An article with no image the viewer can see gets a plain colour block,
+    // as Featured Content cards do; card_media then carries only cacheability.
+    $variables['card_has_media'] = (bool) array_diff_key($variables['card_media'], ['#cache' => TRUE]);
+    $variables['card_media_bundle'] = isset($variables['card_media']['#media']) ? $variables['card_media']['#media']->bundle() : 'image';
+  }
+
+  // The published date at the end of the article sidebar and on article
+  // cards. The text follows the viewer's timezone, so it varies the render
+  // cache by timezone, as core's date formatters do.
+  if ($node->bundle() === 'article' && in_array($variables['view_mode'] ?? '', ['full', 'grid_browse'], TRUE)) {
+    $created = (int) $node->getCreatedTime();
+    $variables['published_date'] = [
+      '#theme' => 'time',
+      '#timestamp' => $created,
+      '#text' => \Drupal::service('date.formatter')->format($created, 'custom', 'F j, Y'),
+      '#cache' => ['contexts' => ['timezone']],
+    ];
   }
 
   // This creates a twig variable that can be used in node templates to
@@ -115,6 +161,51 @@ function mukurtu_v4_preprocess_node(&$variables) {
     }
   }
 
+}
+
+/**
+ * Checks whether the viewer can see more than one media item on a node.
+ *
+ * Only media the viewer can view counts, so a card never hints that
+ * restricted media exists (#1806).
+ *
+ * @param \Drupal\node\NodeInterface $node
+ *   The node, on a browse card.
+ * @param string[] $field_names
+ *   The media reference fields to count across.
+ * @param \Drupal\Core\Cache\CacheableMetadata $cacheability
+ *   Collects the access results' cache metadata.
+ *
+ * @return bool
+ *   TRUE when the viewer can view two or more of the media items.
+ */
+function _mukurtu_v4_has_multiple_media($node, array $field_names, CacheableMetadata $cacheability): bool {
+  $ids = [];
+  foreach ($field_names as $field_name) {
+    if ($node->hasField($field_name)) {
+      foreach ($node->get($field_name) as $item) {
+        if ($item->target_id) {
+          $ids[] = $item->target_id;
+        }
+      }
+    }
+  }
+  // The same media item in two fields is still one item.
+  $ids = array_unique($ids);
+  if (count($ids) < 2) {
+    return FALSE;
+  }
+
+  $viewable = 0;
+  foreach (\Drupal::entityTypeManager()->getStorage('media')->loadMultiple($ids) as $media) {
+    $cacheability->addCacheableDependency($media);
+    $access = $media->access('view', NULL, TRUE);
+    $cacheability->addCacheableDependency($access);
+    if ($access->isAllowed() && ++$viewable >= 2) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -175,6 +266,75 @@ function _mukurtu_v4_dictionary_word_card_media($word): array {
     $card = _mukurtu_v4_card_placeholder($restricted, $cacheability);
   }
 
+  $cacheability->merge(CacheableMetadata::createFromRenderArray($card))->applyTo($card);
+  return $card;
+}
+
+/**
+ * Implements hook_preprocess_views_view_unformatted__mukurtu_articles().
+ *
+ * In the Latest Articles block, the cards sit under the block's h2 title, so
+ * their titles are h3. The heading level is part of each card's render cache
+ * key, so the block and the Articles page don't share cached cards.
+ */
+function mukurtu_v4_preprocess_views_view_unformatted__mukurtu_articles(array &$variables): void {
+  if ($variables['view']->current_display !== 'latest_articles_block') {
+    return;
+  }
+  foreach ($variables['rows'] as &$row) {
+    if (is_array($row['content'] ?? NULL)) {
+      $row['content']['#mukurtu_card_heading'] = 'h3';
+      if (isset($row['content']['#cache']['keys'])) {
+        $row['content']['#cache']['keys'][] = 'card_heading:h3';
+      }
+    }
+  }
+}
+
+/**
+ * Picks the image for an article card.
+ *
+ * The first media asset the viewer can see, then the legacy Image field
+ * (which sites that had articles before Media Assets keep). With neither,
+ * the card shows a plain colour block, as Featured Content cards do.
+ *
+ * @param \Drupal\node\NodeInterface $article
+ *   The article, in the grid_browse view mode.
+ *
+ * @return array
+ *   A render array for the card's media area, or one holding only cache
+ *   metadata when there is nothing to show.
+ */
+function _mukurtu_v4_article_card_media($article): array {
+  $cacheability = new CacheableMetadata();
+  $card = NULL;
+
+  if ($article->hasField('field_page_media_assets')) {
+    $repository = \Drupal::service('entity.repository');
+    foreach ($article->get('field_page_media_assets')->referencedEntities() as $media) {
+      // Its name and alt text in the current language.
+      $media = $repository->getTranslationFromContext($media);
+      $access = $media->access('view', NULL, TRUE);
+      $cacheability->addCacheableDependency($access);
+      if ($access->isAllowed()) {
+        // Rendered as media, so content warnings still apply.
+        $card = \Drupal::entityTypeManager()->getViewBuilder('media')->view($media, 'browse');
+        break;
+      }
+    }
+  }
+
+  if (!$card && $article->hasField('field_article_image') && !$article->get('field_article_image')->isEmpty()) {
+    $card = $article->get('field_article_image')->view([
+      'type' => 'image',
+      'label' => 'hidden',
+      'settings' => ['image_style' => 'medium_480px_w_'],
+    ]);
+  }
+
+  // With nothing to show, the card gets a plain colour block instead of a
+  // placeholder image; return just the cacheability of that decision.
+  $card = $card ?: [];
   $cacheability->merge(CacheableMetadata::createFromRenderArray($card))->applyTo($card);
   return $card;
 }
@@ -358,6 +518,25 @@ function mukurtu_v4_theme_suggestions_page_alter(array &$suggestions, array $var
   ];
   if (in_array($route_name, $lc_directory_routes)) {
     $suggestions[] = 'page__local_contexts_site_project_directory';
+  }
+
+  // Drupal suggests page--node for every path under /node, but that
+  // template only suits node displays, which bring their own grid. Other
+  // pages there (Found In, Add to Collection, the /node listing) fall back
+  // to page.html.twig, which places them on the page grid.
+  $node_display_routes = [
+    'entity.node.canonical',
+    'entity.node.latest_version',
+    'entity.node.preview',
+    'entity.node.revision',
+    'layout_builder.overrides.node.view',
+    'mukurtu_multipage_items.multipage_node_view',
+  ];
+  if (!in_array($route_name, $node_display_routes, TRUE)) {
+    $suggestions = array_values(array_filter(
+      $suggestions,
+      fn($suggestion) => $suggestion !== 'page__node' && !str_starts_with($suggestion, 'page__node__'),
+    ));
   }
 }
 

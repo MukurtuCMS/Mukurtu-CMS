@@ -18,12 +18,26 @@
     padding-inline: var(--layout-padding-m);
   }
 
+  // On the /categories page itself the page grid (see _page.scss) already
+  // supplies the gutter; the padding above is for the category blocks
+  // placed on landing pages.
+  .layout-content & {
+    padding-inline: 0;
+  }
+
   // Individual cards layout.
   .category-card .category-teaser a { // views-row
     display: flex;
     flex-direction: column;
     block-size: 100%;
   }
+}
+
+// The Browse by Category landing page block (the only place .category-grid
+// sits inside a Layout Builder block): same card widths, but a row that isn't
+// full is centered, as the Featured Content block does.
+[data-layout-block-uuid] .category-grid {
+  @include layout.layout--centered-card-row('.category-card');
 }
 
 // Teaser displays for Categories taxonomy terms on /categories.

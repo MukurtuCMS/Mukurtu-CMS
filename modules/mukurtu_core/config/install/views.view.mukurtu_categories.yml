@@ -185,6 +185,18 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items: {  }
+        mukurtu_visible_terms:
+          id: mukurtu_visible_terms
+          table: taxonomy_term_field_data
+          field: mukurtu_visible_terms
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: mukurtu_visible_terms
+          operator: '='
+          value: ''
+          group: 1
+          vocabulary: category
         default_langcode:
           id: default_langcode
           table: taxonomy_term_field_data
@@ -256,8 +268,12 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags:
+        - 'config:taxonomy.vocabulary.category'
+        - node_list
+        - 'taxonomy_term_list:category'
   browse_by_category_block:
     id: browse_by_category_block
     display_title: Block
@@ -277,8 +293,12 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags:
+        - 'config:taxonomy.vocabulary.category'
+        - node_list
+        - 'taxonomy_term_list:category'
   browse_by_category_names_block:
     id: browse_by_category_names_block
     display_title: 'Block (names only)'
@@ -312,8 +332,12 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags:
+        - 'config:taxonomy.vocabulary.category'
+        - node_list
+        - 'taxonomy_term_list:category'
   categories_page:
     id: categories_page
     display_title: Page
@@ -329,8 +353,12 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags:
+        - 'config:taxonomy.vocabulary.category'
+        - node_list
+        - 'taxonomy_term_list:category'
   categories_names_page:
     id: categories_names_page
     display_title: 'Page (names only)'
@@ -360,5 +388,9 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags:
+        - 'config:taxonomy.vocabulary.category'
+        - node_list
+        - 'taxonomy_term_list:category'

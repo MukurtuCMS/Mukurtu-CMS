@@ -18,6 +18,9 @@ class RouteSubscriber extends RouteSubscriberBase {
     if ($route = $collection->get('entity.taxonomy_term.canonical')) {
       $route->setDefault('_controller', '\Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController::build');
       $route->setDefault('_title_callback', '\Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController::title');
+      // The Redirect module sends this path to its alias before any access
+      // check, and a term's alias contains its name (#2643).
+      $route->setDefault('_disable_route_normalizer', TRUE);
     }
   }
 
