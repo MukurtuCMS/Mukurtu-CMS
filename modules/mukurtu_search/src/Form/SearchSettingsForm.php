@@ -64,6 +64,18 @@ class SearchSettingsForm extends ConfigFormBase {
       '#default_value' => !($config->get('collapse_community_records') ?? FALSE),
     ];
 
+    $form['search_suggestions'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Search suggestions'),
+    ];
+
+    $form['search_suggestions']['search_suggestions_enabled'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Suggest search words as people type'),
+      '#description' => $this->t('Applies to the search boxes on the Browse, Digital Heritage, and Dictionary pages.'),
+      '#default_value' => (bool) ($config->get('search_suggestions_enabled') ?? TRUE),
+    ];
+
     $form['header_search'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Header search'),
@@ -85,6 +97,17 @@ class SearchSettingsForm extends ConfigFormBase {
         '/digital-heritage' => $this->t('Digital Heritage (/digital-heritage)'),
       ],
       '#default_value' => $config->get('header_search_path') ?? '/browse',
+      '#states' => [
+        'visible' => [
+          ':input[name="header_search_enabled"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['header_search']['header_suggestions_enabled'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Suggest matching items as people type'),
+      '#default_value' => (bool) ($config->get('header_suggestions_enabled') ?? TRUE),
       '#states' => [
         'visible' => [
           ':input[name="header_search_enabled"]' => ['checked' => TRUE],
@@ -115,6 +138,8 @@ class SearchSettingsForm extends ConfigFormBase {
     $config->set('collapse_multipage_pages', !(bool) $form_state->getValue('collapse_multipage_pages'));
     $config->set('collapse_community_records', !(bool) $form_state->getValue('collapse_community_records'));
     $config->set('header_search_enabled', (bool) $form_state->getValue('header_search_enabled'));
+    $config->set('search_suggestions_enabled', (bool) $form_state->getValue('search_suggestions_enabled'));
+    $config->set('header_suggestions_enabled', (bool) $form_state->getValue('header_suggestions_enabled'));
     $allowed_paths = ['/browse', '/digital-heritage'];
     $path = $form_state->getValue('header_search_path');
     $config->set('header_search_path', in_array($path, $allowed_paths, TRUE) ? $path : '/browse');

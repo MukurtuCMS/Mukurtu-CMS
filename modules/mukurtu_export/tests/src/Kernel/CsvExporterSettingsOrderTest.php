@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_export\Kernel;
 
 use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Form\FormState;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_export\Entity\CsvExporter;
 
@@ -75,6 +76,26 @@ class CsvExporterSettingsOrderTest extends KernelTestBase {
     $expected = array_merge(self::PRESET_IDS, ['aaa_custom_setting']);
     $this->assertSame($expected, array_keys($form['export_settings']['#options']));
     $this->assertSame('default_local_metadata_only', $form['export_settings']['#default_value']);
+  }
+
+  /**
+   * Tests that the settings action buttons don't name a file format.
+   *
+   * Export also writes .xlsx and .ods, so the buttons must not say "CSV"
+   * (#2784).
+   */
+  public function testSettingsActionLabelsOmitFileFormat(): void {
+    $account = $this->createMock(AccountInterface::class);
+    $account->method('id')->willReturn(2);
+    $account->method('hasPermission')
+      ->willReturnCallback(fn (string $permission) => $permission === 'administer mukurtu_import_strategy');
+    $this->container->get('current_user')->setAccount($account);
+
+    $plugin = \Drupal::service('plugin.manager.mukurtu_exporter')->createInstance('csv');
+    $form = $plugin->settingsForm([], new FormState());
+
+    $this->assertSame('New export setting', (string) $form['settings_actions']['new_setting']['#title']);
+    $this->assertSame('Manage saved export settings', (string) $form['settings_actions']['manage_settings']['#title']);
   }
 
 }

@@ -164,3 +164,91 @@ jobs:
             web/sites/simpletest/browser_output
             /tmp/php-server.log
           if-no-files-found: ignore
+
+  # The accessibility program tests pages built from the accessibility demo
+  # content recipe, so check that the recipe still applies to a fresh install
+  # and that its pages render. It runs in its own job, not on Tugboat, because
+  # the recipe turns off og.settings:auto_add_group_owner_membership for the
+  # whole site. See #2711.
+  demo-recipe:
+    name: Accessibility demo recipe
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_USER: db
+          MYSQL_PASSWORD: db
+          MYSQL_DATABASE: db
+          MYSQL_ROOT_PASSWORD: db
+        ports:
+          - 3306:3306
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Get composer cache directory
+        id: composercache
+        run: echo "COMPCACHE=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.composercache.outputs.COMPCACHE }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Mukurtu Template
+        run: |
+          composer create mukurtu/mukurtu-template:^4.0 . --no-install --no-interaction
+          rm web/profiles/mukurtu -rf
+
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          path: web/profiles/mukurtu
+
+      - name: Install Mukurtu
+        run: |
+          # See the testing job for why the path repo declares a version.
+          composer config repositories.local-dev '{"type":"path","url":"web/profiles/mukurtu","options":{"versions":{"mukurtu/mukurtu":"4.9999.9999"}}}'
+          composer install --no-interaction --optimize-autoloader
+          ./vendor/bin/drush site:install mukurtu -y --db-url="mysql://db:db@127.0.0.1:3306/db" --account-pass=admin
+          # The recipe's files use private://, as Mukurtu sites do.
+          chmod u+w web/sites/default web/sites/default/settings.php
+          echo "\$settings['file_private_path'] = '../private_files';" >> web/sites/default/settings.php
+          mkdir -p private_files
+          ./vendor/bin/drush cr
+
+      - name: Apply the recipe
+        run: |
+          ./vendor/bin/drush recipe ../web/profiles/mukurtu/recipes/accessibility_demo_content
+          ./vendor/bin/drush cr
+
+      - name: Check the recipe's pages render
+        run: |
+          ./vendor/bin/drush php:script web/profiles/mukurtu/scripts/ci/demo-recipe-urls.php \
+            "$GITHUB_WORKSPACE/web/profiles/mukurtu/recipes/accessibility_demo_content/content" > /tmp/demo-urls.txt
+          cat /tmp/demo-urls.txt
+          php -S 127.0.0.1:8888 -t web "$GITHUB_WORKSPACE/web/.ht.router.php" > /tmp/php-server.log 2>&1 &
+          sleep 2
+          failed=0
+          while read -r path; do
+            # Multipage item pages redirect to the multipage view, so follow
+            # redirects and check the page the visitor lands on.
+            status=$(curl -sL -o /dev/null -w '%{http_code}' "http://127.0.0.1:8888$path")
+            echo "$status $path"
+            [ "$status" = "200" ] || failed=1
+          done < /tmp/demo-urls.txt
+          exit $failed
+
+      - name: Upload server log
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: demo-recipe-server-log
+          path: /tmp/php-server.log
+          if-no-files-found: ignore

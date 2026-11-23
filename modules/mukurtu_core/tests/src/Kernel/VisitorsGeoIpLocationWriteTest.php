@@ -9,6 +9,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_core\Service\DbIpDatabaseLocator;
 use Drupal\mukurtu_core\Service\DbIpFallbackGeoIpService;
 use Drupal\visitors\Controller\Visitors;
+use Drupal\visitors_geoip\GeoIpCity;
 use Drupal\visitors_geoip\VisitorsGeoIpInterface;
 use GeoIp2\Model\City;
 use PHPUnit\Framework\Attributes\Group;
@@ -91,15 +92,17 @@ class VisitorsGeoIpLocationWriteTest extends KernelTestBase {
   }
 
   /**
-   * Without normalization, the raw DB-IP record cannot be written.
+   * Without normalization, the DB-IP record cannot be written.
    *
-   * The negative control: proves the test exercises the real failure. If this
-   * starts failing, visitors_geoip has fixed the NULL write itself and
+   * The negative control: proves the test exercises the real failure.
+   * GeoIpCity::fromLibrary() is what visitors_geoip's own GeoIpService
+   * returns, and it leaves the missing region code NULL. If this starts
+   * failing, visitors_geoip has fixed the NULL write itself and
    * DbIpFallbackGeoIpService::normalize() may no longer be needed.
    */
   public function testRawDbIpRecordFailsToWrite(): void {
     $raw_lookup = $this->createMock(VisitorsGeoIpInterface::class);
-    $raw_lookup->method('city')->willReturn($this->dbIpRecord());
+    $raw_lookup->method('city')->willReturn(GeoIpCity::fromLibrary($this->dbIpRecord()));
 
     $this->expectException(IntegrityConstraintViolationException::class);
     $this->expectExceptionMessage('location_region');

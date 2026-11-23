@@ -13,3 +13,7 @@ services:
   mukurtu_browse.browse_link_builder:
     class: Drupal\mukurtu_browse\Service\BrowseLinkBuilder
     arguments: ['@config.factory', '@entity_type.manager']
+
+  mukurtu_browse.header_suggestion_builder:
+    class: Drupal\mukurtu_browse\Service\HeaderSuggestionBuilder
+    arguments: ['@entity.repository', '@entity_type.bundle.info', '@mukurtu_browse.browse_link_builder']

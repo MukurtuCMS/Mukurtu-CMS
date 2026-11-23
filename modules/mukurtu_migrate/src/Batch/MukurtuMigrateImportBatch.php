@@ -12,8 +12,21 @@ use Drupal\migrate\Event\MigrateMapSaveEvent;
 use Drupal\migrate\MigrateExecutable;
 use Drupal\migrate\Plugin\MigrateIdMapInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\migrate\Plugin\migrate\id_map\Sql;
 
 class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
+
+  /**
+   * Migrations that stop the run if any of their rows fail.
+   *
+   * Memberships and nearly all content belong to a community or protocol, so
+   * running them after a group failed only produces more failures.
+   */
+  const MUST_SUCCEED_MIGRATIONS = [
+    'mukurtu_cms_v3_communities',
+    'mukurtu_cms_v3_cultural_protocols',
+    'mukurtu_cms_v3_language_communities',
+  ];
 
   /**
    * Number of rows created or updated by the migration task in progress.
@@ -111,6 +124,15 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
     $migration = \Drupal::service('plugin.manager.migration')->createInstance($migration_id, $configuration);
 
     if ($migration) {
+      $current_migration_id = $migration->id();
+      // Core only re-imports rows marked as needing an update, so a row that
+      // failed in an earlier run would otherwise stay failed for good.
+      if (empty($context['sandbox']['retried'][$current_migration_id])) {
+        static::retryFailedRows($migration);
+        $context['sandbox']['retried'][$current_migration_id] = TRUE;
+        $context['sandbox']['migration_row_failures'] = 0;
+      }
+
       static::$messages = new MigrateMessageCapture();
       $executable = new MigrateExecutable($migration, static::$messages);
 
@@ -130,6 +152,7 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
       $context['results']['row_created_or_updated'] += static::$rowCreatedOrUpdatedCount;
       $context['results']['row_failures'] += static::$rowFailedCount;
       $context['results']['row_ignored'] += static::$rowIgnoredCount;
+      $context['sandbox']['migration_row_failures'] += static::$rowFailedCount;
 
       switch ($migration_status) {
         case MigrationInterface::RESULT_COMPLETED:
@@ -194,6 +217,22 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
       if ($migration_status != MigrationInterface::RESULT_INCOMPLETE) {
         array_shift($context['sandbox']['migration_ids']);
         $context['sandbox']['current']++;
+
+        $row_failures = $context['sandbox']['migration_row_failures'];
+        if (in_array($current_migration_id, static::MUST_SUCCEED_MIGRATIONS, TRUE) && ($row_failures > 0 || $migration_status == MigrationInterface::RESULT_FAILED)) {
+          if ($row_failures > 0) {
+            $message = new PluralTranslatableMarkup(
+              $row_failures, 'Migration stopped: 1 @migration item failed to migrate. Nothing after this step was migrated.', 'Migration stopped: @count @migration items failed to migrate. Nothing after this step was migrated.',
+              ['@migration' => $migration_name]);
+            $context['sandbox']['messages'][] = (string) $message;
+            \Drupal::logger('mukurtu_migrate')->error($message);
+          }
+          if ($migration_status != MigrationInterface::RESULT_FAILED) {
+            $context['results']['failures']++;
+          }
+          $context['results']['stopped_by'] = (string) $migration_name;
+          $context['sandbox']['migration_ids'] = [];
+        }
       }
 
       // Add and log any captured messages.
@@ -277,6 +316,12 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
     // and the credential step saves them again before every run.
     static::deleteSourceCredentials();
 
+    // Lead with why the run stopped, before the generic failure messages.
+    if (!empty($results['stopped_by'])) {
+      \Drupal::messenger()->addError(t('The migration was stopped because some @migration items failed to migrate. The memberships and content that depend on them were not migrated. Fix the problems listed in the log, then run the migration again. Failed items will be retried.', [
+        '@migration' => $results['stopped_by'],
+      ]));
+    }
     if ($successes > 0) {
       \Drupal::messenger()->addStatus(\Drupal::translation()
         ->formatPlural($successes, 'Completed 1 migration task successfully', 'Completed @count migration tasks successfully'));
@@ -345,6 +390,35 @@ class MukurtuMigrateImportBatch extends MigrateUpgradeImportBatch {
           ->addStatus(t('The front page was set to the Drupal default of "/node". You will likely want to update this by navigating to <a href="/admin/config/system/site-information">Configuration > System > Basic Site Settings</a>.'));
       }
     }
+  }
+
+  /**
+   * Marks a migration's failed rows so the next import retries them.
+   *
+   * @param \Drupal\migrate\Plugin\MigrationInterface $migration
+   *   The migration.
+   *
+   * @return int
+   *   The number of rows marked for retry.
+   */
+  public static function retryFailedRows(MigrationInterface $migration): int {
+    $id_map = $migration->getIdMap();
+    if (!$id_map instanceof Sql) {
+      return 0;
+    }
+    $database = $id_map->getDatabase();
+    // Core doesn't clear a retried row's old messages, so drop them now. The
+    // retry logs a fresh message if the row fails again.
+    $failed = $database->select($id_map->mapTableName(), 'map')
+      ->fields('map', ['source_ids_hash'])
+      ->condition('source_row_status', MigrateIdMapInterface::STATUS_FAILED);
+    $database->delete($id_map->messageTableName())
+      ->condition('source_ids_hash', $failed, 'IN')
+      ->execute();
+    return (int) $database->update($id_map->mapTableName())
+      ->fields(['source_row_status' => MigrateIdMapInterface::STATUS_NEEDS_UPDATE])
+      ->condition('source_row_status', MigrateIdMapInterface::STATUS_FAILED)
+      ->execute();
   }
 
   /**

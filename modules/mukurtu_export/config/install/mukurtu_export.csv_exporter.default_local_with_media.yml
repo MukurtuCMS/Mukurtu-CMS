@@ -18,10 +18,8 @@ entity_fields_export_list:
     title: Title
     default_langcode: 'Default translation'
     body: Body
-    field_article_category: Category
-    field_article_image/target_id: 'Image > File ID'
-    field_article_image/alt: 'Image > Alternative text'
-    field_article_keywords: Keywords
+    field_page_media_assets: 'Media Assets'
+    field_article_tags: 'Article Tags'
     field_multipage_page_of: 'Multipage parent'
   node__collection:
     nid: ID
@@ -513,6 +511,13 @@ entity_fields_export_list:
     created: Created
     changed: Changed
     langcode: 'Language code'
+  taxonomy_term__article_tags:
+    tid: 'Term ID'
+    langcode: Locale
+    name: Name
+    description: Description
+    parent: Parent
+    default_langcode: 'Default translation'
   taxonomy_term__category:
     tid: 'Term ID'
     langcode: Locale

@@ -86,12 +86,10 @@
   margin-block-end: var(--v-space-5xs);
 }
 
-// Reply page (/comment/reply/…): constrain content to a readable width.
+// Reply page (/comment/reply/…). The page grid (see _page.scss) sets the
+// width; this adds vertical room.
 .path-comment {
   .layout-content {
-    max-width: 1280px;
-    margin-inline: auto;
-    padding-inline: var(--layout-padding);
     padding-block: var(--v-space-2xs);
   }
 
