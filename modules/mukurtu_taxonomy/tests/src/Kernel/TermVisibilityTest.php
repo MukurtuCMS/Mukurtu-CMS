@@ -10,6 +10,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\media\Entity\Media;
 use Drupal\mukurtu_protocol\Entity\Community;
 use Drupal\mukurtu_protocol\Entity\Protocol;
 use Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController;
@@ -18,9 +19,12 @@ use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeAccessRebuild;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
+use Drupal\paragraphs\Entity\Paragraph;
+use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\taxonomy\TermInterface;
+use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\views\Entity\View;
@@ -37,6 +41,8 @@ use PHPUnit\Framework\Attributes\Group;
 #[Group('mukurtu_taxonomy')]
 class TermVisibilityTest extends KernelTestBase {
 
+  use MediaTypeCreationTrait;
+
   /**
    * {@inheritdoc}
    */
@@ -52,6 +58,7 @@ class TermVisibilityTest extends KernelTestBase {
     'image',
     'leaflet',
     'media',
+    'media_test_source',
     'mukurtu_core',
     'mukurtu_protocol',
     'mukurtu_taxonomy',
@@ -100,10 +107,15 @@ class TermVisibilityTest extends KernelTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->installConfig(['og', 'taxonomy']);
-    foreach (['block_content', 'node', 'workflow', 'taxonomy_term', 'og_membership', 'user', 'community', 'protocol'] as $type) {
+    $entity_types = [
+      'block_content', 'node', 'workflow', 'taxonomy_term', 'og_membership',
+      'user', 'community', 'protocol', 'file', 'media', 'paragraph',
+    ];
+    foreach ($entity_types as $type) {
       $this->installEntitySchema($type);
     }
     $this->installSchema('node', ['node_access']);
+    $this->installSchema('file', ['file_usage']);
     $this->installSchema('mukurtu_protocol', ['mukurtu_protocol_map', 'mukurtu_protocol_access']);
     $this->container->get(NodeAccessRebuild::class)->rebuild();
     Og::addGroup('community', 'community');
@@ -119,6 +131,32 @@ class TermVisibilityTest extends KernelTestBase {
       'settings' => ['target_type' => 'taxonomy_term'],
     ])->save();
     FieldConfig::create(['field_name' => 'field_keywords', 'entity_type' => 'node', 'bundle' => 'thing', 'label' => 'Keywords'])->save();
+
+    // Media and paragraphs that use the vocabulary. core's taxonomy_index
+    // only records content items, so TermVisibility reads these separately.
+    $this->createMediaType('test', ['id' => 'recording']);
+    ParagraphsType::create(['id' => 'block', 'label' => 'Block'])->save();
+    ParagraphsType::create(['id' => 'inner', 'label' => 'Inner'])->save();
+    $fields = [
+      // Mukurtu's People fields use their own entity reference field type.
+      ['media', 'recording', 'field_people', 'mukurtu_entity_reference_role', ['target_type' => 'taxonomy_term']],
+      ['paragraph', 'block', 'field_keywords', 'entity_reference', ['target_type' => 'taxonomy_term']],
+      ['paragraph', 'inner', 'field_keywords', 'entity_reference', ['target_type' => 'taxonomy_term']],
+      ['paragraph', 'block', 'field_inner', 'entity_reference_revisions', ['target_type' => 'paragraph']],
+      ['node', 'thing', 'field_blocks', 'entity_reference_revisions', ['target_type' => 'paragraph']],
+    ];
+    foreach ($fields as [$entity_type, $bundle, $name, $type, $settings]) {
+      if (!FieldStorageConfig::loadByName($entity_type, $name)) {
+        FieldStorageConfig::create([
+          'entity_type' => $entity_type,
+          'field_name' => $name,
+          'type' => $type,
+          'cardinality' => -1,
+          'settings' => $settings,
+        ])->save();
+      }
+      FieldConfig::create(['entity_type' => $entity_type, 'bundle' => $bundle, 'field_name' => $name, 'label' => $name])->save();
+    }
 
     foreach (['anonymous', 'authenticated'] as $rid) {
       Role::create(['id' => $rid, 'label' => $rid])->grantPermission('access content')->save();
@@ -165,6 +203,51 @@ class TermVisibilityTest extends KernelTestBase {
     $node->setProtocols([$protocol->id()]);
     $node->setSharingSetting('any');
     $node->save();
+  }
+
+  /**
+   * Creates media in a protocol, with a term in its People field.
+   */
+  protected function createMedia(TermInterface $term, Protocol $protocol, bool $published = TRUE): void {
+    $media = Media::create([
+      'bundle' => 'recording',
+      'name' => $term->label(),
+      'status' => $published,
+      'field_people' => [$term->id()],
+    ]);
+    $media->setProtocols([$protocol->id()]);
+    $media->setSharingSetting('any');
+    $media->save();
+  }
+
+  /**
+   * Creates published content in a protocol, with a term on a paragraph.
+   *
+   * @param \Drupal\taxonomy\TermInterface $term
+   *   The term.
+   * @param \Drupal\mukurtu_protocol\Entity\Protocol $protocol
+   *   The content's protocol.
+   * @param bool $nested
+   *   Put the term on a paragraph inside the content's paragraph.
+   */
+  protected function createContentWithParagraph(TermInterface $term, Protocol $protocol, bool $nested = FALSE): Node {
+    $paragraph = Paragraph::create(['type' => $nested ? 'inner' : 'block', 'field_keywords' => [$term->id()]]);
+    if ($nested) {
+      $paragraph = Paragraph::create(['type' => 'block', 'field_inner' => [$paragraph]]);
+    }
+    $node = Node::create(['type' => 'thing', 'title' => $term->label(), 'status' => 1, 'field_blocks' => [$paragraph]]);
+    $node->setProtocols([$protocol->id()]);
+    $node->setSharingSetting('any');
+    $node->save();
+    return $node;
+  }
+
+  /**
+   * Loads a term by name.
+   */
+  protected function termNamed(string $name): TermInterface {
+    $terms = $this->container->get('entity_type.manager')->getStorage('taxonomy_term')->loadByProperties(['name' => $name]);
+    return reset($terms);
   }
 
   /**
@@ -253,6 +336,94 @@ class TermVisibilityTest extends KernelTestBase {
     $this->assertTrue($this->canSee($unused, $anonymous));
     $this->assertFalse($this->canSee($sensitive, $anonymous));
     $this->assertFalse($this->canSee($sensitive_parent, $anonymous));
+  }
+
+  /**
+   * A term on media shows only to people who can see that media.
+   */
+  public function testTermOnMedia(): void {
+    $public = $this->createTerm('Public person');
+    $sensitive = $this->createTerm('Sensitive person');
+    $this->createMedia($public, $this->open);
+    $this->createMedia($sensitive, $this->strict);
+    $this->createMedia($this->createTerm('Unpublished person'), $this->open, FALSE);
+
+    $anonymous = User::getAnonymousUser();
+    $this->assertTrue($this->canSee($public, $anonymous));
+    $this->assertFalse($this->canSee($sensitive, $anonymous));
+    $this->assertFalse($this->canSee($sensitive, $this->visitor));
+    $this->assertTrue($this->canSee($sensitive, $this->member));
+    $this->assertFalse($this->canSee($this->termNamed('Unpublished person'), $anonymous));
+  }
+
+  /**
+   * A term on a paragraph follows the content item the paragraph is on.
+   */
+  public function testTermOnParagraph(): void {
+    $public = $this->createTerm('Public word');
+    $nested = $this->createTerm('Nested word');
+    $sensitive = $this->createTerm('Sensitive word');
+    $this->createContentWithParagraph($public, $this->open);
+    $this->createContentWithParagraph($nested, $this->open, TRUE);
+    $this->createContentWithParagraph($sensitive, $this->strict, TRUE);
+
+    $anonymous = User::getAnonymousUser();
+    $this->assertTrue($this->canSee($public, $anonymous));
+    $this->assertTrue($this->canSee($nested, $anonymous));
+    $this->assertFalse($this->canSee($sensitive, $anonymous));
+    $this->assertFalse($this->canSee($sensitive, $this->visitor));
+    $this->assertTrue($this->canSee($sensitive, $this->member));
+  }
+
+  /**
+   * A paragraph removed from content no longer counts.
+   *
+   * Paragraphs stay in the database for older revisions, still naming the
+   * content item as their parent.
+   */
+  public function testRemovedParagraph(): void {
+    $removed = $this->createTerm('Removed word');
+    $node = $this->createContentWithParagraph($removed, $this->open);
+    $this->assertTrue($this->canSee($removed, User::getAnonymousUser()));
+
+    $node->set('field_blocks', [Paragraph::create(['type' => 'block'])]);
+    $node->setNewRevision();
+    $node->save();
+    $this->assertFalse($this->canSee($removed, User::getAnonymousUser()));
+  }
+
+  /**
+   * People who can create content using a vocabulary see all its terms.
+   */
+  public function testContributorsSeeAllTerms(): void {
+    $sensitive = $this->createTerm('Sensitive');
+    $this->tag($sensitive, $this->strict);
+    $this->assertFalse($this->canSee($sensitive, $this->visitor));
+
+    // Contributing media in the open protocol is enough: the term field's
+    // suggestions already offer every term in the vocabulary.
+    $role = OgRole::create([
+      'name' => 'uploader',
+      'label' => 'Uploader',
+      'permissions' => ['apply protocol', 'create recording media'],
+    ]);
+    $role->setGroupType('protocol');
+    $role->setGroupBundle('protocol');
+    $role->save();
+    $this->open->addMember($this->visitor, ['uploader']);
+    $this->container->get('entity_type.manager')->getAccessControlHandler('media')->resetCache();
+    $this->assertTrue($this->canSee($sensitive, User::load($this->visitor->id())));
+    $this->assertFalse($this->canSee($sensitive, User::getAnonymousUser()));
+  }
+
+  /**
+   * Cached results clear when media or paragraphs change.
+   */
+  public function testCacheability(): void {
+    $cacheability = $this->container->get('mukurtu_core.term_visibility')->getCacheability('keywords');
+    $this->assertContains('media_list', $cacheability->getCacheTags());
+    $this->assertContains('paragraph_list', $cacheability->getCacheTags());
+    $this->assertContains('mukurtu_memberships', $cacheability->getCacheContexts());
   }
 
   /**
