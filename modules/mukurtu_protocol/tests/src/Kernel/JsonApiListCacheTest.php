@@ -56,6 +56,11 @@ class JsonApiListCacheTest extends ProtocolAwareEntityTestBase {
   protected AccountInterface $outsider;
 
   /**
+   * The X-Drupal-Dynamic-Cache header of the last response.
+   */
+  protected ?string $lastCacheStatus = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public function register(ContainerBuilder $container): void {
@@ -168,11 +173,6 @@ class JsonApiListCacheTest extends ProtocolAwareEntityTestBase {
     $this->getBody('/jsonapi/protocol/protocol', $this->member);
     $this->assertSame('HIT', $this->lastCacheStatus);
   }
-
-  /**
-   * The X-Drupal-Dynamic-Cache header of the last response.
-   */
-  protected ?string $lastCacheStatus = NULL;
 
   /**
    * People outside the restricted community and protocol.
