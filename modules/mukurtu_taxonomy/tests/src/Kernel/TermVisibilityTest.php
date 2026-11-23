@@ -300,6 +300,49 @@ class TermVisibilityTest extends KernelTestBase {
   }
 
   /**
+   * A term page only names the terms the visitor can see.
+   *
+   * That covers the nested terms, and the parent and siblings in the panel.
+   *
+   * @see \Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController::getNestedTerms()
+   * @see \Drupal\mukurtu_taxonomy\Controller\TaxonomyRecordViewController::getSiblingTerms()
+   */
+  public function testTermPageOnlyNamesVisibleTerms(): void {
+    $path = \Drupal::service('extension.list.module')->getPath('mukurtu_taxonomy');
+    View::create(Yaml::decode(file_get_contents("$path/config/install/views.view.taxonomy_term.yml")))->save();
+
+    $parent = $this->createTerm('Washington');
+    $this->tag($this->createTerm('Seattle', $parent), $this->open);
+    $this->tag($this->createTerm('Sensitive', $parent), $this->strict);
+    // An unused term shows with this setting, but its parent, which is only
+    // on restricted content, doesn't.
+    Vocabulary::load('keywords')->setThirdPartySetting('mukurtu_taxonomy', 'show_unused_terms', TRUE)->save();
+    $sensitive_parent = $this->createTerm('Sensitive parent');
+    $this->tag($sensitive_parent, $this->strict);
+    $unused = $this->createTerm('Unused', $sensitive_parent);
+    $this->createTerm('Unused sibling', $sensitive_parent);
+
+    $build = function (TermInterface $term, AccountInterface $account): array {
+      $this->container->get('current_user')->setAccount($account);
+      $this->container->set('mukurtu_core.term_visibility', NULL);
+      return TaxonomyRecordViewController::create($this->container)->build(Term::load($term->id()));
+    };
+
+    $anonymous = User::getAnonymousUser();
+    $page = $build($parent, $anonymous);
+    $this->assertSame(['Seattle'], array_column($page['records']['#nested_terms'], 'name'));
+    $this->assertContains('user.node_grants:view', $page['#cache']['contexts']);
+    $this->assertContains('node_list', $page['#cache']['tags']);
+    $this->assertNull($build($unused, $anonymous)['records']['#sibling_terms']);
+
+    $member = User::load($this->member->id());
+    $this->assertSame(['Seattle', 'Sensitive'], array_column($build($parent, $member)['records']['#nested_terms'], 'name'));
+    $siblings = $build($unused, $member)['records']['#sibling_terms'];
+    $this->assertStringContainsString('Sensitive parent', (string) $siblings['heading']);
+    $this->assertSame(['Unused sibling'], array_column($siblings['terms'], 'name'));
+  }
+
+  /**
    * A term's ID doesn't redirect to its alias, which contains its name.
    */
   public function testTermPathDoesNotRedirectToItsAlias(): void {

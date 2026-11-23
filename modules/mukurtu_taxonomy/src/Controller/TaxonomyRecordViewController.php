@@ -278,7 +278,8 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *   Collects the cacheability of the list.
    *
    * @return array|null
-   *   A heading naming the parent, and the terms, or NULL if there are none.
+   *   A heading naming the parent, and the terms, or NULL if there are none
+   *   or the visitor can't see the parent.
    */
   protected function getSiblingTerms(TermInterface $term, CacheableMetadata $cache): ?array {
     $parent = $term->get('parent')->entity;
@@ -288,7 +289,9 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     $access = $parent->access('view', NULL, TRUE);
     $cache->addCacheableDependency($access);
     $cache->addCacheableDependency($parent);
-    if (!$access->isAllowed()) {
+    $cache->addCacheableDependency($this->termVisibility->getCacheability($parent->bundle()));
+    // A hidden term's name can be sensitive (#2643).
+    if (!$access->isAllowed() || !$this->termVisibility->isVisible($parent)) {
       return NULL;
     }
     $terms = array_values(array_filter(
@@ -314,10 +317,12 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *   Collects the cacheability of the list.
    *
    * @return array
-   *   Each nested term's name, in the current language, and URL.
+   *   Each nested term's name, in the current language, and URL. Terms the
+   *   visitor can't see are left out.
    */
   protected function getNestedTerms(TermInterface $term, CacheableMetadata $cache): array {
     $cache->addCacheContexts(['languages:language_content']);
+    $cache->addCacheableDependency($this->termVisibility->getCacheability($term->bundle()));
     /** @var \Drupal\taxonomy\TermStorageInterface $storage */
     $storage = $this->entityTypeManager()->getStorage('taxonomy_term');
     $nested = [];
@@ -325,7 +330,8 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       $access = $child->access('view', NULL, TRUE);
       $cache->addCacheableDependency($access);
       $cache->addCacheableDependency($child);
-      if (!$access->isAllowed()) {
+      // A hidden term's name can be sensitive (#2643).
+      if (!$access->isAllowed() || !$this->termVisibility->isVisible($child)) {
         continue;
       }
       $nested[] = [
