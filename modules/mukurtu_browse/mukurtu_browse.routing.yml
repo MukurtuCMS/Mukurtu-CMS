@@ -15,3 +15,12 @@ mukurtu_browse.browse_digital_heritage_page:
   requirements:
     _permission: 'access content'
     _custom_access: '\Drupal\mukurtu_browse\Controller\MukurtuDigitalHeritageBrowseController::access'
+
+mukurtu_browse.search_suggest:
+  path: '/browse/suggest'
+  defaults:
+    _controller: '\Drupal\mukurtu_browse\Controller\SearchSuggestController::suggest'
+  requirements:
+    _custom_access: '\Drupal\mukurtu_browse\Controller\SearchSuggestController::access'
+  options:
+    no_cache: TRUE

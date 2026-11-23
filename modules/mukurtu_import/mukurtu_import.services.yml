@@ -5,3 +5,6 @@ services:
   mukurtu_import.log_storage:
     class: Drupal\mukurtu_import\MukurtuImportLogStorage
     arguments: ['@database']
+  mukurtu_import.spreadsheet_converter:
+    class: Drupal\mukurtu_import\SpreadsheetConverter
+    arguments: ['@entity_type.manager', '@file_system']

@@ -2,8 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_article_category
-    - field.storage.node.field_article_keywords
+    - field.storage.node.field_article_tags
     - search_api.server.mukurtu_database_server
   module:
     - mukurtu_protocol
@@ -46,44 +45,24 @@ field_settings:
     dependencies:
       module:
         - node
-  node__field_article_category__name:
-    label: 'Article Category'
+  node__field_article_tags__name:
+    label: 'Article Tags'
     datasource_id: 'entity:node'
-    property_path: 'field_article_category:entity:name'
+    property_path: 'field_article_tags:entity:name'
     type: string
     dependencies:
       config:
-        - field.storage.node.field_article_category
+        - field.storage.node.field_article_tags
       module:
         - taxonomy
-  node__field_article_category__name__text:
-    label: 'Article Category'
+  node__field_article_tags__name__text:
+    label: 'Article Tags'
     datasource_id: 'entity:node'
-    property_path: 'field_article_category:entity:name'
+    property_path: 'field_article_tags:entity:name'
     type: text
     dependencies:
       config:
-        - field.storage.node.field_article_category
-      module:
-        - taxonomy
-  node__field_article_keywords__name:
-    label: 'Article Keywords'
-    datasource_id: 'entity:node'
-    property_path: 'field_article_keywords:entity:name'
-    type: string
-    dependencies:
-      config:
-        - field.storage.node.field_article_keywords
-      module:
-        - taxonomy
-  node__field_article_keywords__name__text:
-    label: 'Article Keywords'
-    datasource_id: 'entity:node'
-    property_path: 'field_article_keywords:entity:name'
-    type: text
-    dependencies:
-      config:
-        - field.storage.node.field_article_keywords
+        - field.storage.node.field_article_tags
       module:
         - taxonomy
   node__field_category__name:
@@ -414,10 +393,8 @@ processor_settings:
     fields:
       - all_taxonomy_term_names
       - entity_type
-      - node__field_article_category__name
-      - node__field_article_category__name__text
-      - node__field_article_keywords__name
-      - node__field_article_keywords__name__text
+      - node__field_article_tags__name
+      - node__field_article_tags__name__text
       - node__field_category__name
       - node__field_category__name__text
       - node__field_communities
@@ -465,8 +442,7 @@ processor_settings:
     all_fields: false
     fields:
       - all_taxonomy_term_names
-      - node__field_article_category__name__text
-      - node__field_article_keywords__name__text
+      - node__field_article_tags__name__text
       - node__field_category__name__text
       - node__field_contributor__name__text
       - node__field_creator__name__text
@@ -494,8 +470,7 @@ processor_settings:
     all_fields: false
     fields:
       - all_taxonomy_term_names
-      - node__field_article_category__name__text
-      - node__field_article_keywords__name__text
+      - node__field_article_tags__name__text
       - node__field_category__name__text
       - node__field_contributor__name__text
       - node__field_creator__name__text
@@ -523,8 +498,7 @@ processor_settings:
     all_fields: true
     fields:
       - all_taxonomy_term_names
-      - node__field_article_category__name__text
-      - node__field_article_keywords__name__text
+      - node__field_article_tags__name__text
       - node__field_category__name__text
       - node__field_contributor__name__text
       - node__field_creator__name__text
@@ -552,10 +526,8 @@ processor_settings:
     fields:
       - all_taxonomy_term_names
       - entity_type
-      - node__field_article_category__name
-      - node__field_article_category__name__text
-      - node__field_article_keywords__name
-      - node__field_article_keywords__name__text
+      - node__field_article_tags__name
+      - node__field_article_tags__name__text
       - node__field_category__name
       - node__field_category__name__text
       - node__field_communities

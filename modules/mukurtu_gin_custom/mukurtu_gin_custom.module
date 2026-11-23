@@ -143,10 +143,17 @@ function mukurtu_gin_custom_preprocess_html(array &$variables): void {
  * Appends select-all-name.js to core's tableselect library, so it loads only
  * with select-all tables and its behavior runs after core has added the
  * checkbox it names (#2397).
+ *
+ * Appends sticky-header-copy.js to Gin's tableheader library, so it loads only
+ * with Gin's sticky table header copies (#2741).
  */
 function mukurtu_gin_custom_library_info_alter(&$libraries, $extension) {
   if ($extension === 'core' && isset($libraries['drupal.tableselect'])) {
     $libraries['drupal.tableselect']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_gin_custom') . '/js/select-all-name.js'] = [];
+  }
+  if ($extension === 'gin' && isset($libraries['tableheader'])) {
+    $libraries['tableheader']['js']['/' . \Drupal::service('extension.list.module')->getPath('mukurtu_gin_custom') . '/js/sticky-header-copy.js'] = [];
+    $libraries['tableheader']['dependencies'][] = 'core/drupal';
   }
 }
 

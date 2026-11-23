@@ -64,6 +64,8 @@ class SearchCollapseToggleBlock extends BlockBase implements ContainerFactoryPlu
       '#theme' => 'search_collapse_toggle',
       '#show_all_pages' => !$collapse_mpi,
       '#show_community_records' => !$collapse_cr,
+      '#mpi_in_url' => array_key_exists('mpi_collapse', $query_params),
+      '#cr_in_url' => array_key_exists('cr_collapse', $query_params),
       '#attached' => ['library' => ['mukurtu_browse/search-collapse-toggle']],
       '#cache' => ['contexts' => ['url.query_args']],
     ];
