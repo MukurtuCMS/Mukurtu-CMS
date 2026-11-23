@@ -1,23 +1,81 @@
 /**
  * @file
- * Keeps keyboard focus on a facet after it reloads the page.
+ * Keeps keyboard focus where it was after the browse filters reload the page.
  *
- * Checking a facet submits the browse form, which reloads the page and sends
- * focus back to the top. This remembers the control that changed and focuses
- * it again once the page loads, so keyboard and screen reader users carry on
- * where they were, and a parent's newly shown nested terms come next in tab
- * order (#2522).
+ * The filters, sort, Display options and search box wait for Apply (#2619).
+ * Applying reloads the page, which sends focus back to the top, a long way
+ * from the filters. This remembers what submitted the form (the Apply
+ * button, Reset, or the search box on Enter) and focuses it again once the
+ * page loads, so people can carry on refining, and announces the number of
+ * results. Shift+Tab from Apply reaches the filters, including a parent's
+ * newly shown nested terms (#2522).
  */
-((Drupal, once) => {
+((Drupal, drupalSettings, once) => {
   'use strict';
 
   const KEY = 'mukurtuFacetFocus';
 
+  // A reload follows within moments of a change. Anything older was left by
+  // a visit that never reloaded, such as leaving the page mid-submit, and
+  // mustn't move focus on some later visit.
+  const MAX_AGE_MS = 10000;
+
+  const FORMS = 'form[id^="views-exposed-form-"]';
+
+  // The form's Apply button.
+  const APPLY = '[data-drupal-selector^="edit-submit-"]';
+
   /**
-   * Reads and clears the remembered control, if it was on this page.
+   * A selector that finds the same control on the reloaded page.
+   *
+   * @param {HTMLElement} control
+   *   The control.
    *
    * @return {string|null}
-   *   The control's data-drupal-selector.
+   *   The selector, or null if the control can't be found again.
+   */
+  function selectorFor(control) {
+    if (control.dataset.drupalSelector) {
+      return `[data-drupal-selector="${CSS.escape(control.dataset.drupalSelector)}"]`;
+    }
+    if (control.name) {
+      return `[name="${CSS.escape(control.name)}"]`;
+    }
+    // The Display options toggles have only the URL parameter they set.
+    if (control.dataset.param) {
+      return `[data-param="${CSS.escape(control.dataset.param)}"]`;
+    }
+    return null;
+  }
+
+  /**
+   * Remembers a control, to focus it again after the reload.
+   *
+   * @param {HTMLElement} control
+   *   The control.
+   */
+  function save(control) {
+    const selector = selectorFor(control);
+    if (!selector) {
+      return;
+    }
+    try {
+      window.sessionStorage.setItem(KEY, JSON.stringify({
+        path: window.location.pathname,
+        selector,
+        time: Date.now(),
+      }));
+    }
+    catch (e) {
+      // Without storage, focus goes back to the top as before.
+    }
+  }
+
+  /**
+   * Reads and clears the remembered control, if it's recent and on this page.
+   *
+   * @return {string|null}
+   *   The control's selector.
    */
   function takeSaved() {
     let saved = null;
@@ -28,7 +86,11 @@
     catch (e) {
       return null;
     }
-    return saved && saved.path === window.location.pathname ? saved.selector : null;
+    if (!saved || saved.path !== window.location.pathname
+      || !(Date.now() - saved.time < MAX_AGE_MS)) {
+      return null;
+    }
+    return saved.selector;
   }
 
   Drupal.behaviors.mukurtuFacetFocus = {
@@ -38,33 +100,59 @@
         if (!selector) {
           return;
         }
+        // Focus lands on the control, not the results, so say how many
+        // there are now.
+        const count = drupalSettings.mukurtuBrowse?.resultCount;
+        if (Number.isInteger(count)) {
+          Drupal.announce(Drupal.formatPlural(count, '1 result.', '@count results.'));
+        }
         // The form can be rendered more than once, for example in a drawer on
-        // small screens, so focus the copy that's visible.
-        const match = Array.from(document.querySelectorAll(`form[id^="views-exposed-form-"] [data-drupal-selector="${CSS.escape(selector)}"]`))
+        // small screens, so focus the copy that's visible. Reset isn't shown
+        // once nothing is filtered, so it falls back to Apply.
+        const visible = (query) => Array.from(document.querySelectorAll(query))
           .find((element) => element.offsetParent !== null);
-        if (match) {
-          match.focus();
+        const match = visible(`${FORMS} ${selector}`) || visible(`${FORMS} ${APPLY}`);
+        if (!match) {
+          return;
+        }
+        match.focus();
+        // Put the cursor after the search words, ready to type more.
+        if (typeof match.setSelectionRange === 'function' && typeof match.value === 'string') {
+          try {
+            match.setSelectionRange(match.value.length, match.value.length);
+          }
+          catch (e) {
+            // Not a text field.
+          }
         }
       });
 
-      once('mukurtuFacetFocus', 'form[id^="views-exposed-form-"]', context).forEach((form) => {
-        form.addEventListener('change', (event) => {
-          const target = event.target;
-          if (!target.matches('input[type="checkbox"], input[type="radio"], select') || !target.dataset.drupalSelector) {
-            return;
+      once('mukurtuFacetFocus', FORMS, context).forEach((form) => {
+        form.addEventListener('submit', (event) => {
+          // The search box on Enter, or the button that was pressed. Safari
+          // doesn't focus a button on click, so fall back to the submitter.
+          const active = document.activeElement;
+          const control = active && active !== form && form.contains(active)
+            && active.matches('input[type="text"], input[type="search"], input[type="submit"], button')
+            ? active
+            : event.submitter;
+          if (control && form.contains(control)) {
+            save(control);
           }
-          try {
-            window.sessionStorage.setItem(KEY, JSON.stringify({
-              path: window.location.pathname,
-              selector: target.dataset.drupalSelector,
-            }));
-          }
-          catch (e) {
-            // Without storage, focus goes back to the top as before.
+        });
+      });
+
+      // The dictionary's Reset is a link beside Apply rather than a button,
+      // so it lands back on Apply.
+      once('mukurtuFacetFocusReset', '.browse-links .filter-reset', context).forEach((link) => {
+        link.addEventListener('click', () => {
+          const apply = link.parentElement.querySelector(APPLY);
+          if (apply) {
+            save(apply);
           }
         });
       });
     },
   };
 
-})(Drupal, once);
+})(Drupal, drupalSettings, once);

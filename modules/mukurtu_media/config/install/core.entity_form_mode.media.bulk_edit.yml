@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+  enforced:
+    module:
+      - mukurtu_media
+id: media.bulk_edit
+label: 'Bulk edit'
+description: ''
+targetEntityType: media
+cache: true

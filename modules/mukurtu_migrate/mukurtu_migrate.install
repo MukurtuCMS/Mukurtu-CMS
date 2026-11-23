@@ -6,6 +6,7 @@
  */
 
 use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\Core\Config\FileStorage;
 use Drupal\migrate\Plugin\migrate\id_map\Sql;
 use Drupal\mukurtu_migrate\Batch\MukurtuMigrateImportBatch;
 
@@ -346,9 +347,129 @@ function mukurtu_migrate_update_40209(): ?string {
 }
 
 /**
+ * Map Mukurtu 3 article categories and tags into the Article Tags field.
+ */
+function mukurtu_migrate_update_40212(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // mukurtu_core_update_40229() replaces the article Category and Keywords
+  // fields with Article Tags, so the shipped article migration would
+  // otherwise write to fields that no longer exist. Only the shipped mappings
+  // are replaced; a site that customized either one is left alone.
+  //
+  // The shipped Image mapping is dropped too, as it is on new sites:
+  // mukurtu_core_update_40229() deletes an unused Image field, and Mukurtu 3
+  // article images aren't migrated (an image media item needs a cultural
+  // protocol articles can't give it).
+  $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_article');
+  if ($config->isNew()) {
+    return NULL;
+  }
+  $process = $config->get('process');
+  $shipped = [
+    'field_article_category' => 'mukurtu_cms_v3_terms_category',
+    'field_article_keywords' => 'mukurtu_cms_v3_terms_keywords',
+  ];
+  // Both mappings have to be the shipped ones. Replacing only one would leave
+  // a site's own mapping writing to a field that no longer exists.
+  foreach ($shipped as $field_name => $migration) {
+    if (($process[$field_name]['plugin'] ?? NULL) !== 'migration_lookup' || ($process[$field_name]['migration'] ?? NULL) !== $migration) {
+      return NULL;
+    }
+  }
+  foreach (array_keys($shipped) as $field_name) {
+    unset($process[$field_name]);
+  }
+  $image = $process['field_article_image'] ?? NULL;
+  if (($image['plugin'] ?? NULL) === 'migration_lookup' && ($image['source'] ?? NULL) === 'field_image/0/fid') {
+    unset($process['field_article_image']);
+  }
+
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_migrate');
+  $record = (new FileStorage($module_path . '/config/install'))->read('migrate_plus.migration.mukurtu_cms_v3_article');
+  foreach (['_article_category_tags', '_article_keyword_tags', 'field_article_tags'] as $key) {
+    $process[$key] = $record['process'][$key];
+  }
+  $config->set('process', $process)->save();
+
+  return (string) t('Updated the Mukurtu 3 article migration so article categories and tags are migrated into the Article Tags field. Article images are no longer migrated.');
+}
+
+/**
+ * Migrate Mukurtu 3 protocols before protocol memberships, and skip memberships whose group is missing.
+ */
+function mukurtu_migrate_update_40213(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // Protocol memberships didn't depend on the protocols migration, so they
+  // could run first. Each membership's group lookup then found nothing, tried
+  // to create an empty placeholder group, and failed with "A group entity is
+  // required for creating a membership." Only the shipped lookups are
+  // replaced; a site that customized one is left alone.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_migrate');
+  $storage = new FileStorage($module_path . '/config/install');
+  $group_migrations = [
+    'mukurtu_cms_v3_community_memberships' => 'mukurtu_cms_v3_communities',
+    'mukurtu_cms_v3_language_community_community_memberships' => 'mukurtu_cms_v3_language_communities',
+    'mukurtu_cms_v3_protocol_memberships' => 'mukurtu_cms_v3_cultural_protocols',
+    'mukurtu_cms_v3_language_community_protocol_memberships' => 'mukurtu_cms_v3_language_communities',
+  ];
+  $changed = FALSE;
+  foreach ($group_migrations as $id => $group_migration) {
+    $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.' . $id);
+    if ($config->isNew()) {
+      continue;
+    }
+    $save = FALSE;
+    if ($config->get('process.entity_id') === [
+      'plugin' => 'migration_lookup',
+      'migration' => [$group_migration],
+      'source' => 'gid',
+    ]) {
+      $record = $storage->read('migrate_plus.migration.' . $id);
+      $config->set('process.entity_id', $record['process']['entity_id']);
+      $save = TRUE;
+    }
+    if ($id === 'mukurtu_cms_v3_protocol_memberships') {
+      $required = $config->get('migration_dependencies.required') ?? [];
+      if (!in_array($group_migration, $required, TRUE)) {
+        $required[] = $group_migration;
+        $config->set('migration_dependencies.required', $required);
+        $save = TRUE;
+      }
+    }
+    if ($save) {
+      $config->save();
+      $changed = TRUE;
+    }
+  }
+
+  // Digital Heritage items with no map location passed NULL to ucfirst(),
+  // which logs a deprecation.
+  $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.mukurtu_cms_v3_digital_heritage');
+  if (!$config->isNew() && $config->get('process.field_coverage/geo_type') === [
+    [
+      'plugin' => 'callback',
+      'source' => 'field_coverage/0/geo_type',
+      'callable' => 'ucfirst',
+    ],
+  ]) {
+    $record = $storage->read('migrate_plus.migration.mukurtu_cms_v3_digital_heritage');
+    $config->set('process.field_coverage/geo_type', $record['process']['field_coverage/geo_type'])->save();
+  }
+
+  if (!$changed) {
+    return NULL;
+  }
+  return (string) t('Updated the Mukurtu 3 membership migrations so protocols always migrate before protocol memberships, and a membership whose community or protocol is missing is skipped and logged instead of failing.');
+}
+
+/**
  * Keep each term's parent in the Mukurtu CMS v3 term migrations.
  */
-function mukurtu_migrate_update_40210(): ?string {
+function mukurtu_migrate_update_40214(): ?string {
   // Every term landed at the top level, because the parent lookup used a
   // migration Mukurtu never runs. Only the shipped lookup is replaced, so a site
   // that has customized a migration's parent mapping is left alone.

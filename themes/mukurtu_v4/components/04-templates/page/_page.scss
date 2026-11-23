@@ -140,17 +140,39 @@
     }
   }
 
-  // Constrain and center the "page not found" text to match other pages.
-  .layout-content--404 {
+  // Blocks in the content region of the default page template (user pages,
+  // contact forms, node tabs such as Found In, confirmation forms, and any
+  // page without its own page template) sit on the same grid as the
+  // breadcrumb, title and tabs. The grid item is the region, not each block,
+  // because a block can print bare text, which a `> *` rule can't place.
+  // Templates that override page_content (node displays, browse pages, 403)
+  // don't render .layout-content.
+  .layout-content {
     @include layout.layout--full-width-grid;
-    text-align: center;
 
     > .region {
-      grid-column: 1 / -1;
+      @include layout.layout--full-width-grid-item;
 
-      @include include-media.media('>=2xl') {
-        grid-column: 2 / -2;
+      // The grid already supplies the page gutter, so components inside it
+      // that build their own full-width grid (taxonomy term pages, the
+      // Articles page) don't add it a second time.
+      --layout-padding: 0;
+
+      // At 2xl those grids leave empty outer columns, and the gaps beside
+      // them would indent the content by a gutter inside this column. Pull
+      // them out by that gutter.
+      .local-tasks,
+      .taxonomy-term-page,
+      .articles-listing--page {
+        @include include-media.media('>=2xl') {
+          margin-inline: calc(var(--gutter) * -1);
+        }
       }
     }
+  }
+
+  // Center the "page not found" text.
+  .layout-content--404 {
+    text-align: center;
   }
 }

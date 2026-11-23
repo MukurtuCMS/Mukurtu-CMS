@@ -106,12 +106,15 @@ class UploadTooLargeSubscriberTest extends KernelTestBase {
    */
   public function testFileFieldsLoadTheCommand(): void {
     $info = ['managed_file' => ['#process' => [['Core', 'process']]], 'textfield' => []];
-    (new ManagedFileHooks())->elementInfoAlter($info);
+    (new ManagedFileHooks($this->container->get('request_stack')))->elementInfoAlter($info);
 
     $this->assertArrayNotHasKey('#process', $info['textfield']);
-    $this->assertCount(2, $info['managed_file']['#process']);
-    $element = call_user_func(end($info['managed_file']['#process']), ['#attached' => ['library' => ['file/drupal.file']]]);
-    $this->assertSame(['file/drupal.file', 'mukurtu_core/reset-refused-upload'], $element['#attached']['library']);
+    $this->assertCount(3, $info['managed_file']['#process']);
+    $element = ['#attached' => ['library' => ['file/drupal.file']]];
+    foreach (array_slice($info['managed_file']['#process'], 1) as $process) {
+      $element = call_user_func($process, $element);
+    }
+    $this->assertSame(['file/drupal.file', 'mukurtu_core/reset-refused-upload', 'mukurtu_core/focus-file-field'], $element['#attached']['library']);
   }
 
   /**

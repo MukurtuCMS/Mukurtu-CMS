@@ -56,6 +56,16 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
   }
 
   /**
+   * Tells admins what the overlay adds around each warning's text.
+   *
+   * Without this, admins repeat the overlay's own wording in every warning,
+   * and a media item with several warnings repeats it once per warning.
+   */
+  protected function overlayTextHelp(): string {
+    return (string) $this->t('The overlay already shows a "Media content warning" title and a "Show media" button, so describe only what the warning is about.');
+  }
+
+  /**
    * Gets the media tags as options, in tree order and translated.
    */
   protected function getTerms(): array {
@@ -89,16 +99,16 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
 
     $form['people_warnings']['single_person_text'] = [
       '#title' => $this->t('Warning Text: Single Person'),
-      '#description' => $this->t('The text that will be displayed on the media overlay for a single deceased person. Use the replacement token "[name]" to insert the person\'s name in the message.'),
+      '#description' => $this->t('The text that will be displayed on the media overlay for a single deceased person. Use the replacement token "[name]" to insert the person\'s name in the message.') . ' ' . $this->overlayTextHelp(),
       '#type' => 'textfield',
-      '#default_value' => $config->get('people_warnings.warning_single') ?? $this->t('Warning: [name] is deceased. Click through to access content.'),
+      '#default_value' => $config->get('people_warnings.warning_single') ?? $this->t('[name] is deceased.'),
     ];
 
     $form['people_warnings']['multiple_people_text'] = [
       '#title' => $this->t('Warning Text: Multiple People'),
-      '#description' => $this->t('The text that will be displayed on the media overlay for multiple deceased people. Use the replacement token "[names]" to insert the names in the message.'),
+      '#description' => $this->t('The text that will be displayed on the media overlay for multiple deceased people. Use the replacement token "[names]" to insert the names in the message.') . ' ' . $this->overlayTextHelp(),
       '#type' => 'textfield',
-      '#default_value' => $config->get('people_warnings.warning_multiple') ?? $this->t('Warning: The following people are deceased. Click through to access content. [names]'),
+      '#default_value' => $config->get('people_warnings.warning_multiple') ?? $this->t('The following people are deceased: [names]'),
     ];
 
     $form['#tree'] = TRUE;
@@ -185,12 +195,13 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
         '#options' => $availableTerms,
         '#empty_option' => $this->t('Select a term'),
         '#default_value' => $id,
+        '#attributes' => ['data-mukurtu-warning-term' => ''],
       ];
       // Term warning text.
       $form['taxonomy_warnings'][$i]['text'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Warning Text'),
-        '#description' => $this->t('The text that will be displayed on the media overlay.'),
+        '#description' => $this->t('The text that will be displayed on the media overlay.') . ' ' . $this->overlayTextHelp(),
         '#default_value' => $text,
       ];
 
@@ -198,7 +209,8 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
       // rather than a row number - $i is a permanent per-slot index that
       // removeCallback() never renumbers, so after removing a row the
       // remaining rows' numbers would have a gap (e.g. "row 1", "row 3"),
-      // which would be misleading read aloud.
+      // which would be misleading read aloud. js/settings-form.js keeps this
+      // in step with the select.
       $remove_label = isset($availableTerms[$id])
         ? $this->t('Remove taxonomy warning for @term', ['@term' => $availableTerms[$id]])
         : $this->t('Remove empty taxonomy warning row');
@@ -209,6 +221,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
         '#name' => $i,
         '#attributes' => [
           'aria-label' => $remove_label,
+          'data-mukurtu-warning-remove' => '',
         ],
         '#submit' => ['::removeCallback'],
         '#ajax' => [
@@ -225,9 +238,8 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     $form['taxonomy_warnings']['actions']['add_taxonomy_warning'] = [
       '#type' => 'submit',
       '#value' => $this->t('Add taxonomy warning'),
-      '#attributes' => [
-        'id' => 'taxonomy-warnings-add-button',
-      ],
+      // Drupal binds #ajax to #id, so an id in #attributes would stop it.
+      '#id' => 'taxonomy-warnings-add-button',
       '#submit' => ['::addOne'],
       '#ajax' => [
         'callback' => '::addMoreCallback',
@@ -236,6 +248,7 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
     ];
 
     $this->attachAjaxRowTableStatusLibrary($form);
+    $form['#attached']['library'][] = 'mukurtu_content_warnings/settings-form';
 
     // Warning media settings — view mode selection.
     $view_mode_options = $this->getMediaViewModes();
@@ -287,6 +300,11 @@ class MukurtuContentWarningsSettingsForm extends ConfigFormBase {
    * Selects and returns the fieldset with the names in it.
    */
   public function addMoreCallback(array &$form, FormStateInterface $form_state) {
+    // A failed validation changes nothing, so it announces no update.
+    if ($form_state->hasAnyErrors()) {
+      return $form['taxonomy_warnings'];
+    }
+
     // Marks the fieldset so the shared ajax-row-table-status JS behavior can
     // find it as a descendant of the #taxonomy-warnings-fieldset-wrapper
     // once() is scoped to - Drupal.attachBehaviors() runs with that wrapper
