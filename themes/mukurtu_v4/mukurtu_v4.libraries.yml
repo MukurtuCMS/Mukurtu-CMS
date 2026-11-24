@@ -43,6 +43,13 @@ language-switcher:
     - core/drupal
     - core/once
 
+local-tasks-collapse:
+  js:
+    components/02-molecules/local-tasks/local-tasks-collapse.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
 quick-actions:
   js:
     components/02-molecules/quick-actions/quick-actions-menu.js: {}

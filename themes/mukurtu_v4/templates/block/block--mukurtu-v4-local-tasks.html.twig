@@ -26,9 +26,19 @@
  * @see template_preprocess_block()
  */
 #}
+{{ attach_library('mukurtu_v4/local-tasks-collapse') }}
 <div{{ attributes.addClass("local-tasks") }}>
   {{ title_prefix }}
   {{ title_suffix }}
+  {# The "more actions" toggle local-tasks-collapse.js adds on phones. #}
+  <template class="local-tasks__more-template">
+    <details class="local-tasks__more">
+      <summary class="local-tasks__more-toggle" aria-label="{{ 'More actions'|t }}">
+        {% include active_theme_path() ~ '/images/more-actions.svg' %}
+      </summary>
+      <ul class="local-tasks__more-menu"></ul>
+    </details>
+  </template>
   {% block content %}
     {% if export_button is defined or export_adhoc_button is defined %}
       <div class="local-tasks__inner">

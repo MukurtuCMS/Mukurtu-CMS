@@ -52,10 +52,26 @@
     justify-content: center;
   }
 
+  // Same fixed arrow gutter as .thumbnail-carousel below: a percentage
+  // width left the arrows covering the first and last pages on a phone.
   .splide__track {
-    inline-size: 90%;
     margin-block: 0;
-    margin-inline: auto;
+    margin-inline: 3em;
+  }
+
+  // Same opaque arrows as the media and thumbnail carousels below, so the
+  // arrows keep WCAG 1.4.11 contrast over page thumbnails of any colour.
+  .splide__arrow {
+    background: rgb(0 0 0 / 60%);
+    opacity: 1;
+
+    svg {
+      fill: white;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+    }
   }
 
   &__navigation {
@@ -152,10 +168,13 @@
     justify-content: center;
   }
 
+  // Reserve a fixed gutter for the prev/next arrows (2em wide, inset 0.5em,
+  // see .splide__arrow above) instead of a percentage width: at 85% the
+  // leftover space on a phone was narrower than the arrow, so the arrows
+  // covered the first and last thumbnails.
   .splide__track {
-    inline-size: 85%;
     margin-block: 0;
-    margin-inline: auto;
+    margin-inline: 3em;
   }
 
   .splide__track,
@@ -167,6 +186,22 @@
   img {
     max-block-size: 100px;
     inline-size: auto;
+  }
+
+  // media-asset-carousel.js drops the strip to a 44px fixedHeight at
+  // <=600px. Pass that height down through the button and media wrappers
+  // so the image scales to fit the slide instead of being cut off by it.
+  @media (max-width: 600px) {
+    &__slide-button,
+    &__slide-button .media,
+    &__slide-button .field {
+      block-size: 100%;
+    }
+
+    img {
+      display: block;
+      max-block-size: 100%;
+    }
   }
 
   // The real <button> media-asset-carousel.js wraps each thumbnail's
