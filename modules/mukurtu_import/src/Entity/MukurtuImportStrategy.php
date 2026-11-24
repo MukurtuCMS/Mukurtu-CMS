@@ -6,6 +6,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\ContainerMembershipFields;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessInterface;
 use Drupal\mukurtu_import\MukurtuImportFieldProcessPluginManager;
 use Drupal\mukurtu_import\MukurtuImportStrategyInterface;
@@ -290,6 +291,22 @@ class MukurtuImportStrategy extends ConfigEntityBase implements MukurtuImportStr
             ['plugin' => 'mukurtu_account_status_lookup', 'source' => $source],
           ];
         }
+        continue;
+      }
+
+      // Collection/word list membership: pass the cell's values through
+      // as written. ProtocolAwareEntityContent resolves them to containers,
+      // so its errors can quote the value that didn't match.
+      if ($entity_type_id === 'node' && isset(ContainerMembershipFields::FIELDS[$target])) {
+        $import_process[$target_option] = [
+          [
+            'plugin' => 'explode',
+            'source' => $source,
+            'delimiter' => $this->getConfig('multivalue_delimiter') ?? ';',
+            'strict' => FALSE,
+          ],
+          ['plugin' => 'callback', 'callable' => 'trim'],
+        ];
         continue;
       }
 
