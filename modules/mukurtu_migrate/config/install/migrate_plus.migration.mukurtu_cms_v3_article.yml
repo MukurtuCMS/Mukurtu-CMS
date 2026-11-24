@@ -108,6 +108,12 @@ process:
       plugin: callback
       callable: array_values
   status: status
+  moderation_state:
+    plugin: static_map
+    source: status
+    map:
+      0: draft
+      1: published
   created: created
   changed: changed
 destination:
