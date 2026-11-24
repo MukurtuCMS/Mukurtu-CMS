@@ -74,10 +74,8 @@ class ImportCollectionMembershipTest extends MukurtuImportTestBase {
     $role->grantPermission('create person content');
     $role->save();
 
-    // Without a group audience field, OG names node permissions
-    // "<operation> <bundle> node".
     $steward = OgRole::load('protocol-protocol-protocol_steward');
-    foreach (['create person node', 'update any person node', 'update own person node', 'update any collection node', 'update own collection node'] as $permission) {
+    foreach (['create person content', 'edit any person content', 'edit any collection content'] as $permission) {
       $steward->grantPermission($permission);
     }
     $steward->save();
@@ -199,8 +197,9 @@ class ImportCollectionMembershipTest extends MukurtuImportTestBase {
   }
 
   /**
-   * A collection the importer can't edit fails the row, unless the item is
-   * already in it.
+   * A collection the importer can't edit fails the row.
+   *
+   * Unless the item is already in it, since then nothing changes.
    */
   public function testCollectionWithoutAccess(): void {
     $already_in = $this->createPerson('Already In');
@@ -295,7 +294,7 @@ class ImportCollectionMembershipTest extends MukurtuImportTestBase {
     $role = OgRole::create([
       'name' => 'person_editor',
       'label' => 'Person editor',
-      'permissions' => ['create person node', 'edit any person content'],
+      'permissions' => ['create person content', 'edit any person content'],
     ]);
     $role->setGroupType('protocol');
     $role->setGroupBundle('protocol');
