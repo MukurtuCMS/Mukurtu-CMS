@@ -472,6 +472,7 @@ function mukurtu_protocol_query_media_access_alter(AlterableInterface $query)
   if (!$account = $query->getMetaData('account')) {
     $account = \Drupal::currentUser();
   }
+  _mukurtu_protocol_bubble_memberships_cache_context();
 
   // Don't alter for UID 1.
   if ($account->id() == 1) {
@@ -527,6 +528,7 @@ function mukurtu_protocol_query_protocol_access_alter(AlterableInterface $query)
   if (!$account = $query->getMetaData('account')) {
     $account = \Drupal::currentUser();
   }
+  _mukurtu_protocol_bubble_memberships_cache_context();
 
   // Grab the protocol table alias.
   $tables = $query->getTables();
@@ -616,6 +618,7 @@ function mukurtu_protocol_query_community_access_alter(AlterableInterface $query
   if (!$account = $query->getMetaData('account')) {
     $account = \Drupal::currentUser();
   }
+  _mukurtu_protocol_bubble_memberships_cache_context();
 
   // Get the community_field_data table alias from the query.
   $tables = $query->getTables();
@@ -1218,5 +1221,26 @@ function mukurtu_protocol_preprocess_views_view_field(&$variables) {
   if (CulturalProtocols::isUserBlockedFromProtocolViaCommunity($owner, $group)) {
     $badge = '<span class="community-blocked-badge" role="status">' . t('Community blocked') . '</span>';
     $variables['output'] = Markup::create((string) $variables['output'] . ' ' . $badge);
+  }
+}
+
+/**
+ * Adds the mukurtu_memberships cache context to the current render context.
+ *
+ * The media, protocol and community access query alters filter lists by the
+ * current user's memberships. A list cached without this context is served
+ * to everyone who asks for the same URL. JSON:API ignores entity types' list
+ * cache contexts and only learns how a list varies from what its query
+ * bubbles while it runs, so each alter bubbles the context itself. This is
+ * the same thing core does for node grants in its node access query alter.
+ *
+ * @see \Drupal\node\Hook\NodeDatabaseHooks::queryNodeAccessAlter()
+ * @see \Drupal\jsonapi\Controller\EntityResource::executeQueryInRenderContext()
+ */
+function _mukurtu_protocol_bubble_memberships_cache_context(): void {
+  $renderer = \Drupal::service('renderer');
+  if ($renderer->hasRenderContext()) {
+    $build = ['#cache' => ['contexts' => ['mukurtu_memberships']]];
+    $renderer->render($build);
   }
 }
