@@ -73,6 +73,9 @@
 
       h1 {
         margin-block: 0;
+        // __title spans the full grid (for its box-shadow), so without
+        // this the heading text ran to the screen edges on a phone.
+        padding-inline: var(--gutter);
       }
     }
   }
