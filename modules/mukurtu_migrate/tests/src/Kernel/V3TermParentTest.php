@@ -16,7 +16,7 @@ use PHPUnit\Framework\Attributes\Group;
  * shaped as the d7_taxonomy_term source returns them.
  *
  * @see \Drupal\mukurtu_migrate\Plugin\migrate\process\V3TermParent
- * @see mukurtu_migrate_update_40214()
+ * @see mukurtu_migrate_update_40215()
  */
 #[Group('mukurtu_migrate')]
 class V3TermParentTest extends MigrateTestBase {
@@ -194,14 +194,14 @@ class V3TermParentTest extends MigrateTestBase {
     $factory->getEditable('migrate_plus.migration.mukurtu_cms_v3_terms_category')->set('process', $old)->save();
     $factory->getEditable('migrate_plus.migration.mukurtu_cms_v3_terms_keywords')->set('process', $custom)->save();
 
-    $this->assertNotNull(mukurtu_migrate_update_40214());
+    $this->assertNotNull(mukurtu_migrate_update_40215());
 
     $this->assertSame(
       ['tid' => 'tid', 'parent' => ['plugin' => 'mukurtu_v3_term_parent', 'source' => 'parent']],
       $factory->get('migrate_plus.migration.mukurtu_cms_v3_terms_category')->get('process'),
     );
     $this->assertSame($custom, $factory->get('migrate_plus.migration.mukurtu_cms_v3_terms_keywords')->get('process'));
-    $this->assertNull(mukurtu_migrate_update_40214());
+    $this->assertNull(mukurtu_migrate_update_40215());
   }
 
 }

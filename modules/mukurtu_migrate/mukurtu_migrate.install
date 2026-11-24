@@ -469,7 +469,7 @@ function mukurtu_migrate_update_40213(): ?string {
 /**
  * Keep each term's parent in the Mukurtu CMS v3 term migrations.
  */
-function mukurtu_migrate_update_40214(): ?string {
+function mukurtu_migrate_update_40215(): ?string {
   // Every term landed at the top level, because the parent lookup used a
   // migration Mukurtu never runs. Only the shipped lookup is replaced, so a site
   // that has customized a migration's parent mapping is left alone.
