@@ -38,6 +38,11 @@ final class SpikeController implements ContainerInjectionInterface {
   const MAX_UPLOAD = 20 * 1024 * 1024;
 
   /**
+   * The most rejected uploads kept.
+   */
+  const MAX_REJECTED = 200;
+
+  /**
    * Where reports, received drafts and their photos are kept.
    */
   const DIRECTORY = 'private://pwa-spike';
@@ -62,13 +67,13 @@ final class SpikeController implements ContainerInjectionInterface {
   /**
    * Reads the results file.
    *
-   * @return array{reports: array, received: array}
-   *   Every report and received draft.
+   * @return array{reports: array, received: array, rejected: array}
+   *   Every report, received draft and rejected upload.
    */
   public function readResults(): array {
     $path = self::DIRECTORY . '/results.json';
     $data = is_file($path) ? json_decode((string) file_get_contents($path), TRUE) : NULL;
-    return (is_array($data) ? $data : []) + ['reports' => [], 'received' => []];
+    return (is_array($data) ? $data : []) + ['reports' => [], 'received' => [], 'rejected' => []];
   }
 
   /**
@@ -92,7 +97,7 @@ final class SpikeController implements ContainerInjectionInterface {
     }
     try {
       $data = json_decode((string) stream_get_contents($handle), TRUE);
-      $data = (is_array($data) ? $data : []) + ['reports' => [], 'received' => []];
+      $data = (is_array($data) ? $data : []) + ['reports' => [], 'received' => [], 'rejected' => []];
       $result = $change($data);
       ftruncate($handle, 0);
       rewind($handle);
@@ -271,8 +276,30 @@ final class SpikeController implements ContainerInjectionInterface {
     $clientId = (string) $request->request->get('client_id');
     $title = trim((string) $request->request->get('title'));
     $photo = $request->files->get('photo');
-    if (!Uuid::isValid($clientId) || $title === '' || !$photo || !$photo->isValid() || $photo->getSize() > self::MAX_UPLOAD) {
-      return new JsonResponse(['error' => 'invalid'], 400);
+    $reason = match (TRUE) {
+      !Uuid::isValid($clientId) => 'client_id',
+      $title === '' => 'title',
+      !$photo => 'photo_missing',
+      !$photo->isValid() => 'photo_error_' . $photo->getError(),
+      $photo->getSize() === 0 => 'photo_empty',
+      $photo->getSize() > self::MAX_UPLOAD => 'photo_too_large',
+      default => NULL,
+    };
+    if ($reason !== NULL) {
+      // Kept with the results, so a failure on a tester's phone can be
+      // diagnosed without the phone (#400).
+      $this->updateResults(function (array &$data) use ($reason, $photo, $request): void {
+        $data['rejected'][] = [
+          'reason' => $reason,
+          'uid' => (int) $this->currentUser->id(),
+          'bytes' => $photo && $photo->isValid() ? (int) $photo->getSize() : NULL,
+          'sentBytes' => (int) $request->request->get('size'),
+          'userAgent' => mb_substr((string) $request->headers->get('User-Agent'), 0, 255),
+          'received' => $this->time->getRequestTime(),
+        ];
+        $data['rejected'] = array_slice($data['rejected'], -self::MAX_REJECTED);
+      });
+      return new JsonResponse(['error' => $reason], 400);
     }
 
     $duplicate = $this->updateResults(function (array &$data) use ($clientId, $title, $photo, $request): bool {

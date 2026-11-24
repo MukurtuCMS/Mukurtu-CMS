@@ -281,11 +281,38 @@ async function freshToken() {
   return response.text();
 }
 
-async function flushOutbox() {
+// An upload still marked as running after this long was cut off, for
+// example because iOS stopped the service worker, so it's tried again.
+const STALE_UPLOAD = 2 * 60 * 1000;
+
+function isDue(entry) {
+  if (entry.status === 'uploading') {
+    return !entry.attemptAt || Date.now() - entry.attemptAt > STALE_UPLOAD;
+  }
+  return ['waiting', 'failed'].includes(entry.status);
+}
+
+// The photo as a Blob. Drafts store its bytes, because Safari can lose the
+// contents of a File kept in IndexedDB. Drafts saved before that change
+// still hold the File.
+function photoOf(entry) {
+  return entry.data
+    ? new Blob([entry.data], { type: entry.type || 'image/jpeg' })
+    : entry.file;
+}
+
+async function uploadError(response) {
+  try {
+    const { error } = await response.json();
+    return error ? `HTTP ${response.status} (${error})` : `HTTP ${response.status}`;
+  } catch {
+    return `HTTP ${response.status}`;
+  }
+}
+
+async function runFlush() {
   const uid = await getMeta('uid', '0');
-  const entries = (await dbAll('outbox')).filter((entry) =>
-    ['waiting', 'failed'].includes(entry.status),
-  );
+  const entries = (await dbAll('outbox')).filter(isDue);
   if (!entries.length) {
     return;
   }
@@ -305,13 +332,15 @@ async function flushOutbox() {
       continue;
     }
     entry.status = 'uploading';
+    entry.attemptAt = Date.now();
     await dbPut('outbox', entry);
     await broadcast({ type: 'outboxChanged' });
     const body = new FormData();
     body.append('client_id', entry.id);
     body.append('title', entry.title);
     body.append('created', String(Math.floor(entry.createdAt / 1000)));
-    body.append('photo', entry.file, entry.fileName);
+    body.append('size', String(entry.size));
+    body.append('photo', photoOf(entry), entry.fileName);
     try {
       const response = await fetch(CONFIG.uploadUrl, {
         method: 'POST',
@@ -323,13 +352,14 @@ async function flushOutbox() {
         entry.status = 'uploaded';
         entry.uploadedAt = Date.now();
         entry.file = null;
+        entry.data = null;
       } else if (!isDrupal(response)) {
         // A holding page or proxy error: the site isn't really there.
         entry.status = 'waiting';
         networkFailed = true;
       } else {
         entry.status = 'failed';
-        entry.error = `HTTP ${response.status}`;
+        entry.error = await uploadError(response);
       }
     } catch {
       entry.status = 'waiting';
@@ -344,13 +374,27 @@ async function flushOutbox() {
   }
 }
 
-async function addToOutbox({ title, file }) {
+// One flush at a time, so opening a page during a background sync doesn't
+// send the same draft twice.
+let flushing = null;
+
+function flushOutbox() {
+  if (!flushing) {
+    flushing = runFlush().finally(() => {
+      flushing = null;
+    });
+  }
+  return flushing;
+}
+
+async function addToOutbox({ title, data, mimeType, name }) {
   const entry = {
     id: self.crypto.randomUUID(),
     title,
-    file,
-    fileName: file.name || 'photo.jpg',
-    size: file.size,
+    data,
+    type: mimeType,
+    fileName: name || 'photo.jpg',
+    size: data.byteLength,
     uid: await getMeta('uid', '0'),
     createdAt: Date.now(),
     status: 'waiting',
@@ -371,6 +415,7 @@ async function listOutbox() {
     .map((entry) => {
       const rest = { ...entry };
       delete rest.file;
+      delete rest.data;
       return rest;
     })
     .sort((a, b) => b.createdAt - a.createdAt);

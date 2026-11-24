@@ -68,6 +68,8 @@ class JsonApiProtocolAccessTest extends KernelTestBase {
     'mukurtu_local_contexts',
     'mukurtu_multipage_items',
     'mukurtu_protocol',
+    'mukurtu_taxonomy',
+    'flat_taxonomy',
     'node',
     'og',
     'options',

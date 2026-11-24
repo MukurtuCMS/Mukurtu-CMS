@@ -152,7 +152,15 @@
               form.elements.photo.focus();
               return;
             }
-            await Drupal.mukurtuPwa.ask({ type: 'outboxAdd', title, file });
+            // The bytes are read now and stored, not the File: Safari can
+            // lose a stored File's contents before it uploads.
+            await Drupal.mukurtuPwa.ask({
+              type: 'outboxAdd',
+              title,
+              data: await file.arrayBuffer(),
+              mimeType: file.type,
+              name: file.name,
+            });
             form.reset();
             message.textContent = Drupal.t(
               "Draft saved on this device. It uploads when you're online.",

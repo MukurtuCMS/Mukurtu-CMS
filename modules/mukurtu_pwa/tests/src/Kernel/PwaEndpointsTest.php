@@ -153,15 +153,16 @@ class PwaEndpointsTest extends KernelTestBase {
   /**
    * Builds an upload request.
    */
-  protected function uploadRequest(string $clientId, string $title = 'Draft'): Request {
+  protected function uploadRequest(string $clientId, string $title = 'Draft', string $contents = 'not really a photo'): Request {
     $path = $this->siteDirectory . '/photo.jpg';
-    file_put_contents($path, 'not really a photo');
+    file_put_contents($path, $contents);
     $photo = new UploadedFile($path, 'photo.jpg', 'image/jpeg', NULL, TRUE);
     return Request::create('/pwa-spike/outbox/upload', 'POST', [
       'client_id' => $clientId,
       'title' => $title,
       'created' => '1795000000',
-    ], [], ['photo' => $photo]);
+      'size' => '18',
+    ], [], ['photo' => $photo], ['HTTP_USER_AGENT' => 'Test phone']);
   }
 
   /**
@@ -193,6 +194,33 @@ class PwaEndpointsTest extends KernelTestBase {
     $this->assertCount(1, $received);
     $this->assertSame((int) $tester->id(), $received[$id]['uid']);
     $this->assertFileExists("private://pwa-spike/$id.bin");
+  }
+
+  /**
+   * A rejected upload says why, and is kept with the results.
+   */
+  public function testRejectedUploads(): void {
+    $id = '9d9fcea7-f2a1-4698-bb7c-0ab6061f3d47';
+    $tester = $this->tester();
+    $cases = [
+      'client_id' => $this->uploadRequest('not-a-uuid'),
+      'title' => $this->uploadRequest($id, ''),
+      // What Safari sends when it loses a stored photo's contents.
+      'photo_empty' => $this->uploadRequest($id, 'Draft', ''),
+    ];
+    foreach ($cases as $reason => $request) {
+      $response = $this->send($request, $tester);
+      $this->assertSame(400, $response->getStatusCode());
+      $this->assertSame(['error' => $reason], json_decode((string) $response->getContent(), TRUE));
+    }
+
+    $rejected = $this->results()['rejected'];
+    $this->assertSame(array_keys($cases), array_column($rejected, 'reason'));
+    $this->assertSame('Test phone', $rejected[2]['userAgent']);
+    $this->assertSame(0, $rejected[2]['bytes']);
+    $this->assertSame(18, $rejected[2]['sentBytes']);
+    $this->assertSame((int) $tester->id(), $rejected[2]['uid']);
+    $this->assertArrayNotHasKey($id, $this->results()['received']);
   }
 
   /**
