@@ -9,6 +9,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
+use Drupal\mukurtu_import\Form\ImportFileUploadForm;
 use Drupal\mukurtu_import\ImportBatchExecutable;
 use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
 use Drupal\node\Entity\Node;
@@ -420,6 +421,21 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
     $html = (string) \Drupal::service('renderer')->renderInIsolation($build);
     $this->assertStringContainsString('Row 3: No collection matches &quot;Collecfn&quot;. Use the collection&#039;s', $html);
     $this->assertStringNotContainsString('&amp;', $html);
+  }
+
+
+  /**
+   * The upload form shows a stored message as text, not markup.
+   */
+  public function testUploadFormEscapesFileMessages(): void {
+    $element = ['file_7' => ['selected' => ['#title' => 'data.csv']]];
+    ImportFileUploadForm::appendFileMessages($element, [
+      ['fid' => 7, 'message' => 'Row 3: No collection matches "<img src=x>".'],
+      ['fid' => 8, 'message' => 'Another file'],
+    ]);
+
+    $this->assertSame('data.csv<span class="import--error">Row 3: No collection matches &quot;&lt;img src=x&gt;&quot;.</span>', $element['file_7']['selected']['#title']);
+    $this->assertArrayNotHasKey('file_8', $element);
   }
 
 }
