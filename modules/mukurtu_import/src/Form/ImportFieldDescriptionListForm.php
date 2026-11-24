@@ -45,7 +45,7 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
         'description' => $this->t('The description is not normally shown to end users. It may be used for internal documentation to clarify or define the content that should reference this term, or to provide additional details about the term.'),
         'name'        => $this->t('The taxonomy term name.'),
         'tid'         => $this->t('Identifier number assigned by the system.'),
-        'parent'      => $this->t('The parent term, as a UUID, term ID, or unique name. Leave blank for a top-level term. Only used if the vocabulary allows nested terms.'),
+        'parent'      => $this->t('The parent term, as a UUID, term ID, or name. Leave blank for a top-level term. Only used if the vocabulary allows nested terms. Use UUIDs if two terms in the vocabulary have the same name. Parents can be in any row of the file.'),
         'uuid'        => $this->t('Unique identifier usually assigned by the system.'),
         'weight'      => $this->t('Not usually used as most sites will default to alphabetical ordering. The weight of this term in relation to other terms in the taxonomy.'),
       ];

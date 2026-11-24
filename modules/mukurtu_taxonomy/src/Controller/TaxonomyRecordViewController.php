@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Http\Exception\CacheableNotFoundHttpException;
 use Drupal\Core\Routing\TrustedRedirectResponse;
+use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\mukurtu_core\Service\TermVisibility;
 use Drupal\node\NodeInterface;
 use Drupal\taxonomy\TermInterface;
@@ -35,9 +36,14 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entityFieldManager
    *   The entity field manager service.
+   * @param \Drupal\mukurtu_core\Service\EntityTranslationResolver $translationResolver
+   *   Resolves entities to the current content language.
+   * @param \Drupal\mukurtu_core\Service\TermVisibility $termVisibility
+   *   Decides which terms the current user can see.
    */
   public function __construct(
     protected EntityFieldManagerInterface $entityFieldManager,
+    protected EntityTranslationResolver $translationResolver,
     protected TermVisibility $termVisibility,
   ) {
     $this->mukurtuTaxonomySettings = $this->config('mukurtu_taxonomy.settings');
@@ -49,6 +55,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
   public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('entity_field.manager'),
+      $container->get('mukurtu_core.entity_translation_resolver'),
       $container->get('mukurtu_core.term_visibility'),
     );
   }
@@ -151,6 +158,7 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     }
 
     $build = [];
+    $cache = new CacheableMetadata();
     $allRecords = $this->getTaxonomyTermRecords($taxonomy_term);
 
     // Load the entities so we can render them.
@@ -191,6 +199,30 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       'type' => 'entity:node',
       'options' => ['view_mode' => 'grid_browse'],
     ]);
+    // The same numbered pager as the browse pages. Twelve items fills every row
+    // in the three- and four-column layouts.
+    $view->display_handler->overrideOption('pager', [
+      'type' => 'full',
+      'options' => [
+        'offset' => 0,
+        'items_per_page' => 12,
+        'id' => 0,
+        'quantity' => 9,
+        'tags' => [
+          'next' => (string) $this->t('Next ›'),
+          'previous' => (string) $this->t('‹ Previous'),
+          'first' => (string) $this->t('« First'),
+          'last' => (string) $this->t('Last »'),
+        ],
+      ],
+    ]);
+    // The listing includes content tagged with terms nested under this one,
+    // so moving a term changes it (#2521). Views caches the listing apart
+    // from this page, under the view's own tags, which a term move doesn't
+    // invalidate: tag the rendered listing with the vocabulary's term list,
+    // and don't cache the query results, which can't carry that tag.
+    $view->display_handler->overrideOption('cache', ['type' => 'none', 'options' => []]);
+    $view->element['#cache']['tags'][] = 'taxonomy_term_list:' . $taxonomy_term->bundle();
     $referencedContent = $view->buildRenderable('default');
 
     $build['records'] = [
@@ -201,6 +233,8 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
       '#records' => $records,
       '#referenced_content' => $referencedContent,
       '#term_description' => $this->getTermDescription($taxonomy_term),
+      '#nested_terms' => $this->getNestedTerms($taxonomy_term, $cache),
+      '#sibling_terms' => $this->getSiblingTerms($taxonomy_term, $cache),
       '#attached' => [
         'library' => [
           'field_group/element.horizontal_tabs',
@@ -220,7 +254,10 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     // tag would require a custom cache tag strategy.
     $person_vocabularies = $this->mukurtuTaxonomySettings->get('person_records_enabled_vocabularies') ?? [];
     $place_vocabularies = $this->mukurtuTaxonomySettings->get('place_records_enabled_vocabularies') ?? [];
-    $cache = CacheableMetadata::createFromRenderArray($build)->addCacheableDependency($visibility);
+    $cache = CacheableMetadata::createFromRenderArray($build)->merge($cache)
+      ->addCacheableDependency($visibility);
+    // The nested terms list changes when a term in the vocabulary moves.
+    $cache->addCacheTags(['taxonomy_term_list:' . $taxonomy_term->bundle()]);
     if (in_array($taxonomy_term->bundle(), $person_vocabularies)) {
       $cache->addCacheTags(['node_list:person']);
     }
@@ -230,6 +267,80 @@ class TaxonomyRecordViewController extends ControllerBase implements ContainerIn
     $cache->applyTo($build);
 
     return $build;
+  }
+
+  /**
+   * Gets the other terms under the same parent, in the vocabulary's order.
+   *
+   * @param \Drupal\taxonomy\TermInterface $term
+   *   The term.
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache
+   *   Collects the cacheability of the list.
+   *
+   * @return array|null
+   *   A heading naming the parent, and the terms, or NULL if there are none
+   *   or the visitor can't see the parent.
+   */
+  protected function getSiblingTerms(TermInterface $term, CacheableMetadata $cache): ?array {
+    $parent = $term->get('parent')->entity;
+    if (!$parent instanceof TermInterface) {
+      return NULL;
+    }
+    $access = $parent->access('view', NULL, TRUE);
+    $cache->addCacheableDependency($access);
+    $cache->addCacheableDependency($parent);
+    $cache->addCacheableDependency($this->termVisibility->getCacheability($parent->bundle()));
+    // A hidden term's name can be sensitive (#2643).
+    if (!$access->isAllowed() || !$this->termVisibility->isVisible($parent)) {
+      return NULL;
+    }
+    $terms = array_values(array_filter(
+      $this->getNestedTerms($parent, $cache),
+      fn ($sibling) => $sibling['id'] !== (int) $term->id(),
+    ));
+    if (!$terms) {
+      return NULL;
+    }
+    return [
+      // The placeholder marks the name, so the theme can set it apart.
+      'heading' => $this->t('Also in %term', ['%term' => $this->translationResolver->translate($parent)->label()]),
+      'terms' => $terms,
+    ];
+  }
+
+  /**
+   * Gets the terms nested directly under a term, in the vocabulary's order.
+   *
+   * @param \Drupal\taxonomy\TermInterface $term
+   *   The term.
+   * @param \Drupal\Core\Cache\CacheableMetadata $cache
+   *   Collects the cacheability of the list.
+   *
+   * @return array
+   *   Each nested term's name, in the current language, and URL. Terms the
+   *   visitor can't see are left out.
+   */
+  protected function getNestedTerms(TermInterface $term, CacheableMetadata $cache): array {
+    $cache->addCacheContexts(['languages:language_content']);
+    $cache->addCacheableDependency($this->termVisibility->getCacheability($term->bundle()));
+    /** @var \Drupal\taxonomy\TermStorageInterface $storage */
+    $storage = $this->entityTypeManager()->getStorage('taxonomy_term');
+    $nested = [];
+    foreach ($storage->loadTree($term->bundle(), (int) $term->id(), 1, TRUE) as $child) {
+      $access = $child->access('view', NULL, TRUE);
+      $cache->addCacheableDependency($access);
+      $cache->addCacheableDependency($child);
+      // A hidden term's name can be sensitive (#2643).
+      if (!$access->isAllowed() || !$this->termVisibility->isVisible($child)) {
+        continue;
+      }
+      $nested[] = [
+        'id' => (int) $child->id(),
+        'name' => $this->translationResolver->translate($child)->label(),
+        'url' => $child->toUrl(),
+      ];
+    }
+    return $nested;
   }
 
   /**

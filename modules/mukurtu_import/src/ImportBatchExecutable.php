@@ -35,6 +35,18 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
   protected ?float $importStartedAt = NULL;
 
   /**
+   * Terms whose parent couldn't be found once the whole file was imported.
+   */
+  protected int $unresolvedParents = 0;
+
+  /**
+   * Counts terms left at the top level because their parent wasn't found.
+   */
+  public function getUnresolvedParentCount(): int {
+    return $this->unresolvedParents;
+  }
+
+  /**
    * Batch import from a set of migration definitions rather than plugins.
    */
   public function batchImportMultiple(array $migration_definitons) {
@@ -181,6 +193,9 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     foreach ($message->getErrorMessages() as $error_message) {
       $context['results'][$migration->id()]['messages'][] = (object) ['message' => $error_message];
     }
+    // Shown as a warning by batchFinishedImport(), not a failure: the terms
+    // themselves were imported.
+    $context['results'][$migration->id()]['@unresolved_parents'] = ($context['results'][$migration->id()]['@unresolved_parents'] ?? 0) + $executable->getUnresolvedParentCount();
 
     // Store the definition for ID map cleanup after the batch completes.
     if (!$started_busy) {
@@ -292,9 +307,20 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // batchProcessImportDefinition() above) that aren't per-migration
     // results -- only entries with a '@numitems' key are.
     $messages = [];
+    $warnings = $store->get('batch_results_warnings') ?? [];
     foreach ($results as $migration_id => $migration_result) {
       if ($migration_id === 'definitions' || !is_array($migration_result) || !isset($migration_result['@numitems'])) {
         continue;
+      }
+
+      if (!empty($migration_result['@unresolved_parents'])) {
+        $warnings[] = [
+          'fid' => $migration_result['fid'],
+          'message' => \Drupal::translation()->formatPlural($migration_result['@unresolved_parents'],
+            '1 term was imported at the top level because its parent term couldn\'t be found.',
+            '@count terms were imported at the top level because their parent terms couldn\'t be found.'
+          ),
+        ];
       }
 
       $imported_count += ($migration_result['@created'] ?? 0) + ($migration_result['@updated'] ?? 0);
@@ -358,6 +384,7 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
     // the batch.
     $store->set('batch_results_noop', $has_silent_noop && !$has_row_failures && !$has_migration_failure && $imported_count === 0);
     $store->set('batch_results_messages', $messages);
+    $store->set('batch_results_warnings', $warnings);
 
     // Summarize created/updated/failed counts per target entity type. Unlike
     // node/media/community/protocol/taxonomy_term, User entities have no
@@ -474,11 +501,16 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
 
   /**
    * {@inheritdoc}
+   *
+   * Once every row is in, sets the term parents that were named before their
+   * own row was imported (#2520). A large file takes several requests, and
+   * only the last one returns RESULT_COMPLETED. The deferred parents are kept
+   * in key-value storage between requests.
    */
   public function import() {
     $this->importStartedAt = microtime(TRUE);
     try {
-      return parent::import();
+      $result = parent::import();
     }
     finally {
       // migrate_tools removes this executable's event listeners on
@@ -487,6 +519,11 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       // same migration in this request.
       $this->importStartedAt = NULL;
     }
+    if ($result === MigrationInterface::RESULT_COMPLETED) {
+      $this->unresolvedParents = \Drupal::service('mukurtu_import.term_parent_resolver')
+        ->resolveDeferred($this->migration->id(), $this->migration->getIdMap());
+    }
+    return $result;
   }
 
   /**

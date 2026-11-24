@@ -14,6 +14,11 @@ services:
     class: Drupal\mukurtu_browse\Service\BrowseLinkBuilder
     arguments: ['@config.factory', '@entity_type.manager']
 
+  mukurtu_browse.term_facet_name_redirect:
+    class: Drupal\mukurtu_browse\EventSubscriber\TermFacetNameRedirectSubscriber
+    arguments: ['@config.factory', '@entity_type.manager', '@?mukurtu_search.nested_term_facets']
+    tags:
+      - { name: event_subscriber }
   mukurtu_browse.header_suggestion_builder:
     class: Drupal\mukurtu_browse\Service\HeaderSuggestionBuilder
     arguments: ['@entity.repository', '@entity_type.bundle.info', '@mukurtu_browse.browse_link_builder']

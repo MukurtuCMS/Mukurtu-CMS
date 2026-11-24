@@ -14,9 +14,101 @@
   }
 }
 
-.referenced-content--divided {
-  @include mixins.divider;
-  margin-block-start: 0;
+// Nested terms sit beside the content on wide screens, so content starts near
+// the top however many there are (#2611). The panel comes first in the page,
+// which keeps it above the content on a small screen.
+.taxonomy-term-layout--panel {
+  display: grid;
+  gap: var(--v-space-m);
+  grid-template-columns: minmax(0, 1fr);
+
+  @include include-media.media('>=lg') {
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) 18rem;
+
+    .taxonomy-term-panel {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .taxonomy-term-main {
+      grid-column: 1;
+      grid-row: 1;
+    }
+  }
+}
+
+.taxonomy-term-panel {
+  border: 1px solid currentcolor;
+  border-radius: 4px;
+  padding: var(--v-space-2xs) var(--v-space-xs);
+}
+
+.taxonomy-term-panel__heading {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-block: 0 0.25rem;
+  overflow-wrap: anywhere;
+
+  // "Also in Washington": the words stay light and the name stands out. Bold
+  // rather than italic, which reads poorly in many writing systems.
+  &:has(em) {
+    font-weight: 400;
+  }
+
+  em {
+    font-style: normal;
+    font-weight: 700;
+  }
+}
+
+.taxonomy-term-panel__list {
+  list-style: none;
+  margin: 0 0 var(--v-space-2xs);
+  padding: 0;
+
+  li {
+    list-style: none;
+    padding-block: 0.125rem;
+  }
+
+  li[hidden] {
+    display: none;
+  }
+
+  a {
+    overflow-wrap: anywhere;
+  }
+
+  &:last-child {
+    margin-block-end: 0;
+  }
+}
+
+// Reads as a link, since it only reveals more of the list.
+.taxonomy-term-panel__more {
+  background: none;
+  border: 0;
+  color: var(--brand-primary-dark);
+  cursor: pointer;
+  font: inherit;
+  margin-block-end: var(--v-space-2xs);
+  min-height: 24px;
+  padding: 0;
+  text-decoration: underline;
+
+  &:last-child {
+    margin-block-end: 0;
+  }
+}
+
+.taxonomy-term-main__heading {
+  font-size: 1.25rem;
+  margin-block: var(--v-space-s) var(--v-space-2xs);
+
+  &:first-child {
+    margin-block-start: 0;
+  }
 }
 
 .taxonomy-term-page .grid:has(.views-row) {
@@ -41,5 +133,43 @@
       gap: var(--v-space-2xs);
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
+  }
+}
+
+// One column fewer beside the panel.
+.taxonomy-term-layout--panel .grid:has(.views-row) .views-element-container > div {
+  @include include-media.media('>=xl') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+// The pager is part of the view, so it's a cell of the content grid unless it
+// spans the row. These match the browse pages' pager.
+.taxonomy-term-main .pager {
+  grid-column: 1 / -1;
+  margin-block-start: var(--v-space-s);
+
+  &__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--v-space-4xxs);
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__item {
+    font-weight: var(--text-bold);
+    list-style: none;
+
+    a {
+      padding: var(--v-space-5xs);
+    }
+  }
+
+  .is-active a {
+    border-block-end: 5px solid var(--brand-secondary);
+    color: var(--brand-text-color);
+    text-decoration: none;
   }
 }

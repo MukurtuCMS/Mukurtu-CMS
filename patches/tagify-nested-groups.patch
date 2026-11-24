@@ -1,0 +1,442 @@
+diff --git a/css/tagify.css b/css/tagify.css
+index 1c53c01..8075594 100644
+--- a/css/tagify.css
++++ b/css/tagify.css
+@@ -392,8 +392,35 @@ select.tagify-select-widget {
+   height: 30px;
+ }
+ 
+-.tagify__tag-text .tagify__tag-text-parent {
++.tagify__tag-text .tagify__tag-text-parent,
++.tagify__tag-text-with-entity-id .tagify__tag-text-parent {
+   font-weight: normal;
++  font-size: 0.85em;
++}
++
++/* A path can be long, so let its tag wrap rather than hide the term's name.
++   Not while Tagify shrinks a removed tag to nothing, or its text wraps a
++   letter per line and the field grows until it has gone. */
++
++.tagify__tag:not(.tagify__tag--hide):has(.tagify__tag-text-parent) {
++  --tag-inset-shadow-size: 100vmax;
++  height: auto;
++  min-height: 32px;
++}
++
++.tagify__tag:not(.tagify__tag--hide):has(.tagify__tag-text-parent) > div {
++  min-width: 0;
++  white-space: normal;
++}
++
++.tagify__tag:not(.tagify__tag--hide) .tagify__tag-text:has(.tagify__tag-text-parent),
++.tagify__tag:not(.tagify__tag--hide) .tagify__tag-text-with-entity-id:has(.tagify__tag-text-parent) {
++  white-space: normal !important;
++  overflow-wrap: anywhere;
++}
++
++.tagify__tag .tagify__tag__removeBtn {
++  flex-shrink: 0;
+ }
+ 
+ .tagify__tag-text .tagify__tag-text-child {
+@@ -402,6 +429,10 @@ select.tagify-select-widget {
+ 
+ /* Group suggestions */
+ 
++.tagify__dropdown__itemsGroup--nested {
++  padding-inline-start: 1rem;
++}
++
+ .tagify__dropdown__itemsGroup {
+   display: flex;
+   flex-direction: column;
+diff --git a/js/tagify.js b/js/tagify.js
+index bcca509..07f1167 100644
+--- a/js/tagify.js
++++ b/js/tagify.js
+@@ -122,15 +122,20 @@
+          * @param {string} tagLabel - The label.
+          * @param {string} tagInfoLabel - The info label information.
+          * @param {string} tagEntityId - The entity id.
++         * @param {string} tagParentPath - The escaped path to the term's parent.
+          * @return {string} The tag markup HTML.
+          */
+-        function tagMarkup(tagLabel, tagInfoLabel, tagEntityId) {
++        function tagMarkup(tagLabel, tagInfoLabel, tagEntityId, tagParentPath) {
+           return `<div id="tagify__tag-items">${tagEntityId}
+             <span class="${
+               tagEntityId
+                 ? 'tagify__tag-text-with-entity-id'
+                 : 'tagify__tag-text'
+-            }">${tagLabel}</span>${tagInfoLabel}</div>`;
++            }">${
++              tagParentPath
++                ? `<span class="tagify__tag-text-parent">${tagParentPath} › </span>`
++                : ''
++            }${tagLabel}</span>${tagInfoLabel}</div>`;
+         }
+ 
+         /**
+@@ -148,24 +153,30 @@
+           const label = tagData.label ?? tagData.value;
+           // Drupal.t() escapes its '@' placeholders, so give it decoded text.
+           const plainLabel = Drupal.tagify.decodeEntities(label);
++          // A nested term shows where it sits, so two terms with the same
++          // name can be told apart. The path isn't escaped by Tagify.
++          const plainPath = Drupal.tagify.decodeEntities(tagData.parent_name ?? '');
++          const parentPath = Drupal.checkPlain(plainPath);
++          const fullName = plainPath ? `${plainPath} › ${plainLabel}` : plainLabel;
+ 
+-          return `<tag title="${label}"
++          return `<tag title="${parentPath ? `${parentPath} › ${label}` : label}"
+             contenteditable='false'
+             spellcheck='false'
+             tabIndex="-1"
+             class="tagify__tag ${tagData.class ? tagData.class : ''}"
+             ${this.getAttributes(tagData)}>
+               <x id="tagify__tag-remove-button"
+-                title="${Drupal.t('Remove @label', { '@label': plainLabel })}"
++                title="${Drupal.t('Remove @label', { '@label': fullName })}"
+                 class='tagify__tag__removeBtn'
+                 role='button'
+-                aria-label="${Drupal.t('remove @label tag', { '@label': plainLabel })}"
++                aria-label="${Drupal.t('remove @label tag', { '@label': fullName })}"
+                 tabindex="0">
+               </x>
+               ${tagMarkup(
+                 label,
+                 infoLabelMarkup(tagData.info_label),
+                 entityIdMarkup(tagData.entity_id),
++                parentPath,
+               )}
+           </tag>`;
+         }
+@@ -279,29 +290,24 @@
+           },
+         });
+ 
++        // Tagify scrolls the highlighted suggestion's parent, which is a group
++        // rather than the scrolling list when suggestions are nested, so keep
++        // the highlight in view during arrow-key navigation.
++        const { highlightOption } = tagify.dropdown;
++        tagify.dropdown.highlightOption = (elm, ...args) => {
++          const result = highlightOption(elm, ...args);
++          if (elm && elm.scrollIntoView) {
++            elm.scrollIntoView({ block: 'nearest' });
++          }
++          return result;
++        };
++
+         // Split the taxonomy terms into groups, when rendering the suggestions list dropdown:
+         // (since each term also has a 'parent' property)
+         tagify.dropdown.createListHTML = (suggestionsList) => {
+           if (isTagLimitReached()) {
+             return '';
+           }
+-          const parentsOfTerms = suggestionsList.reduce((acc, suggestion) => {
+-            const parent = suggestion.parent_name || '';
+-
+-            if (!acc[parent]) acc[parent] = [suggestion];
+-            else acc[parent].push(suggestion);
+-
+-            return acc;
+-          }, {});
+-
+-          // Build a set of parent names that have children
+-          const parentNamesWithChildren = new Set();
+-          Object.keys(parentsOfTerms).forEach((key) => {
+-            if (key) {
+-              parentNamesWithChildren.add(key);
+-            }
+-          });
+-
+           const getTermsSuggestionsHTML = (parentTerms) =>
+             parentTerms
+               .map((suggestion) => {
+@@ -328,51 +334,66 @@
+               })
+               .join('');
+ 
+-          // Assign the item to a group.
+-          return Object.entries(parentsOfTerms)
+-            .map(([parentName, childName]) => {
+-              if (parentName) {
+-                // Find the parent suggestion to get its attributes
+-                const parentSuggestion = suggestionsList.find(
+-                  (s) => s.label === parentName && !s.parent_name,
+-                );
+-
+-                // Create parent header (clickable only if parentSelection is enabled)
+-                let parentHeaderHTML = '';
+-                const isParentSelectionEnabled = parseInt(
+-                  input.dataset.parentSelection,
+-                  10,
+-                );
++          // Show the suggestions as a tree: each term is followed by its
++          // suggested nested terms, in a group named after it. Nested terms
++          // whose parent isn't suggested are grouped under the parent's
++          // path. Groups use the parent's ID, so two parents with the same
++          // name stay apart.
++          const isParentSelectionEnabled = parseInt(
++            input.dataset.parentSelection,
++            10,
++          );
++          const idOf = (suggestion) => String(suggestion.entity_id ?? '');
++          const suggested = new Set(suggestionsList.map(idOf));
++          const childrenOf = {};
++          suggestionsList.forEach((suggestion) => {
++            const parent = String(suggestion.parent_id || '');
++            if (parent && suggested.has(parent)) {
++              (childrenOf[parent] = childrenOf[parent] || []).push(suggestion);
++            }
++          });
+ 
+-                if (parentSuggestion && isParentSelectionEnabled) {
+-                  const value = tagify.dropdown.getMappedValue.call(
+-                    tagify,
+-                    parentSuggestion,
+-                  );
+-                  // Keep the raw value on the data model; rendering escapes it.
+-                  parentSuggestion.label = value;
++          const renderBranch = (suggestion) => {
++            const children = childrenOf[idOf(suggestion)];
++            if (!children) {
++              return getTermsSuggestionsHTML([suggestion]);
++            }
++            const name = Drupal.checkPlain(String(suggestion.label ?? ''));
++            // The parent is an option only if parents can be selected.
++            const header = isParentSelectionEnabled
++              ? getTermsSuggestionsHTML([suggestion])
++              : `<span class="dropdown_group" aria-hidden="true">${name}</span>`;
++            return `${header}<div class="tagify__dropdown__itemsGroup tagify__dropdown__itemsGroup--nested" role="group" aria-label="${name}">${children
++              .map(renderBranch)
++              .join('')}</div>`;
++          };
+ 
+-                  parentHeaderHTML = `<div class="tagify__dropdown__item tagify__dropdown__item--parent" ${
+-                    tagify.getAttributes
+-                      ? tagify.getAttributes(parentSuggestion)
+-                      : ''
+-                  } tabindex="0" role="option">
+-                    <div class="tagify__dropdown__item-highlighted dropdown_group">${Drupal.checkPlain(parentName)}</div>
+-                  </div>`;
+-                } else {
+-                  parentHeaderHTML = `<span class="dropdown_group">${Drupal.checkPlain(parentName)}</span>`;
+-                }
++          const entries = [];
++          const pathGroups = {};
++          suggestionsList.forEach((suggestion) => {
++            const parent = String(suggestion.parent_id || '');
++            if (!parent) {
++              entries.push(suggestion);
++            }
++            else if (!suggested.has(parent)) {
++              if (!pathGroups[parent]) {
++                pathGroups[parent] = { path: suggestion.parent_name || '', items: [] };
++                entries.push(pathGroups[parent]);
++              }
++              pathGroups[parent].items.push(suggestion);
++            }
++          });
+ 
+-                return `<div class="tagify__dropdown__itemsGroup" data-title="${Drupal.checkPlain(parentName)}">
+-                ${parentHeaderHTML}
+-                ${getTermsSuggestionsHTML(childName)}
+-              </div>`;
++          return entries
++            .map((entry) => {
++              if (!entry.items) {
++                return renderBranch(entry);
+               }
+-              // Filter out items that are parents with children
+-              const filteredChildName = childName.filter(
+-                (item) => !parentNamesWithChildren.has(item.label),
+-              );
+-              return getTermsSuggestionsHTML(filteredChildName);
++              const path = Drupal.checkPlain(entry.path);
++              return `<div class="tagify__dropdown__itemsGroup" role="group" aria-label="${path}" data-title="${path}">
++                <span class="dropdown_group" aria-hidden="true">${path}</span>
++                ${entry.items.map(renderBranch).join('')}
++              </div>`;
+             })
+             .join('');
+         };
+@@ -415,6 +436,7 @@
+                 value: current.entity_id,
+                 entity_id: current.entity_id,
+                 parent_name: current.parent_name,
++                parent_id: current.parent_id,
+                 info_label: current.info_label,
+                 label: current.label,
+                 editable: current.editable,
+diff --git a/src/Element/EntityAutocompleteTagify.php b/src/Element/EntityAutocompleteTagify.php
+index 3fd0b88..b7623a3 100644
+--- a/src/Element/EntityAutocompleteTagify.php
++++ b/src/Element/EntityAutocompleteTagify.php
+@@ -339,7 +339,9 @@ class EntityAutocompleteTagify extends Textfield {
+       // string and never matched, so this branch was dead. Attach the parent
+       // name to the item (not the outer list) to keep the JSON an array.
+       if ($entity_id && $entity->getEntityTypeId() === 'taxonomy_term') {
+-        $item['parent_name'] = \Drupal::service('tagify.hierarchical_term_manager')->getParentName((string) $entity_id, $entity->bundle());
++        $hierarchical_term_manager = \Drupal::service('tagify.hierarchical_term_manager');
++        $item['parent_name'] = $hierarchical_term_manager->getParentName((string) $entity_id, $entity->bundle());
++        $item['parent_id'] = $hierarchical_term_manager->getParentId((string) $entity_id, $entity->bundle());
+       }
+ 
+       $default_value[] = $item;
+diff --git a/src/Services/TagifyHierarchicalTermManager.php b/src/Services/TagifyHierarchicalTermManager.php
+index bd53d75..ab96c84 100644
+--- a/src/Services/TagifyHierarchicalTermManager.php
++++ b/src/Services/TagifyHierarchicalTermManager.php
+@@ -5,6 +5,7 @@ declare(strict_types=1);
+ namespace Drupal\tagify\Services;
+ 
+ use Drupal\Core\Entity\EntityInterface;
++use Drupal\Core\Entity\EntityRepositoryInterface;
+ use Drupal\Core\Entity\EntityTypeManagerInterface;
+ 
+ /**
+@@ -24,9 +25,12 @@ class TagifyHierarchicalTermManager implements TagifyHierarchicalTermManagerInte
+    *
+    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+    *   The entity type manager.
++   * @param \Drupal\Core\Entity\EntityRepositoryInterface|null $entityRepository
++   *   The entity repository, used to translate parent names.
+    */
+   public function __construct(
+     protected readonly EntityTypeManagerInterface $entityTypeManager,
++    protected readonly ?EntityRepositoryInterface $entityRepository = NULL,
+   ) {}
+ 
+   /**
+@@ -58,12 +62,14 @@ class TagifyHierarchicalTermManager implements TagifyHierarchicalTermManagerInte
+ 
+     $result = [$item];
+ 
+-    while (($parent = $item->parents[0] ?? NULL) && $parent !== $entity_id) {
+-      $result[] = $tree[$parent];
+-      $entity_id = $parent;
++    // Walk up from the term, one parent at a time, stopping at the top or at
++    // a parent that's already in the chain.
++    while (($parent = $item->parents[0] ?? NULL) && isset($tree[$parent]) && !isset($result[$parent])) {
++      $item = $tree[$parent];
++      $result[$parent] = $item;
+     }
+ 
+-    return array_reverse($result);
++    return array_reverse(array_values($result));
+   }
+ 
+   /**
+@@ -71,13 +77,34 @@ class TagifyHierarchicalTermManager implements TagifyHierarchicalTermManagerInte
+    */
+   public function getParentName(string $entity_id, string $bundle): string {
+     $tree = $this->getTree($bundle);
+-    $parents = $this->getParents($tree, $entity_id);
+-    if (count($parents) < 2) {
++    // The term's ancestors, top-level first, without the term itself.
++    $ancestors = array_slice($this->getParents($tree, $entity_id), 0, -1);
++    if (!$ancestors) {
+       return '';
+     }
+ 
+-    $parent = $parents[0];
+-    return $parent ? $parent->name : '';
++    // The tree holds names in the vocabulary's default language, so load the
++    // terms to name them in the current content language.
++    $terms = $this->entityTypeManager->getStorage('taxonomy_term')
++      ->loadMultiple(array_map(fn ($ancestor) => $ancestor->tid, $ancestors));
++    $names = [];
++    foreach ($ancestors as $ancestor) {
++      $term = $terms[$ancestor->tid] ?? NULL;
++      if ($term && $this->entityRepository) {
++        $term = $this->entityRepository->getTranslationFromContext($term);
++      }
++      $names[] = $term ? $term->label() : $ancestor->name;
++    }
++    return implode(' › ', $names);
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getParentId(string $entity_id, string $bundle): string {
++    $tree = $this->getTree($bundle);
++    $parent = $tree[$entity_id]->parents[0] ?? 0;
++    return $parent ? (string) $parent : '';
+   }
+ 
+   /**
+diff --git a/src/Services/TagifyHierarchicalTermManagerInterface.php b/src/Services/TagifyHierarchicalTermManagerInterface.php
+index ac12139..d8202a5 100644
+--- a/src/Services/TagifyHierarchicalTermManagerInterface.php
++++ b/src/Services/TagifyHierarchicalTermManagerInterface.php
+@@ -36,18 +36,35 @@ interface TagifyHierarchicalTermManagerInterface {
+   public function getParents(array $tree, string $entity_id): array;
+ 
+   /**
+-   * Get parent name.
++   * Gets the name of a term's parent, for grouping suggestions.
++   *
++   * The name is the path from the top-level term down to the direct parent,
++   * in the current content language, for example "Washington › Spokane". Two
++   * parents with the same name are told apart by their paths.
+    *
+    * @param string $entity_id
+-   *   The ID of the entity.
++   *   The term ID.
+    * @param string $bundle
+-   *   The name of the bundle.
++   *   The vocabulary ID.
+    *
+    * @return string
+-   *   The parent name.
++   *   The parent's path, or an empty string for a top-level term.
+    */
+   public function getParentName(string $entity_id, string $bundle): string;
+ 
++  /**
++   * Gets the ID of a term's direct parent, for grouping suggestions.
++   *
++   * @param string $entity_id
++   *   The term ID.
++   * @param string $bundle
++   *   The vocabulary ID.
++   *
++   * @return string
++   *   The parent's term ID, or an empty string for a top-level term.
++   */
++  public function getParentId(string $entity_id, string $bundle): string;
++
+   /**
+    * Check if the entity is hierarchical.
+    *
+diff --git a/src/TagifyEntityAutocompleteMatcher.php b/src/TagifyEntityAutocompleteMatcher.php
+index 0f906cc..2368b54 100644
+--- a/src/TagifyEntityAutocompleteMatcher.php
++++ b/src/TagifyEntityAutocompleteMatcher.php
+@@ -175,9 +175,11 @@ class TagifyEntityAutocompleteMatcher implements TagifyEntityAutocompleteMatcher
+       'info_label' => $info_label,
+       'editable' => FALSE,
+     ];
+-    // Add the parent name to the tagify item.
++    // Add the parent to the tagify item, so suggestions can be grouped.
+     $tagify_items['parent_name'] = $this->hierarchicalTermManager
+       ->getParentName($entity_id, $bundle);
++    $tagify_items['parent_id'] = $this->hierarchicalTermManager
++      ->getParentId($entity_id, $bundle);
+ 
+     return $tagify_items;
+   }
+diff --git a/tagify.services.yml b/tagify.services.yml
+index d2ed1f6..8d67624 100644
+--- a/tagify.services.yml
++++ b/tagify.services.yml
+@@ -11,6 +11,7 @@ services:
+     class: Drupal\tagify\Services\TagifyHierarchicalTermManager
+     arguments:
+       - '@entity_type.manager'
++      - '@entity.repository'
+   tagify.theme_resolver:
+     class: Drupal\tagify\Services\TagifyThemeResolver
+     arguments:

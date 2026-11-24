@@ -392,4 +392,38 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
     ], $this->getTempstoreValue(ImportStatus::TEMPSTORE_KEY));
   }
 
+  /**
+   * Parents that couldn't be found are a warning, not a failure (#2520).
+   *
+   * The terms themselves were imported, so the import still succeeds, and
+   * the warning joins any set before the batch ran.
+   */
+  public function testUnresolvedParentsWarnNotFail(): void {
+    \Drupal::service('tempstore.private')->get('mukurtu_import')->set('batch_results_warnings', [
+      ['fid' => 7, 'message' => 'Earlier warning.'],
+    ]);
+    $results = [
+      '12345__7__taxonomy_term' => [
+        '@numitems' => 3,
+        '@created' => 3,
+        '@updated' => 0,
+        '@failures' => 0,
+        '@ignored' => 0,
+        '@unresolved_parents' => 2,
+        '@name' => '12345__7__taxonomy_term',
+        'fid' => 7,
+        'messages' => [],
+      ],
+    ];
+
+    ImportBatchExecutable::batchFinishedImport(TRUE, $results, []);
+
+    $this->assertTrue($this->getTempstoreValue('batch_results_success'));
+    $this->assertSame([], $this->getTempstoreValue('batch_results_messages'));
+    $warnings = $this->getTempstoreValue('batch_results_warnings');
+    $this->assertCount(2, $warnings);
+    $this->assertSame(7, $warnings[1]['fid']);
+    $this->assertSame('2 terms were imported at the top level because their parent terms couldn\'t be found.', (string) $warnings[1]['message']);
+  }
+
 }
