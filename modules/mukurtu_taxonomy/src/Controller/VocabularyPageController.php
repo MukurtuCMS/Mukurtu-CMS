@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\mukurtu_taxonomy\Controller;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\taxonomy\VocabularyInterface;
@@ -48,9 +49,16 @@ class VocabularyPageController extends ControllerBase {
   public function build(VocabularyInterface $taxonomy_vocabulary): array {
     // loadTree() doesn't check access, so unpublished terms are removed here.
     // Terms nested under one go with it, since their parent isn't listed.
+    // Which terms someone can see depends on more than their permissions
+    // (#2785), so each check's cacheability is kept.
+    $cacheability = new CacheableMetadata();
     $terms = array_filter(
       $this->entityTypeManager()->getStorage('taxonomy_term')->loadTree($taxonomy_vocabulary->id(), 0, NULL, TRUE),
-      fn ($term) => $term->access('view'),
+      function ($term) use ($cacheability) {
+        $access = $term->access('view', NULL, TRUE);
+        $cacheability->addCacheableDependency($access);
+        return $access->isAllowed();
+      },
     );
     $by_parent = [];
     foreach ($terms as $term) {
@@ -71,7 +79,7 @@ class VocabularyPageController extends ControllerBase {
       $groups = $this->groupByLetter($items);
     }
 
-    return [
+    $build = [
       '#theme' => 'mukurtu_vocabulary_page',
       '#description' => $taxonomy_vocabulary->getDescription(),
       '#items' => $groups ? [] : $items,
@@ -84,6 +92,8 @@ class VocabularyPageController extends ControllerBase {
         'tags' => array_merge($taxonomy_vocabulary->getCacheTags(), ['taxonomy_term_list:' . $taxonomy_vocabulary->id()]),
       ],
     ];
+    CacheableMetadata::createFromRenderArray($build)->merge($cacheability)->applyTo($build);
+    return $build;
   }
 
   /**

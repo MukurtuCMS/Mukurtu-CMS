@@ -55,9 +55,17 @@ class VocabularyPageTest extends EntityKernelTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('taxonomy_term');
+    foreach (['user', 'file', 'node', 'media', 'paragraph', 'og_membership', 'community', 'protocol'] as $entity_type) {
+      $this->installEntitySchema($entity_type);
+    }
+    $this->installSchema('node', ['node_access']);
+    $this->installSchema('mukurtu_protocol', ['mukurtu_protocol_map', 'mukurtu_protocol_access']);
     $this->installConfig(['language']);
     ConfigurableLanguage::createFromLangcode('es')->save();
+    // These tests are about layout, so every term is listed. Which terms a
+    // visitor can see is tested in TermVisibilityTest.
     $this->vocabulary = Vocabulary::create(['vid' => 'location', 'name' => 'Location', 'description' => 'Places on this site.']);
+    $this->vocabulary->setThirdPartySetting('mukurtu_taxonomy', 'show_unused_terms', TRUE);
     $this->vocabulary->save();
     // The first user is user 1, who bypasses access checks.
     $this->createUser();
@@ -77,6 +85,8 @@ class VocabularyPageTest extends EntityKernelTestBase {
    * Builds the page.
    */
   protected function buildPage(): array {
+    // The service keeps visible terms for the rest of the request.
+    $this->container->set('mukurtu_core.term_visibility', NULL);
     return $this->container->get('class_resolver')
       ->getInstanceFromDefinition(VocabularyPageController::class)
       ->build($this->vocabulary);
@@ -88,6 +98,18 @@ class VocabularyPageTest extends EntityKernelTestBase {
   protected function renderPage(): string {
     $build = $this->buildPage();
     return (string) $this->container->get('renderer')->renderInIsolation($build);
+  }
+
+  /**
+   * The page varies by whatever decides which terms someone can see (#2785).
+   */
+  public function testCacheVariesByVisibility(): void {
+    $this->createTerm('Lake');
+    $cache = $this->buildPage()['#cache'];
+    $this->assertContains('mukurtu_memberships', $cache['contexts']);
+    $this->assertContains('user.node_grants:view', $cache['contexts']);
+    $this->assertContains('node_list', $cache['tags']);
+    $this->assertContains('media_list', $cache['tags']);
   }
 
   /**
