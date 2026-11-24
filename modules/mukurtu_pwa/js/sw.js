@@ -230,12 +230,27 @@ async function setSession(uid) {
   await setMeta('uid', uid);
 }
 
+// A random version 4 UUID. crypto.randomUUID() needs Safari 15.4, and older
+// iPads still run this worker.
+function uuid() {
+  if (self.crypto.randomUUID) {
+    return self.crypto.randomUUID();
+  }
+  const bytes = self.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return [8, 12, 16, 20, 32]
+    .map((end, i, ends) => hex.slice(i ? ends[i - 1] : 0, end))
+    .join('-');
+}
+
 // Device facts that survive only as long as this app's storage does.
 async function deviceFacts() {
   let deviceId = await getMeta('deviceId');
   let firstSeen = await getMeta('firstSeen');
   if (!deviceId) {
-    deviceId = self.crypto.randomUUID();
+    deviceId = uuid();
     firstSeen = Date.now();
     await setMeta('deviceId', deviceId);
     await setMeta('firstSeen', firstSeen);
@@ -389,7 +404,7 @@ function flushOutbox() {
 
 async function addToOutbox({ title, data, mimeType, name }) {
   const entry = {
-    id: self.crypto.randomUUID(),
+    id: uuid(),
     title,
     data,
     type: mimeType,
@@ -447,11 +462,17 @@ self.addEventListener('install', (event) => {
         if (response.ok && isDrupal(response)) {
           await cache.put(CONFIG.offlineUrl, response.clone());
           const html = await response.text();
-          const assets = [
-            ...html.matchAll(/(?:href|src)="([^"]+\.(?:css|js)(?:\?[^"]*)?)"/g),
-          ]
-            .map((match) => match[1].replace(/&amp;/g, '&'))
-            .filter((asset) => asset.startsWith('/') && !asset.startsWith('//'));
+          // A plain exec() loop: matchAll() needs Safari 13.
+          const pattern = /(?:href|src)="([^"]+\.(?:css|js)(?:\?[^"]*)?)"/g;
+          const assets = [];
+          let match = pattern.exec(html);
+          while (match) {
+            const asset = match[1].replace(/&amp;/g, '&');
+            if (asset.startsWith('/') && !asset.startsWith('//')) {
+              assets.push(asset);
+            }
+            match = pattern.exec(html);
+          }
           await Promise.all(
             assets.map((asset) =>
               fetch(asset)

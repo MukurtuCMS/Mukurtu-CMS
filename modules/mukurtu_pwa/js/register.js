@@ -5,14 +5,90 @@
 
 ((Drupal, drupalSettings) => {
   Drupal.mukurtuPwa = Drupal.mukurtuPwa || {};
+  const settings = drupalSettings.mukurtuPwa || {};
+
+  /**
+   * Replaces an element's children. replaceChildren() needs Safari 14.
+   */
+  Drupal.mukurtuPwa.replaceChildren = (element, children) => {
+    element.textContent = '';
+    children.forEach((child) => element.append(child));
+  };
+
+  // A random version 4 UUID. crypto.randomUUID() needs Safari 15.4.
+  function uuid() {
+    if (window.crypto.randomUUID) {
+      return window.crypto.randomUUID();
+    }
+    const bytes = window.crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join(
+      '',
+    );
+    return [8, 12, 16, 20, 32]
+      .map((end, i, ends) => hex.slice(i ? ends[i - 1] : 0, end))
+      .join('-');
+  }
+
+  /**
+   * Reports, once per launch, that this browser can't run the offline tests.
+   *
+   * Without this, a device that fails never shows up in the results.
+   */
+  function reportUnsupported(reason) {
+    let deviceId;
+    try {
+      if (sessionStorage.getItem('mukurtuPwaUnsupported')) {
+        return;
+      }
+      sessionStorage.setItem('mukurtuPwaUnsupported', '1');
+      deviceId = localStorage.getItem('mukurtuPwaDeviceId');
+      if (!deviceId) {
+        deviceId = uuid();
+        localStorage.setItem('mukurtuPwaDeviceId', deviceId);
+      }
+    } catch (e) {
+      deviceId = deviceId || uuid();
+    }
+    if (!settings.reportUrl || !navigator.onLine) {
+      return;
+    }
+    function send(token) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['X-CSRF-Token'] = token;
+      }
+      fetch(settings.reportUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers,
+        body: JSON.stringify({
+          deviceId,
+          time: Date.now(),
+          supported: false,
+          reason,
+          userAgent: navigator.userAgent,
+        }),
+      }).catch(() => {});
+    }
+    // A signed-in report needs a CSRF token first.
+    if (drupalSettings.user && String(drupalSettings.user.uid) !== '0') {
+      fetch(settings.tokenUrl, { credentials: 'same-origin' })
+        .then((response) => (response.ok ? response.text() : null))
+        .then((token) => send(token))
+        .catch(() => {});
+    } else {
+      send(null);
+    }
+  }
 
   if (!('serviceWorker' in navigator)) {
     Drupal.mukurtuPwa.supported = false;
+    reportUnsupported('no_service_worker');
     return;
   }
   Drupal.mukurtuPwa.supported = true;
-
-  const settings = drupalSettings.mukurtuPwa || {};
 
   /**
    * Sends a message to the service worker and resolves with its answer.
@@ -112,11 +188,21 @@
     .register(settings.serviceWorker, { scope: settings.scope })
     .then(async () => {
       const uid = drupalSettings.user ? String(drupalSettings.user.uid) : '0';
-      await Drupal.mukurtuPwa.ask({ type: 'session', uid });
-      reportOpen().catch(() => {});
+      // A worker that never starts leaves ask() waiting forever.
+      await Promise.race([
+        Drupal.mukurtuPwa.ask({ type: 'session', uid }),
+        new Promise((resolve, reject) => {
+          setTimeout(() => reject(new Error('worker_timeout')), 20000);
+        }),
+      ]);
+      reportOpen().catch(() => reportUnsupported('report_failed'));
       Drupal.mukurtuPwa.flush();
     })
-    .catch(() => {});
+    .catch((e) =>
+      reportUnsupported(
+        e && e.message === 'worker_timeout' ? 'worker_timeout' : 'worker_failed',
+      ),
+    );
 
   window.addEventListener('online', () => Drupal.mukurtuPwa.flush());
 })(Drupal, drupalSettings);

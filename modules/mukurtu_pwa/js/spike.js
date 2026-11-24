@@ -8,6 +8,15 @@
     new DOMParser().parseFromString(html, 'text/html').documentElement
       .textContent;
 
+  // File.arrayBuffer() needs Safari 14.
+  const readBytes = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(file);
+    });
+
   const megabytes = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
   async function renderStatus(wrapper) {
@@ -54,8 +63,9 @@
     const opens = await Drupal.mukurtuPwa.ask({ type: 'opens' });
     const table = wrapper.querySelector('.mukurtu-pwa-status__opens');
     const body = table.tBodies[0] || table.createTBody();
-    body.replaceChildren(
-      ...opens.map((open) => {
+    Drupal.mukurtuPwa.replaceChildren(
+      body,
+      opens.map((open) => {
         const row = document.createElement('tr');
         [
           new Date(open.time).toLocaleString(),
@@ -86,8 +96,9 @@
 
   async function renderOutbox(wrapper) {
     const entries = await Drupal.mukurtuPwa.ask({ type: 'outboxList' });
-    wrapper.querySelector('.mukurtu-pwa-outbox__list').replaceChildren(
-      ...entries.map((entry) => {
+    Drupal.mukurtuPwa.replaceChildren(
+      wrapper.querySelector('.mukurtu-pwa-outbox__list'),
+      entries.map((entry) => {
         const li = document.createElement('li');
         li.textContent = `${entry.title}: ${plain(statusLabel(entry))}`;
         return li;
@@ -111,7 +122,9 @@
               message.textContent = '';
               try {
                 if (button.dataset.action === 'persist') {
-                  await navigator.storage.persist();
+                  if (navigator.storage && navigator.storage.persist) {
+                    await navigator.storage.persist();
+                  }
                 } else if (button.dataset.action === 'fill') {
                   await Drupal.mukurtuPwa.ask({
                     type: 'fillTestData',
@@ -157,7 +170,7 @@
             await Drupal.mukurtuPwa.ask({
               type: 'outboxAdd',
               title,
-              data: await file.arrayBuffer(),
+              data: await readBytes(file),
               mimeType: file.type,
               name: file.name,
             });

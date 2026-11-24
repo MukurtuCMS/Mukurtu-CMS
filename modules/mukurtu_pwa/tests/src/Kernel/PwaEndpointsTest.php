@@ -258,6 +258,29 @@ class PwaEndpointsTest extends KernelTestBase {
   }
 
   /**
+   * Browsers that can't run the offline tests still show up, with a reason.
+   */
+  public function testUnsupportedReports(): void {
+    $request = Request::create('/pwa-spike/report', 'POST', [], [], [], [], json_encode([
+      'deviceId' => '1b4e28ba-2fa1-41d2-883f-0016d3cca427',
+      'time' => 1795000000000,
+      'supported' => FALSE,
+      'reason' => 'worker_timeout<script>',
+      'userAgent' => 'Old iPad',
+    ]));
+    $this->assertSame(200, $this->send($request)->getStatusCode());
+    $valid = json_decode((string) $request->getContent(), TRUE);
+    $valid['reason'] = 'worker_timeout';
+    $this->assertSame(200, $this->send(Request::create('/pwa-spike/report', 'POST', [], [], [], [], json_encode($valid)))->getStatusCode());
+
+    $reports = $this->results()['reports'];
+    $this->assertSame(['unknown', 'worker_timeout'], array_column($reports, 'reason'));
+    $this->assertFalse($reports[1]['supported']);
+    $this->assertSame('Old iPad', $reports[1]['userAgent']);
+    $this->assertArrayNotHasKey('itemsFound', $reports[1]);
+  }
+
+  /**
    * Results are for administrators, and come from the file.
    */
   public function testResults(): void {

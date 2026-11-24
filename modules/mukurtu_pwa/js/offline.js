@@ -29,8 +29,9 @@
               );
               empty.hidden = usable.length > 0;
               expired.hidden = !items.some((item) => item.expired);
-              list.replaceChildren(
-                ...usable.map((item) => {
+              Drupal.mukurtuPwa.replaceChildren(
+                list,
+                usable.map((item) => {
                   const li = document.createElement('li');
                   const link = document.createElement('a');
                   link.href = item.url;

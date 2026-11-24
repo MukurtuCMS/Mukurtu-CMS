@@ -334,9 +334,18 @@ final class SpikeController implements ContainerInjectionInterface {
     $allowed = [
       'deviceId', 'deviceFirstSeen', 'time', 'standalone', 'itemsTotal',
       'itemsFound', 'usage', 'quota', 'persisted', 'swVersion', 'userAgent',
+      'supported', 'reason',
     ];
     $report = array_intersect_key($data, array_flip($allowed));
     $report['userAgent'] = mb_substr((string) ($report['userAgent'] ?? ''), 0, 300);
+    // Browsers that can't run the offline tests say so, and why.
+    if (array_key_exists('reason', $report)) {
+      $reason = (string) $report['reason'];
+      $report['reason'] = preg_match('/^[a-z_]{1,40}$/', $reason) ? $reason : 'unknown';
+    }
+    if (array_key_exists('supported', $report)) {
+      $report['supported'] = (bool) $report['supported'];
+    }
     $report['uid'] = (int) $this->currentUser->id();
     $report['received'] = $this->time->getRequestTime();
 
