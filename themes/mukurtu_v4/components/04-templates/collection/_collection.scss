@@ -64,13 +64,20 @@
         position: relative;
         margin-block-end: var(--v-space-2xl);
         color: var(--color-white);
-        font-size: var(--font-size-heading-2xl);
+        // 56px with the side margins below left too little width on a
+        // phone, so even ordinary words broke mid-word through the
+        // overflow-wrap fallback that follows.
+        font-size: var(--font-size-heading-md);
         // A long, single-word (unbreakable) collection title can exceed
         // the narrow mobile column width at this font size; allow a
         // mid-word break as a last resort rather than overflowing
         // horizontally (issue #1997).
         overflow-wrap: anywhere;
         word-break: normal;
+
+        @include include-media.media('>=md') {
+          font-size: var(--font-size-heading-2xl);
+        }
 
         &::after {
           content: '';
@@ -85,7 +92,11 @@
 
       // Margin for left/right of text elements.
       > * {
-        margin-inline: var(--v-space-xl);
+        margin-inline: var(--gutter);
+
+        @include include-media.media('>=md') {
+          margin-inline: var(--v-space-xl);
+        }
       }
 
       .node-summary {
