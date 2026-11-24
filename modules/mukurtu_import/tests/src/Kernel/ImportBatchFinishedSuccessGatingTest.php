@@ -392,4 +392,34 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
     ], $this->getTempstoreValue(ImportStatus::TEMPSTORE_KEY));
   }
 
+
+  /**
+   * A row message with quotes is stored as plain text, escaped only once.
+   */
+  public function testRowMessageIsPlainText(): void {
+    $message = 'No collection matches "Collecfn". Use the collection\'s title, ID, or UUID.';
+    $results = [
+      'test_migration' => [
+        '@numitems' => 1,
+        '@created' => 0,
+        '@updated' => 0,
+        '@failures' => 1,
+        '@ignored' => 0,
+        '@name' => 'test_migration',
+        'messages' => [(object) ['src__record_number' => 2, 'message' => $message]],
+      ],
+    ];
+
+    ImportBatchExecutable::batchFinishedImport(TRUE, $results, []);
+
+    $messages = $this->getTempstoreValue('batch_results_messages');
+    $this->assertSame('Row 3: ' . $message, $messages[0]['message']);
+
+    // The results table renders it with the quotes intact.
+    $build = ['#theme' => 'item_list', '#items' => [$messages[0]['message']]];
+    $html = (string) \Drupal::service('renderer')->renderInIsolation($build);
+    $this->assertStringContainsString('Row 3: No collection matches &quot;Collecfn&quot;. Use the collection&#039;s', $html);
+    $this->assertStringNotContainsString('&amp;', $html);
+  }
+
 }
