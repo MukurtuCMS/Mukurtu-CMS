@@ -6,6 +6,7 @@ namespace Drupal\Tests\mukurtu_design\Kernel;
 
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Theme\ActiveTheme;
+use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_design\CustomCss;
 use Drupal\mukurtu_design\DesignPalette;
@@ -52,8 +53,13 @@ class CustomCssTest extends KernelTestBase {
    * The custom CSS stylesheets currently on disk.
    */
   protected function stylesheets(): array {
-    $files = glob(\Drupal::service('file_system')->realpath(CustomCss::DIRECTORY) . '/' . CustomCss::FILE_PREFIX . '*.css') ?: [];
-    return array_map('basename', $files);
+    if (!is_dir(CustomCss::DIRECTORY)) {
+      return [];
+    }
+    $files = \Drupal::service('file_system')->scanDirectory(CustomCss::DIRECTORY, '/^' . CustomCss::FILE_PREFIX . '.*\.css$/');
+    $names = array_column($files, 'filename');
+    sort($names);
+    return $names;
   }
 
   /**
@@ -69,9 +75,21 @@ class CustomCssTest extends KernelTestBase {
    * Runs the attachment step with the given theme rendering the page.
    */
   protected function attachmentsFor(string $theme): array {
-    \Drupal::theme()->setActiveTheme(new ActiveTheme(['name' => $theme]));
+    // A real ActiveTheme needs the theme installed, and mukurtu_v4 sits in
+    // the profile, out of a kernel test's reach. Only its name matters here.
+    $active_theme = $this->createMock(ActiveTheme::class);
+    $active_theme->method('getName')->willReturn($theme);
+    $theme_manager = $this->createMock(ThemeManagerInterface::class);
+    $theme_manager->method('getActiveTheme')->willReturn($active_theme);
+
+    $custom_css = new CustomCss(
+      $this->container->get('config.factory'),
+      $theme_manager,
+      $this->container->get('file_system'),
+      $this->container->get('file_url_generator'),
+    );
     $attachments = [];
-    \Drupal::classResolver(CustomCss::class)->attach($attachments);
+    $custom_css->attach($attachments);
     return $attachments;
   }
 

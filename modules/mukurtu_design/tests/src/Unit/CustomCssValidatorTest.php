@@ -58,14 +58,26 @@ class CustomCssValidatorTest extends UnitTestCase {
       'quoted http url' => ['a { background: url("http://example.com/x.png"); }', CustomCssValidator::EXTERNAL],
       'protocol-relative' => ['a { background: url(//example.com/x.png); }', CustomCssValidator::EXTERNAL],
       'scheme without slashes' => ['a { background: url(http:example.com/x.png); }', CustomCssValidator::EXTERNAL],
-      'image-set string' => ['a { background: image-set("https://example.com/x.png" 1x); }', CustomCssValidator::EXTERNAL],
-      'font-face remote' => ['@font-face { font-family: X; src: url(https://example.com/x.woff2); }', CustomCssValidator::EXTERNAL],
+      'image-set string' => [
+        'a { background: image-set("https://example.com/x.png" 1x); }',
+        CustomCssValidator::EXTERNAL,
+      ],
+      'font-face remote' => [
+        '@font-face { font-family: X; src: url(https://example.com/x.woff2); }',
+        CustomCssValidator::EXTERNAL,
+      ],
       'escaped scheme' => ['a { background: url(ht\74ps://example.com/x.png); }', CustomCssValidator::EXTERNAL],
       'escaped slash' => ['a { background: url(/\2f example.com/x.png); }', CustomCssValidator::EXTERNAL],
       // CSS "\\\\" is two backslashes, which a URL parser reads as "//".
       'backslashes as slashes' => ['a { background: url("\\\\\\\\example.com/x.png"); }', CustomCssValidator::EXTERNAL],
-      'tab inside scheme' => ["a { background: url(\"ht\\9 tps://example.com/x.png\"); }", CustomCssValidator::EXTERNAL],
-      'namespace exemption only for w3.org' => [".i { background: url(\"data:image/svg+xml,%3Csvg xmlns='http://example.com/'%3E\"); }", CustomCssValidator::EXTERNAL],
+      'tab inside scheme' => [
+        "a { background: url(\"ht\\9 tps://example.com/x.png\"); }",
+        CustomCssValidator::EXTERNAL,
+      ],
+      'namespace exemption only for w3.org' => [
+        ".i { background: url(\"data:image/svg+xml,%3Csvg xmlns='http://example.com/'%3E\"); }",
+        CustomCssValidator::EXTERNAL,
+      ],
       'w3.org outside xmlns' => ['a { background: url(http://www.w3.org/2000/svg); }', CustomCssValidator::EXTERNAL],
     ];
   }
