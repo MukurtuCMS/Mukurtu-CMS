@@ -467,6 +467,57 @@ function mukurtu_migrate_update_40213(): ?string {
 }
 
 /**
+ * Migrate unpublished Mukurtu 3 content as drafts instead of publishing it.
+ */
+function mukurtu_migrate_update_40214(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // These content types use mukurtu_default_content_workflow, whose default
+  // moderation state is "published". The migrations mapped status but not
+  // moderation_state, so content moderation published every migrated node,
+  // including ones that were unpublished in Mukurtu 3. The dictionary word
+  // migration didn't map status at all. Only missing keys are added, so a
+  // site's own status or moderation_state mapping is left alone.
+  $module_path = \Drupal::service('extension.list.module')->getPath('mukurtu_migrate');
+  $storage = new FileStorage($module_path . '/config/install');
+  $migrations = [
+    'mukurtu_cms_v3_article',
+    'mukurtu_cms_v3_collection',
+    'mukurtu_cms_v3_dictionary_word',
+    'mukurtu_cms_v3_digital_heritage',
+    'mukurtu_cms_v3_page',
+    'mukurtu_cms_v3_person',
+    'mukurtu_cms_v3_word_list',
+  ];
+  $changed = FALSE;
+  foreach ($migrations as $id) {
+    $config = \Drupal::configFactory()->getEditable('migrate_plus.migration.' . $id);
+    if ($config->isNew()) {
+      continue;
+    }
+    $process = $config->get('process') ?? [];
+    $record = $storage->read('migrate_plus.migration.' . $id);
+    $save = FALSE;
+    foreach (['status', 'moderation_state'] as $key) {
+      if (!array_key_exists($key, $process)) {
+        $config->set('process.' . $key, $record['process'][$key]);
+        $save = TRUE;
+      }
+    }
+    if ($save) {
+      $config->save();
+      $changed = TRUE;
+    }
+  }
+
+  if (!$changed) {
+    return NULL;
+  }
+  return (string) t('Updated the Mukurtu 3 content migrations so content that was unpublished in Mukurtu 3 is migrated as a draft instead of being published.');
+}
+
+/**
  * Keep each term's parent in the Mukurtu CMS v3 term migrations.
  */
 function mukurtu_migrate_update_40215(): ?string {
