@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\mukurtu_design\Kernel;
 
 use Drupal\Core\Form\FormState;
+use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\Core\Theme\ActiveTheme;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
@@ -86,7 +87,6 @@ class CustomCssTest extends KernelTestBase {
       $this->container->get('config.factory'),
       $theme_manager,
       $this->container->get('file_system'),
-      $this->container->get('file_url_generator'),
     );
     $attachments = [];
     $custom_css->attach($attachments);
@@ -141,6 +141,9 @@ class CustomCssTest extends KernelTestBase {
 
   /**
    * The library points at the current file, after the palette stylesheets.
+   *
+   * The path carries no host. Library definitions are cached for every host,
+   * so an absolute URL would send all visitors to whichever host built them.
    */
   public function testLibraryPointsAtCurrentFile(): void {
     $css = 'a { color: red; }';
@@ -150,7 +153,7 @@ class CustomCssTest extends KernelTestBase {
 
     $this->assertCount(1, $stylesheets);
     $url = array_key_first($stylesheets);
-    $this->assertStringEndsWith(basename(CustomCss::uri($css)), $url);
+    $this->assertSame('/' . PublicStream::basePath() . '/mukurtu-design/' . basename(CustomCss::uri($css)), $url);
     $this->assertGreaterThan(1000000, $stylesheets[$url]['weight']);
     $this->assertFalse($stylesheets[$url]['preprocess']);
   }

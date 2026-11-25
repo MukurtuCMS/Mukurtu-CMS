@@ -17,9 +17,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  *
  * The custom palette and the custom CSS are each a file on disk, and the
  * library alters only write them when they are missing. Regenerating on every
- * save of the
- * settings, rather than only from the settings form, covers config import,
- * `drush config:set` and recipes too. See issue #2181.
+ * save of the settings, rather than only from the settings form, covers config
+ * import, `drush config:set` and recipes too. See issues #2181 and #125.
  */
 class DesignSettingsConfigSubscriber implements EventSubscriberInterface {
 

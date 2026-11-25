@@ -9,7 +9,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\File\FileUrlGeneratorInterface;
+use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -50,7 +50,6 @@ final class CustomCss implements ContainerInjectionInterface {
     protected ConfigFactoryInterface $configFactory,
     protected ThemeManagerInterface $themeManager,
     protected FileSystemInterface $fileSystem,
-    protected FileUrlGeneratorInterface $fileUrlGenerator,
   ) {}
 
   /**
@@ -61,7 +60,6 @@ final class CustomCss implements ContainerInjectionInterface {
       $container->get('config.factory'),
       $container->get('theme.manager'),
       $container->get('file_system'),
-      $container->get('file_url_generator'),
     );
   }
 
@@ -127,9 +125,13 @@ final class CustomCss implements ContainerInjectionInterface {
       if (!file_exists($uri)) {
         $this->write($css);
       }
-      // Absolute, as for the custom palette: a root-relative path is read as
-      // relative to the Drupal root and breaks on sites in a subdirectory.
-      $stylesheets[$this->fileUrlGenerator->generateAbsoluteString($uri)] = [
+      // A path from the Drupal root, which the library system turns into a
+      // URL per request. An absolute URL would fix whichever host first built
+      // the cached library definitions (a second domain, a preview, or
+      // Drush's http://default) for every visitor. A URL from
+      // generateString() would not do either: it already includes the base
+      // path, so a site in a subdirectory would get it twice.
+      $stylesheets['/' . PublicStream::basePath() . '/' . substr($uri, strlen('public://'))] = [
         'weight' => 1000001,
         'preprocess' => FALSE,
       ];
