@@ -124,4 +124,27 @@ class ThreeDModelImportExportUpdateTest extends MukurtuImportTestBase {
     $this->assertNull(\Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy')->loadUnchanged('3d_model_all_fields'));
   }
 
+  /**
+   * The update runs after the one that creates the 3D Model media type.
+   *
+   * Without the declared dependency the two modules' updates aren't linked,
+   * and only the modules' names put them in the right order.
+   */
+  public function testRunsAfterMediaTypeUpdate(): void {
+    require_once $this->root . '/core/includes/update.inc';
+    // A site from before both updates. Drupal reads hook_update_dependencies()
+    // only from modules with a schema version, which kernel tests don't set.
+    $core_path = \Drupal::service('extension.list.module')->getPath('mukurtu_core');
+    require_once $this->root . '/' . $core_path . '/mukurtu_core.install';
+    $registry = \Drupal::service('update.update_hook_registry');
+    $registry->setInstalledVersion('mukurtu_core', 40232);
+    $registry->setInstalledVersion('mukurtu_import', 40406);
+
+    $graph = update_build_dependency_graph(update_get_update_function_list([
+      'mukurtu_core' => 40233,
+      'mukurtu_import' => 40407,
+    ]));
+    $this->assertArrayHasKey('mukurtu_import_update_40407', $graph['mukurtu_core_update_40233']['edges'] ?? []);
+  }
+
 }

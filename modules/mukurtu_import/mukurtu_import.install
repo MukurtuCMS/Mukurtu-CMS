@@ -592,3 +592,13 @@ function mukurtu_import_update_40407(): ?string {
 
   return $changed ? (string) t('Added 3D models to bulk import and export.') : NULL;
 }
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function mukurtu_import_update_dependencies(): array {
+  // mukurtu_import_update_40407() needs the 3D Model media type, which
+  // mukurtu_core_update_40233() creates on an existing site.
+  $dependencies['mukurtu_import'][40407] = ['mukurtu_core' => 40233];
+  return $dependencies;
+}
