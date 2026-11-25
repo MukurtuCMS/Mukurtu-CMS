@@ -62,19 +62,29 @@ class TaxonomyExportStartForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $selected = array_filter($form_state->getValue('vocabularies'));
 
-    $ids = $this->entityTypeManager
-      ->getStorage('taxonomy_term')
-      ->getQuery()
+    /** @var \Drupal\taxonomy\TermStorageInterface $storage */
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
+    $allowed = $storage->getQuery()
       ->condition('vid', array_values($selected), 'IN')
       ->accessCheck(TRUE)
       ->execute();
 
-    if (empty($ids)) {
+    if (empty($allowed)) {
       $this->messenger()->addWarning($this->t('No terms found in the selected taxonomies.'));
       return;
     }
 
-    $ids = array_map('intval', array_values($ids));
+    // Export in tree order, parents before their children, so an import
+    // finds each parent on an earlier row (#2520).
+    $allowed = array_flip(array_map('intval', $allowed));
+    $ids = [];
+    foreach ($selected as $vid) {
+      foreach ($storage->loadTree($vid) as $term) {
+        if (isset($allowed[(int) $term->tid])) {
+          $ids[] = (int) $term->tid;
+        }
+      }
+    }
 
     $store = $this->tempStoreFactory->get('mukurtu_import');
     $store->delete('export_list_id');
