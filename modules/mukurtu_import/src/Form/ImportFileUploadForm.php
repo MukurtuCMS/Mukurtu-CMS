@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Component\Utility\Environment;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Security\TrustedCallbackInterface;
@@ -122,14 +123,29 @@ class ImportFileUploadForm extends ImportBaseForm implements TrustedCallbackInte
     // Get our messages and mark up the file titles as needed.
     $tempstore = \Drupal::service('tempstore.private');
     $store = $tempstore->get('mukurtu_import');
-    $messages = $store->get('batch_results_messages') ?? [];
-    foreach ($messages as $message) {
-      if (isset($message['fid']) && isset($element["file_{$message['fid']}"])) {
-        $element["file_{$message['fid']}"]["selected"]["#title"] .= "<span class=\"import--error\">{$message['message']}</span>";
-      }
-    }
+    static::appendFileMessages($element, $store->get('batch_results_messages') ?? []);
 
     return $element;
+  }
+
+  /**
+   * Appends each file's import messages to its checkbox title.
+   *
+   * The title is rendered as markup, but the messages are plain text that
+   * can quote CSV cells, so they are escaped here.
+   *
+   * @param array $element
+   *   The managed file element, after processing.
+   * @param array $messages
+   *   The batch result messages, each with 'fid' and 'message' keys.
+   */
+  public static function appendFileMessages(array &$element, array $messages): void {
+    foreach ($messages as $message) {
+      if (isset($message['fid']) && isset($element["file_{$message['fid']}"])) {
+        $text = Html::escape((string) $message['message']);
+        $element["file_{$message['fid']}"]["selected"]["#title"] .= "<span class=\"import--error\">{$text}</span>";
+      }
+    }
   }
 
   /**
