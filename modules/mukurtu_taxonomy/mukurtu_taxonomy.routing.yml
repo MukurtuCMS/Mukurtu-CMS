@@ -51,3 +51,26 @@ mukurtu_taxonomy.place_record_settings:
     _title: 'Mukurtu Place Record Settings'
   requirements:
     _permission: 'administer site configuration'
+mukurtu_taxonomy.flatten_vocabulary:
+  path: '/admin/structure/taxonomy/manage/{taxonomy_vocabulary}/flatten'
+  defaults:
+    _form: '\Drupal\mukurtu_taxonomy\Form\FlattenVocabularyConfirmForm'
+    _title: 'Make flat'
+  options:
+    parameters:
+      taxonomy_vocabulary:
+        type: entity:taxonomy_vocabulary
+  requirements:
+    _entity_access: 'taxonomy_vocabulary.update'
+
+mukurtu_taxonomy.restore_nesting:
+  path: '/admin/structure/taxonomy/manage/{taxonomy_vocabulary}/restore-nesting'
+  defaults:
+    _form: '\Drupal\mukurtu_taxonomy\Form\RestoreNestingConfirmForm'
+    _title: 'Restore nesting'
+  options:
+    parameters:
+      taxonomy_vocabulary:
+        type: entity:taxonomy_vocabulary
+  requirements:
+    _entity_access: 'taxonomy_vocabulary.update'
