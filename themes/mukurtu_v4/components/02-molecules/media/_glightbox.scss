@@ -129,6 +129,7 @@
     // shrinks to fit its content.
     .media--external-embed iframe:not([height]) {
       width: min(92vw, calc((92vh - 2rem - 40px) * 16 / 9));
+      max-width: 100%;
       height: auto;
       min-height: 0;
       aspect-ratio: 16 / 9;
