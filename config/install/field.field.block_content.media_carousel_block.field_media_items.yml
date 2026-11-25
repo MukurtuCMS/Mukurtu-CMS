@@ -4,6 +4,7 @@ dependencies:
   config:
     - block_content.type.media_carousel_block
     - field.storage.block_content.field_media_items
+    - media.type.3d_model
     - media.type.audio
     - media.type.document
     - media.type.external_embed
@@ -27,6 +28,7 @@ settings:
   handler: 'default:media'
   handler_settings:
     target_bundles:
+      3d_model: 3d_model
       audio: audio
       document: document
       external_embed: external_embed

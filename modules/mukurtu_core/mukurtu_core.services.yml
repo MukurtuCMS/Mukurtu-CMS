@@ -87,4 +87,4 @@ services:
       - '@user.data'
       - media
       - mukurtu_bulk_edit_media
-      - [audio, document, external_embed, image, remote_video, soundcloud, video]
+      - [audio, document, external_embed, image, remote_video, soundcloud, video, 3d_model]

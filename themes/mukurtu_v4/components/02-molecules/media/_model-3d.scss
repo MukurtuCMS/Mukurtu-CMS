@@ -1,0 +1,85 @@
+// 3D model viewer (model-viewer), its controls, and its lightbox copy.
+// See media--3d-model--media-assets.html.twig.
+
+.media--3d_model .media-asset--content {
+  inline-size: 100%;
+}
+
+.media-3d-model {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-5xs);
+  inline-size: 100%;
+
+  &__viewer {
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 16 / 9;
+    max-block-size: 80vh;
+
+    // The ring model-viewer draws itself is the browser default, 1px and
+    // inset. Focus lands inside its shadow root, which the host's
+    // :focus-within sees.
+    &:focus-within {
+      outline: var(--focus-color) solid 3px;
+      outline-offset: 2px;
+    }
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--v-space-6xs);
+
+    .button {
+      margin: 0;
+    }
+
+    // display: flex above would otherwise show them.
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  &__ar {
+    position: absolute;
+    inset-block-end: var(--v-space-5xs);
+    inset-inline-end: var(--v-space-5xs);
+  }
+
+  // No WebGL, or the model failed to load: say so instead of showing an
+  // empty box and buttons that do nothing.
+  &--unsupported {
+    .media-3d-model__viewer,
+    .media-3d-model__controls {
+      display: none;
+    }
+  }
+
+  &__unsupported,
+  &__noscript {
+    margin: 0;
+    padding: var(--v-space-2xs);
+    text-align: center;
+  }
+}
+
+.glightbox-clean .gslide-inline {
+  // Sized like the 16:9 embed iframe in _glightbox.scss, less the controls
+  // below it (two rows of buttons on a narrow screen). An explicit width,
+  // because a percentage can't size .gslide-media, which shrinks to fit.
+  .media-3d-model {
+    inline-size: min(92vw, calc((92vh - 2rem - 40px - 7rem) * 16 / 9));
+    max-inline-size: 100%;
+  }
+
+  .media-3d-model__viewer:focus-within {
+    // The dark backdrop, not the page, is behind the ring here.
+    outline-color: #fff;
+  }
+
+  .media-3d-model__unsupported {
+    color: #fff;
+  }
+}

@@ -493,6 +493,7 @@ content:
         - remote_video
         - soundcloud
         - video
+        - 3d_model
     third_party_settings: {  }
   field_mukurtu_community_records:
     type: entity_reference_autocomplete

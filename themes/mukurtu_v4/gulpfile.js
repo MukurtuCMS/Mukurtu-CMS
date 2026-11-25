@@ -97,6 +97,26 @@ function copyLibraries() {
   ])
   .pipe(dest("./libraries/glightbox"));
 
+  // Copy model-viewer (three.js bundled in) and the decoders it would
+  // otherwise download from gstatic.com. encoding: false keeps gulp 5 from
+  // reading the .wasm files as text, which corrupts them.
+  const result2 = src([
+    "./node_modules/@google/model-viewer/dist/model-viewer.min.js",
+    "./node_modules/@google/model-viewer/LICENSE",
+  ])
+  .pipe(dest("./libraries/model-viewer"));
+  src([
+    "./node_modules/three/examples/jsm/libs/draco/gltf/draco_decoder.js",
+    "./node_modules/three/examples/jsm/libs/draco/gltf/draco_decoder.wasm",
+    "./node_modules/three/examples/jsm/libs/draco/gltf/draco_wasm_wrapper.js",
+  ], { encoding: false })
+  .pipe(dest("./libraries/model-viewer/draco"));
+  src([
+    "./node_modules/three/examples/jsm/libs/basis/basis_transcoder.js",
+    "./node_modules/three/examples/jsm/libs/basis/basis_transcoder.wasm",
+  ], { encoding: false })
+  .pipe(dest("./libraries/model-viewer/basis"));
+
   // Return any non-zero exit codes.
   return result1 || result2 || 0;
 }

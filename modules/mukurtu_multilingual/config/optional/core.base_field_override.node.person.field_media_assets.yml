@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - media.type.3d_model
     - media.type.audio
     - media.type.document
     - media.type.image
@@ -14,7 +15,7 @@ field_name: field_media_assets
 entity_type: node
 bundle: person
 label: 'Media Assets'
-description: "Media assets are a key element of most person records, though they are not required. Supported media types are images, documents, video, audio, and embed code. Person records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the person record to allow differential access to the media assets and metadata.\t<br />Select \"Add media\" to select or upload media assets."
+description: "Media assets are a key element of most person records, though they are not required. Supported media types are images, documents, video, audio, 3D models, and embed code. Person records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the person record to allow differential access to the media assets and metadata.\t<br />Select \"Add media\" to select or upload media assets."
 required: false
 translatable: false
 default_value:
@@ -25,6 +26,7 @@ settings:
   handler: 'default:media'
   handler_settings:
     target_bundles:
+      3d_model: 3d_model
       audio: audio
       document: document
       image: image

@@ -16,7 +16,7 @@
   const MOBILE_BREAKPOINT = 768;
   // Elements inside the current slide that get a stop in the lightbox's Tab
   // cycle (see manageLightboxTabOrder).
-  const SLIDE_FOCUSABLE_SELECTOR = 'video, audio, iframe, a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  const SLIDE_FOCUSABLE_SELECTOR = 'video, audio, iframe, model-viewer, a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -200,7 +200,14 @@
       container.querySelectorAll('.focused').forEach((el) => el.classList.remove('focused'));
       const next = stops[nextIndex];
       next.classList.add('focused');
-      next.focus();
+      // A 3D model viewer's focusable element is inside its shadow root;
+      // focusing the host element itself does nothing. While focus is in
+      // there, document.activeElement is the host, so indexOf() above
+      // still finds it.
+      const target = next.matches('model-viewer')
+        ? (next.shadowRoot && next.shadowRoot.querySelector('.userInput')) || next
+        : next;
+      target.focus();
     }
 
     document.addEventListener('keydown', manageLightboxTabOrder, true);

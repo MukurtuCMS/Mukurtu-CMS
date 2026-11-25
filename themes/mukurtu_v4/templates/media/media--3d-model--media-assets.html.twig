@@ -1,0 +1,98 @@
+{#
+/**
+ * @file
+ * Theme override to present a 3D model in the media assets field.
+ *
+ * Available variables:
+ * - media: The media item, with limited access to object properties and
+ *   methods.
+ * - name: Name of the media item, used as the viewer's text alternative.
+ * - content: Media content.
+ * - attributes: HTML attributes for the containing element.
+ * - bundle: machine name of media type.
+ * - media_url: URL to the GLB file. Empty when the file's stream wrapper is
+ *   unavailable, in which case no viewer or link can be offered.
+ * - media_download_enabled: Whether the site offers media downloads.
+ * - model_usdz_url: URL to the optional USDZ file, for AR on Apple devices.
+ * - model_poster_url: URL to the thumbnail, shown until the model loads.
+ * - model_a11y: JSON of translated screen reader announcements.
+ *
+ * The viewer is printed twice: once on the page, and once hidden for the
+ * lightbox (Expand +), which shows a copy of it. Neither copy loads the
+ * model until it is visible.
+ *
+ * @see mukurtu_v4_preprocess_media__3d_model__media_assets()
+ */
+#}
+{%
+  set classes = [
+    'media',
+    'media--' ~ bundle,
+  ]
+%}
+
+{% set viewer %}
+<div class="media-3d-model">
+  {#
+    ar-modes leaves out scene-viewer: it hands the file's URL to a Google app,
+    which can't open a file behind cultural protocols. interaction-prompt is
+    off because its animated hand keeps moving until someone interacts.
+  #}
+  <model-viewer class="media-3d-model__viewer"
+    src="{{ media_url }}"
+    {% if model_usdz_url %}ios-src="{{ model_usdz_url }}"{% endif %}
+    {% if model_poster_url %}poster="{{ model_poster_url }}"{% endif %}
+    alt="{{ name }}"
+    a11y="{{ model_a11y }}"
+    camera-controls
+    touch-action="pan-y"
+    interaction-prompt="none"
+    loading="lazy"
+    ar
+    ar-modes="webxr quick-look">
+    <button type="button" slot="ar-button" class="button media-3d-model__ar">{{ 'View in your space'|t }}</button>
+  </model-viewer>
+  <p class="media-3d-model__unsupported" hidden>{{ "This 3D model can't be displayed in your browser."|t }}</p>
+  <noscript><p class="media-3d-model__noscript">{{ "This 3D model can't be displayed in your browser."|t }}</p></noscript>
+  {# Shown by media-3d-model.js once it knows the viewer can work. #}
+  <div class="media-3d-model__controls" role="group" aria-label="{{ '3D model controls'|t }}" hidden>
+    <button type="button" class="button" data-model-viewer-action="rotate-left">{{ 'Rotate left'|t }}</button>
+    <button type="button" class="button" data-model-viewer-action="rotate-right">{{ 'Rotate right'|t }}</button>
+    <button type="button" class="button" data-model-viewer-action="rotate-up">{{ 'Rotate up'|t }}</button>
+    <button type="button" class="button" data-model-viewer-action="rotate-down">{{ 'Rotate down'|t }}</button>
+    <button type="button" class="button" data-model-viewer-action="zoom-in">{{ 'Zoom in'|t }}</button>
+    <button type="button" class="button" data-model-viewer-action="zoom-out">{{ 'Zoom out'|t }}</button>
+    <button type="button" class="button" data-model-viewer-action="reset">{{ 'Reset view'|t }}</button>
+  </div>
+</div>
+{% endset %}
+
+<div class="media-asset--slide">
+  <div{{ attributes.addClass(classes) }}>
+    {{ content.media_content_warnings }}
+
+    {% if media_url %}
+    <div class="media-asset--content">
+      {{ viewer }}
+    </div>
+
+    <div id="model-3d-{{ media.id }}" class="media-asset--glightbox-inline">
+      <div class="media media--3d-model">
+        {{ content.media_content_warnings }}
+        {{ viewer }}
+      </div>
+    </div>
+    {% else %}
+    <p class="media-asset--unavailable">{{ "@name isn't available right now. Contact your site administrator."|t({'@name': name}) }}</p>
+    {% endif %}
+  </div>
+
+  {% if media_url %}
+  <div class="media-asset--actions">
+    <a href="#model-3d-{{ media.id }}" data-type="inline" class="media-asset--link button">{{ 'Expand +'|t }}<span class="visually-hidden"> {{ '3D model: @name'|t({'@name': name}) }}</span></a>
+    {% if media_download_enabled %}
+      <a href="{{ media_url }}" class="button button--download" download>{{ 'Download 3D model'|t }}<span class="visually-hidden">{{ ': @name'|t({'@name': name}) }}</span> <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="16" height="18" aria-hidden="true"><path d="M11.61 0H3.87v5.57H0L7.74 13l7.74-7.43h-3.87z"/><path fill-rule="evenodd" d="M.52 15H16v3H.52z" clip-rule="evenodd"/></svg></a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

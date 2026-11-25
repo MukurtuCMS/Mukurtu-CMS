@@ -14,6 +14,7 @@ use Drupal\mukurtu_core\EntityReferenceRoleConverter;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
 use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\mukurtu_core\StaleConfigKeyCleanup;
+use Drupal\mukurtu_media\Entity\ThreeDModel;
 use Drupal\search_api\Item\Field as SearchApiField;
 use Drupal\user\Entity\Role;
 use Drupal\views\Entity\View;
@@ -1506,4 +1507,170 @@ function mukurtu_core_update_40232(): ?string {
   }
 
   return $changed ? (string) t('Allowed fullscreen and AR in embedded iframes, and added Sketchfab to the consent manager.') : NULL;
+}
+
+/**
+ * Add the 3D Model media type.
+ */
+function mukurtu_core_update_40233(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // #336: a media type for uploaded 3D models (GLB, plus an optional USDZ for
+  // AR on Apple devices), shown with model-viewer. New sites get all of this
+  // from config. Each step skips what a site already has, and a site that
+  // removed a media field, form display component or role keeps it removed.
+  $module_handler = \Drupal::moduleHandler();
+  if (!$module_handler->moduleExists('mukurtu_media')) {
+    return NULL;
+  }
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $changed = FALSE;
+
+  // The bundle's own fields are code-defined (ThreeDModel), sharing storage
+  // with the other media bundles' fields of the same name, so only the two
+  // new ones need storage.
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $definitions = ThreeDModel::bundleFieldDefinitions($update_manager->getEntityType('media'), '3d_model', []);
+  foreach (['field_media_3d_model', 'field_media_3d_model_usdz'] as $field_name) {
+    if (!$update_manager->getFieldStorageDefinition($field_name, 'media')) {
+      $update_manager->installFieldStorageDefinition($field_name, 'media', 'mukurtu_media', $definitions[$field_name]);
+      $changed = TRUE;
+    }
+  }
+
+  // The media type, then its displays. Read from each module's shipped
+  // config so the update and a fresh install can't drift apart.
+  $modules_dir = dirname(__DIR__);
+  $sources = [
+    [new FileStorage(__DIR__ . '/config/install'), ['media.type.3d_model']],
+    [
+      new FileStorage($modules_dir . '/mukurtu_media/config/install'),
+      ['core.entity_form_display.media.3d_model.default', 'core.entity_form_display.media.3d_model.bulk_edit'],
+    ],
+  ];
+  $profile_install = new FileStorage(dirname(__DIR__, 2) . '/config/install');
+  $sources[] = [$profile_install, $profile_install->listAll('core.entity_view_display.media.3d_model.')];
+  if ($module_handler->moduleExists('mukurtu_multilingual') && $module_handler->moduleExists('content_translation')) {
+    $sources[] = [new FileStorage($modules_dir . '/mukurtu_multilingual/config/optional'), ['language.content_settings.media.3d_model']];
+  }
+  $config_manager = \Drupal::service('config.manager');
+  foreach ($sources as [$storage, $names]) {
+    foreach ($names as $name) {
+      $entity_type_id = $config_manager->getEntityTypeIdByName($name);
+      $record = $storage->read($name);
+      if (!$entity_type_id || !$record) {
+        continue;
+      }
+      $entity_storage = $entity_type_manager->getStorage($entity_type_id);
+      if ($entity_storage->load($record['id'])) {
+        continue;
+      }
+      // A view mode a site deleted can't take a display.
+      if (str_starts_with($name, 'core.entity_view_display.') && !$entity_type_manager->getStorage('entity_view_mode')->load('media.' . $record['mode']) && $record['mode'] !== 'default') {
+        continue;
+      }
+      $entity_storage->createFromStorageRecord($record)->save();
+      $changed = TRUE;
+    }
+  }
+
+  // Protocol sync adds its checkbox to every media type's form at install.
+  if ($module_handler->moduleExists('mukurtu_protocol_sync')) {
+    $display = $entity_type_manager->getStorage('entity_form_display')->load('media.3d_model.default');
+    if ($display && !$display->getComponent('field_sync_protocols')) {
+      $display->setComponent('field_sync_protocols', [
+        'type' => 'boolean_checkbox',
+        'weight' => 3,
+        'region' => 'content',
+        'settings' => ['display_label' => TRUE],
+        'third_party_settings' => [],
+      ])->save();
+      $changed = TRUE;
+    }
+  }
+
+  // Let the media fields that take every media type take this one. A field
+  // whose allowed types a site narrowed (no external_embed) is left alone.
+  $fields = [
+    'field_config' => [
+      'block_content.media_block.field_block_media',
+      'block_content.media_carousel_block.field_media_items',
+      'node.article.field_page_media_assets',
+      'node.page.field_page_media_assets',
+    ],
+    'base_field_override' => [
+      'node.person.field_media_assets',
+      'node.place.field_media_assets',
+    ],
+  ];
+  foreach ($fields as $entity_type_id => $ids) {
+    foreach ($entity_type_manager->getStorage($entity_type_id)->loadMultiple($ids) as $field) {
+      $settings = $field->getSetting('handler_settings') ?? [];
+      $bundles = $settings['target_bundles'] ?? [];
+      if (!$bundles || isset($bundles['3d_model']) || !isset($bundles['document'])) {
+        continue;
+      }
+      $settings['target_bundles'] = ['3d_model' => '3d_model'] + $bundles;
+      $field->setSetting('handler_settings', $settings);
+      if ($entity_type_id === 'base_field_override') {
+        $field->setDescription(str_replace(
+          'Supported media types are images, documents, video, audio, and embed code.',
+          'Supported media types are images, documents, video, audio, 3D models, and embed code.',
+          (string) $field->getDescription()
+        ));
+      }
+      $field->save();
+      $changed = TRUE;
+    }
+  }
+
+  // The same for the media library widget's tabs. The new tab goes last, so
+  // the tab the widget opens on stays the same.
+  $widgets = [
+    'node.digital_heritage.default' => 'field_media_assets',
+    'node.digital_heritage.bulk_edit' => 'field_media_assets',
+    'node.person.default' => 'field_media_assets',
+    'node.person.bulk_edit' => 'field_media_assets',
+    'node.place.default' => 'field_media_assets',
+    'node.place.bulk_edit' => 'field_media_assets',
+    'node.dictionary_word.default' => 'field_media_assets',
+    'node.dictionary_word.bulk_edit' => 'field_media_assets',
+    'node.page.default' => 'field_page_media_assets',
+    'node.article.default' => 'field_page_media_assets',
+  ];
+  $form_displays = $entity_type_manager->getStorage('entity_form_display')->loadMultiple(array_keys($widgets));
+  foreach ($form_displays as $id => $display) {
+    $component = $display->getComponent($widgets[$id]);
+    $types = $component['settings']['media_types'] ?? [];
+    if (($component['type'] ?? '') !== 'media_library_widget' || !in_array('document', $types, TRUE) || in_array('3d_model', $types, TRUE)) {
+      continue;
+    }
+    $component['settings']['media_types'][] = '3d_model';
+    $display->setComponent($widgets[$id], $component)->save();
+    $changed = TRUE;
+  }
+
+  // Each protocol role gets the same 3D model permissions it has for
+  // documents, so a site's own changes to a role carry over.
+  if ($module_handler->moduleExists('og')) {
+    foreach ($entity_type_manager->getStorage('og_role')->loadByProperties(['group_type' => 'protocol']) as $role) {
+      $grant = [];
+      foreach ($role->getPermissions() as $permission) {
+        if (preg_match('/^(create|delete own|delete any|update own|update any) document media$/', $permission, $matches)) {
+          $grant[] = $matches[1] . ' 3d_model media';
+        }
+      }
+      $grant = array_diff($grant, $role->getPermissions());
+      if ($grant) {
+        foreach ($grant as $permission) {
+          $role->grantPermission($permission);
+        }
+        $role->save();
+        $changed = TRUE;
+      }
+    }
+  }
+
+  return $changed ? (string) t('Added the 3D Model media type.') : NULL;
 }

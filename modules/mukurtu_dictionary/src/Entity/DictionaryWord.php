@@ -153,7 +153,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
-      ->setDescription(t('Additional media assets can further enrich a dictionary word. Examples include photos of a plant or animal named in the word, a longer video of the word being taught, or a relevant page from a language learning book. Supported media types are images, documents, video, audio, and embed code. dictionary words can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the dictionary word to allow differential access to the media assets and metadata. <br />Select "Add media" to select or upload media assets.'))
+      ->setDescription(t('Additional media assets can further enrich a dictionary word. Examples include photos of a plant or animal named in the word, a longer video of the word being taught, or a relevant page from a language learning book. Supported media types are images, documents, video, audio, 3D models, and embed code. dictionary words can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the dictionary word to allow differential access to the media assets and metadata. <br />Select "Add media" to select or upload media assets.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -165,6 +165,7 @@ class DictionaryWord extends Node implements DictionaryWordInterface, CulturalPr
             'remote_video' => 'remote_video',
             'video' => 'video',
             'soundcloud' => 'soundcloud',
+            '3d_model' => '3d_model',
             'external_embed' => 'external_embed'
           ],
           'sort' => [

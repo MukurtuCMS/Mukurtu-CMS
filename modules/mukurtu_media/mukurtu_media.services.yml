@@ -12,6 +12,10 @@ services:
     arguments: ['@mukurtu_media.create_notice', '@current_user', '@current_route_match', '@messenger']
     tags:
       - { name: event_subscriber }
+  mukurtu_media.3d_model_mime_type_subscriber:
+    class: Drupal\mukurtu_media\EventSubscriber\ThreeDModelMimeTypeSubscriber
+    tags:
+      - { name: event_subscriber }
   mukurtu_media.route_subscriber:
     class: Drupal\mukurtu_media\Routing\RouteSubscriber
     tags:
