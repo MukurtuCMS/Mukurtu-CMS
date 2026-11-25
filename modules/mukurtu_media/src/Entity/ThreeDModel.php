@@ -199,7 +199,8 @@ class ThreeDModel extends Media implements ThreeDModelInterface, CulturalProtoco
    */
   public function getDefaultThumbnail(): ?int {
     $fid = \Drupal::config('mukurtu_media.thumbnail_settings')->get('3d_model')[0] ?? NULL;
-    return $fid ? (int) $fid : NULL;
+    // A default whose file was deleted would leave a broken thumbnail.
+    return ($fid && \Drupal::entityTypeManager()->getStorage('file')->load($fid)) ? (int) $fid : NULL;
   }
 
   /**
@@ -207,11 +208,15 @@ class ThreeDModel extends Media implements ThreeDModelInterface, CulturalProtoco
    */
   public function preSave(EntityStorageInterface $storage) {
     // The server can't draw a picture of a model, so the thumbnail is the
-    // one the editor uploaded, else the site default. With neither, the file
-    // source's generic icon stays.
+    // one the editor uploaded, else the site default. With neither, it is
+    // emptied, so Media::preSave() puts back the file source's generic icon
+    // rather than keeping an uploaded thumbnail the editor removed.
     $thumb = $this->get('field_thumbnail')->target_id ?? $this->getDefaultThumbnail();
     if ($thumb) {
       $this->thumbnail->target_id = $thumb;
+    }
+    else {
+      $this->set('thumbnail', NULL);
     }
 
     // Auto-fill thumbnail alt text from the media name when it is empty.

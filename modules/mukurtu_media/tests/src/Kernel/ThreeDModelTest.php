@@ -146,6 +146,40 @@ class ThreeDModelTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * Removing the uploaded thumbnail doesn't leave it as the thumbnail.
+   */
+  public function testRemovedThumbnailIsNotKept(): void {
+    $image = $this->createImage('old.png');
+    $media = Media::create([
+      'bundle' => '3d_model',
+      'name' => 'Rattle',
+      'field_thumbnail' => ['target_id' => $image->id()],
+    ]);
+    $media->save();
+
+    $media->set('field_thumbnail', NULL);
+    $media->save();
+
+    $this->assertNotEquals($image->id(), $media->get('thumbnail')->target_id);
+    $this->assertSame($media->getSource()->getMetadata($media, 'thumbnail_uri'), $media->get('thumbnail')->entity->getFileUri());
+  }
+
+  /**
+   * A default thumbnail whose file was deleted is ignored.
+   */
+  public function testDeletedDefaultThumbnailIsIgnored(): void {
+    $image = $this->createImage('gone.png');
+    $this->config('mukurtu_media.thumbnail_settings')->set('3d_model', [(int) $image->id()])->save();
+    $image->delete();
+
+    $media = Media::create(['bundle' => '3d_model', 'name' => 'Mask']);
+    $media->save();
+
+    $this->assertNull($media->getDefaultThumbnail());
+    $this->assertNotNull($media->get('thumbnail')->entity);
+  }
+
+  /**
    * The viewer gets translated announcements, a poster and local decoders.
    */
   public function testMediaAssetsPreprocess(): void {
