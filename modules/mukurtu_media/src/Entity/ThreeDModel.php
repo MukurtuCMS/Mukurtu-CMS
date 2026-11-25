@@ -16,7 +16,7 @@ use Drupal\mukurtu_protocol\CulturalProtocolControlledTrait;
 /**
  * Defines the 3D Model media entity bundle class.
  */
-class ThreeDModel extends Media implements ThreeDModelInterface, CulturalProtocolControlledInterface, PeopleInterface {
+class ThreeDModel extends Media implements ThreeDModelInterface, CulturalProtocolControlledInterface, PeopleInterface, MukurtuFilenameGenerationInterface {
   use CulturalProtocolControlledTrait;
   use PeopleTrait;
 
@@ -170,6 +170,25 @@ class ThreeDModel extends Media implements ThreeDModelInterface, CulturalProtoco
       ->setDisplayConfigurable('form', TRUE);
 
     return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Used by mukurtu_media_upload_ajax_callback() to fill in the name from
+   * the uploaded file's name.
+   */
+  public function hasUploadedMediaFile() {
+    return (bool) ($this->get('field_media_3d_model')->getValue()[0]['fids'][0] ?? NULL);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMediaFilename() {
+    $fid = $this->get('field_media_3d_model')->getValue()[0]['fids'][0] ?? NULL;
+    $file = $fid ? \Drupal::entityTypeManager()->getStorage('file')->load($fid) : NULL;
+    return $file ? $file->getFilename() : NULL;
   }
 
   /**

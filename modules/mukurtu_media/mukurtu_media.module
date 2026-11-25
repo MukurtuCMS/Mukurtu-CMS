@@ -272,8 +272,9 @@ function mukurtu_media_form_media_3d_model_edit_form_alter(&$form, FormStateInte
 /**
  * Shared alterations for the 3D Model add and edit forms.
  *
- * Greys out other file types in the OS file picker, and fills in the
- * thumbnail's alt text on upload. There is no thumbnail to generate.
+ * Greys out other file types in the OS file picker, fills in the name from
+ * the model's file name, and fills in the thumbnail's alt text on upload.
+ * There is no thumbnail to generate.
  */
 function mukurtu_media_3d_model_form_alter(array &$form): void {
   foreach (['field_media_3d_model', 'field_media_3d_model_usdz'] as $field_name) {
@@ -286,6 +287,9 @@ function mukurtu_media_3d_model_form_alter(array &$form): void {
       $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
     }
     unset($widget);
+  }
+  if (isset($form['field_media_3d_model']['widget'][0])) {
+    $form['field_media_3d_model']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
   }
   if (isset($form['field_thumbnail']['widget'][0])) {
     $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';

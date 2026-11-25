@@ -775,10 +775,11 @@ function mukurtu_v4_preprocess_media__3d_model__media_assets(array &$variables):
   $usdz = $media->hasField('field_media_3d_model_usdz') ? $media->get('field_media_3d_model_usdz')->entity : NULL;
   $variables['model_usdz_url'] = $usdz ? MukurtuV4FileUrl::fromFile($usdz) : NULL;
 
-  // The poster shows until the model loads. Core's generic file icon, used
-  // when there is no uploaded or default thumbnail, makes a poor one.
+  // The poster shows until the model loads. The file source's own thumbnail,
+  // a generic file icon used when there is no uploaded or default
+  // thumbnail, makes a poor one.
   $thumbnail = $media->get('thumbnail')->entity;
-  $is_icon = $thumbnail && str_starts_with($thumbnail->getFileUri(), 'public://media-icons/');
+  $is_icon = $thumbnail && $thumbnail->getFileUri() === $media->getSource()->getMetadata($media, 'thumbnail_uri');
   $variables['model_poster_url'] = ($thumbnail && !$is_icon) ? MukurtuV4FileUrl::fromFile($thumbnail) : NULL;
 
   // Translated text for model-viewer's screen reader announcements. Its keys

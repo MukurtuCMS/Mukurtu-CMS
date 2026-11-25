@@ -16,9 +16,17 @@
     self.ModelViewerElement.ktx2TranscoderLocation = paths.ktx2TranscoderLocation;
   }
 
-  // Each press of a rotate button turns the model by this many radians.
-  const ROTATE_STEP = Math.PI / 8;
+  // Each rotate button does what an arrow key does with the viewer focused,
+  // so a press turns by the same step, quick presses add up, and the
+  // viewer's own limits apply.
+  const KEYS = {
+    'rotate-left': 'ArrowLeft',
+    'rotate-right': 'ArrowRight',
+    'rotate-up': 'ArrowUp',
+    'rotate-down': 'ArrowDown',
+  };
   // Each press of a zoom button counts as this many mouse wheel steps.
+  // model-viewer's own Page Up and Page Down handling doesn't zoom.
   const ZOOM_STEPS = 3;
 
   const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -48,46 +56,26 @@
    * and pinching the model (WCAG 2.5.1, 2.5.7).
    */
   function act(viewer, action) {
-    const orbit = viewer.getCameraOrbit();
-    let { theta, phi } = orbit;
-    switch (action) {
-      case 'rotate-left':
-        theta += ROTATE_STEP;
-        break;
-
-      case 'rotate-right':
-        theta -= ROTATE_STEP;
-        break;
-
-      case 'rotate-up':
-        phi += ROTATE_STEP;
-        break;
-
-      case 'rotate-down':
-        phi -= ROTATE_STEP;
-        break;
-
-      case 'zoom-in':
-        viewer.zoom(ZOOM_STEPS);
-        return;
-
-      case 'zoom-out':
-        viewer.zoom(-ZOOM_STEPS);
-        return;
-
-      case 'reset':
-        viewer.cameraOrbit = viewer.getAttribute('camera-orbit') || 'auto auto auto';
-        viewer.fieldOfView = viewer.getAttribute('field-of-view') || 'auto';
-        if (reducedMotion()) {
-          viewer.jumpCameraToGoal();
-        }
-        return;
-
-      default:
-        return;
+    if (action === 'reset') {
+      viewer.cameraOrbit = viewer.getAttribute('camera-orbit') || 'auto auto auto';
+      viewer.fieldOfView = viewer.getAttribute('field-of-view') || 'auto';
+      if (reducedMotion()) {
+        viewer.jumpCameraToGoal();
+      }
+      return;
     }
-    // model-viewer clamps phi to its own limits.
-    viewer.cameraOrbit = `${theta}rad ${phi}rad ${orbit.radius}m`;
+    if (action === 'zoom-in' || action === 'zoom-out') {
+      viewer.zoom(action === 'zoom-in' ? ZOOM_STEPS : -ZOOM_STEPS);
+      if (reducedMotion()) {
+        viewer.jumpCameraToGoal();
+      }
+      return;
+    }
+    const input = viewer.shadowRoot && viewer.shadowRoot.querySelector('.userInput');
+    if (!input || !KEYS[action]) {
+      return;
+    }
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: KEYS[action], bubbles: true, composed: true }));
     if (reducedMotion()) {
       viewer.jumpCameraToGoal();
     }
@@ -102,7 +90,7 @@
         return;
       }
       const viewer = button.closest('.media-3d-model')?.querySelector('model-viewer');
-      if (viewer && typeof viewer.getCameraOrbit === 'function') {
+      if (viewer && viewer.shadowRoot) {
         act(viewer, button.dataset.modelViewerAction);
       }
     });

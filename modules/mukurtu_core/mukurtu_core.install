@@ -1566,8 +1566,9 @@ function mukurtu_core_update_40233(): ?string {
       if ($entity_storage->load($record['id'])) {
         continue;
       }
-      // A view mode a site deleted can't take a display.
-      if (str_starts_with($name, 'core.entity_view_display.') && !$entity_type_manager->getStorage('entity_view_mode')->load('media.' . $record['mode']) && $record['mode'] !== 'default') {
+      // A view or form mode a site deleted can't take a display.
+      if (preg_match('/^core\.entity_(view|form)_display\./', $name, $matches) && $record['mode'] !== 'default'
+        && !$entity_type_manager->getStorage('entity_' . $matches[1] . '_mode')->load('media.' . $record['mode'])) {
         continue;
       }
       $entity_storage->createFromStorageRecord($record)->save();

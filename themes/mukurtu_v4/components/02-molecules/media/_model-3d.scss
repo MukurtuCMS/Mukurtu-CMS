@@ -14,8 +14,17 @@
   &__viewer {
     display: block;
     inline-size: 100%;
+
+    // model-viewer's own styles set a 300x150px box, and an explicit height
+    // there would win over the aspect ratio.
+    block-size: auto;
     aspect-ratio: 16 / 9;
     max-block-size: 80vh;
+
+    // 16:9 leaves a phone held upright a strip too short to work with.
+    @media (orientation: portrait) {
+      aspect-ratio: 1;
+    }
 
     // The ring model-viewer draws itself is the browser default, 1px and
     // inset. Focus lands inside its shadow root, which the host's
@@ -39,6 +48,16 @@
     // display: flex above would otherwise show them.
     &[hidden] {
       display: none;
+    }
+
+    // Two to a row on a phone, rather than one per row down the screen.
+    @media (width <= 600px) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+
+      .button {
+        padding-inline: var(--v-space-6xs);
+      }
     }
   }
 
@@ -67,11 +86,16 @@
 
 .glightbox-clean .gslide-inline {
   // Sized like the 16:9 embed iframe in _glightbox.scss, less the controls
-  // below it (two rows of buttons on a narrow screen). An explicit width,
-  // because a percentage can't size .gslide-media, which shrinks to fit.
+  // below it: up to two rows of buttons, four on a phone. An explicit
+  // width, because a percentage can't size .gslide-media, which shrinks to
+  // fit.
   .media-3d-model {
     inline-size: min(92vw, calc((92vh - 2rem - 40px - 7rem) * 16 / 9));
     max-inline-size: 100%;
+
+    @media (orientation: portrait) {
+      inline-size: min(92vw, calc(92vh - 2rem - 40px - 12rem));
+    }
   }
 
   .media-3d-model__viewer:focus-within {
