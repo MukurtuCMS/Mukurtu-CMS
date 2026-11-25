@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Utility\Error;
 use Drupal\migrate\Event\MigrateMapSaveEvent;
 use Drupal\migrate_tools\MigrateBatchExecutable;
@@ -316,8 +317,12 @@ class ImportBatchExecutable extends MigrateBatchExecutable {
       $details = $migration_result['row_details'] ?? [];
       foreach ($migration_result['messages'] ?? [] as $raw_message) {
         $row = static::spreadsheetRow($raw_message);
+        // Kept as plain text, like a message without a row, since everything
+        // that shows these escapes or filters them. The @ placeholder has
+        // already escaped the message, so it's decoded back, or quotes would
+        // show as &quot; on the results page.
         $message = $row
-          ? (string) t('Row @row: @message', ['@row' => $row, '@message' => $raw_message->message])
+          ? Html::decodeEntities((string) t('Row @row: @message', ['@row' => $row, '@message' => $raw_message->message]))
           : $raw_message->message;
         $messages[] = ['fid' => $fid, 'message' => $message];
         $file_message_texts[] = $message;
