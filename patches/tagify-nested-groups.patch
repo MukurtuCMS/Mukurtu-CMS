@@ -1,8 +1,8 @@
 diff --git a/css/tagify.css b/css/tagify.css
-index 1c53c01..8075594 100644
+index cb29760..9dd8054 100644
 --- a/css/tagify.css
 +++ b/css/tagify.css
-@@ -392,8 +392,35 @@ select.tagify-select-widget {
+@@ -406,8 +406,35 @@ select.tagify-select-widget {
    height: 30px;
  }
  
@@ -39,7 +39,7 @@ index 1c53c01..8075594 100644
  }
  
  .tagify__tag-text .tagify__tag-text-child {
-@@ -402,6 +429,10 @@ select.tagify-select-widget {
+@@ -416,6 +443,10 @@ select.tagify-select-widget {
  
  /* Group suggestions */
  
@@ -51,10 +51,10 @@ index 1c53c01..8075594 100644
    display: flex;
    flex-direction: column;
 diff --git a/js/tagify.js b/js/tagify.js
-index bcca509..07f1167 100644
+index bd5c25b..f9a0757 100644
 --- a/js/tagify.js
 +++ b/js/tagify.js
-@@ -122,15 +122,20 @@
+@@ -108,15 +108,20 @@
           * @param {string} tagLabel - The label.
           * @param {string} tagInfoLabel - The info label information.
           * @param {string} tagEntityId - The entity id.
@@ -77,7 +77,7 @@ index bcca509..07f1167 100644
          }
  
          /**
-@@ -148,24 +153,30 @@
+@@ -134,24 +139,30 @@
            const label = tagData.label ?? tagData.value;
            // Drupal.t() escapes its '@' placeholders, so give it decoded text.
            const plainLabel = Drupal.tagify.decodeEntities(label);
@@ -111,9 +111,9 @@ index bcca509..07f1167 100644
                )}
            </tag>`;
          }
-@@ -279,29 +290,24 @@
-           },
-         });
+@@ -264,29 +275,24 @@
+         );
+         Drupal.tagify.keepFocusOnRemove(tagify);
  
 +        // Tagify scrolls the highlighted suggestion's parent, which is a group
 +        // rather than the scrolling list when suggestions are nested, so keep
@@ -153,7 +153,7 @@ index bcca509..07f1167 100644
            const getTermsSuggestionsHTML = (parentTerms) =>
              parentTerms
                .map((suggestion) => {
-@@ -328,51 +334,66 @@
+@@ -313,51 +319,66 @@
                })
                .join('');
  
@@ -261,7 +261,7 @@ index bcca509..07f1167 100644
              })
              .join('');
          };
-@@ -415,6 +436,7 @@
+@@ -400,6 +421,7 @@
                  value: current.entity_id,
                  entity_id: current.entity_id,
                  parent_name: current.parent_name,
@@ -270,10 +270,10 @@ index bcca509..07f1167 100644
                  label: current.label,
                  editable: current.editable,
 diff --git a/src/Element/EntityAutocompleteTagify.php b/src/Element/EntityAutocompleteTagify.php
-index 3fd0b88..b7623a3 100644
+index b4c2586..db99cde 100644
 --- a/src/Element/EntityAutocompleteTagify.php
 +++ b/src/Element/EntityAutocompleteTagify.php
-@@ -339,7 +339,9 @@ class EntityAutocompleteTagify extends Textfield {
+@@ -338,7 +338,9 @@ class EntityAutocompleteTagify extends Textfield {
        // string and never matched, so this branch was dead. Attach the parent
        // name to the item (not the outer list) to keep the JSON an array.
        if ($entity_id && $entity->getEntityTypeId() === 'taxonomy_term') {
@@ -412,10 +412,10 @@ index ac12139..d8202a5 100644
     * Check if the entity is hierarchical.
     *
 diff --git a/src/TagifyEntityAutocompleteMatcher.php b/src/TagifyEntityAutocompleteMatcher.php
-index 0f906cc..2368b54 100644
+index c9dfb25..2218614 100644
 --- a/src/TagifyEntityAutocompleteMatcher.php
 +++ b/src/TagifyEntityAutocompleteMatcher.php
-@@ -175,9 +175,11 @@ class TagifyEntityAutocompleteMatcher implements TagifyEntityAutocompleteMatcher
+@@ -176,9 +176,11 @@ class TagifyEntityAutocompleteMatcher implements TagifyEntityAutocompleteMatcher
        'info_label' => $info_label,
        'editable' => FALSE,
      ];
@@ -429,7 +429,7 @@ index 0f906cc..2368b54 100644
      return $tagify_items;
    }
 diff --git a/tagify.services.yml b/tagify.services.yml
-index d2ed1f6..8d67624 100644
+index e51fb4a..c084ae9 100644
 --- a/tagify.services.yml
 +++ b/tagify.services.yml
 @@ -11,6 +11,7 @@ services:
