@@ -40,6 +40,11 @@ class MukurtuImportTestBase extends MigrateTestBase {
   protected MigrationInterface $lastMigration;
 
   /**
+   * The executable used in the most recent importCsvFile() call.
+   */
+  protected ImportBatchExecutable $lastExecutable;
+
+  /**
    * The user account set as the current user in the tests.
    *
    * @var \Drupal\Core\Session\AccountInterface
@@ -292,6 +297,7 @@ class MukurtuImportTestBase extends MigrateTestBase {
       $migration_plugin_manager,
       [],
     );
+    $this->lastExecutable = $executable;
     return $executable->import();
   }
 
