@@ -21,6 +21,27 @@
   }
 }
 
+// A captioned embed sits in a figure that takes its content's width (see
+// _images.scss). The viewer's container query gives it none, so the figure
+// takes the embed's widths instead, and its caption fills that width.
+figure:has(> .media--3d-model-embed) {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 900px;
+
+  &:has(> .media--3d-model-embed--small) {
+    max-inline-size: 320px;
+  }
+
+  &:has(> .media--3d-model-embed--medium) {
+    max-inline-size: 480px;
+  }
+
+  > figcaption {
+    display: block;
+  }
+}
+
 .media-3d-model {
   display: flex;
   flex-direction: column;

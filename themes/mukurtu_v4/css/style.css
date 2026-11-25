@@ -4416,6 +4416,21 @@ img[class$=-placeholder] {
   max-inline-size: 480px;
 }
 
+figure:has(> .media--3d-model-embed) {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 900px;
+}
+figure:has(> .media--3d-model-embed):has(> .media--3d-model-embed--small) {
+  max-inline-size: 320px;
+}
+figure:has(> .media--3d-model-embed):has(> .media--3d-model-embed--medium) {
+  max-inline-size: 480px;
+}
+figure:has(> .media--3d-model-embed) > figcaption {
+  display: block;
+}
+
 .media-3d-model {
   display: -webkit-box;
   display: -ms-flexbox;
