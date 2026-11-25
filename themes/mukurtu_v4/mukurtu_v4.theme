@@ -643,6 +643,15 @@ function mukurtu_v4_preprocess_field__community__name__community(array &$variabl
 }
 
 /**
+ * Media view modes that show a 3D model's interactive viewer.
+ *
+ * media_assets is the media assets field on content. The rest are the view
+ * modes the Basic and Full HTML formats let editors embed media with, less
+ * the card ones (teaser_featured, dictionary_word_thumbnail).
+ */
+const MUKURTU_V4_MODEL_3D_VIEWER_MODES = ['media_assets', 'image_with_description', 'small', 'medium', 'large', 'default', 'full'];
+
+/**
  * Implements template_preprocess_media().
  */
 function mukurtu_v4_preprocess_media(array &$variables) {
@@ -650,6 +659,15 @@ function mukurtu_v4_preprocess_media(array &$variables) {
 
   // Put media type in variable to use in twig.
   $variables['bundle'] = $media->bundle();
+
+  // A 3D model shows its interactive viewer in the media assets field and
+  // where body text embeds it, and its thumbnail on cards and elsewhere.
+  if ($media->bundle() === '3d_model') {
+    $variables['model_viewer'] = in_array($variables['elements']['#view_mode'] ?? '', MUKURTU_V4_MODEL_3D_VIEWER_MODES, TRUE);
+    if ($variables['model_viewer']) {
+      mukurtu_v4_model_3d_viewer_variables($variables);
+    }
+  }
 
   // Get the media url in variable to use in twig.
   $fid = $media->getSource()->getSourceFieldValue($media);
@@ -764,12 +782,15 @@ function mukurtu_v4_preprocess_media__document__carousel_thumbnail(array &$varia
 }
 
 /**
- * Implements template_preprocess_media__3d_model__media_assets().
+ * Adds what a 3D model's viewer needs beyond the model's own URL.
  *
- * Adds what the model-viewer element needs beyond the model's own URL
- * (media_url, set in mukurtu_v4_preprocess_media()).
+ * Called from mukurtu_v4_preprocess_media() for the view modes that show the
+ * viewer (MUKURTU_V4_MODEL_3D_VIEWER_MODES). media_url, the model's own URL,
+ * is set there.
+ *
+ * @see _model-3d-viewer.html.twig
  */
-function mukurtu_v4_preprocess_media__3d_model__media_assets(array &$variables): void {
+function mukurtu_v4_model_3d_viewer_variables(array &$variables): void {
   $media = $variables['media'];
 
   $usdz = $media->hasField('field_media_3d_model_usdz') ? $media->get('field_media_3d_model_usdz')->entity : NULL;

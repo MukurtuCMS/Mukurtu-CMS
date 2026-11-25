@@ -21,7 +21,7 @@
  * lightbox (Expand +), which shows a copy of it. Neither copy loads the
  * model until it is visible.
  *
- * @see mukurtu_v4_preprocess_media__3d_model__media_assets()
+ * @see mukurtu_v4_model_3d_viewer_variables()
  */
 #}
 {%
@@ -32,47 +32,7 @@
 %}
 
 {% set viewer %}
-<div class="media-3d-model">
-  {#
-    ar-modes leaves out scene-viewer: it hands the file's URL to a Google app,
-    which can't open a file behind cultural protocols. interaction-prompt is
-    off because its animated hand keeps moving until someone interacts.
-    nodrag stops GLightbox taking a drag that turns the model for a swipe to
-    the next slide.
-  #}
-  <model-viewer class="media-3d-model__viewer nodrag"
-    src="{{ media_url }}"
-    {% if model_usdz_url %}ios-src="{{ model_usdz_url }}"{% endif %}
-    {% if model_poster_url %}poster="{{ model_poster_url }}"{% endif %}
-    alt="{{ name }}"
-    a11y="{{ model_a11y }}"
-    camera-controls
-    touch-action="pan-y"
-    interaction-prompt="none"
-    loading="lazy"
-    ar
-    ar-modes="webxr quick-look">
-    <button type="button" slot="ar-button" class="button media-3d-model__ar">{{ 'View in your space'|t }}</button>
-  </model-viewer>
-  <p class="media-3d-model__unsupported" hidden>{{ "This 3D model can't be displayed in your browser."|t }}</p>
-  <noscript><p class="media-3d-model__noscript">{{ "This 3D model can't be displayed in your browser."|t }}</p></noscript>
-  {# Shown by media-3d-model.js once it knows the viewer can work. #}
-  <div class="media-3d-model__controls" role="group" aria-label="{{ '3D model controls'|t }}" hidden>
-    <div class="media-3d-model__controls-row">
-      <button type="button" class="button" data-model-viewer-action="rotate-left">{{ 'Rotate left'|t }}</button>
-      <button type="button" class="button" data-model-viewer-action="rotate-right">{{ 'Rotate right'|t }}</button>
-      <button type="button" class="button" data-model-viewer-action="rotate-up">{{ 'Rotate up'|t }}</button>
-      <button type="button" class="button" data-model-viewer-action="rotate-down">{{ 'Rotate down'|t }}</button>
-    </div>
-    <div class="media-3d-model__controls-row">
-      <button type="button" class="button" data-model-viewer-action="zoom-in">{{ 'Zoom in'|t }}</button>
-      <button type="button" class="button" data-model-viewer-action="zoom-out">{{ 'Zoom out'|t }}</button>
-      <button type="button" class="button" data-model-viewer-action="reset">{{ 'Reset view'|t }}</button>
-    </div>
-    {# Where the view a rotate or reset button leaves is announced. #}
-    <div class="media-3d-model__status visually-hidden" aria-live="polite"></div>
-  </div>
-</div>
+{% include '@mukurtu_v4/media/_model-3d-viewer.html.twig' %}
 {% endset %}
 
 <div class="media-asset--slide">

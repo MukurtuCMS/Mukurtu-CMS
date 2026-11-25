@@ -57,6 +57,28 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 class SubmissionSettings extends ConfigEntityBase implements SubmissionSettingsInterface {
 
   /**
+   * Media types visitors may submit only once an admin allows them.
+   *
+   * Wherever no media types are chosen, which otherwise means all of them,
+   * these are left out. 3D models (#336) can be large, and a site decides
+   * whether to accept them.
+   */
+  public const OPT_IN_MEDIA_TYPES = ['3d_model'];
+
+  /**
+   * Returns the given media types without the opt-in ones.
+   *
+   * @param string[] $types
+   *   Media type IDs.
+   *
+   * @return string[]
+   *   The same IDs, in order, less SubmissionSettings::OPT_IN_MEDIA_TYPES.
+   */
+  public static function withoutOptInMediaTypes(array $types): array {
+    return array_values(array_diff($types, self::OPT_IN_MEDIA_TYPES));
+  }
+
+  /**
    * The settings ID.
    *
    * @var string

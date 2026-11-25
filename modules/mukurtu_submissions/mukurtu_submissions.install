@@ -256,3 +256,34 @@ function mukurtu_submissions_update_40201(): ?string {
     '@changed' => implode(', ', $changed),
   ]);
 }
+
+/**
+ * Let submission reviewers manage submitted 3D models.
+ */
+function mukurtu_submissions_update_40202(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // #2810: visitors can submit 3D models once a site allows them in its
+  // submission settings, which no site does by default. Reviewers get the
+  // same rights over them as over submitted documents. A site that took
+  // those document rights away from the role is left alone.
+  $role = \Drupal::entityTypeManager()->getStorage('user_role')->load('mukurtu_submission_reviewer');
+  if (!$role || !\Drupal::entityTypeManager()->getStorage('media_type')->load('3d_model')) {
+    return NULL;
+  }
+  $grant = [];
+  foreach (['delete any', 'edit any'] as $operation) {
+    if ($role->hasPermission("$operation document media") && !$role->hasPermission("$operation 3d_model media")) {
+      $grant[] = "$operation 3d_model media";
+    }
+  }
+  if (!$grant) {
+    return NULL;
+  }
+  foreach ($grant as $permission) {
+    $role->grantPermission($permission);
+  }
+  $role->save();
+  return (string) t('Let submission reviewers manage submitted 3D models.');
+}

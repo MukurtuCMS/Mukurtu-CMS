@@ -54,6 +54,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       'audio' => 'audio files',
       'document' => 'documents',
       'video' => 'videos',
+      '3d_model' => '3D models',
     ];
     $label = $labels[$media_type] ?? $media_type;
     return "Bulk upload {$label}";

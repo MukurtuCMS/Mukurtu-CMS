@@ -13,6 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\mukurtu_submissions\SubmissionFormDisplayManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 
 /**
  * Form for adding and editing Submission settings entities.
@@ -22,7 +23,7 @@ class SubmissionSettingsForm extends EntityForm {
   /**
    * Media type bundles selectable for the public submission form.
    */
-  const MEDIA_TYPES = ['image', 'video', 'audio', 'document', 'remote_video', 'external_embed', 'soundcloud'];
+  const MEDIA_TYPES = ['image', 'video', 'audio', 'document', 'remote_video', 'external_embed', 'soundcloud', '3d_model'];
 
   /**
    * Constructs a SubmissionSettingsForm object.
@@ -144,7 +145,7 @@ class SubmissionSettingsForm extends EntityForm {
       '#title' => $this->t('Allowed media types'),
       '#description' => $this->t('Restrict which kinds of media a visitor may attach on the submission form. Only applies to content types with a media field configured on their Submission form display.'),
       '#options' => $this->getMediaTypeOptions(),
-      '#default_value' => $this->entity->getAllowedMediaTypes() ?: self::MEDIA_TYPES,
+      '#default_value' => $this->entity->getAllowedMediaTypes() ?: SubmissionSettings::withoutOptInMediaTypes(self::MEDIA_TYPES),
     ];
 
     return $form;

@@ -1,0 +1,33 @@
+{#
+/**
+ * @file
+ * Theme override for a 3D model outside the media assets field.
+ *
+ * In the view modes body text embeds use (image_with_description, small,
+ * medium, large, default and full), this is the interactive viewer, with
+ * no lightbox. Elsewhere, such as cards and the media library, it is the
+ * thumbnail, as for any other media.
+ *
+ * Available variables, besides media.html.twig's:
+ * - model_viewer: Whether this view mode shows the viewer.
+ * - view_mode: The view mode, used to size the viewer.
+ * - The viewer's own variables; see _model-3d-viewer.html.twig.
+ *
+ * @see mukurtu_v4_model_3d_viewer_variables()
+ */
+#}
+{% set classes = ['media', 'media--' ~ bundle] %}
+{% if model_viewer %}
+  {% set classes = classes|merge(['media--3d-model-embed', 'media--3d-model-embed--' ~ view_mode|clean_class]) %}
+{% endif %}
+
+<div{{ attributes.addClass(classes) }}>
+  {{ content.media_content_warnings }}
+  {% if not model_viewer %}
+    {{ content|without('media_content_warnings') }}
+  {% elseif media_url %}
+    {% include '@mukurtu_v4/media/_model-3d-viewer.html.twig' %}
+  {% else %}
+    <p class="media-asset--unavailable">{{ "@name isn't available right now. Contact your site administrator."|t({'@name': name}) }}</p>
+  {% endif %}
+</div>

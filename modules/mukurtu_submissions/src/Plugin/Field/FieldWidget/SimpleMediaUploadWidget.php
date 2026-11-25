@@ -15,6 +15,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_media\MediaTypeExtensions;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 
 /**
  * Plain multi-file upload widget for entity-reference-to-media fields on
@@ -93,7 +94,8 @@ class SimpleMediaUploadWidget extends WidgetBase {
   public static function defaultSettings() {
     return [
       // Bundle IDs (subset of MediaTypeExtensions::SUPPORTED_TYPES) this
-      // instance accepts. Empty means all supported (file-based) bundles.
+      // instance accepts. Empty means all supported (file-based) bundles,
+      // except SubmissionSettings::OPT_IN_MEDIA_TYPES.
       'allowed_bundles' => [],
     ] + parent::defaultSettings();
   }
@@ -104,7 +106,7 @@ class SimpleMediaUploadWidget extends WidgetBase {
   public function getAllowedBundles(): array {
     $allowed = array_filter($this->getSetting('allowed_bundles') ?? []);
     $supported = array_keys(MediaTypeExtensions::SUPPORTED_TYPES);
-    return $allowed ? array_values(array_intersect($supported, $allowed)) : $supported;
+    return $allowed ? array_values(array_intersect($supported, $allowed)) : SubmissionSettings::withoutOptInMediaTypes($supported);
   }
 
   /**

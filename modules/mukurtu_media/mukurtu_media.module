@@ -176,6 +176,13 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
       'label' => t('Bulk upload videos'),
       'description' => t('Upload multiple video files at once.'),
     ],
+    'bulk_upload_3d_model' => [
+      'bundle' => '3d_model',
+      'route' => 'mukurtu_media.bulk_upload',
+      'params' => ['media_type' => '3d_model'],
+      'label' => t('Bulk upload 3D models'),
+      'description' => t('Upload multiple 3D models at once.'),
+    ],
     'bulk_create_remote_video' => [
       'bundle' => 'remote_video',
       'route' => 'mukurtu_media.bulk_create',
@@ -214,6 +221,7 @@ function mukurtu_media_preprocess_entity_add_list(&$variables) {
     'remote_video' => 'bulk_create_remote_video',
     'soundcloud'   => 'bulk_create_soundcloud',
     'video'        => 'bulk_upload_video',
+    '3d_model'     => 'bulk_upload_3d_model',
   ];
 
   $ordered = [];

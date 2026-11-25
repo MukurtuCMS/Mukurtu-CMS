@@ -105,6 +105,11 @@ const PAGE = `<!DOCTYPE html>
 </body></html>`;
 
 // A second media asset, so the lightbox has a next slide (/two).
+// Mirrors media--3d-model.html.twig: a model embedded in body text, in
+// each embed size, with no lightbox (/embed).
+const EMBEDS = ['small', 'medium', 'large'].map((size) => `
+  <div class="media media--3d_model media--3d-model-embed media--3d-model-embed--${size}" data-size="${size}">${VIEWER}</div>`).join('');
+
 const SECOND = `
   <div class="media-asset--slide">
     <div id="second-1" class="media-asset--glightbox-inline"><div class="media"><p>Second slide</p></div></div>
@@ -130,6 +135,10 @@ async function serve(page: Page): Promise<string[]> {
     }
     if (url.pathname === '/') {
       return route.fulfill({ contentType: 'text/html', body: PAGE });
+    }
+    if (url.pathname === '/embed') {
+      const body = PAGE.slice(0, PAGE.indexOf('<main')) + `<main style="inline-size: 1200px">${EMBEDS}</main>` + PAGE.slice(PAGE.indexOf('</main>') + '</main>'.length);
+      return route.fulfill({ contentType: 'text/html', body });
     }
     if (url.pathname === '/two') {
       return route.fulfill({ contentType: 'text/html', body: PAGE.replace('</main>', SECOND + '</main>') });
@@ -398,6 +407,36 @@ for (const [width, height, ratio] of [[1440, 900, 16 / 9], [768, 1024, 1], [390,
     }).toPass({ timeout: 3000 });
   });
 }
+
+test('Embedded in body text, the viewer works at each size, with no lightbox (#2810)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await page.goto(ORIGIN + '/embed');
+  await expect(page.locator('a.media-asset--link')).toHaveCount(0);
+
+  for (const [size, max] of [['small', 320], ['medium', 480], ['large', 900]] as const) {
+    const embed = page.locator(`[data-size="${size}"]`);
+    const viewer = embed.locator('model-viewer');
+    await viewer.scrollIntoViewIfNeeded();
+    await page.waitForFunction((s) => (document.querySelector(`[data-size="${s}"] model-viewer`) as any)?.loaded === true, size, { timeout: 20000 });
+    await expect(embed.locator('.media-3d-model__controls')).toBeVisible();
+
+    const box = (await viewer.boundingBox())!;
+    expect(box.width).toBeCloseTo(max, 0);
+    expect(box.width / box.height).toBeCloseTo(16 / 9, 1);
+  }
+
+  // Narrow embeds lay their buttons out two to a line, by the viewer's own
+  // width rather than the screen's: Rotate up sits below Rotate left.
+  const small = page.locator('[data-size="small"] .media-3d-model__controls');
+  const left = (await small.getByRole('button', { name: 'Rotate left' }).boundingBox())!;
+  const up = (await small.getByRole('button', { name: 'Rotate up' }).boundingBox())!;
+  expect(up.y).toBeGreaterThan(left.y + left.height - 1);
+  const large = page.locator('[data-size="large"] .media-3d-model__controls');
+  const largeLeft = (await large.getByRole('button', { name: 'Rotate left' }).boundingBox())!;
+  const largeDown = (await large.getByRole('button', { name: 'Rotate down' }).boundingBox())!;
+  expect(largeDown.y).toBeCloseTo(largeLeft.y, 0);
+});
 
 test('Without WebGL, a message replaces the viewer and its controls', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

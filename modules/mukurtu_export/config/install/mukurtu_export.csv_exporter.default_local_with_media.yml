@@ -363,6 +363,24 @@ entity_fields_export_list:
     default_langcode: 'Default translation'
     field_media_tags: 'Media Tags'
     field_found_in: 'Found In'
+  media__3d_model:
+    mid: ID
+    langcode: Locale
+    uid: 'Authored by'
+    created: 'Authored on'
+    status: 'Published'
+    name: Name
+    field_cultural_protocols/protocols: 'Cultural Protocols > Protocols'
+    field_cultural_protocols/sharing_setting: 'Cultural Protocols > Sharing Setting'
+    field_media_3d_model: '3D Model'
+    field_media_3d_model_usdz: '3D Model for Apple devices'
+    field_people: People
+    field_thumbnail/target_id: 'Thumbnail > File ID'
+    field_thumbnail/alt: 'Thumbnail > Alternative text'
+    field_identifier: Identifier
+    default_langcode: 'Default translation'
+    field_media_tags: 'Media Tags'
+    field_found_in: 'Found In'
   multipage_item__multipage_item:
     id: ID
     langcode: Language

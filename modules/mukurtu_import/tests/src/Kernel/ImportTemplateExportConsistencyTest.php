@@ -35,6 +35,7 @@ class ImportTemplateExportConsistencyTest extends KernelTestBase {
    * the csv_exporter's entity_fields_export_list.
    */
   private const TEMPLATE_BUNDLES = [
+    '3d_model_all_fields' => 'media__3d_model',
     'audio_all_fields' => 'media__audio',
     'biography_section_all_fields' => 'paragraph__formatted_text_with_title',
     'collection_all_fields' => 'node__collection',
