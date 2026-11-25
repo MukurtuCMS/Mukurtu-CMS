@@ -14,6 +14,9 @@
   // uses for its own native zoom, since hover-to-pan has no touch
   // equivalent and pinch-zoom isn't implemented here.
   const MOBILE_BREAKPOINT = 768;
+  // Elements inside the current slide that get a stop in the lightbox's Tab
+  // cycle (see manageLightboxTabOrder).
+  const SLIDE_FOCUSABLE_SELECTOR = 'video, audio, iframe, a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -145,14 +148,25 @@
       // controls, or a remote-video/external-embed <iframe>) was previously
       // left out of the tab cycle entirely: Tab could never move focus onto
       // it, only a mouse click could, leaving keyboard users with no way to
-      // play/pause, seek, or reach captions once the lightbox is open. Same
-      // inert guard as the zoomable image above - an undismissed content
-      // warning marks it inert too (see content-warnings.js's
-      // setMediaInert(), which targets audio/video/object/iframe broadly).
-      let mediaEl = currentSlide ? currentSlide.querySelector('video, audio, iframe') : null;
-      if (mediaEl && mediaEl.closest('[inert]')) {
-        mediaEl = null;
-      }
+      // play/pause, seek, or reach captions once the lightbox is open.
+      //
+      // Every other focusable element in the slide is a stop too, in page
+      // order: Klaro's consent notice (its button and link replace an
+      // embed that has not been consented to yet, while the iframe itself
+      // stays in the DOM hidden) and links that come with an embed code,
+      // such as Sketchfab's credit line. Leaving them out trapped focus:
+      // focusing a hidden iframe is a silent no-op, and Tab from a link the
+      // browser reached on its own jumped back to the iframe, never Close.
+      //
+      // The zoomable image is handled above, so it is left out here, also
+      // where zoom is off. Hidden and inert elements are skipped, the latter
+      // because an undismissed content warning marks the media inert (see
+      // content-warnings.js's setMediaInert()), which would make .focus()
+      // below a silent no-op too.
+      let slideStops = currentSlide
+        ? Array.from(currentSlide.querySelectorAll(SLIDE_FOCUSABLE_SELECTOR))
+          .filter((el) => !el.matches(ZOOM_SELECTOR) && el.getClientRects().length && !el.closest('[inert]'))
+        : [];
 
       // An undismissed content warning covers the slide's media, so its
       // dismiss button replaces the media as the first stop. Without it,
@@ -162,15 +176,13 @@
         : null;
       if (warningButton) {
         zoomableImg = null;
-        mediaEl = null;
+        slideStops = [];
       }
 
       // Preserves the original gnext/gprev/gclose order for other slides;
-      // the zoomable image or the slide's own media element (when present -
-      // mutually exclusive, since only image slides have the former and
-      // only video/audio/remote-video/external-embed slides have the
-      // latter) simply becomes the first stop.
-      const stops = [warningButton, zoomableImg, mediaEl, container.querySelector('.gnext'), container.querySelector('.gprev'), container.querySelector('.gclose')]
+      // the zoomable image or the slide's own focusable elements simply
+      // come first.
+      const stops = [warningButton, zoomableImg, ...slideStops, container.querySelector('.gnext'), container.querySelector('.gprev'), container.querySelector('.gclose')]
         .filter((el) => el && !el.classList.contains('disabled'));
       if (!stops.length) return;
 

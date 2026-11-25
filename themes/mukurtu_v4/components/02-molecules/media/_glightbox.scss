@@ -187,6 +187,13 @@
     .media {
       position: relative;
     }
+
+    // Text that comes with an embed code, such as Sketchfab's credit line,
+    // takes the page's dark text and link colors, which are unreadable on
+    // the dark backdrop here. Klaro's consent notice sets its own colors.
+    .media--external-embed :is(p, a):not(.klaro *) {
+      color: #fff;
+    }
   }
 }
 
