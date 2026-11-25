@@ -149,6 +149,9 @@ mapping:
   -
     source: 'Original Record'
     target: field_mukurtu_original_record
+  -
+    source: Collections
+    target: field_in_collection
 configuration:
   delimiter: ','
   enclosure: '"'

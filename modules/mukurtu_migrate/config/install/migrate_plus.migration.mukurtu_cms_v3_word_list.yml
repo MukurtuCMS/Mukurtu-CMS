@@ -25,6 +25,12 @@ process:
   changed: changed
   created: created
   status: status
+  moderation_state:
+    plugin: static_map
+    source: status
+    map:
+      0: draft
+      1: published
   title: title
   field_cultural_protocols/sharing_setting:
     -

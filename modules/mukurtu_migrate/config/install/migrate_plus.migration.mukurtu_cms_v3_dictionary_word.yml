@@ -143,6 +143,13 @@ process:
         - plugin: extract
           index:
             - 1
+  status: status
+  moderation_state:
+    plugin: static_map
+    source: status
+    map:
+      0: draft
+      1: published
 destination:
   plugin: 'entity:node'
   default_bundle: dictionary_word

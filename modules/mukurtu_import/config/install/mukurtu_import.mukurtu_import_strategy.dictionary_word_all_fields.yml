@@ -122,6 +122,12 @@ mapping:
   -
     source: 'Word Type'
     target: field_word_type
+  -
+    source: Collections
+    target: field_in_collection
+  -
+    source: 'Word Lists'
+    target: field_in_word_list
 configuration:
   delimiter: ','
   enclosure: '"'
