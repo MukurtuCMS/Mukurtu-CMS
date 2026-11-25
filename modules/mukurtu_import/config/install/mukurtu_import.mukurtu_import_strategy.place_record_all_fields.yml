@@ -83,6 +83,9 @@ mapping:
   -
     source: UUID
     target: uuid
+  -
+    source: Collections
+    target: field_in_collection
 configuration:
   delimiter: ','
   enclosure: '"'

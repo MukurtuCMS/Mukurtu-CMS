@@ -543,9 +543,64 @@ function mukurtu_import_update_40405(): string {
 }
 
 /**
- * Use semicolons between values in the default taxonomy import templates.
+ * Map the Collections and Word Lists columns in the default import templates.
  */
 function mukurtu_import_update_40406(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // mukurtu_export_update_40403() adds Collections and Word Lists columns
+  // to item exports (#2798). config/install ships the rows, which fixes new
+  // sites. As in mukurtu_import_update_40404(), only the shipped templates
+  // are touched, and a template that already maps the column, or already
+  // writes to the field, keeps what it has.
+  $rows = [
+    'digital_heritage_item_all_fields' => ['Collections' => 'field_in_collection'],
+    'dictionary_word_all_fields' => [
+      'Collections' => 'field_in_collection',
+      'Word Lists' => 'field_in_word_list',
+    ],
+    'word_list_all_fields' => ['Collections' => 'field_in_collection'],
+    'person_record_all_fields' => ['Collections' => 'field_in_collection'],
+    'place_record_all_fields' => ['Collections' => 'field_in_collection'],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy');
+  $updated = 0;
+
+  /** @var \Drupal\mukurtu_import\Entity\MukurtuImportStrategy $strategy */
+  foreach ($storage->loadMultiple(array_keys($rows)) as $id => $strategy) {
+    $mapping = $strategy->getMapping() ?? [];
+    $sources = array_column($mapping, 'source');
+    $targets = array_column($mapping, 'target');
+    $changed = FALSE;
+    foreach ($rows[$id] as $source => $target) {
+      if (!in_array($source, $sources, TRUE) && !in_array($target, $targets, TRUE)) {
+        $mapping[] = ['source' => $source, 'target' => $target];
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $strategy->setMapping($mapping);
+      $strategy->save();
+      $updated++;
+    }
+  }
+
+  if (!$updated) {
+    return NULL;
+  }
+
+  return (string) t('Mapped the Collections and Word Lists columns in @count default import template(s).', [
+    '@count' => $updated,
+  ]);
+}
+
+/**
+ * Use semicolons between values in the default taxonomy import templates.
+ */
+function mukurtu_import_update_40407(): ?string {
   // Keep the docblock above to one line: Drupal renders it verbatim as this
   // update's description on update.php and in `drush updatedb:status`.
   //
@@ -554,7 +609,7 @@ function mukurtu_import_update_40406(): ?string {
   // template (#2520). config/install now ships ";". As in
   // mukurtu_import_update_40402(), only the shipped templates are touched, by
   // id, and a template a site switched to another delimiter keeps it.
-  // Numbered 40406 because milestone 11 uses 40405.
+  // Numbered 40407 because 40406 maps the collection columns (#2798).
   $vids = [
     'category',
     'community_type',

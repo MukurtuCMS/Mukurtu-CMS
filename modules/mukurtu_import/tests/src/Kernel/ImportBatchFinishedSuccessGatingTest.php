@@ -9,6 +9,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\mukurtu_import\Entity\MukurtuImportStrategy;
+use Drupal\mukurtu_import\Form\ImportFileUploadForm;
 use Drupal\mukurtu_import\ImportBatchExecutable;
 use Drupal\mukurtu_import\Plugin\views\field\ImportStatus;
 use Drupal\node\Entity\Node;
@@ -390,6 +391,51 @@ class ImportBatchFinishedSuccessGatingTest extends MukurtuImportTestBase {
       'node' => ['5' => ['en' => 'updated']],
       'media' => ['9' => ['en' => 'new']],
     ], $this->getTempstoreValue(ImportStatus::TEMPSTORE_KEY));
+  }
+
+
+  /**
+   * A row message with quotes is stored as plain text, escaped only once.
+   */
+  public function testRowMessageIsPlainText(): void {
+    $message = 'No collection matches "Collecfn". Use the collection\'s title, ID, or UUID.';
+    $results = [
+      'test_migration' => [
+        '@numitems' => 1,
+        '@created' => 0,
+        '@updated' => 0,
+        '@failures' => 1,
+        '@ignored' => 0,
+        '@name' => 'test_migration',
+        'messages' => [(object) ['src__record_number' => 2, 'message' => $message]],
+      ],
+    ];
+
+    ImportBatchExecutable::batchFinishedImport(TRUE, $results, []);
+
+    $messages = $this->getTempstoreValue('batch_results_messages');
+    $this->assertSame('Row 3: ' . $message, $messages[0]['message']);
+
+    // The results table renders it with the quotes intact.
+    $build = ['#theme' => 'item_list', '#items' => [$messages[0]['message']]];
+    $html = (string) \Drupal::service('renderer')->renderInIsolation($build);
+    $this->assertStringContainsString('Row 3: No collection matches &quot;Collecfn&quot;. Use the collection&#039;s', $html);
+    $this->assertStringNotContainsString('&amp;', $html);
+  }
+
+
+  /**
+   * The upload form shows a stored message as text, not markup.
+   */
+  public function testUploadFormEscapesFileMessages(): void {
+    $element = ['file_7' => ['selected' => ['#title' => 'data.csv']]];
+    ImportFileUploadForm::appendFileMessages($element, [
+      ['fid' => 7, 'message' => 'Row 3: No collection matches "<img src=x>".'],
+      ['fid' => 8, 'message' => 'Another file'],
+    ]);
+
+    $this->assertSame('data.csv<span class="import--error">Row 3: No collection matches &quot;&lt;img src=x&gt;&quot;.</span>', $element['file_7']['selected']['#title']);
+    $this->assertArrayNotHasKey('file_8', $element);
   }
 
   /**
