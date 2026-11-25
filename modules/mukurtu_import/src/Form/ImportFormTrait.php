@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Form;
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\mukurtu_core\ContainerMembershipFields;
 use Drupal\mukurtu_import\ParagraphImportAccess;
 
 /**
@@ -354,7 +355,14 @@ trait ImportFormTrait {
           unset($field_defs[$field_name]);
         }
 
-        if ($field_def->isComputed() || $field_def->isReadOnly() || $field_def->isInternal()) {
+        // Collection and word list membership is stored on the container,
+        // but each item has a computed reverse field for it. Import writes
+        // through it: ProtocolAwareEntityContent adds the item to each named
+        // container after saving the item.
+        $is_membership_field = $entity_type_id === 'node'
+          && ContainerMembershipFields::forItemBundle($this->entityFieldManager, $field_name, $bundle);
+
+        if (!$is_membership_field && ($field_def->isComputed() || $field_def->isReadOnly() || $field_def->isInternal())) {
           unset($field_defs[$field_name]);
         }
 
