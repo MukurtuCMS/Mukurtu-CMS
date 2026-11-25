@@ -18,4 +18,4 @@ dependencies:
   - 'mukurtu_export:mukurtu_export'
   - 'mukurtu_notifications:mukurtu_notifications'
   - 'mukurtu_protocol:mukurtu_protocol'
-version: 4.x-dev
+version: 4.0.11-rc1
