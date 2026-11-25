@@ -35,6 +35,8 @@ class ImportFieldDescriptionListForm extends ImportBaseForm {
     ];
     $field_format_overrides = [
       'langcode' => $this->t("A language code, e.g. es. Fields that aren't translatable (like Cultural Protocols) won't be updated when this import targets a translation - update those in a separate, non-translation import."),
+      'field_in_collection' => $this->t("Collection titles, IDs, or UUIDs, separated by your selected multi-value delimiter. The item is added to each collection listed. It isn't removed from any collection, and a blank cell changes nothing."),
+      'field_in_word_list' => $this->t("Word list titles, IDs, or UUIDs, separated by your selected multi-value delimiter. The word is added to each word list listed. It isn't removed from any word list, and a blank cell changes nothing."),
     ];
 
     // Per-entity-type overrides for the Field Description column.
