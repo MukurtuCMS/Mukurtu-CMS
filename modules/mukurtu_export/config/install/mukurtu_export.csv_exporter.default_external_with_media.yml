@@ -84,6 +84,8 @@ entity_fields_export_list:
     field_coverage: 'Map Points'
     uuid: UUID
     field_multipage_page_of: 'Multipage parent'
+    field_in_collection: Collections
+    field_in_word_list: 'Word Lists'
   node__digital_heritage:
     langcode: Locale
     uid: 'Authored by'
@@ -129,6 +131,7 @@ entity_fields_export_list:
     field_location: Location
     uuid: UUID
     field_multipage_page_of: 'Multipage parent'
+    field_in_collection: Collections
   node__landing_page:
     langcode: Language
     uid: 'Authored by'
@@ -183,6 +186,7 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
     field_multipage_page_of: 'Multipage parent'
+    field_in_collection: Collections
   node__place:
     uuid: UUID
     langcode: Locale
@@ -207,6 +211,7 @@ entity_fields_export_list:
     field_local_contexts_labels_and_notices: 'Local Contexts Labels and Notices'
     field_coverage: 'Map Points'
     field_multipage_page_of: 'Multipage parent'
+    field_in_collection: Collections
   node__word_list:
     langcode: Locale
     uid: 'Authored by'
@@ -233,6 +238,7 @@ entity_fields_export_list:
     field_multipage_page_of: 'Multipage parent'
     field_word_list_image/target_id: 'Image > File ID'
     field_word_list_image/alt: 'Image > Alternative text'
+    field_in_collection: Collections
   media__audio:
     langcode: Locale
     uid: 'Authored by'

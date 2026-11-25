@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\mukurtu_import\Plugin\migrate\destination;
 
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
@@ -16,7 +17,9 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Session\AccountSwitcherInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\migrate\Plugin\migrate\destination\EntityContentBase;
+use Drupal\mukurtu_core\ContainerMembershipFields;
 use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\mukurtu_import\ParagraphImportAccess;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -45,6 +48,8 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
  * @see mukurtu_import_migrate_destination_info_alter().
  */
 class ProtocolAwareEntityContent extends EntityContentBase {
+
+  use StringTranslationTrait;
 
   /**
    * The current user.
@@ -166,6 +171,9 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     // field's items once the names are set.
     $this->roleFieldOriginals = [];
     $role_updates = $this->extractAndClearRoleUpdates($row);
+    // Collection/word list membership is stored on the container, so the
+    // item's computed reverse field is applied to containers post-save.
+    $membership_updates = $this->extractAndClearMembershipUpdates($row);
 
     $this->rollbackAction = MigrateIdMapInterface::ROLLBACK_DELETE;
     $entity = $this->getEntity($row, $old_destination_id_values);
@@ -229,17 +237,22 @@ class ProtocolAwareEntityContent extends EntityContentBase {
     // Resolved before anything is saved, so a media item the current user
     // can't edit fails the whole row rather than leaving it half-imported.
     $media_alt_changes = $media_alt_updates ? $this->resolveMediaAltTextChanges($entity, $media_alt_updates) : [];
+    // Likewise, an unknown or inaccessible collection fails the row here.
+    $membership_changes = $membership_updates ? $this->resolveMembershipChanges($entity, $membership_updates) : [];
 
     // Worked out before save(), which bumps "changed" and starts a new
     // revision on every row whether or not anything else differs.
     $outcome = $this->determineOutcome($entity, $was_new);
-    if ($media_alt_changes && $outcome === 'unchanged') {
+    if (($media_alt_changes || $membership_changes) && $outcome === 'unchanged') {
       $outcome = 'updated';
     }
     $ids = $this->save($entity, $old_destination_id_values);
 
     if ($media_alt_changes) {
       $this->applyMediaEntityAltText($media_alt_changes);
+    }
+    if ($membership_changes) {
+      $this->applyMembershipChanges($entity, $membership_changes);
     }
 
     if ($this->isTranslationDestination()) {
@@ -537,6 +550,167 @@ class ProtocolAwareEntityContent extends EntityContentBase {
       $values[0]['alt'] = $change['alt'];
       $change['media']->get($change['field_name'])->setValue($values);
       $change['media']->save();
+    }
+  }
+
+  /**
+   * Extracts and clears the collection/word list membership properties.
+   *
+   * These are computed reverse fields on the item (see
+   * ContainerMembershipFields), so they can't be set on the entity itself.
+   *
+   * @return array<string, string[]>
+   *   Reverse field name => the non-blank values from the cell, as written.
+   */
+  protected function extractAndClearMembershipUpdates(Row $row): array {
+    $updates = [];
+    if ($this->storage->getEntityTypeId() !== 'node') {
+      return $updates;
+    }
+    foreach (array_keys(ContainerMembershipFields::FIELDS) as $field_name) {
+      if (!$row->hasDestinationProperty($field_name)) {
+        continue;
+      }
+      $values = array_filter(array_map('strval', (array) $row->getDestinationProperty($field_name)), 'strlen');
+      $row->removeDestinationProperty($field_name);
+      if ($values) {
+        $updates[$field_name] = array_values($values);
+      }
+    }
+    return $updates;
+  }
+
+  /**
+   * Resolves membership values to the containers the item must be added to.
+   *
+   * Runs before the item is saved, so a value that matches no container, or
+   * a container the current user can't edit, fails the whole row with
+   * nothing saved. Containers that already hold the item are skipped, and
+   * need no access, since nothing about them changes. Membership isn't
+   * translatable, so a row that targets a translation changes nothing.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The item being imported, not yet saved.
+   * @param array $membership_updates
+   *   From extractAndClearMembershipUpdates().
+   *
+   * @return array
+   *   Changes keyed by container ID, each with keys container, items_field,
+   *   field_name, noun, and value (the cell value that named it).
+   *
+   * @throws \Drupal\migrate\MigrateException
+   */
+  protected function resolveMembershipChanges(ContentEntityInterface $entity, array $membership_updates): array {
+    if (!$entity->isDefaultTranslation()) {
+      return [];
+    }
+
+    $changes = [];
+    foreach ($membership_updates as $field_name => $values) {
+      $definition = ContainerMembershipFields::forItemBundle($this->entityFieldManager, $field_name, $entity->bundle());
+      if (!$definition) {
+        continue;
+      }
+      foreach ($values as $value) {
+        $container = $this->lookupMembershipContainer($value, $definition['bundle'], $definition['noun']);
+        if (isset($changes[$container->id()])) {
+          continue;
+        }
+        if (!$entity->isNew()) {
+          $item_ids = array_column($container->get($definition['items_field'])->getValue(), 'target_id');
+          if (in_array($entity->id(), $item_ids)) {
+            continue;
+          }
+        }
+        if (!$this->currentUserBypassesAccessChecks() && !$container->access('update', $this->currentUser)) {
+          throw new MigrateException(sprintf('The current user does not have permission to add items to the %s "%s".', $definition['noun'], $value));
+        }
+        $changes[$container->id()] = [
+          'container' => $container,
+          'items_field' => $definition['items_field'],
+          'field_name' => $field_name,
+          'noun' => $definition['noun'],
+          'value' => $value,
+        ];
+      }
+    }
+
+    return $changes;
+  }
+
+  /**
+   * Finds the collection or word list a cell value names.
+   *
+   * Tries the value as an ID, then a UUID, then a title, always limited to
+   * the container bundle. The title match ignores case, as other reference
+   * columns do, and skips access checks so a value can't silently resolve
+   * to nothing; access is checked by resolveMembershipChanges().
+   *
+   * @throws \Drupal\migrate\MigrateException
+   *   If no container matches, or more than one shares the title.
+   */
+  protected function lookupMembershipContainer(string $value, string $bundle, string $noun): ContentEntityInterface {
+    $storage = $this->entityTypeManager->getStorage('node');
+
+    if (ctype_digit($value)) {
+      $node = $storage->load($value);
+      if ($node instanceof ContentEntityInterface && $node->bundle() === $bundle) {
+        return $node;
+      }
+    }
+
+    if (Uuid::isValid($value)) {
+      $nodes = $storage->loadByProperties(['uuid' => $value, 'type' => $bundle]);
+      if ($nodes) {
+        return reset($nodes);
+      }
+    }
+
+    $ids = $storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('type', $bundle)
+      ->condition('title', $value)
+      ->execute();
+    if (count($ids) > 1) {
+      throw new MigrateException(sprintf('"%s" is ambiguous, multiple items share the same label. Try referencing the item\'s ID.', $value));
+    }
+    $node = $ids ? $storage->load(reset($ids)) : NULL;
+    if (!$node instanceof ContentEntityInterface) {
+      throw new MigrateException(sprintf('No %s matches "%s". Use the %s\'s title, ID, or UUID.', $noun, $value, $noun));
+    }
+    return $node;
+  }
+
+  /**
+   * Adds the saved item to each container from resolveMembershipChanges().
+   *
+   * @throws \Drupal\migrate\MigrateException
+   *   If a container rejects the item.
+   */
+  protected function applyMembershipChanges(ContentEntityInterface $entity, array $changes): void {
+    foreach ($changes as $change) {
+      /** @var \Drupal\Core\Entity\ContentEntityInterface $container */
+      $container = $change['container'];
+      $items = $container->get($change['items_field']);
+      $items->appendItem(['target_id' => $entity->id()]);
+
+      $violations = $items->validate();
+      if ($violations->count()) {
+        throw new MigrateException(sprintf('Could not add this item to the %s "%s": %s', $change['noun'], $change['value'], strip_tags((string) $violations->get(0)->getMessage())));
+      }
+
+      // Recorded like ContainerMembershipActionBase, with the same revision
+      // log messages as the "Add to collection" and "Add to word list" forms.
+      if ($container instanceof RevisionLogInterface) {
+        $message = $change['field_name'] === 'field_in_word_list'
+          ? $this->t('Added @node to the word list.', ['@node' => $entity->label()])
+          : $this->t('Added @node to collection.', ['@node' => $entity->label()]);
+        $container->setNewRevision(TRUE);
+        $container->setRevisionUserId($this->currentUser->id());
+        $container->setRevisionCreationTime($this->time->getRequestTime());
+        $container->setRevisionLogMessage((string) $message);
+      }
+      $container->save();
     }
   }
 

@@ -545,6 +545,61 @@ function mukurtu_import_update_40405(): string {
 }
 
 /**
+ * Map the Collections and Word Lists columns in the default import templates.
+ */
+function mukurtu_import_update_40406(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // mukurtu_export_update_40403() adds Collections and Word Lists columns
+  // to item exports (#2798). config/install ships the rows, which fixes new
+  // sites. As in mukurtu_import_update_40404(), only the shipped templates
+  // are touched, and a template that already maps the column, or already
+  // writes to the field, keeps what it has.
+  $rows = [
+    'digital_heritage_item_all_fields' => ['Collections' => 'field_in_collection'],
+    'dictionary_word_all_fields' => [
+      'Collections' => 'field_in_collection',
+      'Word Lists' => 'field_in_word_list',
+    ],
+    'word_list_all_fields' => ['Collections' => 'field_in_collection'],
+    'person_record_all_fields' => ['Collections' => 'field_in_collection'],
+    'place_record_all_fields' => ['Collections' => 'field_in_collection'],
+  ];
+
+  $storage = \Drupal::entityTypeManager()->getStorage('mukurtu_import_strategy');
+  $updated = 0;
+
+  /** @var \Drupal\mukurtu_import\Entity\MukurtuImportStrategy $strategy */
+  foreach ($storage->loadMultiple(array_keys($rows)) as $id => $strategy) {
+    $mapping = $strategy->getMapping() ?? [];
+    $sources = array_column($mapping, 'source');
+    $targets = array_column($mapping, 'target');
+    $changed = FALSE;
+    foreach ($rows[$id] as $source => $target) {
+      if (!in_array($source, $sources, TRUE) && !in_array($target, $targets, TRUE)) {
+        $mapping[] = ['source' => $source, 'target' => $target];
+        $changed = TRUE;
+      }
+    }
+
+    if ($changed) {
+      $strategy->setMapping($mapping);
+      $strategy->save();
+      $updated++;
+    }
+  }
+
+  if (!$updated) {
+    return NULL;
+  }
+
+  return (string) t('Mapped the Collections and Word Lists columns in @count default import template(s).', [
+    '@count' => $updated,
+  ]);
+}
+
+/**
  * Add 3D models to bulk import and export.
  */
 function mukurtu_import_update_40407(): ?string {
