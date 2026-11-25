@@ -80,3 +80,21 @@ function mukurtu_design_update_40006(): string {
 
   return (string) t('Regenerated the custom palette stylesheet.');
 }
+
+/**
+ * Add an empty custom CSS setting.
+ */
+function mukurtu_design_update_40007(): string {
+  $config = \Drupal::configFactory()
+    ->getEditable(DesignPalette::SETTINGS);
+
+  // Checked by key, not value: get() returns NULL for a missing key, and a
+  // site may already have saved CSS here by the time this runs.
+  if (array_key_exists('custom_css', $config->getRawData())) {
+    return (string) t('The custom CSS setting is already present.');
+  }
+
+  $config->set('custom_css', '')->save();
+
+  return (string) t('Added the custom CSS setting. It is empty, so the site is unchanged.');
+}

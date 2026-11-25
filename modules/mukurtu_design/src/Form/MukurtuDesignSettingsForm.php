@@ -12,6 +12,8 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\FileUsage\FileUsageInterface;
+use Drupal\mukurtu_design\CustomCss;
+use Drupal\mukurtu_design\CustomCssValidator;
 use Drupal\mukurtu_design\DesignPalette;
 use Drupal\mukurtu_design\PageBackground;
 use Drupal\mukurtu_design\PaletteContrastAnalyzer;
@@ -34,6 +36,11 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
    */
   protected const SUMMARY_ID = 'mukurtu-palette-contrast-summary';
   protected const SUMMARY_KEY = 'contrast_summary';
+
+  /**
+   * The permission that reveals the custom CSS field.
+   */
+  public const CUSTOM_CSS_PERMISSION = 'edit mukurtu custom css';
 
   /**
    * The entity type manager.
@@ -214,6 +221,33 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
       '#default_value' => PageBackground::tintEnabled($config->get('header.tint')),
     ];
 
+    // Collapsed unless the site already has some, since most sites never
+    // need it. Behind its own restricted permission rather than the one for
+    // this page: CSS can hide protocol notices or break accessibility site
+    // wide, so by default only administrators get it.
+    $custom_css = (string) $config->get(CustomCss::KEY);
+    $form['custom_css_section'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Custom CSS'),
+      '#open' => trim($custom_css) !== '',
+      '#access' => $this->canEditCustomCss(),
+      '#attributes' => ['class' => ['mukurtu-design-custom-css']],
+    ];
+    $form['custom_css_section'][CustomCss::KEY] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Custom CSS'),
+      // The details summary already shows the same words.
+      '#title_display' => 'invisible',
+      '#description' => $this->t("CSS added here loads after the theme styles on public pages. It doesn't affect administration pages. Make sure your changes keep text readable and focus outlines visible, and don't hide protocol notices, content warnings or Local Contexts labels. To use images or fonts, use a path on this site, such as /sites/default/files/image.png, or a data URI."),
+      '#default_value' => $custom_css,
+      '#rows' => 15,
+      '#attributes' => [
+        'spellcheck' => 'false',
+        'autocapitalize' => 'off',
+        'autocomplete' => 'off',
+      ],
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -337,6 +371,10 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     parent::validateForm($form, $form_state);
 
+    if ($this->canEditCustomCss()) {
+      $this->validateCustomCss($form_state);
+    }
+
     // Only the custom palette can fail this way. The two built-in palettes
     // are checked when they change, not every time someone opens this form.
     if ($form_state->getValue('palette') !== 'custom') {
@@ -358,6 +396,36 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
         '@required' => number_format($failure['required'], 1),
         '@example' => reset($failure['selectors']),
       ]));
+    }
+  }
+
+  /**
+   * Whether the current user may see and change the custom CSS.
+   */
+  protected function canEditCustomCss(): bool {
+    return $this->currentUser()->hasPermission(static::CUSTOM_CSS_PERMISSION);
+  }
+
+  /**
+   * Rejects custom CSS that could load other sites' files or break markup.
+   *
+   * @see \Drupal\mukurtu_design\CustomCssValidator
+   */
+  protected function validateCustomCss(FormStateInterface $form_state): void {
+    $messages = [
+      CustomCssValidator::MARKUP => $this->t("Custom CSS can't contain the @character character.", ['@character' => '<']),
+      CustomCssValidator::IMPORT => $this->t("Custom CSS can't use @import."),
+      CustomCssValidator::EXTERNAL => $this->t("Custom CSS can't load files from other websites. Use a path on this site or a data URI."),
+    ];
+
+    $problems = (new CustomCssValidator())->validate((string) $form_state->getValue(CustomCss::KEY));
+    // One error per element is all the form keeps, so list every problem in
+    // it rather than making the author fix them one save at a time.
+    if ($problems) {
+      $form_state->setErrorByName(CustomCss::KEY, implode(' ', array_map(
+        static fn (string $problem): string => (string) $messages[$problem],
+        $problems
+      )));
     }
   }
 
@@ -399,6 +467,9 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
 
     $config->set('palette', $values['palette']);
     $config->set('colors', $values['colors']);
+    if ($this->canEditCustomCss()) {
+      $config->set(CustomCss::KEY, (string) ($values[CustomCss::KEY] ?? ''));
+    }
 
     $old_fid = $config->get('background.image');
     $new_fid = $values['background']['image'][0] ?? NULL;
@@ -416,7 +487,7 @@ class MukurtuDesignSettingsForm extends ConfigFormBase {
 
     $this->updateBackgroundImageUsage($old_fid, $new_fid ? (int) $new_fid : NULL, PageBackground::USAGE_ID);
     $this->updateBackgroundImageUsage($old_header_fid, $new_header_fid ? (int) $new_header_fid : NULL, PageBackground::HEADER_USAGE_ID);
-    // The custom palette stylesheet is regenerated by
+    // The custom palette and custom CSS stylesheets are regenerated by
     // DesignSettingsConfigSubscriber when the config above is saved.
   }
 
