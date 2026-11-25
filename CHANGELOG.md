@@ -5,6 +5,71 @@ a tagged release; see the
 [releases page](https://github.com/MukurtuCMS/Mukurtu-CMS/releases) for the tags
 themselves.
 
+## 4.0.11
+
+A security, feature, and maintenance release. Update as soon as you can. It
+requires Drupal core 11.4.14 or later, which fixes the highly critical access
+bypass issue SA-CORE-2026-019, and Twig 3.31.1 or later, which fixes 10 Twig
+security advisories. It also adds bulk editing and fixes many accessibility
+issues.
+
+New in this release:
+
+- Bulk editing. Mukurtu Managers and people with the new Bulk Editor role can
+  change many items of one type at once from Dashboard > Bulk edit content and
+  Dashboard > Bulk edit media. They can change field values, add or remove
+  cultural protocols with a warning before anyone loses access, add items to or
+  remove them from collections and word lists, and edit selected items one by
+  one in a grid, including image alternative text.
+- Import and export have Collections and Word Lists columns, so you can add an
+  item to collections, or a word to word lists, from the item's own row.
+- Browse cards show an icon when the item has more than one media asset.
+- Paragraphs, such as Biography sections and Word Entries, have arrow buttons
+  to move them without dragging.
+- SoundCloud media saved without a name gets the track title.
+- A warning explains why media can't be added when the person has no cultural
+  protocol that allows it.
+
+Access changes:
+
+- Term names are hidden from people who can't see the term's content, in every
+  field, view, and API that shows them, not only on term pages. Terms used on
+  media, paragraphs, and drafts count as visible to people who can see that
+  content.
+- JSON:API caches protocol and community lists separately for each set of
+  memberships. JSON:API isn't turned on by default.
+
+Mukurtu 3 migration changes:
+
+- Unpublished Mukurtu 3 content is migrated as drafts instead of published.
+- Protocols are migrated before protocol memberships, and the migration stops
+  when a community or protocol fails.
+
+This release also fixes several bugs and accessibility issues. Filters on
+Browse, Digital Heritage, and Dictionary wait for Apply instead of reloading
+the page. Focus returns to the button that opened a media library or entity
+browser, and stays inside the cookie consent window. Gin pages show focus and
+icons in forced colors mode. Tagify suggestion lists stay with their field and
+are easier to read. Several layouts work better at phone widths, and visitor
+locations save again with Visitors 2.34.
+
+To update, back up your site, run `composer update`, and then run database
+updates (`drush updb`). `composer update` also installs Drupal core 11.4.14,
+Twig 3.31.1, league/csv 9.29.1, which fixes a denial of service advisory, and a
+new dependency: Views Bulk Edit. This release includes 14 database updates.
+They:
+
+- Add the Bulk Editor role and let Mukurtu Managers use bulk editing.
+- Add the Bulk edit content and Bulk edit media pages, with field editing,
+  cultural protocol actions, collection and word list actions, and one-by-one
+  editing.
+- Turn on Mukurtu Export, which one-by-one editing needs.
+- Make the Browse, Digital Heritage, and Dictionary filters wait for Apply.
+- Add the Collections and Word Lists columns to the default import templates
+  and export settings.
+- Migrate unpublished Mukurtu 3 content as drafts, and migrate protocols before
+  protocol memberships.
+
 ## 4.0.10
 
 A security release. Update as soon as you can. It requires Drupal core 11.4.13
