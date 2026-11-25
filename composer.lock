@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "88289b5aff1f0bd5aec63a076eb534ac",
+    "content-hash": "22f52e7e2869aed7e57834debc2e5e99",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -5664,17 +5664,17 @@
         },
         {
             "name": "drupal/tagify",
-            "version": "2.0.5",
+            "version": "2.0.6",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/tagify.git",
-                "reference": "2.0.5"
+                "reference": "2.0.6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/tagify-2.0.5.zip",
-                "reference": "2.0.5",
-                "shasum": "5dd3553190e29c21848435903452785ae8600b83"
+                "url": "https://ftp.drupal.org/files/projects/tagify-2.0.6.zip",
+                "reference": "2.0.6",
+                "shasum": "1afb01750229369357f2de736e3713dbb21ca0e4"
             },
             "require": {
                 "drupal/core": "^10.3 || ^11 || ^12"
@@ -5685,17 +5685,26 @@
                 "drupal/facets": "^2.0",
                 "drupal/iconify_icons": "*",
                 "drupal/search_api": "^1.31",
+                "drupal/token": "^1.15",
                 "drupal/ui_icons": "*",
-                "drupal/ui_icons_field": "*"
+                "drupal/ui_icons_field": "*",
+                "drupal/webform": "^6.3",
+                "drush/drush": "^13 || ^14"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.0.5",
-                    "datestamp": "1791555707",
+                    "version": "2.0.6",
+                    "datestamp": "1795628376",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
+                    }
+                },
+                "drupal-scaffold": {
+                    "file-mapping": {
+                        "[project-root]/.editorconfig": false,
+                        "[project-root]/.gitattributes": false
                     }
                 }
             },
