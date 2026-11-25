@@ -73,6 +73,46 @@ class NestedTerms {
   }
 
   /**
+   * Gets the IDs of a term's immediate children.
+   *
+   * @return int[]
+   *   Term IDs.
+   */
+  public function getChildIds(int $tid): array {
+    $ids = $this->entityTypeManager->getStorage('taxonomy_term')->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('parent.target_id', $tid)
+      ->execute();
+    return array_map('intval', array_values($ids));
+  }
+
+  /**
+   * Moves a term's immediate children under another parent.
+   *
+   * Their own children move with them. A child is left where it is if it's in
+   * $skip, or if moving it would make it an ancestor of itself.
+   *
+   * @param int $tid
+   *   The term whose children move.
+   * @param int $new_parent
+   *   The new parent's ID, or 0 for the top level.
+   * @param int[] $skip
+   *   IDs of children to leave alone.
+   */
+  public function moveChildren(int $tid, int $new_parent, array $skip = []): void {
+    $storage = $this->entityTypeManager->getStorage('taxonomy_term');
+    $ancestors = $new_parent ? array_map('intval', array_keys($storage->loadAllParents($new_parent))) : [];
+    foreach ($storage->loadMultiple($this->getChildIds($tid)) as $child) {
+      $child_id = (int) $child->id();
+      if (in_array($child_id, $skip, TRUE) || in_array($child_id, $ancestors, TRUE)) {
+        continue;
+      }
+      $child->set('parent', $new_parent);
+      $child->save();
+    }
+  }
+
+  /**
    * Saves the parent and weight of every nested term in a vocabulary.
    *
    * Only call this when the vocabulary has nested terms, so that making a
