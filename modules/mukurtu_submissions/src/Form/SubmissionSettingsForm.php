@@ -23,7 +23,16 @@ class SubmissionSettingsForm extends EntityForm {
   /**
    * Media type bundles selectable for the public submission form.
    */
-  const MEDIA_TYPES = ['image', 'video', 'audio', 'document', 'remote_video', 'external_embed', 'soundcloud', '3d_model'];
+  const MEDIA_TYPES = [
+    'image',
+    'video',
+    'audio',
+    'document',
+    'remote_video',
+    'external_embed',
+    'soundcloud',
+    '3d_model',
+  ];
 
   /**
    * Constructs a SubmissionSettingsForm object.

@@ -11,6 +11,7 @@ use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
 use Drupal\mukurtu_media\Entity\ThreeDModel;
+use Drupal\mukurtu_media\MediaTypeExtensions;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -104,6 +105,17 @@ class ThreeDModelTest extends ProtocolAwareEntityTestBase {
     foreach (['field_thumbnail', 'field_media_tags', 'field_people', 'field_identifier', 'field_cultural_protocols'] as $field_name) {
       $this->assertTrue($media->hasField($field_name), $field_name);
     }
+  }
+
+  /**
+   * Bulk upload and submissions recognize a GLB file as a 3D model (#2810).
+   */
+  public function testBulkUploadType(): void {
+    $this->assertSame('3d_model', MediaTypeExtensions::bundleForFilename('Basket.GLB'));
+    $this->assertSame('field_media_3d_model', MediaTypeExtensions::SUPPORTED_TYPES['3d_model']['field']);
+    $this->assertSame('private', MediaTypeExtensions::SUPPORTED_TYPES['3d_model']['uri_scheme']);
+    // USDZ only goes alongside a GLB, so it isn't a type of its own.
+    $this->assertNull(MediaTypeExtensions::bundleForFilename('basket.usdz'));
   }
 
   /**
