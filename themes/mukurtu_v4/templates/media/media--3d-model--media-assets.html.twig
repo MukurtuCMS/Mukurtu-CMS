@@ -37,8 +37,10 @@
     ar-modes leaves out scene-viewer: it hands the file's URL to a Google app,
     which can't open a file behind cultural protocols. interaction-prompt is
     off because its animated hand keeps moving until someone interacts.
+    nodrag stops GLightbox taking a drag that turns the model for a swipe to
+    the next slide.
   #}
-  <model-viewer class="media-3d-model__viewer"
+  <model-viewer class="media-3d-model__viewer nodrag"
     src="{{ media_url }}"
     {% if model_usdz_url %}ios-src="{{ model_usdz_url }}"{% endif %}
     {% if model_poster_url %}poster="{{ model_poster_url }}"{% endif %}

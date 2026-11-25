@@ -27,11 +27,12 @@
     }
 
     // The ring model-viewer draws itself is the browser default, 1px and
-    // inset. Focus lands inside its shadow root, which the host's
-    // :focus-within sees.
-    &:focus-within {
+    // inset. media-3d-model.js sets this class for keyboard focus, which
+    // lands inside the viewer's shadow root. Inset, so it can't cover the
+    // tabs or buttons right next to the viewer.
+    &--focus-visible {
       outline: var(--focus-color) solid 3px;
-      outline-offset: 2px;
+      outline-offset: -3px;
     }
   }
 
@@ -98,7 +99,7 @@
     }
   }
 
-  .media-3d-model__viewer:focus-within {
+  .media-3d-model__viewer--focus-visible {
     // The dark backdrop, not the page, is behind the ring here.
     outline-color: #fff;
   }

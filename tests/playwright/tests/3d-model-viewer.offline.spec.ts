@@ -33,7 +33,7 @@ const A11Y = JSON.stringify({
 
 const VIEWER = `
   <div class="media-3d-model">
-    <model-viewer class="media-3d-model__viewer" src="/model.glb" alt="Test box"
+    <model-viewer class="media-3d-model__viewer nodrag" src="/model.glb" alt="Test box"
       a11y='${A11Y}' camera-controls touch-action="pan-y" interaction-prompt="none"
       loading="lazy" ar ar-modes="webxr quick-look">
       <button type="button" slot="ar-button" class="button media-3d-model__ar">View in your space</button>
@@ -245,13 +245,62 @@ test('In the lightbox, Tab goes from the viewer through the controls to Close (W
     'Close',
   ]);
 
-  // With the viewer focused, the arrow keys turn the model.
+  // With the viewer focused, the arrow keys turn the model. The lightbox
+  // moves focus with a script, which still shows the keyboard ring.
   await page.locator('.gclose').focus();
   await page.keyboard.press('Tab');
+  await expect(page.locator('.glightbox-container model-viewer')).toHaveClass(/media-3d-model__viewer--focus-visible/);
   const selector = '.glightbox-container model-viewer';
   const before = (await orbit(page, selector)).theta;
   await page.keyboard.press('ArrowLeft');
   await expect.poll(async () => (await orbit(page, selector)).theta).toBeGreaterThan(before + 0.1);
+});
+
+test('Keyboard focus on the viewer shows an inset ring, and a click shows none (WCAG 2.4.7)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await load(page);
+  const viewer = page.locator('.media-asset--content model-viewer');
+
+  await viewer.click();
+  await expect(viewer).not.toHaveClass(/media-3d-model__viewer--focus-visible/);
+  await expect(viewer).toHaveCSS('outline-style', 'none');
+
+  await page.locator('.media-asset--content .media-3d-model__controls button').first().focus();
+  await page.keyboard.press('Shift+Tab');
+  expect(await active(page)).toBe('VIEWER');
+  await expect(viewer).toHaveClass(/media-3d-model__viewer--focus-visible/);
+  await expect(viewer).toHaveCSS('outline-width', '3px');
+  await expect(viewer).toHaveCSS('outline-offset', '-3px');
+
+  await page.keyboard.press('Tab');
+  await expect(viewer).not.toHaveClass(/media-3d-model__viewer--focus-visible/);
+});
+
+test('Dragging the model in the lightbox turns it, and leaves the slide where it is', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await page.goto(ORIGIN + '/');
+  await page.waitForTimeout(250);
+  await page.locator('a.media-asset--link').click();
+  const selector = '.glightbox-container model-viewer';
+  await load(page, selector);
+
+  // GLightbox moves the slide's inner container, so measure something in it.
+  const slide = page.locator('.glightbox-container .media-3d-model__controls');
+  const slideBefore = (await slide.boundingBox())!;
+  const box = (await page.locator(selector).boundingBox())!;
+  const before = (await orbit(page, selector)).theta;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 250, box.y + box.height / 2, { steps: 10 });
+  // Still held: GLightbox moves the slide with the pointer while it drags.
+  const slideDuring = (await slide.boundingBox())!;
+  await page.mouse.up();
+
+  expect(Math.abs(slideDuring.x - slideBefore.x)).toBeLessThan(1);
+  await expect(page.locator('.glightbox-container')).toBeVisible();
+  await expect.poll(async () => Math.abs((await orbit(page, selector)).theta - before)).toBeGreaterThan(0.2);
 });
 
 for (const [width, height, ratio] of [[1440, 900, 16 / 9], [768, 1024, 1], [390, 844, 1]]) {

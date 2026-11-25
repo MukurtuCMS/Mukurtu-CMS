@@ -95,6 +95,22 @@
       }
     });
 
+    // Focus lands on an element inside the viewer's shadow root. The viewer
+    // matches :focus-within for a click as well as for the keyboard, and
+    // never matches :focus-visible, so copy the inner element's state.
+    document.addEventListener('focusin', (event) => {
+      const viewer = event.target;
+      if (viewer instanceof Element && viewer.matches('model-viewer')) {
+        const inner = viewer.shadowRoot && viewer.shadowRoot.activeElement;
+        viewer.classList.toggle('media-3d-model__viewer--focus-visible', !!inner && inner.matches(':focus-visible'));
+      }
+    });
+    document.addEventListener('focusout', (event) => {
+      if (event.target instanceof Element && event.target.matches('model-viewer')) {
+        event.target.classList.remove('media-3d-model__viewer--focus-visible');
+      }
+    });
+
     // model-viewer's load errors don't bubble.
     document.addEventListener('error', (event) => {
       if (event.target instanceof Element && event.target.matches('model-viewer')) {

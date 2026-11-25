@@ -4428,9 +4428,9 @@ img[class$=-placeholder] {
     aspect-ratio: 1;
   }
 }
-.media-3d-model__viewer:focus-within {
+.media-3d-model__viewer--focus-visible {
   outline: var(--focus-color) solid 3px;
-  outline-offset: 2px;
+  outline-offset: -3px;
 }
 .media-3d-model__controls {
   display: -webkit-box;
@@ -4482,7 +4482,7 @@ img[class$=-placeholder] {
     inline-size: min(92vw, 92vh - 2rem - 40px - 12rem);
   }
 }
-.glightbox-clean .gslide-inline .media-3d-model__viewer:focus-within {
+.glightbox-clean .gslide-inline .media-3d-model__viewer--focus-visible {
   outline-color: #fff;
 }
 .glightbox-clean .gslide-inline .media-3d-model__unsupported {
