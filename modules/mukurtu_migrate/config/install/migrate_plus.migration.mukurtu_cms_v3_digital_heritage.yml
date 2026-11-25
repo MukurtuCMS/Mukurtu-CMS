@@ -258,6 +258,12 @@ process:
               - mukurtu_cms_v3_media_video
             source: sid
   status: status
+  moderation_state:
+    plugin: static_map
+    source: status
+    map:
+      0: draft
+      1: published
 destination:
   plugin: 'entity:node'
   default_bundle: digital_heritage

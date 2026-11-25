@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\EventSubscriber;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\mukurtu_core\ContainerMembershipFields;
 use Drupal\mukurtu_core\Service\EntityTranslationResolver;
 use Drupal\mukurtu_core\Service\ParagraphEmptinessChecker;
 use Drupal\mukurtu_export\Entity\CsvExporter;
@@ -117,6 +118,21 @@ class CsvEntityFieldExportEventSubscriber implements EventSubscriberInterface {
 
     if ($fieldType == 'cultural_protocol') {
       return $this->exportCulturalProtocol($event, $field, $config);
+    }
+
+    // Collection/word list membership: identifiers only. Following these
+    // references would add each container to the export, and with it
+    // everything else the container holds.
+    if ($entity->getEntityTypeId() === 'node' && isset(ContainerMembershipFields::FIELDS[$field_name])) {
+      $use_uuid = $config->getIdFieldSetting() === 'uuid';
+      $export = [];
+      foreach ($field->getValue() as $value) {
+        if ($id = ($value['target_id'] ?? NULL)) {
+          $export[] = $use_uuid ? $this->getUUID('node', $id) : $id;
+        }
+      }
+      $event->setValue($export);
+      return;
     }
 
     if (in_array($fieldType, ['entity_reference', 'mukurtu_entity_reference_role'], TRUE)) {
