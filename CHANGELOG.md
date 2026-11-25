@@ -53,10 +53,13 @@ icons in forced colors mode. Tagify suggestion lists stay with their field and
 are easier to read. Several layouts work better at phone widths, and visitor
 locations save again with Visitors 2.34.
 
-To update, back up your site, run `composer update`, and then run database
-updates (`drush updb`). `composer update` also installs Drupal core 11.4.14,
-Twig 3.31.1, league/csv 9.29.1, which fixes a denial of service advisory, and a
-new dependency: Views Bulk Edit. This release includes 14 database updates.
+To update, back up your site, run `composer update`, then
+`composer patches-relock` and `composer patches-repatch`, and then run database
+updates (`drush updb`). This release adds a patch to the SoundCloud media
+module, which Composer doesn't apply until you relock and repatch.
+`composer update` also installs Drupal core 11.4.14, Twig 3.31.1, league/csv
+9.29.1, which fixes a denial of service advisory, and a new dependency: Views
+Bulk Edit. This release includes 14 database updates.
 They:
 
 - Add the Bulk Editor role and let Mukurtu Managers use bulk editing.
