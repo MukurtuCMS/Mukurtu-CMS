@@ -4226,6 +4226,11 @@ img[class$=-placeholder] {
   display: block;
   inline-size: 100%;
 }
+.media--external_embed iframe:not([height]),
+.media--soundcloud iframe:not([height]) {
+  aspect-ratio: 16/9;
+  max-block-size: 80vh;
+}
 
 .media-asset--pdf-wrapper {
   inline-size: 100%;

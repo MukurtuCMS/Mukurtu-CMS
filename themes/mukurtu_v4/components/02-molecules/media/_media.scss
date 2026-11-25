@@ -199,6 +199,15 @@ img[class$="-placeholder"] {
     display: block;
     inline-size: 100%;
   }
+
+  // Responsive embed codes, such as Sketchfab's with "Fixed size" off, leave
+  // out the height attribute, so the iframe fell back to the browser's
+  // default 150px height. Only aspect-ratio is set: the lightbox gives the
+  // iframe an explicit height, which wins over it there.
+  iframe:not([height]) {
+    aspect-ratio: 16 / 9;
+    max-block-size: 80vh;
+  }
 }
 
 .media-asset--pdf-wrapper {
