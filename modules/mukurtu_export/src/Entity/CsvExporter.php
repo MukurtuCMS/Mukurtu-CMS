@@ -5,6 +5,7 @@ namespace Drupal\mukurtu_export\Entity;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\mukurtu_core\ContainerMembershipFields;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\UserInterface;
 
@@ -468,8 +469,12 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
     /** @var \Drupal\Core\Field\FieldConfigInterface $field_def */
     foreach($all_field_defs as $field_name => $field_def) {
       // Skip computed fields, except for field_multipage_page_of which has an
-      // export-compatible implementation via the PageOfItemList plugin.
-      if ($field_def->isComputed() && $field_name !== 'field_multipage_page_of') {
+      // export-compatible implementation via the PageOfItemList plugin, and
+      // collection/word list membership, which import writes back to the
+      // containers (see ContainerMembershipFields).
+      $is_membership_field = $entity_type_id === 'node'
+        && ContainerMembershipFields::forItemBundle(\Drupal::service('entity_field.manager'), $field_name, $bundle);
+      if ($field_def->isComputed() && $field_name !== 'field_multipage_page_of' && !$is_membership_field) {
         continue;
       }
 
@@ -563,7 +568,7 @@ class CsvExporter extends ConfigEntityBase implements EntityOwnerInterface {
         'field_name' => $field_name,
         'field_label' => $field_def->getLabel(),
         'csv_header_label' => $field_def->getLabel(),
-        'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields)) : FALSE,
+        'export' => $this->isNew() ? (!$field_def->isReadOnly() || in_array($field_name, $id_fields) || $is_membership_field) : FALSE,
       ];
     }
 
