@@ -18,8 +18,10 @@ const ORIGIN = 'https://fixture.test';
 
 // Headless Chromium only offers WebGL through SwiftShader, and only when
 // asked for it.
-// It renders on the CPU, so with other workers running a click can take
-// longer than the suite's 5 second action timeout.
+// It renders on the CPU. This file's tests run one after another in one
+// worker, rather than all at once, and with other files' workers running a
+// click can still take longer than the suite's 5 second action timeout.
+test.describe.configure({ mode: 'default' });
 test.use({
   launchOptions: { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
   actionTimeout: 20000,
@@ -40,13 +42,17 @@ const VIEWER = `
     </model-viewer>
     <p class="media-3d-model__unsupported" hidden>This 3D model can't be displayed in your browser.</p>
     <div class="media-3d-model__controls" role="group" aria-label="3D model controls" hidden>
-      <button type="button" class="button" data-model-viewer-action="rotate-left">Rotate left</button>
-      <button type="button" class="button" data-model-viewer-action="rotate-right">Rotate right</button>
-      <button type="button" class="button" data-model-viewer-action="rotate-up">Rotate up</button>
-      <button type="button" class="button" data-model-viewer-action="rotate-down">Rotate down</button>
-      <button type="button" class="button" data-model-viewer-action="zoom-in">Zoom in</button>
-      <button type="button" class="button" data-model-viewer-action="zoom-out">Zoom out</button>
-      <button type="button" class="button" data-model-viewer-action="reset">Reset view</button>
+      <div class="media-3d-model__controls-row">
+        <button type="button" class="button" data-model-viewer-action="rotate-left">Rotate left</button>
+        <button type="button" class="button" data-model-viewer-action="rotate-right">Rotate right</button>
+        <button type="button" class="button" data-model-viewer-action="rotate-up">Rotate up</button>
+        <button type="button" class="button" data-model-viewer-action="rotate-down">Rotate down</button>
+      </div>
+      <div class="media-3d-model__controls-row">
+        <button type="button" class="button" data-model-viewer-action="zoom-in">Zoom in</button>
+        <button type="button" class="button" data-model-viewer-action="zoom-out">Zoom out</button>
+        <button type="button" class="button" data-model-viewer-action="reset">Reset view</button>
+      </div>
     </div>
   </div>`;
 

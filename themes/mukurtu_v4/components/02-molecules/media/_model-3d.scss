@@ -36,7 +36,20 @@
     }
   }
 
+  // Two rows: the four rotate buttons, then zoom and reset.
   &__controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-6xs);
+
+    // display: flex above would otherwise show them.
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  &__controls-row {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -46,15 +59,16 @@
       margin: 0;
     }
 
-    // display: flex above would otherwise show them.
-    &[hidden] {
-      display: none;
-    }
-
-    // Two to a row on a phone, rather than one per row down the screen.
+    // On a phone neither row fits on one line: two to a line, with Reset
+    // view on its own, rather than one per line down the screen.
     @media (width <= 600px) {
       display: grid;
       grid-template-columns: 1fr 1fr;
+      inline-size: 100%;
+
+      .button:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+      }
 
       .button {
         padding-inline: var(--v-space-6xs);
@@ -87,7 +101,7 @@
 
 .glightbox-clean .gslide-inline {
   // Sized like the 16:9 embed iframe in _glightbox.scss, less the controls
-  // below it: up to two rows of buttons, four on a phone. An explicit
+  // below it: two rows of buttons, four on a phone. An explicit
   // width, because a percentage can't size .gslide-media, which shrinks to
   // fit.
   .media-3d-model {

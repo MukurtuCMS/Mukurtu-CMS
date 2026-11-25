@@ -58,13 +58,17 @@
   <noscript><p class="media-3d-model__noscript">{{ "This 3D model can't be displayed in your browser."|t }}</p></noscript>
   {# Shown by media-3d-model.js once it knows the viewer can work. #}
   <div class="media-3d-model__controls" role="group" aria-label="{{ '3D model controls'|t }}" hidden>
-    <button type="button" class="button" data-model-viewer-action="rotate-left">{{ 'Rotate left'|t }}</button>
-    <button type="button" class="button" data-model-viewer-action="rotate-right">{{ 'Rotate right'|t }}</button>
-    <button type="button" class="button" data-model-viewer-action="rotate-up">{{ 'Rotate up'|t }}</button>
-    <button type="button" class="button" data-model-viewer-action="rotate-down">{{ 'Rotate down'|t }}</button>
-    <button type="button" class="button" data-model-viewer-action="zoom-in">{{ 'Zoom in'|t }}</button>
-    <button type="button" class="button" data-model-viewer-action="zoom-out">{{ 'Zoom out'|t }}</button>
-    <button type="button" class="button" data-model-viewer-action="reset">{{ 'Reset view'|t }}</button>
+    <div class="media-3d-model__controls-row">
+      <button type="button" class="button" data-model-viewer-action="rotate-left">{{ 'Rotate left'|t }}</button>
+      <button type="button" class="button" data-model-viewer-action="rotate-right">{{ 'Rotate right'|t }}</button>
+      <button type="button" class="button" data-model-viewer-action="rotate-up">{{ 'Rotate up'|t }}</button>
+      <button type="button" class="button" data-model-viewer-action="rotate-down">{{ 'Rotate down'|t }}</button>
+    </div>
+    <div class="media-3d-model__controls-row">
+      <button type="button" class="button" data-model-viewer-action="zoom-in">{{ 'Zoom in'|t }}</button>
+      <button type="button" class="button" data-model-viewer-action="zoom-out">{{ 'Zoom out'|t }}</button>
+      <button type="button" class="button" data-model-viewer-action="reset">{{ 'Reset view'|t }}</button>
+    </div>
   </div>
 </div>
 {% endset %}
