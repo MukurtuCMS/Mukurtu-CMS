@@ -69,6 +69,8 @@
       <button type="button" class="button" data-model-viewer-action="zoom-out">{{ 'Zoom out'|t }}</button>
       <button type="button" class="button" data-model-viewer-action="reset">{{ 'Reset view'|t }}</button>
     </div>
+    {# Where the view a rotate or reset button leaves is announced. #}
+    <div class="media-3d-model__status visually-hidden" aria-live="polite"></div>
   </div>
 </div>
 {% endset %}

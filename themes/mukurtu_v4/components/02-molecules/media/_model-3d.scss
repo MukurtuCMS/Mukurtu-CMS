@@ -113,8 +113,10 @@
     }
   }
 
-  .media-3d-model__viewer--focus-visible {
-    // The dark backdrop, not the page, is behind the ring here.
+  // The dark backdrop, not the page, is behind these rings here. The
+  // buttons' brand-colored ring is about 2.5:1 against it (WCAG 1.4.11).
+  .media-3d-model__viewer--focus-visible,
+  .media-3d-model__controls .button:focus-visible {
     outline-color: #fff;
   }
 

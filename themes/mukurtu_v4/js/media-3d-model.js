@@ -49,6 +49,42 @@
     }
   }
 
+  const AZIMUTHS = ['front', 'right', 'back', 'left'];
+  const POLARS = ['upper-', '', 'lower-'];
+
+  /**
+   * Announces the view a rotate or reset button leaves the model at.
+   *
+   * With the viewer focused, model-viewer announces this itself, but not
+   * while focus is on a button. Same position names and maths as its own
+   * announcements, using the translated text in its a11y attribute.
+   */
+  function announce(viewer) {
+    const status = viewer.closest('.media-3d-model')?.querySelector('.media-3d-model__status');
+    if (!status) {
+      return;
+    }
+    clearTimeout(status.mukurtuTimer);
+    // After the camera's move, and after any further quick presses.
+    status.mukurtuTimer = setTimeout(() => {
+      let labels;
+      try {
+        labels = JSON.parse(viewer.getAttribute('a11y') || '{}');
+      }
+      catch {
+        return;
+      }
+      const { theta, phi } = viewer.getCameraOrbit();
+      const tau = Math.PI * 2;
+      const azimuth = (4 + Math.floor((((theta % tau) + Math.PI / 4) / (Math.PI / 2)))) % 4;
+      const polar = Math.min(2, Math.max(0, Math.floor(phi / (Math.PI / 3))));
+      const text = labels[POLARS[polar] + AZIMUTHS[azimuth]];
+      if (text) {
+        status.textContent = text;
+      }
+    }, reducedMotion() ? 100 : 800);
+  }
+
   /**
    * Moves the camera for one control button press.
    *
@@ -62,6 +98,7 @@
       if (reducedMotion()) {
         viewer.jumpCameraToGoal();
       }
+      announce(viewer);
       return;
     }
     if (action === 'zoom-in' || action === 'zoom-out') {
@@ -79,6 +116,29 @@
     if (reducedMotion()) {
       viewer.jumpCameraToGoal();
     }
+    announce(viewer);
+  }
+
+  const guarded = new WeakSet();
+
+  /**
+   * Keeps Left and Right Arrow presses in the viewer from changing slides.
+   *
+   * The viewer turns the model on those keys, and GLightbox, listening on
+   * window, would also move to the next slide. Stopped here, once the
+   * viewer has handled the key on its way out of its shadow root. Added on
+   * first focus, which also covers GLightbox's clone of the viewer.
+   */
+  function guardArrowKeys(viewer) {
+    if (guarded.has(viewer)) {
+      return;
+    }
+    guarded.add(viewer);
+    viewer.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.stopPropagation();
+      }
+    });
   }
 
   // Delegated, because GLightbox shows a clone of the hidden copy of the
@@ -103,6 +163,7 @@
       if (viewer instanceof Element && viewer.matches('model-viewer')) {
         const inner = viewer.shadowRoot && viewer.shadowRoot.activeElement;
         viewer.classList.toggle('media-3d-model__viewer--focus-visible', !!inner && inner.matches(':focus-visible'));
+        guardArrowKeys(viewer);
       }
     });
     document.addEventListener('focusout', (event) => {

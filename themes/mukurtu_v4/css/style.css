@@ -4499,7 +4499,8 @@ img[class$=-placeholder] {
     inline-size: min(92vw, 92vh - 2rem - 40px - 12rem);
   }
 }
-.glightbox-clean .gslide-inline .media-3d-model__viewer--focus-visible {
+.glightbox-clean .gslide-inline .media-3d-model__viewer--focus-visible,
+.glightbox-clean .gslide-inline .media-3d-model__controls .button:focus-visible {
   outline-color: #fff;
 }
 .glightbox-clean .gslide-inline .media-3d-model__unsupported {

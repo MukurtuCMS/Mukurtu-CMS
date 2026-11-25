@@ -99,6 +99,40 @@ test('Dismissing a video moves focus to the player', async ({ page }) => {
   await expect(page.locator('video')).toBeFocused();
 });
 
+// A stand-in for model-viewer (#336) with the same shape: no tabindex of
+// its own, and its focusable element inside an open shadow root.
+const MODEL = `
+  <script>
+    customElements.define('model-viewer', class extends HTMLElement {
+      connectedCallback() {
+        if (!this.shadowRoot) {
+          this.attachShadow({ mode: 'open' }).innerHTML = '<div class="userInput" tabindex="0" role="img" aria-label="Test box">3D</div>';
+        }
+      }
+    });
+  </script>
+  <div class="media media--3d_model" style="inline-size: 100%; block-size: 181px">
+    ${overlay(4)}
+    <model-viewer style="display: block; inline-size: 272px; block-size: 153px"></model-viewer>
+    <button type="button" class="button">Rotate left</button>
+  </div>`;
+
+test('A 3D model is out of reach behind its warning, and gets focus after it', async ({ page }) => {
+  await load(page, MODEL);
+  const viewer = page.locator('model-viewer');
+  await expect(viewer).toHaveAttribute('inert', '');
+
+  await page.getByRole('button', { name: 'Show media' }).focus();
+  await page.keyboard.press('Enter');
+
+  await expect(viewer).not.toHaveAttribute('inert', '');
+  const focused = await page.evaluate(() => {
+    const host = document.activeElement as HTMLElement;
+    return `${host.tagName} ${host.shadowRoot?.activeElement?.className ?? ''}`;
+  });
+  expect(focused).toBe('MODEL-VIEWER userInput');
+});
+
 test('Clicking the warning text dismisses it', async ({ page }) => {
   await load(page, VIDEO);
   await page.getByText(WARNINGS[1]).click();

@@ -29,6 +29,7 @@ test.use({
 
 const A11Y = JSON.stringify({
   front: 'View from the front',
+  right: 'View from the right',
   'upper-front': 'View from above the front',
   'interaction-prompt': 'Use a mouse, touch, the arrow keys, or the buttons below to move the model.',
 });
@@ -53,6 +54,7 @@ const VIEWER = `
         <button type="button" class="button" data-model-viewer-action="zoom-out">Zoom out</button>
         <button type="button" class="button" data-model-viewer-action="reset">Reset view</button>
       </div>
+      <div class="media-3d-model__status visually-hidden" aria-live="polite"></div>
     </div>
   </div>`;
 
@@ -102,6 +104,15 @@ const PAGE = `<!DOCTYPE html>
 </script>
 </body></html>`;
 
+// A second media asset, so the lightbox has a next slide (/two).
+const SECOND = `
+  <div class="media-asset--slide">
+    <div id="second-1" class="media-asset--glightbox-inline"><div class="media"><p>Second slide</p></div></div>
+    <div class="media-asset--actions">
+      <a href="#second-1" data-type="inline" class="media-asset--link button">Expand second</a>
+    </div>
+  </div>`;
+
 const TYPES: Record<string, string> = {
   '.js': 'text/javascript',
   '.css': 'text/css',
@@ -119,6 +130,9 @@ async function serve(page: Page): Promise<string[]> {
     }
     if (url.pathname === '/') {
       return route.fulfill({ contentType: 'text/html', body: PAGE });
+    }
+    if (url.pathname === '/two') {
+      return route.fulfill({ contentType: 'text/html', body: PAGE.replace('</main>', SECOND + '</main>') });
     }
     if (url.pathname === '/model.glb') {
       return route.fulfill({ contentType: 'model/gltf-binary', body: fs.readFileSync(MODEL) });
@@ -251,6 +265,13 @@ test('In the lightbox, Tab goes from the viewer through the controls to Close (W
     'Close',
   ]);
 
+  // The buttons' ring is white against the dark backdrop (WCAG 1.4.11).
+  // Focus is on Close, so two presses: the viewer, then Rotate left.
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  expect(await active(page)).toBe('BUTTON Rotate left');
+  await expect(page.locator('.glightbox-container [data-model-viewer-action="rotate-left"]')).toHaveCSS('outline-color', 'rgb(255, 255, 255)');
+
   // With the viewer focused, the arrow keys turn the model. The lightbox
   // moves focus with a script, which still shows the keyboard ring.
   await page.locator('.gclose').focus();
@@ -260,6 +281,24 @@ test('In the lightbox, Tab goes from the viewer through the controls to Close (W
   const before = (await orbit(page, selector)).theta;
   await page.keyboard.press('ArrowLeft');
   await expect.poll(async () => (await orbit(page, selector)).theta).toBeGreaterThan(before + 0.1);
+});
+
+test('The rotate and reset buttons announce the view they leave (WCAG 4.1.3)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await load(page);
+  const controls = page.locator('.media-asset--content .media-3d-model__controls');
+  const status = page.locator('.media-asset--content .media-3d-model__status');
+  await expect(status).toHaveAttribute('aria-live', 'polite');
+
+  const rotateLeft = controls.getByRole('button', { name: 'Rotate left' });
+  await rotateLeft.click();
+  await rotateLeft.click();
+  await rotateLeft.click();
+  await expect(status).toHaveText('View from the right');
+
+  await controls.getByRole('button', { name: 'Reset view' }).click();
+  await expect(status).toHaveText('View from the front');
 });
 
 test('Keyboard focus on the viewer shows an inset ring, and a click shows none (WCAG 2.4.7)', async ({ page }) => {
@@ -281,6 +320,30 @@ test('Keyboard focus on the viewer shows an inset ring, and a click shows none (
 
   await page.keyboard.press('Tab');
   await expect(viewer).not.toHaveClass(/media-3d-model__viewer--focus-visible/);
+});
+
+test('In a lightbox with more slides, Left and Right turn the model and stay on its slide (WCAG 2.1.1)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await page.goto(ORIGIN + '/two');
+  await page.waitForTimeout(250);
+  await page.locator('a.media-asset--link').first().click();
+  const selector = '.glightbox-container model-viewer';
+  await load(page, selector);
+
+  await page.locator('.gclose').focus();
+  await page.keyboard.press('Tab');
+  expect(await active(page)).toBe('VIEWER');
+  const before = (await orbit(page, selector)).theta;
+  // One press: with two slides and looping, a second would come back.
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(async () => (await orbit(page, selector)).theta).toBeLessThan(before - 0.2);
+  // GLightbox changes slides after an animation, so give it the time.
+  await page.waitForTimeout(1000);
+  const current = await page.evaluate(() => [...document.querySelectorAll('.glightbox-container .gslide')]
+    .findIndex((slide) => slide.classList.contains('current')));
+  expect(current).toBe(0);
+  expect(await active(page)).toBe('VIEWER');
 });
 
 test('Dragging the model in the lightbox turns it, and leaves the slide where it is', async ({ page }) => {

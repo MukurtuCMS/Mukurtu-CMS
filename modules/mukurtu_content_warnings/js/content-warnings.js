@@ -132,10 +132,13 @@
       if (hadFocus && mediaEl) {
         // Skip overlay controls and anything not rendered, such as the hidden
         // lightbox copy of the media nested inside this .media.
-        const candidates = mediaEl.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]:not([tabindex="-1"])');
+        const candidates = mediaEl.querySelectorAll('audio, video, object, iframe, model-viewer, a, button, [tabindex]:not([tabindex="-1"])');
         const target = [...candidates].find((el) => !el.closest('.mukurtu-content-warnings') && el.getClientRects().length > 0);
         if (target) {
-          target.focus();
+          // A 3D model viewer's focusable element is inside its shadow root;
+          // focusing the viewer itself does nothing.
+          const inner = target.matches('model-viewer') && target.shadowRoot && target.shadowRoot.querySelector('.userInput');
+          (inner || target).focus();
         }
         else {
           // Images have no control of their own, so focus the media itself.
@@ -152,7 +155,9 @@
       if (!mediaEl) {
         return;
       }
-      mediaEl.querySelectorAll('audio, video, object, iframe, a, button, [tabindex]').forEach((el) => {
+      // model-viewer has no tabindex of its own: its focusable element is
+      // inside its shadow root, which inert on the viewer also covers.
+      mediaEl.querySelectorAll('audio, video, object, iframe, model-viewer, a, button, [tabindex]').forEach((el) => {
         // Skip every overlay's own controls, not only this one's: the hidden
         // lightbox copy of the media is nested inside this .media, and its
         // dismiss button must stay focusable once the lightbox shows it.
