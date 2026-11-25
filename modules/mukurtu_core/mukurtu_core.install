@@ -14,6 +14,7 @@ use Drupal\mukurtu_core\EntityReferenceRoleConverter;
 use Drupal\mukurtu_core\Hook\UpdatePathRequirements;
 use Drupal\mukurtu_core\Plugin\Field\FieldType\EntityReferenceRoleItem;
 use Drupal\mukurtu_core\StaleConfigKeyCleanup;
+use Drupal\mukurtu_browse\EventSubscriber\MediaTypeIndexingItemsSubscriber;
 use Drupal\mukurtu_media\Entity\ThreeDModel;
 use Drupal\search_api\Item\Field as SearchApiField;
 use Drupal\user\Entity\Role;
@@ -1555,6 +1556,7 @@ function mukurtu_core_update_40233(): ?string {
     $sources[] = [new FileStorage($modules_dir . '/mukurtu_multilingual/config/optional'), ['language.content_settings.media.3d_model']];
   }
   $config_manager = \Drupal::service('config.manager');
+  $type_added = FALSE;
   foreach ($sources as [$storage, $names]) {
     foreach ($names as $name) {
       $entity_type_id = $config_manager->getEntityTypeIdByName($name);
@@ -1573,6 +1575,7 @@ function mukurtu_core_update_40233(): ?string {
       }
       $entity_storage->createFromStorageRecord($record)->save();
       $changed = TRUE;
+      $type_added = $type_added || $name === 'media.type.3d_model';
     }
   }
 
@@ -1673,5 +1676,59 @@ function mukurtu_core_update_40233(): ?string {
     }
   }
 
+  // Browse now counts Sketchfab embeds as 3D models. Content indexed
+  // before this update still says External Embed until it is reindexed.
+  if ($type_added) {
+    _mukurtu_core_reindex_3d_embeds();
+  }
+
   return $changed ? (string) t('Added the 3D Model media type.') : NULL;
+}
+
+/**
+ * Queues content with embeds from 3D model hosts for search reindexing.
+ *
+ * @return int
+ *   The number of nodes queued.
+ *
+ * @see \Drupal\mukurtu_browse\EventSubscriber\MediaTypeIndexingItemsSubscriber::THREE_D_EMBED_HOSTS
+ */
+function _mukurtu_core_reindex_3d_embeds(): int {
+  $module_handler = \Drupal::moduleHandler();
+  if (!$module_handler->moduleExists('search_api') || !$module_handler->moduleExists('mukurtu_browse')) {
+    return 0;
+  }
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $field_map = \Drupal::service('entity_field.manager')->getFieldMap();
+  if (empty($field_map['media']['field_media_external_embed']) || empty($field_map['node']['field_media_assets'])) {
+    return 0;
+  }
+
+  $media_query = $entity_type_manager->getStorage('media')->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('bundle', 'external_embed');
+  $hosts = $media_query->orConditionGroup();
+  foreach (MediaTypeIndexingItemsSubscriber::THREE_D_EMBED_HOSTS as $host) {
+    $hosts->condition('field_media_external_embed', $host, 'CONTAINS');
+  }
+  $media_ids = $media_query->condition($hosts)->execute();
+  if (!$media_ids) {
+    return 0;
+  }
+
+  $node_ids = $entity_type_manager->getStorage('node')->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('field_media_assets', $media_ids, 'IN')
+    ->execute();
+  if (!$node_ids) {
+    return 0;
+  }
+
+  // Search API's own tracking, which only queues each translation on the
+  // indexes that include its bundle and language.
+  $tracking = \Drupal::service('search_api.entity_datasource.tracking_manager');
+  foreach ($entity_type_manager->getStorage('node')->loadMultiple($node_ids) as $node) {
+    $tracking->trackEntityChange($node);
+  }
+  return count($node_ids);
 }
