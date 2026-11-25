@@ -92,6 +92,9 @@ mapping:
   -
     source: Words
     target: field_words
+  -
+    source: Collections
+    target: field_in_collection
 configuration:
   delimiter: ','
   enclosure: '"'
