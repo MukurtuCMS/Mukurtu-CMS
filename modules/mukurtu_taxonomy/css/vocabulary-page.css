@@ -1,0 +1,82 @@
+/**
+ * @file
+ * Styles for long vocabulary pages' filter and letter links, and term lists.
+ */
+
+.vocabulary-page__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.vocabulary-page__list li {
+  list-style: none;
+  padding-block: 0.2rem;
+}
+
+/* WCAG 1.4.10: long single-word names mustn't widen the page. */
+.vocabulary-page__list a {
+  overflow-wrap: anywhere;
+}
+
+.vocabulary-page__list .vocabulary-page__list {
+  border-inline-start: 2px solid currentcolor;
+  margin-block-start: 0.2rem;
+  margin-inline-start: 0.5rem;
+  padding-inline-start: 1rem;
+}
+
+.vocabulary-page__filter {
+  margin-block-end: 1rem;
+  max-width: 24rem;
+}
+
+.vocabulary-page__filter label {
+  display: block;
+}
+
+.vocabulary-page__filter input {
+  border: 1px solid currentcolor;
+  border-radius: 4px;
+  font: inherit;
+  padding: 0.5rem;
+  width: 100%;
+}
+
+/* This stays in the page while empty. A status role added along with its
+message may not be announced (WCAG 4.1.3). */
+.vocabulary-page__status:empty {
+  margin: 0;
+}
+
+.vocabulary-page__letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  margin-block-end: 1.5rem;
+}
+
+/* WCAG 2.5.8: single letters are small targets, so give them a 24px minimum. */
+.vocabulary-page__letters a {
+  display: inline-block;
+  font-weight: 700;
+  min-height: 24px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.vocabulary-page__letters[hidden],
+.vocabulary-page__group[hidden],
+.vocabulary-page__filter[hidden],
+.vocabulary-page__list li[hidden],
+.vocabulary-page__list[hidden] {
+  display: none;
+}
+
+.vocabulary-page__group {
+  margin-block-end: 1.5rem;
+}
+
+.vocabulary-page__group h2 {
+  scroll-margin-block-start: 6rem;
+}

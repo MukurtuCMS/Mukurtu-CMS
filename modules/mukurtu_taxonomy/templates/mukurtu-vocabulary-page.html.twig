@@ -1,0 +1,61 @@
+{#
+/**
+ * @file
+ * The public page for a vocabulary.
+ *
+ * Available variables:
+ * - description: The vocabulary's description.
+ * - items: Nested term items, on a short vocabulary. Each has a name, url and
+ *   below.
+ * - groups: On a long vocabulary, top-level items by first letter. Each has a
+ *   letter, id and items.
+ *
+ * @see \Drupal\mukurtu_taxonomy\Controller\VocabularyPageController
+ */
+#}
+{% import _self as vocabulary %}
+
+{% macro terms(items) %}
+  {% import _self as vocabulary %}
+  {# Safari drops list semantics when bullets are removed, unless role is set. #}
+  <ul class="vocabulary-page__list" role="list">
+    {% for item in items %}
+      <li data-vocabulary-term>
+        <a href="{{ item.url }}" data-vocabulary-term-name>{{ item.name }}</a>
+        {% if item.below %}
+          {{ vocabulary.terms(item.below) }}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+<div class="vocabulary-page taxonomy-term-page"{% if groups %} data-vocabulary-page{% endif %}>
+  {% if description %}
+    <p class="vocabulary-page__description">{{ description }}</p>
+  {% endif %}
+
+  {% if groups %}
+    {# The script shows this, as the filter can't work without it. #}
+    <div class="vocabulary-page__filter" data-vocabulary-filter hidden>
+      <label for="vocabulary-filter">{{ 'Filter terms'|t }}</label>
+      <input id="vocabulary-filter" class="form-text form-element" type="search" autocomplete="off">
+    </div>
+    <p class="vocabulary-page__status" role="status" data-vocabulary-status></p>
+    <nav class="vocabulary-page__letters" aria-label="{{ 'Jump to a letter'|t }}" data-vocabulary-letters>
+      {% for group in groups %}
+        <a href="#{{ group.id }}">{{ group.letter }}</a>
+      {% endfor %}
+    </nav>
+    {% for group in groups %}
+      <section class="vocabulary-page__group" aria-labelledby="{{ group.id }}" data-vocabulary-group>
+        <h2 id="{{ group.id }}">{{ group.letter }}</h2>
+        {{ vocabulary.terms(group.items) }}
+      </section>
+    {% endfor %}
+  {% elseif items %}
+    {{ vocabulary.terms(items) }}
+  {% else %}
+    <p>{{ 'This vocabulary has no terms yet.'|t }}</p>
+  {% endif %}
+</div>

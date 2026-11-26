@@ -15,8 +15,12 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * Person and place records reference terms from several vocabularies (for
  * example creator, contributor and people), so the same name can be
  * referenced once per vocabulary. This formatter keeps the first term with a
- * given name and drops the rest, comparing the translated labels the viewer
- * actually sees.
+ * given name and drops terms with that name from other vocabularies, comparing
+ * the translated labels the viewer actually sees.
+ *
+ * Terms with the same name in one vocabulary are different terms, for example
+ * two places called Springfield nested under different regions, so they all
+ * show (#2521).
  */
 #[FieldFormatter(
   id: 'mukurtu_combined_term_label',
@@ -42,14 +46,18 @@ class CombinedTermLabelFormatter extends EntityReferenceLabelFormatter {
     $kept = [];
     foreach ($elements as $delta => $element) {
       $key = static::normalizeLabel((string) $element['#entity']->label());
+      $vid = $element['#entity']->bundle();
       if (!isset($kept[$key])) {
-        $kept[$key] = $delta;
+        $kept[$key] = ['delta' => $delta, 'vid' => $vid];
+        continue;
+      }
+      if ($kept[$key]['vid'] === $vid) {
         continue;
       }
 
       // Keep the dropped term's cache tags so editing any of the combined
       // terms still invalidates the rendered field.
-      $first = $kept[$key];
+      $first = $kept[$key]['delta'];
       CacheableMetadata::createFromRenderArray($elements[$first])
         ->merge(CacheableMetadata::createFromRenderArray($element))
         ->applyTo($elements[$first]);
