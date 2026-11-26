@@ -1,0 +1,7 @@
+#!/bin/sh
+# PHP's sendmail when MUKURTU_SMTP_HOST is not set. Without this, the base image's
+# own `sendmail` would try an SMTP server on 127.0.0.1, fail with a confusing
+# "can't connect to remote host (127.0.0.1)", and say nothing about the cause.
+cat >/dev/null
+echo "[mukurtu] mail was not sent: MUKURTU_SMTP_HOST is not set (see docs/docker.md, Mail)" >&2
+exit 1

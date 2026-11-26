@@ -1,0 +1,103 @@
+name: Watch the published Docker image
+
+# The code in the image is read-only, so a Docker site can't apply a Drupal security
+# release itself. This checks the newest published image every day, and opens an issue
+# when an advisory affects it. It never builds or publishes anything: a person decides
+# whether to release an image revision. See docs/docker-build.md, "Watching the published
+# image".
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to check."
+        required: true
+        type: string
+        default: latest
+
+permissions:
+  contents: read
+
+jobs:
+  watch:
+    name: Check the newest image
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    env:
+      OWNER: ${{ github.repository_owner }}
+      TAG: ${{ inputs.tag || 'latest' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Pull the image
+        id: image
+        run: |
+          set -euo pipefail
+          ref="ghcr.io/${OWNER,,}/mukurtu:$TAG"
+          if ! docker pull --quiet "$ref" >/dev/null; then
+            echo "::notice::$ref is not published, so there is nothing to check."
+            exit 0
+          fi
+          version="$(docker image inspect "$ref" --format '{{ index .Config.Labels "org.opencontainers.image.version" }}')"
+          container="$(docker create "$ref")"
+          docker cp "$container:/var/www/html/composer.json" composer.json
+          docker cp "$container:/var/www/html/composer.lock" composer.lock
+          docker rm "$container" >/dev/null
+          {
+            echo "ref=$ref"
+            echo "version=${version:-$TAG}"
+          } >> "$GITHUB_OUTPUT"
+
+      # composer audit exits non-zero when it finds something, so its exit code says
+      # nothing here. Output that isn't a report fails the job, so a broken watch can't
+      # pass as a clean one.
+      - name: Audit the image's Composer packages
+        if: steps.image.outputs.ref
+        run: |
+          set -euo pipefail
+          composer_image="$(sed -n 's/^FROM \(composer:[^ ]*\) AS composer$/\1/p' Dockerfile)"
+          docker run --rm -v "$PWD:/app" -w /app "$composer_image" audit --locked --no-dev \
+            --no-plugins --no-scripts --abandoned=ignore --format=json > composer-audit.json || true
+          jq -e 'has("advisories")' composer-audit.json >/dev/null
+
+      - name: Scan the image for fixable HIGH and CRITICAL vulnerabilities
+        if: steps.image.outputs.ref
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.ref }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"
+          format: json
+          output: trivy.json
+
+      - name: Open or update the issue
+        if: steps.image.outputs.ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          REF: ${{ steps.image.outputs.ref }}
+          VERSION: ${{ steps.image.outputs.version }}
+        run: |
+          set -euo pipefail
+          scripts/docker/watch-report.py composer-audit.json trivy.json "$REF" > report.md
+          if [[ ! -s report.md ]]; then
+            echo "::notice::No advisories affect $REF."
+            exit 0
+          fi
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+          title="Container image $VERSION has security advisories"
+          number="$(gh issue list --repo "$REPO" --state open --search "\"$title\" in:title" \
+            --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty")"
+          if [[ -z "$number" ]]; then
+            gh issue create --repo "$REPO" --title "$title" --label "packaging and deployment" --body-file report.md
+          elif [[ "$(gh issue view "$number" --repo "$REPO" --json body --jq .body)" != "$(cat report.md)" ]]; then
+            gh issue edit "$number" --repo "$REPO" --body-file report.md
+            gh issue comment "$number" --repo "$REPO" --body "The findings changed. The description above is up to date."
+          fi

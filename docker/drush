@@ -1,0 +1,11 @@
+#!/bin/sh
+# Drush, told the site's public address however it is started: by the entrypoint,
+# by cron, or by `docker exec` (which does not run the entrypoint, so environment
+# variables it sets would be missing). render-config.sh writes the address to
+# $MUKURTU_RUN_DIR/drush-uri at every start.
+uri_file="${MUKURTU_RUN_DIR:-/run/mukurtu}/drush-uri"
+if [ -z "${DRUSH_OPTIONS_URI:-}" ] && [ -r "$uri_file" ]; then
+  DRUSH_OPTIONS_URI=$(cat "$uri_file")
+  export DRUSH_OPTIONS_URI
+fi
+exec /var/www/html/vendor/bin/drush "$@"
