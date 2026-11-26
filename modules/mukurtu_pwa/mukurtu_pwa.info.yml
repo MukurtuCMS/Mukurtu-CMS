@@ -1,0 +1,10 @@
+name: 'Mukurtu PWA (experimental)'
+type: module
+description: 'Research spike for Mukurtu Mobile. Makes the site installable and lets people save items to their device. Not for production sites.'
+core_version_requirement: '^10 || ^11'
+package: 'Experimental'
+hidden: true
+dependencies:
+  - 'mukurtu_api:mukurtu_api'
+  - 'mukurtu_core:mukurtu_core'
+  - 'mukurtu_design:mukurtu_design'

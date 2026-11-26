@@ -1,0 +1,7 @@
+services:
+  mukurtu_api.resource_type_allowlist:
+    class: Drupal\mukurtu_api\EventSubscriber\ResourceTypeAllowlist
+    tags:
+      - { name: event_subscriber }
+  Drupal\mukurtu_api\Service\SiteManifest:
+    arguments: ['@config.factory', '@language_manager', '@module_handler', '@Drupal\Core\Extension\ThemeSettingsProvider']

@@ -175,6 +175,11 @@ services:
           # A11Y_* environment variables are set on this Tugboat project,
           # so a preview without them behaves exactly as before. See #2241.
           sudo -E -u www-data ./vendor/bin/drush php:script $TUGBOAT_ROOT/scripts/tugboat/provision-a11y-accounts.php
+          # #400 PWA spike, on the 400-mobile-api-spike research branch only.
+          # Every push rebuilds the site, so the test items come from a
+          # repeatable script. Don't push during a storage-retention test.
+          sudo -E -u www-data ./vendor/bin/drush en -y mukurtu_pwa
+          sudo -E -u www-data ./vendor/bin/drush php:script $TUGBOAT_ROOT/modules/mukurtu_pwa/scripts/seed.php
       update:
         # Ensure settings.php is always present with the correct database
         # credentials, guarding against site-install rewrites or refresh-only
