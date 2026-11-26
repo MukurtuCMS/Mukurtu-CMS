@@ -22,6 +22,14 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
       'template' => 'mukurtu-vocabulary-add-list',
       'variables' => ['content' => NULL],
     ],
+    'mukurtu_vocabulary_page' => [
+      'template' => 'mukurtu-vocabulary-page',
+      'variables' => [
+        'description' => '',
+        'items' => [],
+        'groups' => [],
+      ],
+    ],
     'taxonomy_records' => [
       'template' => 'taxonomy-records',
       'variables' => [
@@ -29,6 +37,8 @@ function mukurtu_taxonomy_theme($existing, $type, $theme, $path) {
         'records' => NULL,
         'referenced_content' => NULL,
         'term_description' => '',
+        'nested_terms' => [],
+        'parent_term' => NULL,
       ],
     ],
   ];
