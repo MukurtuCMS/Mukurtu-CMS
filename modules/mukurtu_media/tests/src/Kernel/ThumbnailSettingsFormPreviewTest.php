@@ -147,6 +147,22 @@ class ThumbnailSettingsFormPreviewTest extends KernelTestBase {
   }
 
   /**
+   * Each field's title and help text is one translatable string for every
+   * media type, with the type's name as a placeholder.
+   */
+  public function testTitleAndDescriptionAreTranslatable(): void {
+    $form = $this->buildThumbnailSettingsForm();
+
+    $title = $form['default_thumbnail']['image']['#title'];
+    $this->assertSame('@label default thumbnail', $title->getUntranslatedString());
+    $this->assertSame('Image default thumbnail', (string) $title);
+
+    $description = $form['default_thumbnail']['image']['#description'];
+    $this->assertSame('Manage default thumbnail for @label media items.', $description->getUntranslatedString());
+    $this->assertSame('Manage default thumbnail for Image media items.', (string) $description);
+  }
+
+  /**
    * No preview element is built for a bundle with no configured file.
    */
   public function testNoPreviewWhenNoFileConfigured(): void {
