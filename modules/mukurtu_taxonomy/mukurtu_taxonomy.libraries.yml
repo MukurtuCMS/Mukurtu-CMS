@@ -3,3 +3,14 @@ nested-term-options:
   css:
     component:
       css/nested-term-options.css: {}
+
+vocabulary-page:
+  css:
+    component:
+      css/vocabulary-page.css: {}
+  js:
+    js/vocabulary-page.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupal.debounce
+    - core/once
