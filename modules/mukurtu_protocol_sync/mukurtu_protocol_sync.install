@@ -34,7 +34,7 @@ function mukurtu_protocol_sync_install(): void {
 
   // Add field_sync_protocols to default and media_library form displays
   // for all media bundles.
-  $bundles = ['image', 'audio', 'video', 'document', 'remote_video', 'soundcloud', 'external_embed'];
+  $bundles = ['image', 'audio', 'video', 'document', 'remote_video', 'soundcloud', 'external_embed', '3d_model'];
   $display_storage = \Drupal::entityTypeManager()->getStorage('entity_form_display');
 
   foreach ($bundles as $bundle) {

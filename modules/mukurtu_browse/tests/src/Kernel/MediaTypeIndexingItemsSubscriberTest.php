@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_browse\Kernel;
 
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\TypedData\ComplexDataInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mukurtu_browse\EventSubscriber\MediaTypeIndexingItemsSubscriber;
 use Drupal\search_api\Entity\Index;
@@ -15,7 +19,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Tests that remote media bundles are indexed as Audio and Video.
+ * Tests that remote media bundles are indexed as Audio, Video and 3D Model.
  */
 #[Group('mukurtu_browse')]
 class MediaTypeIndexingItemsSubscriberTest extends KernelTestBase {
@@ -74,6 +78,63 @@ class MediaTypeIndexingItemsSubscriberTest extends KernelTestBase {
     $this->dispatch($item);
 
     $this->assertSame($expected, $item->getField('media_type')->getValues());
+  }
+
+  /**
+   * Embeds, by embed code, in; expected indexed values out.
+   */
+  public static function embedProvider(): array {
+    $sketchfab = '<iframe title="Bowl" src="https://sketchfab.com/models/abc/embed"></iframe>';
+    $other = '<iframe title="Map" src="https://example.com/map"></iframe>';
+    return [
+      'A Sketchfab embed counts as a 3D model' => [['image', 'external_embed'], [$sketchfab], ['image', '3d_model']],
+      'Another embed stays an external embed' => [['external_embed'], [$other], ['external_embed']],
+      'Both kinds of embed count as both' => [['external_embed'], [$other, $sketchfab], ['external_embed', '3d_model']],
+      'A Sketchfab embed and an uploaded model count once' => [
+        ['3d_model', 'external_embed'],
+        [$sketchfab],
+        ['3d_model'],
+      ],
+    ];
+  }
+
+  /**
+   * Tests that embeds from 3D model hosts are indexed as 3D models (#336).
+   */
+  #[DataProvider('embedProvider')]
+  public function testEmbedsFromModelHostsCountAsModels(array $bundles, array $embed_codes, array $expected): void {
+    $item = $this->createItem([
+      'media_type' => ['entity:node', 'field_media_assets:entity:bundle', $bundles],
+    ]);
+    $item->setOriginalObject($this->nodeWithEmbeds($embed_codes));
+
+    $this->dispatch($item);
+
+    $this->assertSame($expected, $item->getField('media_type')->getValues());
+  }
+
+  /**
+   * Builds a stand-in for a node whose media assets are the given embeds.
+   */
+  protected function nodeWithEmbeds(array $embed_codes): ComplexDataInterface {
+    $media = [];
+    foreach ($embed_codes as $code) {
+      $embed = $this->createMock(FieldItemListInterface::class);
+      $embed->method('__get')->with('value')->willReturn($code);
+      $item = $this->createMock(FieldableEntityInterface::class);
+      $item->method('bundle')->willReturn('external_embed');
+      $item->method('hasField')->willReturn(TRUE);
+      $item->method('get')->willReturn($embed);
+      $media[] = $item;
+    }
+    $assets = $this->createMock(EntityReferenceFieldItemListInterface::class);
+    $assets->method('referencedEntities')->willReturn($media);
+    $node = $this->createMock(FieldableEntityInterface::class);
+    $node->method('hasField')->willReturn(TRUE);
+    $node->method('get')->with('field_media_assets')->willReturn($assets);
+    $data = $this->createMock(ComplexDataInterface::class);
+    $data->method('getValue')->willReturn($node);
+    return $data;
   }
 
   /**

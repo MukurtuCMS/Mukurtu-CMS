@@ -4401,6 +4401,112 @@ img[class$=-placeholder] {
   display: none;
 }
 
+.media--3d_model .media-asset--content {
+  inline-size: 100%;
+}
+
+.media-3d-model {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: var(--v-space-5xs);
+  inline-size: 100%;
+}
+.media-3d-model__viewer {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 16/9;
+  max-block-size: 80vh;
+}
+@media (orientation: portrait) {
+  .media-3d-model__viewer {
+    aspect-ratio: 1;
+  }
+}
+.media-3d-model__viewer--focus-visible {
+  outline: var(--focus-color) solid 3px;
+  outline-offset: -3px;
+}
+.media-3d-model__controls {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: var(--v-space-6xs);
+}
+.media-3d-model__controls[hidden] {
+  display: none;
+}
+.media-3d-model__controls-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  gap: var(--v-space-6xs);
+}
+.media-3d-model__controls-row .button {
+  margin: 0;
+}
+@media (width <= 600px) {
+  .media-3d-model__controls-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    inline-size: 100%;
+  }
+  .media-3d-model__controls-row .button:last-child:nth-child(odd) {
+    grid-column: 1/-1;
+  }
+  .media-3d-model__controls-row .button {
+    padding-inline: var(--v-space-6xs);
+  }
+}
+.media-3d-model__ar {
+  position: absolute;
+  inset-block-end: var(--v-space-5xs);
+  inset-inline-end: var(--v-space-5xs);
+}
+.media-3d-model--unsupported .media-3d-model__viewer,
+.media-3d-model--unsupported .media-3d-model__controls {
+  display: none;
+}
+.media-3d-model__unsupported, .media-3d-model__noscript {
+  margin: 0;
+  padding: var(--v-space-2xs);
+  text-align: center;
+}
+
+.glightbox-clean .gslide-inline .media-3d-model {
+  inline-size: min(92vw, (92vh - 2rem - 40px - 7rem) * 16 / 9);
+  max-inline-size: 100%;
+}
+@media (orientation: portrait) {
+  .glightbox-clean .gslide-inline .media-3d-model {
+    inline-size: min(92vw, 92vh - 2rem - 40px - 12rem);
+  }
+}
+.glightbox-clean .gslide-inline .media-3d-model__viewer--focus-visible,
+.glightbox-clean .gslide-inline .media-3d-model__controls .button:focus-visible {
+  outline-color: #fff;
+}
+.glightbox-clean .gslide-inline .media-3d-model__unsupported {
+  color: #fff;
+}
+
 /**
  * @file
  * Nav Primary.

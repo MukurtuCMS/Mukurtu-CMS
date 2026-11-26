@@ -189,7 +189,7 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
-      ->setDescription(t('Media assets are a key element of most digital heritage items, though they are not required. Supported media types are images, documents, video, audio, and embed code. Digital heritage items can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the digital heritage item to allow differential access to the media assets and metadata. <br />Select "Add media" to select or upload media assets.'))
+      ->setDescription(t('Media assets are a key element of most digital heritage items, though they are not required. Supported media types are images, documents, video, audio, 3D models, and embed code. Digital heritage items can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the digital heritage item to allow differential access to the media assets and metadata. <br />Select "Add media" to select or upload media assets.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -201,7 +201,8 @@ class DigitalHeritage extends Node implements DigitalHeritageInterface, Cultural
             'remote_video' => 'remote_video',
             'video' => 'video',
             'external_embed' => 'external_embed',
-            'soundcloud' => 'soundcloud'
+            'soundcloud' => 'soundcloud',
+            '3d_model' => '3d_model',
           ],
           'auto_create' => FALSE,
         ]

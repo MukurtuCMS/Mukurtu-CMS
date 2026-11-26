@@ -30,6 +30,7 @@ use Drupal\mukurtu_media\Form\ExternalEmbedForm;
 use Drupal\mukurtu_media\Form\MukurtuFileUploadForm;
 use Drupal\mukurtu_media\Form\SoundCloudAddForm;
 use Drupal\mukurtu_media\Entity\SoundCloud;
+use Drupal\mukurtu_media\Entity\ThreeDModel;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -58,6 +59,9 @@ function mukurtu_media_entity_bundle_info_alter(array &$bundles): void
   }
   if (isset($bundles['media']['soundcloud'])) {
     $bundles['media']['soundcloud']['class'] = SoundCloud::class;
+  }
+  if (isset($bundles['media']['3d_model'])) {
+    $bundles['media']['3d_model']['class'] = ThreeDModel::class;
   }
 }
 
@@ -112,6 +116,7 @@ function mukurtu_media_entity_field_storage_info(EntityTypeInterface $entity_typ
     $fields += RemoteVideo::bundleFieldDefinitions($entity_type, 'remote_video', []);
     $fields += SoundCloud::bundleFieldDefinitions($entity_type, 'soundcloud', []);
     $fields += Video::bundleFieldDefinitions($entity_type, 'video', []);
+    $fields += ThreeDModel::bundleFieldDefinitions($entity_type, '3d_model', []);
     return $fields;
   }
 }
@@ -248,6 +253,47 @@ function mukurtu_media_form_media_external_embed_add_form_alter(&$form, FormStat
  */
 function mukurtu_media_form_media_external_embed_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_media_form_media_3d_model_add_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  mukurtu_media_3d_model_form_alter($form);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mukurtu_media_form_media_3d_model_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  mukurtu_media_3d_model_form_alter($form);
+}
+
+/**
+ * Shared alterations for the 3D Model add and edit forms.
+ *
+ * Greys out other file types in the OS file picker, fills in the name from
+ * the model's file name, and fills in the thumbnail's alt text on upload.
+ * There is no thumbnail to generate.
+ */
+function mukurtu_media_3d_model_form_alter(array &$form): void {
+  foreach (['field_media_3d_model', 'field_media_3d_model_usdz'] as $field_name) {
+    if (!isset($form[$field_name]['widget'][0])) {
+      continue;
+    }
+    $widget = &$form[$field_name]['widget'][0];
+    if (!empty($widget['#upload_validators']['FileExtension']['extensions'])) {
+      $ext = $widget['#upload_validators']['FileExtension']['extensions'];
+      $widget['#accept'] = '.' . implode(',.', array_filter(explode(' ', $ext)));
+    }
+    unset($widget);
+  }
+  if (isset($form['field_media_3d_model']['widget'][0])) {
+    $form['field_media_3d_model']['widget'][0]['#process'][] = 'mukurtu_media_refresh_media_process';
+  }
+  if (isset($form['field_thumbnail']['widget'][0])) {
+    $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
+  }
 }
 
 /**
@@ -1009,7 +1055,7 @@ function mukurtu_media_form_alter(array &$form, FormStateInterface $form_state, 
   // The edit button URL includes ?mukurtu_modal=1. This parameter persists
   // when Drupal's AJAX JS swaps _wrapper_format from drupal_modal to
   // drupal_ajax on form submit, giving a stable signal across both requests.
-  $mukurtu_bundles = ['video', 'audio', 'image', 'document', 'remote_video', 'external_embed', 'soundcloud'];
+  $mukurtu_bundles = ['video', 'audio', 'image', 'document', 'remote_video', 'external_embed', 'soundcloud', '3d_model'];
   $pattern = '/^media_(' . implode('|', $mukurtu_bundles) . ')_edit_form$/';
   if (preg_match($pattern, $form_id) && \Drupal::request()->query->get('mukurtu_modal')) {
     unset($form['actions']['delete']);

@@ -89,6 +89,31 @@ glightbox:
   js:
     libraries/glightbox/glightbox.min.js: {}
 
+model-viewer:
+  remote: https://github.com/google/model-viewer
+  version: 4.4.0
+  license:
+    name: Apache-2.0
+    url: https://github.com/google/model-viewer/blob/master/LICENSE
+    gpl-compatible: true
+  js:
+    # An ES module with three.js bundled in. Not aggregated: module scripts
+    # can't share a file with the classic scripts around them.
+    libraries/model-viewer/model-viewer.min.js:
+      minified: true
+      preprocess: false
+      attributes:
+        type: module
+
+media-3d-model:
+  js:
+    js/media-3d-model.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - mukurtu_v4/model-viewer
+
 media-glightbox:
   js:
     js/media-asset-glightbox.js: {}

@@ -1,0 +1,126 @@
+// 3D model viewer (model-viewer), its controls, and its lightbox copy.
+// See media--3d-model--media-assets.html.twig.
+
+.media--3d_model .media-asset--content {
+  inline-size: 100%;
+}
+
+.media-3d-model {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-space-5xs);
+  inline-size: 100%;
+
+  &__viewer {
+    display: block;
+    inline-size: 100%;
+
+    // model-viewer's own styles set a 300x150px box, and an explicit height
+    // there would win over the aspect ratio.
+    block-size: auto;
+    aspect-ratio: 16 / 9;
+    max-block-size: 80vh;
+
+    // 16:9 leaves a phone held upright a strip too short to work with.
+    @media (orientation: portrait) {
+      aspect-ratio: 1;
+    }
+
+    // The ring model-viewer draws itself is the browser default, 1px and
+    // inset. media-3d-model.js sets this class for keyboard focus, which
+    // lands inside the viewer's shadow root. Inset, so it can't cover the
+    // tabs or buttons right next to the viewer.
+    &--focus-visible {
+      outline: var(--focus-color) solid 3px;
+      outline-offset: -3px;
+    }
+  }
+
+  // Two rows: the four rotate buttons, then zoom and reset.
+  &__controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--v-space-6xs);
+
+    // display: flex above would otherwise show them.
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  &__controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--v-space-6xs);
+
+    .button {
+      margin: 0;
+    }
+
+    // On a phone neither row fits on one line: two to a line, with Reset
+    // view on its own, rather than one per line down the screen.
+    @media (width <= 600px) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      inline-size: 100%;
+
+      .button:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+      }
+
+      .button {
+        padding-inline: var(--v-space-6xs);
+      }
+    }
+  }
+
+  &__ar {
+    position: absolute;
+    inset-block-end: var(--v-space-5xs);
+    inset-inline-end: var(--v-space-5xs);
+  }
+
+  // No WebGL, or the model failed to load: say so instead of showing an
+  // empty box and buttons that do nothing.
+  &--unsupported {
+    .media-3d-model__viewer,
+    .media-3d-model__controls {
+      display: none;
+    }
+  }
+
+  &__unsupported,
+  &__noscript {
+    margin: 0;
+    padding: var(--v-space-2xs);
+    text-align: center;
+  }
+}
+
+.glightbox-clean .gslide-inline {
+  // Sized like the 16:9 embed iframe in _glightbox.scss, less the controls
+  // below it: two rows of buttons, four on a phone. An explicit
+  // width, because a percentage can't size .gslide-media, which shrinks to
+  // fit.
+  .media-3d-model {
+    inline-size: min(92vw, calc((92vh - 2rem - 40px - 7rem) * 16 / 9));
+    max-inline-size: 100%;
+
+    @media (orientation: portrait) {
+      inline-size: min(92vw, calc(92vh - 2rem - 40px - 12rem));
+    }
+  }
+
+  // The dark backdrop, not the page, is behind these rings here. The
+  // buttons' brand-colored ring is about 2.5:1 against it (WCAG 1.4.11).
+  .media-3d-model__viewer--focus-visible,
+  .media-3d-model__controls .button:focus-visible {
+    outline-color: #fff;
+  }
+
+  .media-3d-model__unsupported {
+    color: #fff;
+  }
+}

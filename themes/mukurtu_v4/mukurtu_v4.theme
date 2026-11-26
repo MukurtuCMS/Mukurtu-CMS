@@ -764,6 +764,52 @@ function mukurtu_v4_preprocess_media__document__carousel_thumbnail(array &$varia
 }
 
 /**
+ * Implements template_preprocess_media__3d_model__media_assets().
+ *
+ * Adds what the model-viewer element needs beyond the model's own URL
+ * (media_url, set in mukurtu_v4_preprocess_media()).
+ */
+function mukurtu_v4_preprocess_media__3d_model__media_assets(array &$variables): void {
+  $media = $variables['media'];
+
+  $usdz = $media->hasField('field_media_3d_model_usdz') ? $media->get('field_media_3d_model_usdz')->entity : NULL;
+  $variables['model_usdz_url'] = $usdz ? MukurtuV4FileUrl::fromFile($usdz) : NULL;
+
+  // The poster shows until the model loads. The file source's own thumbnail,
+  // a generic file icon used when there is no uploaded or default
+  // thumbnail, makes a poor one.
+  $thumbnail = $media->get('thumbnail')->entity;
+  $is_icon = $thumbnail && $thumbnail->getFileUri() === $media->getSource()->getMetadata($media, 'thumbnail_uri');
+  $variables['model_poster_url'] = ($thumbnail && !$is_icon) ? MukurtuV4FileUrl::fromFile($thumbnail) : NULL;
+
+  // Translated text for model-viewer's screen reader announcements. Its keys
+  // name the camera position: front, right, back and left, prefixed with
+  // "upper-" or "lower-" when looking down on or up at the model.
+  $variables['model_a11y'] = json_encode([
+    'front' => (string) t('View from the front'),
+    'right' => (string) t('View from the right'),
+    'back' => (string) t('View from the back'),
+    'left' => (string) t('View from the left'),
+    'upper-front' => (string) t('View from above the front'),
+    'upper-right' => (string) t('View from above the right'),
+    'upper-back' => (string) t('View from above the back'),
+    'upper-left' => (string) t('View from above the left'),
+    'lower-front' => (string) t('View from below the front'),
+    'lower-right' => (string) t('View from below the right'),
+    'lower-back' => (string) t('View from below the back'),
+    'lower-left' => (string) t('View from below the left'),
+    'interaction-prompt' => (string) t('Use a mouse, touch, the arrow keys, or the buttons below to move the model.'),
+  ], JSON_UNESCAPED_UNICODE);
+
+  $base = \Drupal::service('file_url_generator')->generateString(\Drupal::service('extension.list.theme')->getPath('mukurtu_v4') . '/libraries/model-viewer');
+  $variables['#attached']['library'][] = 'mukurtu_v4/media-3d-model';
+  $variables['#attached']['drupalSettings']['mukurtuModelViewer'] = [
+    'dracoDecoderLocation' => $base . '/draco/',
+    'ktx2TranscoderLocation' => $base . '/basis/',
+  ];
+}
+
+/**
  * Implements template_preprocess_media__audio__media_assets().
  */
 function mukurtu_v4_preprocess_media__audio__media_assets(array &$variables): void {

@@ -304,6 +304,7 @@ content:
         - remote_video
         - soundcloud
         - video
+        - 3d_model
     third_party_settings: {  }
   field_protocol_control:
     type: mukurtu_protocol_control_widget

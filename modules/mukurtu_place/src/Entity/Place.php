@@ -70,7 +70,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
 
     $definitions['field_media_assets'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Media Assets'))
-      ->setDescription(t('Media assets are a key element of most place records, though they are not required. Supported media types are images, documents, video, audio, and embed code. Place records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the place record to allow differential access to the media assets and metadata.	<br />Select "Add media" to select or upload media assets.'))
+      ->setDescription(t('Media assets are a key element of most place records, though they are not required. Supported media types are images, documents, video, audio, 3D models, and embed code. Place records can include more than one media asset, and each media asset can be a different media type. Media assets can be assigned a different cultural protocol from the place record to allow differential access to the media assets and metadata.	<br />Select "Add media" to select or upload media assets.'))
       ->setSettings([
         'target_type' => 'media',
         'handler' => 'default:media',
@@ -82,6 +82,7 @@ class Place extends Node implements PlaceInterface, CulturalProtocolControlledIn
             'remote_video' => 'remote_video',
             'video' => 'video',
             'soundcloud' => 'soundcloud',
+            '3d_model' => '3d_model',
             'external_embed' => 'external_embed'
 
           ],

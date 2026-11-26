@@ -12,6 +12,7 @@ group_bundle: protocol
 group_id: null
 permissions:
   - 'apply protocol'
+  - 'create 3d_model media'
   - 'create audio media'
   - 'create collection content'
   - 'create document media'
@@ -21,6 +22,7 @@ permissions:
   - 'create soundcloud media'
   - 'create video media'
   - 'delete any collection content'
+  - 'delete own 3d_model media'
   - 'delete own audio media'
   - 'delete own collection content'
   - 'delete own document media'
@@ -31,6 +33,7 @@ permissions:
   - 'delete own video media'
   - 'edit any collection content'
   - 'edit own collection content'
+  - 'update own 3d_model media'
   - 'update own audio media'
   - 'update own document media'
   - 'update own external_embed media'

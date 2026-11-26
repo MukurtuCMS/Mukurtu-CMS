@@ -32,7 +32,7 @@
 <div class="card-media--content-warning" data-mukurtu-card-url="{{ url }}">
   {{ media_markup }}
 </div>
-{% elseif media_bundle in ['image', 'document', 'external_embed'] %}
+{% elseif media_bundle in ['image', 'document', 'external_embed', '3d_model'] %}
 <a href="{{ url }}" aria-hidden="true" tabindex="-1">
   {{ media_markup }}
 </a>

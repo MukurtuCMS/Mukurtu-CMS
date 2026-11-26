@@ -149,6 +149,7 @@ content:
         - remote_video
         - soundcloud
         - video
+        - 3d_model
     third_party_settings: {  }
   field_other_place_names:
     type: tagify_entity_reference_autocomplete_widget

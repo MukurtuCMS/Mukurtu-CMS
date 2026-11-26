@@ -44,6 +44,7 @@ content:
         - remote_video
         - soundcloud
         - video
+        - 3d_model
     third_party_settings: {  }
   langcode:
     type: language_select

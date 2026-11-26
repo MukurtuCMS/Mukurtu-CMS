@@ -3,6 +3,7 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_page_media_assets
+    - media.type.3d_model
     - media.type.audio
     - media.type.document
     - media.type.external_embed
@@ -25,6 +26,7 @@ settings:
   handler: 'default:media'
   handler_settings:
     target_bundles:
+      3d_model: 3d_model
       audio: audio
       document: document
       external_embed: external_embed
