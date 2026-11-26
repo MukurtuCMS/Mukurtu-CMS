@@ -171,16 +171,16 @@ class TermPageNestedContentTest extends DigitalHeritageTestBase {
   }
 
   /**
-   * The term page links to its parent and lists the terms nested under it.
+   * The term page lists the terms nested under it, and the ones beside it.
    *
-   * Nested terms are in the vocabulary's order. Names are in the current
-   * content language, and moving any term in the vocabulary refreshes the
-   * page.
+   * Terms are in the vocabulary's order. Names are in the current content
+   * language, and moving any term in the vocabulary refreshes the page.
    */
   public function testNestedTermsList(): void {
-    $this->createTerm('Carving', $this->terms['arts'], -1);
+    $carving = $this->createTerm('Carving', $this->terms['arts'], -1);
     ConfigurableLanguage::createFromLangcode('es')->save();
     $this->container->get('entity_type.manager')->getStorage('taxonomy_term')->resetCache();
+    Term::load($this->terms['arts']->id())->addTranslation('es', ['name' => 'Artes'])->save();
     Term::load($this->terms['weaving']->id())->addTranslation('es', ['name' => 'Tejido'])->save();
 
     $controller = TaxonomyRecordViewController::create($this->container);
@@ -189,22 +189,29 @@ class TermPageNestedContentTest extends DigitalHeritageTestBase {
     $this->assertContains('taxonomy_term_list:category', $build['#cache']['tags']);
     $this->assertContains('languages:language_content', $build['#cache']['contexts']);
 
-    $this->assertNull($build['records']['#parent_term']);
+    // A top-level term has nothing beside it.
+    $this->assertNull($build['records']['#sibling_terms']);
 
+    // An only child has no siblings either.
     $baskets = $controller->build($this->terms['baskets']);
     $this->assertSame([], $baskets['records']['#nested_terms']);
-    $this->assertSame(
-      'Nested under <a href="' . $this->terms['weaving']->toUrl()->toString() . '">Weaving</a>',
-      (string) $baskets['records']['#parent_term']
-    );
+    $this->assertNull($baskets['records']['#sibling_terms']);
+
+    // The term itself is left out of the list beside it.
+    $siblings = $controller->build($this->terms['weaving'])['records']['#sibling_terms'];
+    $this->assertSame('Also in <em class="placeholder">Arts</em>', (string) $siblings['heading']);
+    $this->assertSame(['Carving'], array_column($siblings['terms'], 'name'));
 
     $this->config('system.site')->set('default_langcode', 'es')->save();
     $this->container->get('language.default')->set(ConfigurableLanguage::load('es'));
     $this->container->get('language_manager')->reset();
-    $build = TaxonomyRecordViewController::create($this->container)->build($this->terms['arts']);
-    $this->assertSame(['Carving', 'Tejido'], array_column($build['records']['#nested_terms'], 'name'));
-    $parent_term = (string) TaxonomyRecordViewController::create($this->container)->build($this->terms['baskets'])['records']['#parent_term'];
-    $this->assertStringContainsString('>Tejido</a>', $parent_term);
+
+    $this->assertSame(
+      'Also in <em class="placeholder">Artes</em>',
+      (string) TaxonomyRecordViewController::create($this->container)->build($carving)['records']['#sibling_terms']['heading']
+    );
+    $nested = TaxonomyRecordViewController::create($this->container)->build($this->terms['arts'])['records']['#nested_terms'];
+    $this->assertSame(['Carving', 'Tejido'], array_column($nested, 'name'));
   }
 
   /**
