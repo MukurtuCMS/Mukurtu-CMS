@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\file\Entity\File;
 use Drupal\mukurtu_collection\Entity\Collection;
 use Drupal\mukurtu_local_contexts\LocalContextsSupportedProjectManager;
+use Drupal\mukurtu_media\ModelViewer;
 use Drupal\mukurtu_v4\MukurtuV4PreRender;
 
 /**
@@ -803,31 +804,8 @@ function mukurtu_v4_model_3d_viewer_variables(array &$variables): void {
   $is_icon = $thumbnail && $thumbnail->getFileUri() === $media->getSource()->getMetadata($media, 'thumbnail_uri');
   $variables['model_poster_url'] = ($thumbnail && !$is_icon) ? MukurtuV4FileUrl::fromFile($thumbnail) : NULL;
 
-  // Translated text for model-viewer's screen reader announcements. Its keys
-  // name the camera position: front, right, back and left, prefixed with
-  // "upper-" or "lower-" when looking down on or up at the model.
-  $variables['model_a11y'] = json_encode([
-    'front' => (string) t('View from the front'),
-    'right' => (string) t('View from the right'),
-    'back' => (string) t('View from the back'),
-    'left' => (string) t('View from the left'),
-    'upper-front' => (string) t('View from above the front'),
-    'upper-right' => (string) t('View from above the right'),
-    'upper-back' => (string) t('View from above the back'),
-    'upper-left' => (string) t('View from above the left'),
-    'lower-front' => (string) t('View from below the front'),
-    'lower-right' => (string) t('View from below the right'),
-    'lower-back' => (string) t('View from below the back'),
-    'lower-left' => (string) t('View from below the left'),
-    'interaction-prompt' => (string) t('Use a mouse, touch, the arrow keys, or the buttons below to move the model.'),
-  ], JSON_UNESCAPED_UNICODE);
-
-  $base = \Drupal::service('file_url_generator')->generateString(\Drupal::service('extension.list.theme')->getPath('mukurtu_v4') . '/libraries/model-viewer');
-  $variables['#attached']['library'][] = 'mukurtu_v4/media-3d-model';
-  $variables['#attached']['drupalSettings']['mukurtuModelViewer'] = [
-    'dracoDecoderLocation' => $base . '/draco/',
-    'ktx2TranscoderLocation' => $base . '/basis/',
-  ];
+  $variables['model_a11y'] = ModelViewer::a11y();
+  ModelViewer::attach($variables['#attached']);
 }
 
 /**

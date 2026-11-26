@@ -28,6 +28,8 @@ use Drupal\mukurtu_media\Entity\Video;
 use Drupal\mukurtu_media\Entity\ExternalEmbed;
 use Drupal\mukurtu_media\Form\ExternalEmbedForm;
 use Drupal\mukurtu_media\Form\MukurtuFileUploadForm;
+use Drupal\mukurtu_media\ModelViewer;
+use Drupal\mukurtu_media\ThreeDModelThumbnailCapture;
 use Drupal\mukurtu_media\Form\SoundCloudAddForm;
 use Drupal\mukurtu_media\Entity\SoundCloud;
 use Drupal\mukurtu_media\Entity\ThreeDModel;
@@ -99,6 +101,13 @@ function mukurtu_media_theme(): array {
         'files' => [],
         'attributes' => NULL,
         'tracks' => [],
+      ],
+    ],
+    'mukurtu_3d_model_capture' => [
+      'variables' => [
+        'media_url' => NULL,
+        'name' => '',
+        'model_a11y' => '',
       ],
     ],
   ];
@@ -301,6 +310,81 @@ function mukurtu_media_3d_model_form_alter(array &$form): void {
   }
   if (isset($form['field_thumbnail']['widget'][0])) {
     $form['field_thumbnail']['widget'][0]['#process'][] = 'mukurtu_media_thumbnail_alt_process';
+  }
+
+  // Capturing the thumbnail from the viewer (#2809). The viewer is part of
+  // the model's file widget, so it changes when the model is uploaded or
+  // removed. The capture goes in a hidden field outside that widget. The
+  // viewer's template is mukurtu_v4's, which Twig only finds when that theme
+  // is installed.
+  if (isset($form['field_media_3d_model']['widget'][0], $form['field_thumbnail']['widget'][0]) && isset($form['actions']['submit']['#submit']) && \Drupal::service('theme_handler')->themeExists('mukurtu_v4')) {
+    $form['field_media_3d_model']['widget'][0]['#process'][] = 'mukurtu_media_3d_model_capture_process';
+    $form['thumbnail_capture'] = [
+      '#type' => 'hidden',
+      '#default_value' => '',
+      '#attributes' => ['data-mukurtu-3d-capture-value' => ''],
+    ];
+    $form['#validate'][] = 'mukurtu_media_3d_model_capture_validate';
+    $submit = &$form['actions']['submit']['#submit'];
+    $save = array_search('::save', $submit, TRUE);
+    array_splice($submit, $save === FALSE ? count($submit) : $save, 0, ['mukurtu_media_3d_model_capture_submit']);
+    unset($submit);
+  }
+}
+
+/**
+ * Process callback: shows the 3D model's viewer, for capturing a thumbnail.
+ *
+ * Shown once a model is uploaded, including before the media is saved: core
+ * lets the person who uploaded a file view it.
+ */
+function mukurtu_media_3d_model_capture_process(array &$element, FormStateInterface $form_state, array &$complete_form): array {
+  $file = reset($element['#files']);
+  if (!$file instanceof FileInterface) {
+    return $element;
+  }
+  $media = $form_state->getFormObject()->getEntity();
+  $element['thumbnail_capture'] = [
+    '#theme' => 'mukurtu_3d_model_capture',
+    '#media_url' => \Drupal::service('file_url_generator')->generateString($file->getFileUri()),
+    '#name' => $media->label() ?: $file->getFilename(),
+    '#model_a11y' => ModelViewer::a11y(),
+    '#weight' => 100,
+    '#attached' => ['library' => ['mukurtu_media/3d-model-thumbnail-capture']],
+  ];
+  ModelViewer::attach($element['thumbnail_capture']['#attached']);
+  return $element;
+}
+
+/**
+ * Form validation handler: checks a thumbnail captured from the viewer.
+ */
+function mukurtu_media_3d_model_capture_validate(array &$form, FormStateInterface $form_state): void {
+  $value = (string) $form_state->getValue('thumbnail_capture');
+  if ($value === '') {
+    return;
+  }
+  $png = ThreeDModelThumbnailCapture::decode($value);
+  if ($png === NULL) {
+    $form_state->setErrorByName('thumbnail_capture', t("The captured thumbnail couldn't be saved. Try again, or upload a thumbnail."));
+    return;
+  }
+  $form_state->set('mukurtu_3d_model_capture', $png);
+}
+
+/**
+ * Form submission handler: makes a captured view the 3D model's thumbnail.
+ *
+ * Runs before the media is saved, so ThreeDModel::preSave() uses it.
+ */
+function mukurtu_media_3d_model_capture_submit(array &$form, FormStateInterface $form_state): void {
+  $png = $form_state->get('mukurtu_3d_model_capture');
+  $media = $form_state->getFormObject()->getEntity();
+  if ($png === NULL || !$media instanceof ThreeDModel) {
+    return;
+  }
+  if (!ThreeDModelThumbnailCapture::save($png, $media)) {
+    \Drupal::messenger()->addError(t("The captured thumbnail couldn't be saved. Try again, or upload a thumbnail."));
   }
 }
 

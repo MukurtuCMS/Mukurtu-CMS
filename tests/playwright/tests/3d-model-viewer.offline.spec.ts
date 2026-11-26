@@ -13,6 +13,7 @@ import path = require('path');
  */
 
 const THEME_DIR = path.join(__dirname, '../../../themes/mukurtu_v4');
+const MEDIA_DIR = path.join(__dirname, '../../../modules/mukurtu_media');
 const MODEL = path.join(__dirname, '../fixtures/test-model.glb');
 const ORIGIN = 'https://fixture.test';
 
@@ -126,6 +127,47 @@ const SECOND = `
     </div>
   </div>`;
 
+// Mirrors mukurtu-3d-model-capture.html.twig: the viewer on a 3D Model add
+// or edit form, for capturing the thumbnail (#2809), with the form's hidden
+// field (/capture). Drupal.t and once.remove stand in for core's.
+const CAPTURE = `
+  <form>
+    <input type="hidden" name="thumbnail_capture" value="" data-mukurtu-3d-capture-value>
+    <label>Thumbnail <input type="file" name="files[field_thumbnail_0]"></label>
+    <div class="mukurtu-3d-capture" data-mukurtu-3d-capture>${VIEWER}
+      <div class="mukurtu-3d-capture__actions" hidden>
+        <button type="button" class="button" data-mukurtu-3d-capture-button>Use this view as the thumbnail</button>
+        <p class="mukurtu-3d-capture__status" role="status"></p>
+        <img class="mukurtu-3d-capture__preview" alt="Captured thumbnail" hidden>
+      </div>
+    </div>
+  </form>`;
+
+const CAPTURE_SCRIPTS = `
+<link rel="stylesheet" href="/media/css/media-admin.css">
+<script>
+  Drupal.t = function (s) { return s; };
+  once.remove = function (id, selector, context) {
+    var attr = 'data-once-' + id;
+    return Array.prototype.slice.call(context.querySelectorAll(selector)).filter(function (el) {
+      var had = el.hasAttribute(attr);
+      el.removeAttribute(attr);
+      return had;
+    });
+  };
+</script>
+<script src="/media/js/3d-model-thumbnail-capture.js"></script>
+<script>Drupal.behaviors.mukurtu3dModelThumbnailCapture.attach(document);</script>
+</body>`;
+
+function capturePage(value = ''): string {
+  const form = CAPTURE.replace('value=""', `value="${value}"`);
+  return PAGE.slice(0, PAGE.indexOf('<main')) + `<main style="inline-size: 640px">${form}</main>` + PAGE.slice(PAGE.indexOf('</main>') + '</main>'.length).replace('</body>', CAPTURE_SCRIPTS);
+}
+
+// A 2x1 PNG, as a capture kept when the form is shown again.
+const KEPT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAEUlEQVR42mP8z8DwnwEIGAEAD/4C/vZkG/MAAAAASUVORK5CYII=';
+
 const TYPES: Record<string, string> = {
   '.js': 'text/javascript',
   '.css': 'text/css',
@@ -148,6 +190,15 @@ async function serve(page: Page): Promise<string[]> {
       const embeds = url.pathname === '/embed' ? EMBEDS : CAPTIONED;
       const body = PAGE.slice(0, PAGE.indexOf('<main')) + `<main style="inline-size: 1200px">${embeds}</main>` + PAGE.slice(PAGE.indexOf('</main>') + '</main>'.length);
       return route.fulfill({ contentType: 'text/html', body });
+    }
+    if (url.pathname === '/capture' || url.pathname === '/capture-kept') {
+      return route.fulfill({ contentType: 'text/html', body: capturePage(url.pathname === '/capture-kept' ? KEPT : '') });
+    }
+    if (url.pathname.startsWith('/media/')) {
+      const file = path.join(MEDIA_DIR, url.pathname.slice('/media/'.length));
+      if (fs.existsSync(file)) {
+        return route.fulfill({ contentType: TYPES[path.extname(file)] ?? 'application/octet-stream', body: fs.readFileSync(file) });
+      }
     }
     if (url.pathname === '/two') {
       return route.fulfill({ contentType: 'text/html', body: PAGE.replace('</main>', SECOND + '</main>') });
@@ -486,4 +537,68 @@ test('Without WebGL, a message replaces the viewer and its controls', async ({ p
   await expect(inline.locator('.media-3d-model__unsupported')).toBeVisible();
   await expect(inline.locator('.media-3d-model__controls')).toBeHidden();
   await expect(inline.locator('model-viewer')).toBeHidden();
+});
+
+test('On the add and edit forms, the current view can be captured as the thumbnail, by keyboard (#2809)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const outside = await serve(page);
+  await page.goto(ORIGIN + '/capture');
+  const button = page.getByRole('button', { name: 'Use this view as the thumbnail' });
+  await expect(button).toBeVisible({ timeout: 20000 });
+
+  // model-viewer lowers its resolution on a slow device. A slower CPU and
+  // a few seconds of turning get it there.
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 20 });
+  for (let i = 0; i < 6; i++) {
+    await page.getByRole('button', { name: 'Rotate right' }).click();
+    await page.waitForTimeout(500);
+  }
+  await button.focus();
+  await page.keyboard.press('Enter');
+
+  const preview = page.getByRole('img', { name: 'Captured thumbnail' });
+  await expect(preview).toBeVisible();
+  // model-viewer has a status region of its own, in its shadow root.
+  const status = page.locator('.mukurtu-3d-capture__status');
+  await expect(status).toHaveAttribute('role', 'status');
+  await expect(status).toHaveText('The thumbnail will be this view when you save.');
+  const value = await page.locator('[data-mukurtu-3d-capture-value]').inputValue();
+  expect(value).toMatch(/^data:image\/png;base64,/);
+
+  // The whole view, at full resolution, not the part a lower resolution
+  // leaves.
+  const sizes = await page.evaluate(() => {
+    const viewer = document.querySelector('model-viewer')!;
+    const img = document.querySelector('.mukurtu-3d-capture__preview') as HTMLImageElement;
+    return { width: img.naturalWidth, height: img.naturalHeight, viewerWidth: viewer.clientWidth, viewerHeight: viewer.clientHeight };
+  });
+  expect(sizes.width).toBeGreaterThanOrEqual(sizes.viewerWidth - 1);
+  expect(sizes.height).toBeGreaterThanOrEqual(sizes.viewerHeight - 1);
+
+  expect(outside).toEqual([]);
+});
+
+test('A capture kept when the form is shown again is shown, and removing the model drops it (#2809)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await page.goto(ORIGIN + '/capture-kept');
+  await expect(page.getByRole('img', { name: 'Captured thumbnail' })).toBeVisible();
+  await expect(page.locator('[data-mukurtu-3d-capture-value]')).toHaveValue(KEPT);
+
+  // What Drupal does when the Remove button's response replaces the widget.
+  await page.evaluate(() => (window as any).Drupal.behaviors.mukurtu3dModelThumbnailCapture.detach(document.querySelector('form'), {}, 'unload'));
+  await expect(page.locator('[data-mukurtu-3d-capture-value]')).toHaveValue('');
+});
+
+test('A thumbnail uploaded after a capture replaces the capture (#2809)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await page.goto(ORIGIN + '/capture-kept');
+  await expect(page.getByRole('img', { name: 'Captured thumbnail' })).toBeVisible();
+
+  await page.getByLabel('Thumbnail').setInputFiles({ name: 'basket.png', mimeType: 'image/png', buffer: Buffer.from(KEPT.split(',')[1], 'base64') });
+  await expect(page.locator('[data-mukurtu-3d-capture-value]')).toHaveValue('');
+  await expect(page.getByRole('img', { name: 'Captured thumbnail' })).toBeHidden();
+  await expect(page.locator('.mukurtu-3d-capture__status')).toHaveText('');
 });

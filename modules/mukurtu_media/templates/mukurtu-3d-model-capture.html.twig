@@ -1,0 +1,29 @@
+{#
+/**
+ * @file
+ * A 3D model's viewer on its add and edit forms, for capturing a thumbnail.
+ *
+ * Available variables:
+ * - media_url: The model file's URL.
+ * - name: The model's name, for the viewer's alt text.
+ * - model_a11y: JSON, the viewer's screen reader announcements.
+ *
+ * The viewer is mukurtu_v4's, so it matches what visitors see.
+ * 3d-model-thumbnail-capture.js shows the button once the model loads, and
+ * puts the capture in the form's hidden thumbnail_capture field.
+ */
+#}
+<div class="mukurtu-3d-capture" data-mukurtu-3d-capture>
+  {% include '@mukurtu_v4/media/_model-3d-viewer.html.twig' with {
+    media_url: media_url,
+    model_usdz_url: null,
+    model_poster_url: null,
+    name: name,
+    model_a11y: model_a11y,
+  } only %}
+  <div class="mukurtu-3d-capture__actions" hidden>
+    <button type="button" class="button" data-mukurtu-3d-capture-button>{{ 'Use this view as the thumbnail'|t }}</button>
+    <p class="mukurtu-3d-capture__status" role="status"></p>
+    <img class="mukurtu-3d-capture__preview" alt="{{ 'Captured thumbnail'|t }}" hidden>
+  </div>
+</div>
