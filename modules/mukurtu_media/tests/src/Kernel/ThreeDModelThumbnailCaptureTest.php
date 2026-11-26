@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\mukurtu_media\Kernel;
 
+use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Serialization\Yaml;
@@ -181,7 +182,11 @@ class ThreeDModelThumbnailCaptureTest extends ProtocolAwareEntityTestBase {
     $this->assertArrayNotHasKey('thumbnail_capture', $form);
     $this->assertSame(['::submitForm', '::save'], $form['actions']['submit']['#submit']);
 
-    \Drupal::service('theme_installer')->install(['mukurtu_v4']);
+    // Kernel tests don't find themes in the profile, so mukurtu_v4 can't be
+    // installed here.
+    $theme_handler = $this->createMock(ThemeHandlerInterface::class);
+    $theme_handler->method('themeExists')->willReturnMap([['mukurtu_v4', TRUE]]);
+    $this->container->set('theme_handler', $theme_handler);
     $form = $original;
     mukurtu_media_3d_model_form_alter($form);
 
