@@ -133,6 +133,7 @@ const SECOND = `
 const CAPTURE = `
   <form>
     <input type="hidden" name="thumbnail_capture" value="" data-mukurtu-3d-capture-value>
+    <label>Thumbnail <input type="file" name="files[field_thumbnail_0]"></label>
     <div class="mukurtu-3d-capture" data-mukurtu-3d-capture>${VIEWER}
       <div class="mukurtu-3d-capture__actions" hidden>
         <button type="button" class="button" data-mukurtu-3d-capture-button>Use this view as the thumbnail</button>
@@ -588,4 +589,16 @@ test('A capture kept when the form is shown again is shown, and removing the mod
   // What Drupal does when the Remove button's response replaces the widget.
   await page.evaluate(() => (window as any).Drupal.behaviors.mukurtu3dModelThumbnailCapture.detach(document.querySelector('form'), {}, 'unload'));
   await expect(page.locator('[data-mukurtu-3d-capture-value]')).toHaveValue('');
+});
+
+test('A thumbnail uploaded after a capture replaces the capture (#2809)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await page.goto(ORIGIN + '/capture-kept');
+  await expect(page.getByRole('img', { name: 'Captured thumbnail' })).toBeVisible();
+
+  await page.getByLabel('Thumbnail').setInputFiles({ name: 'basket.png', mimeType: 'image/png', buffer: Buffer.from(KEPT.split(',')[1], 'base64') });
+  await expect(page.locator('[data-mukurtu-3d-capture-value]')).toHaveValue('');
+  await expect(page.getByRole('img', { name: 'Captured thumbnail' })).toBeHidden();
+  await expect(page.locator('.mukurtu-3d-capture__status')).toHaveText('');
 });

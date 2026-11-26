@@ -37,8 +37,30 @@
     customElements.get('model-viewer').minimumRenderScale = 1;
   });
 
+  /**
+   * Hides a capture that's been dropped.
+   */
+  function hide(wrapper) {
+    const preview = wrapper.querySelector('.mukurtu-3d-capture__preview');
+    preview.hidden = true;
+    preview.removeAttribute('src');
+    wrapper.querySelector('.mukurtu-3d-capture__status').textContent = '';
+  }
+
   Drupal.behaviors.mukurtu3dModelThumbnailCapture = {
     attach(context) {
+      // A thumbnail chosen after a capture replaces the capture, so the last
+      // choice is the one saved.
+      once('mukurtu-3d-capture-upload', 'form:has([data-mukurtu-3d-capture-value])', context).forEach((form) => {
+        form.addEventListener('change', (event) => {
+          if (event.target.name !== 'files[field_thumbnail_0]' || !event.target.files?.length) {
+            return;
+          }
+          form.querySelector('[data-mukurtu-3d-capture-value]').value = '';
+          form.querySelectorAll('[data-mukurtu-3d-capture]').forEach(hide);
+        });
+      });
+
       once('mukurtu-3d-capture', '[data-mukurtu-3d-capture]', context).forEach((wrapper) => {
         const form = wrapper.closest('form');
         const input = form && form.querySelector('[data-mukurtu-3d-capture-value]');

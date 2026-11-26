@@ -169,11 +169,20 @@ class ThreeDModelThumbnailCaptureTest extends ProtocolAwareEntityTestBase {
    * The add and edit forms get the hidden field and the handlers, in order.
    */
   public function testFormAlter(): void {
-    $form = [
+    $original = [
       'field_media_3d_model' => ['widget' => [0 => ['#process' => []]]],
       'field_thumbnail' => ['widget' => [0 => ['#process' => []]]],
       'actions' => ['submit' => ['#submit' => ['::submitForm', '::save']]],
     ];
+
+    // Without mukurtu_v4, which has the viewer's template, there's no viewer.
+    $form = $original;
+    mukurtu_media_3d_model_form_alter($form);
+    $this->assertArrayNotHasKey('thumbnail_capture', $form);
+    $this->assertSame(['::submitForm', '::save'], $form['actions']['submit']['#submit']);
+
+    \Drupal::service('theme_installer')->install(['mukurtu_v4']);
+    $form = $original;
     mukurtu_media_3d_model_form_alter($form);
 
     $this->assertSame('hidden', $form['thumbnail_capture']['#type']);

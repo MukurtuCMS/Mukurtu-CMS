@@ -314,8 +314,10 @@ function mukurtu_media_3d_model_form_alter(array &$form): void {
 
   // Capturing the thumbnail from the viewer (#2809). The viewer is part of
   // the model's file widget, so it changes when the model is uploaded or
-  // removed. The capture goes in a hidden field outside that widget.
-  if (isset($form['field_media_3d_model']['widget'][0], $form['field_thumbnail']['widget'][0]) && isset($form['actions']['submit']['#submit'])) {
+  // removed. The capture goes in a hidden field outside that widget. The
+  // viewer's template is mukurtu_v4's, which Twig only finds when that theme
+  // is installed.
+  if (isset($form['field_media_3d_model']['widget'][0], $form['field_thumbnail']['widget'][0]) && isset($form['actions']['submit']['#submit']) && \Drupal::service('theme_handler')->themeExists('mukurtu_v4')) {
     $form['field_media_3d_model']['widget'][0]['#process'][] = 'mukurtu_media_3d_model_capture_process';
     $form['thumbnail_capture'] = [
       '#type' => 'hidden',
