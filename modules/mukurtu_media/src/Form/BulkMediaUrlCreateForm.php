@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\media\Entity\Media;
 use GuzzleHttp\ClientInterface;
@@ -25,11 +26,9 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
   protected const SUPPORTED_TYPES = [
     'remote_video' => [
       'field' => 'field_media_oembed_video',
-      'label' => 'remote videos',
     ],
     'soundcloud' => [
       'field' => 'field_media_soundcloud',
-      'label' => 'SoundCloud items',
     ],
   ];
 
@@ -69,9 +68,15 @@ class BulkMediaUrlCreateForm extends FormBase implements ContainerInjectionInter
     }
   }
 
-  public static function getTitle(string $media_type): string {
-    $label = self::SUPPORTED_TYPES[$media_type]['label'] ?? $media_type;
-    return "Bulk add {$label}";
+  /**
+   * Title callback: each type's title is a whole phrase, for translators.
+   */
+  public static function getTitle(string $media_type): TranslatableMarkup {
+    return match ($media_type) {
+      'remote_video' => t('Bulk add remote videos'),
+      'soundcloud' => t('Bulk add SoundCloud items'),
+      default => t('Bulk add media'),
+    };
   }
 
   public function buildForm(array $form, FormStateInterface $form_state, string $media_type = ''): array {

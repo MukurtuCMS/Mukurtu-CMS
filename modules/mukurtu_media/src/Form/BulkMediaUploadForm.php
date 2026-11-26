@@ -9,6 +9,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\ByteSizeMarkup;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
@@ -48,16 +49,18 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
     return 'mukurtu_media_bulk_upload_form';
   }
 
-  public static function getTitle(string $media_type): string {
-    $labels = [
-      'image' => 'images',
-      'audio' => 'audio files',
-      'document' => 'documents',
-      'video' => 'videos',
-      '3d_model' => '3D models',
-    ];
-    $label = $labels[$media_type] ?? $media_type;
-    return "Bulk upload {$label}";
+  /**
+   * Title callback: each type's title is a whole phrase, for translators.
+   */
+  public static function getTitle(string $media_type): TranslatableMarkup {
+    return match ($media_type) {
+      'image' => t('Bulk upload images'),
+      'audio' => t('Bulk upload audio'),
+      'document' => t('Bulk upload documents'),
+      'video' => t('Bulk upload videos'),
+      '3d_model' => t('Bulk upload 3D models'),
+      default => t('Bulk upload media'),
+    };
   }
 
   public static function setFileInputAccept(array $element, FormStateInterface $form_state): array {

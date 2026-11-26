@@ -5,6 +5,7 @@ dependencies:
     - media.type.3d_model
     - media.type.audio
     - media.type.document
+    - media.type.external_embed
     - media.type.image
     - media.type.remote_video
     - media.type.soundcloud
@@ -33,6 +34,7 @@ settings:
       remote_video: remote_video
       video: video
       soundcloud: soundcloud
+      external_embed: external_embed
     sort:
       field: _none
     auto_create: false
