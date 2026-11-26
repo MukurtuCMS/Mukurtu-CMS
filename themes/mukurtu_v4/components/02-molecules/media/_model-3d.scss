@@ -5,11 +5,52 @@
   inline-size: 100%;
 }
 
+// Embedded in body text (media--3d-model.html.twig): as wide as the space,
+// up to the width the embed's size names for images. Small is wider than
+// its 250px image style, which leaves the buttons no room.
+.media--3d-model-embed {
+  inline-size: 100%;
+  max-inline-size: 900px;
+
+  &--small {
+    max-inline-size: 320px;
+  }
+
+  &--medium {
+    max-inline-size: 480px;
+  }
+}
+
+// A captioned embed sits in a figure that takes its content's width (see
+// _images.scss). The viewer's container query gives it none, so the figure
+// takes the embed's widths instead, and its caption fills that width.
+figure:has(> .media--3d-model-embed) {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 900px;
+
+  &:has(> .media--3d-model-embed--small) {
+    max-inline-size: 320px;
+  }
+
+  &:has(> .media--3d-model-embed--medium) {
+    max-inline-size: 480px;
+  }
+
+  > figcaption {
+    display: block;
+  }
+}
+
 .media-3d-model {
   display: flex;
   flex-direction: column;
   gap: var(--v-space-5xs);
   inline-size: 100%;
+
+  // The buttons lay out by the viewer's width, not the screen's: a small
+  // embed on a wide screen is as tight as a phone.
+  container-type: inline-size;
 
   &__viewer {
     display: block;
@@ -59,9 +100,9 @@
       margin: 0;
     }
 
-    // On a phone neither row fits on one line: two to a line, with Reset
-    // view on its own, rather than one per line down the screen.
-    @media (width <= 600px) {
+    // In a narrow viewer neither row fits on one line: two to a line, with
+    // Reset view on its own, rather than one per line down the screen.
+    @container (width <= 600px) {
       display: grid;
       grid-template-columns: 1fr 1fr;
       inline-size: 100%;

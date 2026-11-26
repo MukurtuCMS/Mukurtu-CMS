@@ -256,3 +256,48 @@ function mukurtu_submissions_update_40201(): ?string {
     '@changed' => implode(', ', $changed),
   ]);
 }
+
+/**
+ * Let submission reviewers manage submitted 3D models.
+ */
+function mukurtu_submissions_update_40202(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // #2810: visitors can submit 3D models once a site allows them in its
+  // submission settings, which no site does by default. The roles that
+  // review submissions (mukurtu_submissions_review_permissions(), granted at
+  // install) get the same rights over them as over submitted documents. A
+  // role a site took those document rights away from is left alone.
+  if (!\Drupal::entityTypeManager()->getStorage('media_type')->load('3d_model')) {
+    return NULL;
+  }
+  $changed = FALSE;
+  $roles = \Drupal::entityTypeManager()->getStorage('user_role')->loadMultiple(['mukurtu_submission_reviewer', 'mukurtu_manager']);
+  foreach ($roles as $role) {
+    $grant = [];
+    foreach (['delete any', 'edit any'] as $operation) {
+      if ($role->hasPermission("$operation document media") && !$role->hasPermission("$operation 3d_model media")) {
+        $grant[] = "$operation 3d_model media";
+      }
+    }
+    if ($grant) {
+      foreach ($grant as $permission) {
+        $role->grantPermission($permission);
+      }
+      $role->save();
+      $changed = TRUE;
+    }
+  }
+  return $changed ? (string) t('Let submission reviewers manage submitted 3D models.') : NULL;
+}
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function mukurtu_submissions_update_dependencies(): array {
+  // mukurtu_submissions_update_40202() needs the 3D Model media type, which
+  // mukurtu_core_update_40233() creates on an existing site.
+  $dependencies['mukurtu_submissions'][40202] = ['mukurtu_core' => 40233];
+  return $dependencies;
+}

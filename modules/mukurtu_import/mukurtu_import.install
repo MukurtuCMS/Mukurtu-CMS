@@ -5,6 +5,8 @@
  * Update functions for the Mukurtu Import module.
  */
 
+use Drupal\Core\Config\FileStorage;
+
 /**
  * Implements hook_schema().
  */
@@ -595,4 +597,63 @@ function mukurtu_import_update_40406(): ?string {
   return (string) t('Mapped the Collections and Word Lists columns in @count default import template(s).', [
     '@count' => $updated,
   ]);
+}
+
+/**
+ * Add 3D models to bulk import and export.
+ */
+function mukurtu_import_update_40407(): ?string {
+  // Keep the docblock above to one line: Drupal renders it verbatim as this
+  // update's description on update.php and in `drush updatedb:status`.
+  //
+  // #2810: the 3D Model media type (#336) gets a default import template,
+  // and a column map in the shipped CSV export settings, read from each
+  // module's config/install so the update and a fresh install can't drift
+  // apart. A site that already has them keeps its own. An export preset the
+  // site cleared of documents is assumed to have left out media on purpose.
+  $entity_type_manager = \Drupal::entityTypeManager();
+  if (!$entity_type_manager->getStorage('media_type')->load('3d_model')) {
+    return NULL;
+  }
+  $changed = FALSE;
+
+  $strategies = $entity_type_manager->getStorage('mukurtu_import_strategy');
+  $record = (new FileStorage(__DIR__ . '/config/install'))->read('mukurtu_import.mukurtu_import_strategy.3d_model_all_fields');
+  if ($record && !$strategies->load('3d_model_all_fields')) {
+    $strategies->createFromStorageRecord($record)->save();
+    $changed = TRUE;
+  }
+
+  if (\Drupal::moduleHandler()->moduleExists('mukurtu_export')) {
+    $shipped = new FileStorage(dirname(__DIR__) . '/mukurtu_export/config/install');
+    $ids = [
+      'default_local_metadata_only',
+      'default_local_with_media',
+      'default_external_metadata_only',
+      'default_external_with_media',
+    ];
+    foreach ($entity_type_manager->getStorage('csv_exporter')->loadMultiple($ids) as $id => $exporter) {
+      $map = $exporter->get('entity_fields_export_list') ?? [];
+      $columns = $shipped->read("mukurtu_export.csv_exporter.$id")['entity_fields_export_list']['media__3d_model'] ?? NULL;
+      if (!$columns || isset($map['media__3d_model']) || !isset($map['media__document'])) {
+        continue;
+      }
+      $map['media__3d_model'] = $columns;
+      $exporter->set('entity_fields_export_list', $map);
+      $exporter->save();
+      $changed = TRUE;
+    }
+  }
+
+  return $changed ? (string) t('Added 3D models to bulk import and export.') : NULL;
+}
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function mukurtu_import_update_dependencies(): array {
+  // mukurtu_import_update_40407() needs the 3D Model media type, which
+  // mukurtu_core_update_40233() creates on an existing site.
+  $dependencies['mukurtu_import'][40407] = ['mukurtu_core' => 40233];
+  return $dependencies;
 }

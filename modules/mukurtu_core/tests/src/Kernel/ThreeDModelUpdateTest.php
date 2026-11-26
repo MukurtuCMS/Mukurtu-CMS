@@ -10,6 +10,7 @@ use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\Entity\EntityViewMode;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\filter\Entity\FilterFormat;
 use Drupal\media\Entity\MediaType;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
@@ -19,7 +20,10 @@ use PHPUnit\Framework\Attributes\Group;
 /**
  * Tests mukurtu_core_update_40233(), which adds the 3D Model media type.
  *
+ * Also mukurtu_core_update_40234(), which lets text formats embed it (#2810).
+ *
  * @see mukurtu_core_update_40233()
+ * @see mukurtu_core_update_40234()
  */
 #[Group('mukurtu_core')]
 class ThreeDModelUpdateTest extends ProtocolAwareEntityTestBase {
@@ -206,6 +210,48 @@ class ThreeDModelUpdateTest extends ProtocolAwareEntityTestBase {
     mukurtu_core_update_40233();
 
     $this->assertNull(EntityFormDisplay::load('node.page.default')->getComponent('field_page_media_assets'));
+  }
+
+  /**
+   * Formats that embed every type, documents included, get 3D models.
+   *
+   * A format a site narrowed, or left empty (every type), is left alone.
+   */
+  public function testEmbedFormats(): void {
+    // Before 40233 there is no media type to allow.
+    $this->assertNull(mukurtu_core_update_40234());
+    mukurtu_core_update_40233();
+
+    $formats = [
+      'basic_html' => ['audio' => 'audio', 'document' => 'document', 'image' => 'image'],
+      'full_html' => ['image' => 'image'],
+      'restricted_html' => [],
+    ];
+    foreach ($formats as $id => $types) {
+      FilterFormat::create([
+        'format' => $id,
+        'name' => $id,
+        'filters' => [
+          'media_embed' => [
+            'status' => TRUE,
+            'settings' => [
+              'default_view_mode' => 'default',
+              'allowed_view_modes' => [],
+              'allowed_media_types' => $types,
+            ],
+          ],
+        ],
+      ])->save();
+    }
+
+    $this->assertSame('Allowed 3D models in editor media embeds.', mukurtu_core_update_40234());
+
+    $allowed = fn(string $id) => FilterFormat::load($id)->filters('media_embed')->getConfiguration()['settings']['allowed_media_types'];
+    $this->assertSame(['3d_model' => '3d_model', 'audio' => 'audio', 'document' => 'document', 'image' => 'image'], $allowed('basic_html'));
+    $this->assertSame(['image' => 'image'], $allowed('full_html'));
+    $this->assertSame([], $allowed('restricted_html'));
+
+    $this->assertNull(mukurtu_core_update_40234(), 'A second run changed something.');
   }
 
 }

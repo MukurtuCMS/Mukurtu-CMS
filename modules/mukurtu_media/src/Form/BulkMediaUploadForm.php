@@ -58,6 +58,7 @@ class BulkMediaUploadForm extends FormBase implements ContainerInjectionInterfac
       'audio' => t('Bulk upload audio'),
       'document' => t('Bulk upload documents'),
       'video' => t('Bulk upload videos'),
+      '3d_model' => t('Bulk upload 3D models'),
       default => t('Bulk upload media'),
     };
   }

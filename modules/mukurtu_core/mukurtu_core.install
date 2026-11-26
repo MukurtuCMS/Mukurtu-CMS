@@ -1686,6 +1686,36 @@ function mukurtu_core_update_40233(): ?string {
 }
 
 /**
+ * Allow 3D models in editor media embeds.
+ */
+function mukurtu_core_update_40234(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // #2810: the 3D Model media type (#336) can be embedded in body text, like
+  // the other media types. Only a format whose embed list already takes
+  // documents gets it: a site that narrowed its list keeps its choice, and
+  // an empty list already allows every type.
+  if (!\Drupal::entityTypeManager()->getStorage('media_type')->load('3d_model')) {
+    return NULL;
+  }
+  $changed = FALSE;
+  foreach (['basic_html', 'full_html'] as $format_id) {
+    $format = \Drupal::configFactory()->getEditable("filter.format.$format_id");
+    $key = 'filters.media_embed.settings.allowed_media_types';
+    $types = $format->get($key);
+    if (!is_array($types) || !isset($types['document']) || isset($types['3d_model'])) {
+      continue;
+    }
+    $types['3d_model'] = '3d_model';
+    ksort($types);
+    $format->set($key, $types)->save();
+    $changed = TRUE;
+  }
+  return $changed ? (string) t('Allowed 3D models in editor media embeds.') : NULL;
+}
+
+/**
  * Queues content with embeds from 3D model hosts for search reindexing.
  *
  * @return int

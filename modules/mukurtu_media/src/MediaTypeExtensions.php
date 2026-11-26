@@ -2,6 +2,8 @@
 
 namespace Drupal\mukurtu_media;
 
+use Drupal\mukurtu_media\Entity\ThreeDModel;
+
 /**
  * Shared mapping of file-based media bundles to their source field and
  * accepted extensions, used wherever a raw uploaded file needs to become a
@@ -33,6 +35,11 @@ final class MediaTypeExtensions {
     'video' => [
       'field' => 'field_media_video_file',
       'extensions' => 'mp4 webm ogv',
+      'uri_scheme' => 'private',
+    ],
+    '3d_model' => [
+      'field' => 'field_media_3d_model',
+      'extensions' => ThreeDModel::MODEL_EXTENSIONS,
       'uri_scheme' => 'private',
     ],
   ];

@@ -1,0 +1,72 @@
+langcode: en
+status: true
+dependencies: {  }
+id: 3d_model_all_fields
+uid: 1
+label: '3D Model - all fields'
+description: ''
+target_entity_type_id: media
+target_bundle: 3d_model
+mapping:
+  -
+    source: 'Authored by'
+    target: uid
+  -
+    source: 'Authored on'
+    target: created
+  -
+    source: 'Default translation'
+    target: '-1'
+  -
+    source: '3D Model'
+    target: field_media_3d_model
+  -
+    source: '3D Model for Apple devices'
+    target: field_media_3d_model_usdz
+  -
+    source: 'Found In'
+    target: field_found_in
+  -
+    source: ID
+    target: mid
+  -
+    source: Identifier
+    target: field_identifier
+  -
+    source: Locale
+    target: langcode
+  -
+    source: 'Media Tags'
+    target: field_media_tags
+  -
+    source: Name
+    target: name
+  -
+    source: People
+    target: field_people
+  -
+    source: 'Cultural Protocols > Protocols'
+    target: field_cultural_protocols/protocols
+  -
+    source: Published
+    target: status
+  -
+    source: 'Cultural Protocols > Sharing Setting'
+    target: field_cultural_protocols/sharing_setting
+  -
+    source: 'Thumbnail > Alternative text'
+    target: field_thumbnail/alt
+  -
+    source: 'Thumbnail > File ID'
+    target: field_thumbnail/target_id
+  -
+    source: UUID
+    target: uuid
+configuration:
+  delimiter: ','
+  enclosure: '"'
+  escape: \
+  multivalue_delimiter: ;
+  default_format: basic_html
+  identifier_column: null
+  local_contexts_delimiter: '>'

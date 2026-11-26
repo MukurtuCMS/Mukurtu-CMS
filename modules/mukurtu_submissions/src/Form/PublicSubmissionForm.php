@@ -23,6 +23,8 @@ use Drupal\node\NodeInterface;
 use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
+use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
+use Drupal\mukurtu_media\MediaTypeExtensions;
 
 /**
  * Public, bundle-agnostic content submission form.
@@ -305,10 +307,8 @@ class PublicSubmissionForm extends FormBase {
     if (!$this->settings) {
       return;
     }
-    $allowed = $this->settings->getAllowedMediaTypes();
-    if (empty($allowed)) {
-      return;
-    }
+    // Nothing chosen means every type, except those a site has to allow.
+    $allowed = $this->settings->getAllowedMediaTypes() ?: SubmissionSettings::withoutOptInMediaTypes(SubmissionSettingsForm::MEDIA_TYPES);
 
     $this->restrictMediaTypesOnDisplay($this->display, $this->entity->getEntityTypeId(), $this->entity->bundle(), $allowed, []);
   }
@@ -343,13 +343,16 @@ class PublicSubmissionForm extends FormBase {
     foreach ($display->getComponents() as $field_name => $component) {
       switch ($component['type'] ?? NULL) {
         case 'media_library_widget':
+          // An empty list means every type the field takes, not none.
           $current_types = $component['settings']['media_types'] ?? [];
-          $component['settings']['media_types'] = array_values(array_intersect($current_types, $allowed));
+          $component['settings']['media_types'] = $current_types ? array_values(array_intersect($current_types, $allowed)) : $allowed;
           $display->setComponent($field_name, $component);
           break;
 
         case 'mukurtu_simple_media_upload':
-          $current_bundles = $component['settings']['allowed_bundles'] ?? [];
+          // An empty list means the widget's default, not none.
+          $current_bundles = array_filter($component['settings']['allowed_bundles'] ?? [])
+            ?: SubmissionSettings::withoutOptInMediaTypes(array_keys(MediaTypeExtensions::SUPPORTED_TYPES));
           $component['settings']['allowed_bundles'] = array_values(array_intersect($current_bundles, $allowed));
           $display->setComponent($field_name, $component);
           break;

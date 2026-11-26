@@ -105,6 +105,19 @@ const PAGE = `<!DOCTYPE html>
 </body></html>`;
 
 // A second media asset, so the lightbox has a next slide (/two).
+// Mirrors media--3d-model.html.twig: a model embedded in body text, in
+// each embed size, with no lightbox (/embed).
+const EMBEDS = ['small', 'medium', 'large'].map((size) => `
+  <div class="media media--3d_model media--3d-model-embed media--3d-model-embed--${size}" data-size="${size}">${VIEWER}</div>`).join('');
+
+// The same, with a caption: the figure the caption filter wraps it in
+// (/embed-captioned).
+const CAPTIONED = ['small', 'medium', 'large'].map((size) => `
+  <figure role="group" class="align-${size === 'medium' ? 'right' : 'left'}" data-size="${size}">
+    <div class="media media--3d_model media--3d-model-embed media--3d-model-embed--${size}">${VIEWER}</div>
+    <figcaption>A caption for the ${size} model</figcaption>
+  </figure>`).join('');
+
 const SECOND = `
   <div class="media-asset--slide">
     <div id="second-1" class="media-asset--glightbox-inline"><div class="media"><p>Second slide</p></div></div>
@@ -130,6 +143,11 @@ async function serve(page: Page): Promise<string[]> {
     }
     if (url.pathname === '/') {
       return route.fulfill({ contentType: 'text/html', body: PAGE });
+    }
+    if (url.pathname === '/embed' || url.pathname === '/embed-captioned') {
+      const embeds = url.pathname === '/embed' ? EMBEDS : CAPTIONED;
+      const body = PAGE.slice(0, PAGE.indexOf('<main')) + `<main style="inline-size: 1200px">${embeds}</main>` + PAGE.slice(PAGE.indexOf('</main>') + '</main>'.length);
+      return route.fulfill({ contentType: 'text/html', body });
     }
     if (url.pathname === '/two') {
       return route.fulfill({ contentType: 'text/html', body: PAGE.replace('</main>', SECOND + '</main>') });
@@ -398,6 +416,60 @@ for (const [width, height, ratio] of [[1440, 900, 16 / 9], [768, 1024, 1], [390,
     }).toPass({ timeout: 3000 });
   });
 }
+
+test('Embedded in body text, the viewer works at each size, with no lightbox (#2810)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await page.goto(ORIGIN + '/embed');
+  await expect(page.locator('a.media-asset--link')).toHaveCount(0);
+
+  for (const [size, max] of [['small', 320], ['medium', 480], ['large', 900]] as const) {
+    const embed = page.locator(`[data-size="${size}"]`);
+    const viewer = embed.locator('model-viewer');
+    await viewer.scrollIntoViewIfNeeded();
+    await page.waitForFunction((s) => (document.querySelector(`[data-size="${s}"] model-viewer`) as any)?.loaded === true, size, { timeout: 20000 });
+    await expect(embed.locator('.media-3d-model__controls')).toBeVisible();
+
+    const box = (await viewer.boundingBox())!;
+    expect(box.width).toBeCloseTo(max, 0);
+    expect(box.width / box.height).toBeCloseTo(16 / 9, 1);
+  }
+
+  // Narrow embeds lay their buttons out two to a line, by the viewer's own
+  // width rather than the screen's: Rotate up sits below Rotate left.
+  const small = page.locator('[data-size="small"] .media-3d-model__controls');
+  const left = (await small.getByRole('button', { name: 'Rotate left' }).boundingBox())!;
+  const up = (await small.getByRole('button', { name: 'Rotate up' }).boundingBox())!;
+  expect(up.y).toBeGreaterThan(left.y + left.height - 1);
+  const large = page.locator('[data-size="large"] .media-3d-model__controls');
+  const largeLeft = (await large.getByRole('button', { name: 'Rotate left' }).boundingBox())!;
+  const largeDown = (await large.getByRole('button', { name: 'Rotate down' }).boundingBox())!;
+  expect(largeDown.y).toBeCloseTo(largeLeft.y, 0);
+});
+
+test('With a caption, an embedded viewer keeps its size and its buttons (#2810)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await serve(page);
+  await page.goto(ORIGIN + '/embed-captioned');
+
+  for (const [size, max] of [['small', 320], ['medium', 480], ['large', 900]] as const) {
+    const figure = page.locator(`figure[data-size="${size}"]`);
+    const viewer = figure.locator('model-viewer');
+    await viewer.scrollIntoViewIfNeeded();
+    await page.waitForFunction((s) => (document.querySelector(`figure[data-size="${s}"] model-viewer`) as any)?.loaded === true, size, { timeout: 20000 });
+
+    // The figure takes the embed's width, rather than shrinking around a
+    // viewer that gives it none, so the buttons and caption stay inside.
+    const box = (await figure.boundingBox())!;
+    expect(box.width).toBeCloseTo(max, 0);
+    expect((await viewer.boundingBox())!.width).toBeCloseTo(max, 0);
+    for (const part of [figure.locator('.media-3d-model__controls'), figure.locator('figcaption')]) {
+      const inner = (await part.boundingBox())!;
+      expect(inner.x).toBeGreaterThanOrEqual(box.x - 1);
+      expect(inner.x + inner.width).toBeLessThanOrEqual(box.x + box.width + 1);
+    }
+  }
+});
 
 test('Without WebGL, a message replaces the viewer and its controls', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

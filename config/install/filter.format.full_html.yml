@@ -59,6 +59,7 @@ filters:
         medium: medium
         large: large
       allowed_media_types:
+        3d_model: 3d_model
         audio: audio
         document: document
         external_embed: external_embed

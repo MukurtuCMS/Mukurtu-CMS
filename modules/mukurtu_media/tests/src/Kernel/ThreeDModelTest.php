@@ -11,6 +11,7 @@ use Drupal\file\Entity\File;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
 use Drupal\mukurtu_media\Entity\ThreeDModel;
+use Drupal\mukurtu_media\MediaTypeExtensions;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -18,7 +19,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * @see \Drupal\mukurtu_media\Entity\ThreeDModel
  * @see \Drupal\mukurtu_media\EventSubscriber\ThreeDModelMimeTypeSubscriber
- * @see mukurtu_v4_preprocess_media__3d_model__media_assets()
+ * @see mukurtu_v4_model_3d_viewer_variables()
  */
 #[Group('mukurtu_media')]
 class ThreeDModelTest extends ProtocolAwareEntityTestBase {
@@ -107,6 +108,17 @@ class ThreeDModelTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * Bulk upload and submissions recognize a GLB file as a 3D model (#2810).
+   */
+  public function testBulkUploadType(): void {
+    $this->assertSame('3d_model', MediaTypeExtensions::bundleForFilename('Basket.GLB'));
+    $this->assertSame('field_media_3d_model', MediaTypeExtensions::SUPPORTED_TYPES['3d_model']['field']);
+    $this->assertSame('private', MediaTypeExtensions::SUPPORTED_TYPES['3d_model']['uri_scheme']);
+    // USDZ only goes alongside a GLB, so it isn't a type of its own.
+    $this->assertNull(MediaTypeExtensions::bundleForFilename('basket.usdz'));
+  }
+
+  /**
    * GLB and USDZ files get real MIME types, which core doesn't know.
    */
   public function testMimeTypes(): void {
@@ -192,7 +204,7 @@ class ThreeDModelTest extends ProtocolAwareEntityTestBase {
     $media->save();
 
     $variables = ['media' => $media];
-    mukurtu_v4_preprocess_media__3d_model__media_assets($variables);
+    mukurtu_v4_model_3d_viewer_variables($variables);
 
     $this->assertNull($variables['model_usdz_url']);
     $this->assertStringEndsWith('/poster.png', $variables['model_poster_url']);
@@ -215,6 +227,28 @@ class ThreeDModelTest extends ProtocolAwareEntityTestBase {
   }
 
   /**
+   * The viewer shows where body text embeds a model; cards show a thumbnail.
+   */
+  public function testViewerViewModes(): void {
+    $media = Media::create(['bundle' => '3d_model', 'name' => 'Bowl']);
+    $media->save();
+
+    foreach (['media_assets', 'image_with_description', 'small', 'medium', 'large', 'default', 'full'] as $view_mode) {
+      $variables = ['media' => $media, 'elements' => ['#view_mode' => $view_mode], 'content' => []];
+      mukurtu_v4_preprocess_media($variables);
+      $this->assertTrue($variables['model_viewer'], $view_mode);
+      $this->assertArrayHasKey('model_a11y', $variables, $view_mode);
+      $this->assertContains('mukurtu_v4/media-3d-model', $variables['#attached']['library'], $view_mode);
+    }
+    foreach (['teaser_featured', 'dictionary_word_thumbnail', 'browse', 'media_library', 'carousel_thumbnail'] as $view_mode) {
+      $variables = ['media' => $media, 'elements' => ['#view_mode' => $view_mode], 'content' => []];
+      mukurtu_v4_preprocess_media($variables);
+      $this->assertFalse($variables['model_viewer'], $view_mode);
+      $this->assertArrayNotHasKey('model_a11y', $variables, $view_mode);
+    }
+  }
+
+  /**
    * Core's generic file icon isn't used as the viewer's poster.
    */
   public function testGenericIconIsNotUsedAsPoster(): void {
@@ -224,7 +258,7 @@ class ThreeDModelTest extends ProtocolAwareEntityTestBase {
     $this->assertSame($media->getSource()->getMetadata($media, 'thumbnail_uri'), $media->get('thumbnail')->entity->getFileUri());
 
     $variables = ['media' => $media];
-    mukurtu_v4_preprocess_media__3d_model__media_assets($variables);
+    mukurtu_v4_model_3d_viewer_variables($variables);
 
     $this->assertNull($variables['model_poster_url']);
   }

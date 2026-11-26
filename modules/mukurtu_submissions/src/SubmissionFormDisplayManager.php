@@ -13,6 +13,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\mukurtu_media\MediaTypeExtensions;
 use Drupal\mukurtu_submissions\Entity\SubmissionSettingsInterface;
 use Drupal\mukurtu_submissions\Form\PublicSubmissionForm;
+use Drupal\mukurtu_submissions\Entity\SubmissionSettings;
 
 /**
  * Provisions a target bundle's "submission" form display, shared by
@@ -436,7 +437,9 @@ class SubmissionFormDisplayManager {
     }
 
     $target_bundles = array_keys(array_filter($definition->getSetting('handler_settings')['target_bundles'] ?? []));
-    $supported = array_keys(MediaTypeExtensions::SUPPORTED_TYPES);
+    // 3D models and other opt-in types are left out until a site allows
+    // them in its submission settings.
+    $supported = SubmissionSettings::withoutOptInMediaTypes(array_keys(MediaTypeExtensions::SUPPORTED_TYPES));
     $allowed_bundles = $target_bundles ? array_values(array_intersect($supported, $target_bundles)) : $supported;
 
     $component['type'] = 'mukurtu_simple_media_upload';

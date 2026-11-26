@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - media.type.3d_model
     - media.type.audio
     - media.type.document
     - media.type.image
@@ -14,10 +15,12 @@ label: 'Submission Reviewer'
 weight: 4
 is_admin: false
 permissions:
+  - 'delete any 3d_model media'
   - 'delete any audio media'
   - 'delete any document media'
   - 'delete any image media'
   - 'delete any video media'
+  - 'edit any 3d_model media'
   - 'edit any audio media'
   - 'edit any document media'
   - 'edit any image media'

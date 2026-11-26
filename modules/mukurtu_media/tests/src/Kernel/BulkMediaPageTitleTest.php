@@ -35,6 +35,7 @@ class BulkMediaPageTitleTest extends KernelTestBase {
       'audio' => 'Bulk upload audio',
       'document' => 'Bulk upload documents',
       'video' => 'Bulk upload videos',
+      '3d_model' => 'Bulk upload 3D models',
     ];
     $this->assertSame(array_keys($expected), array_keys(MediaTypeExtensions::SUPPORTED_TYPES), 'Give each supported type its own title.');
     foreach ($expected as $media_type => $title) {
