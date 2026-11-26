@@ -1460,3 +1460,50 @@ function mukurtu_core_update_40231(): string {
 
   return $done === [] ? 'The character palette was already set up; nothing to change.' : ucfirst(implode('; ', $done)) . '.';
 }
+
+/**
+ * Allow fullscreen and AR in Full HTML iframes, and add Sketchfab to Klaro.
+ */
+function mukurtu_core_update_40232(): ?string {
+  // Keep the docblock above to one line; see mukurtu_core_update_40201() for
+  // why.
+  //
+  // #336: Sketchfab's embed code sets allow="autoplay; fullscreen;
+  // xr-spatial-tracking" and allowfullscreen on its iframe. Full HTML (which
+  // External Embed media uses) stripped both, so fullscreen and AR did not
+  // work. The filter and the editor's source editing list have to match, or
+  // CKEditor 5 reports the format as invalid, so both get the same change.
+  // A site that removed or rewrote the iframe entry is left alone.
+  $old = '<iframe width height frameborder scrolling marginheight marginwidth title src>';
+  $new = '<iframe width height frameborder scrolling marginheight marginwidth title src allow allowfullscreen>';
+  $config_factory = \Drupal::configFactory();
+  $changed = FALSE;
+
+  $filter = $config_factory->getEditable('filter.format.full_html');
+  $allowed = $filter->get('filters.filter_html.settings.allowed_html');
+  if (is_string($allowed) && str_contains($allowed, $old)) {
+    $filter->set('filters.filter_html.settings.allowed_html', str_replace($old, $new, $allowed))->save();
+    $changed = TRUE;
+  }
+
+  $editor = $config_factory->getEditable('editor.editor.full_html');
+  $tags = $editor->get('settings.plugins.ckeditor5_sourceEditing.allowed_tags');
+  if (is_array($tags) && ($at = array_search($old, $tags, TRUE)) !== FALSE) {
+    $tags[$at] = $new;
+    $editor->set('settings.plugins.ckeditor5_sourceEditing.allowed_tags', $tags)->save();
+    $changed = TRUE;
+  }
+
+  // A named Sketchfab entry in the consent dialog, instead of the generic
+  // "Other services" one. New sites get it from config/optional.
+  if (\Drupal::moduleHandler()->moduleExists('klaro')) {
+    $storage = \Drupal::entityTypeManager()->getStorage('klaro_app');
+    $optional = new FileStorage(__DIR__ . '/config/optional');
+    if (!$storage->load('sketchfab') && ($record = $optional->read('klaro.klaro_app.sketchfab'))) {
+      $storage->createFromStorageRecord($record)->save();
+      $changed = TRUE;
+    }
+  }
+
+  return $changed ? (string) t('Allowed fullscreen and AR in embedded iframes, and added Sketchfab to the consent manager.') : NULL;
+}

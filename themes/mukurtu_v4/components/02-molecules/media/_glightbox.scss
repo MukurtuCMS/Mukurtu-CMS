@@ -122,6 +122,19 @@
       min-height: 400px;
     }
 
+    // Embed codes without a height (Sketchfab with "Fixed size" off) match
+    // the 16:9 the page uses for them (see _media.scss). Sized with an
+    // explicit width, the same cap mediaAssetOembedRatio uses for remote
+    // video, because a percentage width cannot size .gslide-media, which
+    // shrinks to fit its content.
+    .media--external-embed iframe:not([height]) {
+      width: min(92vw, calc((92vh - 2rem - 40px) * 16 / 9));
+      max-width: 100%;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 16 / 9;
+    }
+
     // The oEmbed formatter's iframe (remote-video) already carries width/
     // height HTML attributes matching the video's real aspect ratio (e.g.
     // 900x506 for a 16:9 embed), but those attributes are sized for the
@@ -173,6 +186,13 @@
     // warning overlay support), ensure it creates the positioning context.
     .media {
       position: relative;
+    }
+
+    // Text that comes with an embed code, such as Sketchfab's credit line,
+    // takes the page's dark text and link colors, which are unreadable on
+    // the dark backdrop here. Klaro's consent notice sets its own colors.
+    .media--external-embed :is(p, a):not(.klaro *) {
+      color: #fff;
     }
   }
 }

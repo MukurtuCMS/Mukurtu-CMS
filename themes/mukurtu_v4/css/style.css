@@ -4226,6 +4226,11 @@ img[class$=-placeholder] {
   display: block;
   inline-size: 100%;
 }
+.media--external_embed iframe:not([height]),
+.media--soundcloud iframe:not([height]) {
+  aspect-ratio: 16/9;
+  max-block-size: 80vh;
+}
 
 .media-asset--pdf-wrapper {
   inline-size: 100%;
@@ -4325,6 +4330,13 @@ img[class$=-placeholder] {
   height: calc(88vh - 2rem);
   min-height: 400px;
 }
+.glightbox-clean .gslide-inline .media--external-embed iframe:not([height]) {
+  width: min(92vw, (92vh - 2rem - 40px) * 16 / 9);
+  max-width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 16/9;
+}
 .glightbox-clean .gslide-inline iframe.media-oembed-content {
   display: block;
   width: auto;
@@ -4341,6 +4353,9 @@ img[class$=-placeholder] {
 }
 .glightbox-clean .gslide-inline .media {
   position: relative;
+}
+.glightbox-clean .gslide-inline .media--external-embed :is(p, a):not(.klaro *) {
+  color: #fff;
 }
 
 .glightbox-clean .gprev,

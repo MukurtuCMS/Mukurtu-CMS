@@ -52,7 +52,7 @@ settings:
         - '<div>'
         - '<img src alt data-entity-type data-entity-uuid data-align data-caption>'
         - '<drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-caption data-embed-button data-langcode alt title>'
-        - '<iframe width height frameborder scrolling marginheight marginwidth title src>'
+        - '<iframe width height frameborder scrolling marginheight marginwidth title src allow allowfullscreen>'
         - '<embed type src height width>'
         - '<object data form height name type usemap width>'
         - '<video autoplay controls height loop muted poster preload src width>'
