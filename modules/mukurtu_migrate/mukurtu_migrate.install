@@ -516,3 +516,31 @@ function mukurtu_migrate_update_40214(): ?string {
   }
   return (string) t('Updated the Mukurtu 3 content migrations so content that was unpublished in Mukurtu 3 is migrated as a draft instead of being published.');
 }
+
+/**
+ * Keep each term's parent in the Mukurtu CMS v3 term migrations.
+ */
+function mukurtu_migrate_update_40215(): ?string {
+  // Every term landed at the top level, because the parent lookup used a
+  // migration Mukurtu never runs. Only the shipped lookup is replaced, so a site
+  // that has customized a migration's parent mapping is left alone.
+  $config_factory = \Drupal::configFactory();
+  $updated = FALSE;
+  foreach ($config_factory->listAll('migrate_plus.migration.mukurtu_cms_v3_terms_') as $name) {
+    $config = $config_factory->getEditable($name);
+    $process = $config->get('process');
+    if (($process['parent_id'][1]['migration'] ?? NULL) !== 'd7_taxonomy_term') {
+      continue;
+    }
+    unset($process['parent_id']);
+    $process['parent'] = ['plugin' => 'mukurtu_v3_term_parent', 'source' => 'parent'];
+    $config->set('process', $process)->save();
+    $updated = TRUE;
+  }
+  if (!$updated) {
+    return NULL;
+  }
+
+  \Drupal::service('plugin.manager.migration')->clearCachedDefinitions();
+  return (string) t("Updated the Mukurtu CMS v3 term migrations to keep each term's parent.");
+}
