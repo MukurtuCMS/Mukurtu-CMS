@@ -10,6 +10,7 @@ background:
   image: null
   text_treatment: light
   tint: true
+custom_css: ''
 header:
   image: null
   text_treatment: light

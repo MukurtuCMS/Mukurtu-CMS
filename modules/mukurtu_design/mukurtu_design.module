@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\mukurtu_design\CustomCss;
 use Drupal\mukurtu_design\DesignPalette;
 
 /**
@@ -15,13 +16,16 @@ use Drupal\mukurtu_design\DesignPalette;
  */
 function mukurtu_design_page_attachments(&$attachments) {
   \Drupal::classResolver(DesignPalette::class)->enablePalette($attachments);
+  \Drupal::classResolver(CustomCss::class)->attach($attachments);
 }
 
 /**
  * Implements hook_library_info_alter().
  */
 function mukurtu_design_library_info_alter(array &$libraries, $extension) {
-  return \Drupal::classResolver(DesignPalette::class)
+  \Drupal::classResolver(DesignPalette::class)
+    ->alterThemeLibraries($libraries, $extension);
+  \Drupal::classResolver(CustomCss::class)
     ->alterThemeLibraries($libraries, $extension);
 }
 

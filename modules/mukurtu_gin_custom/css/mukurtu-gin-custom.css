@@ -1798,6 +1798,12 @@ table.gin--sticky-table-header:has(+ .gin-table-scroll-wrapper thead :focus-visi
   }
 }
 
+/* Design settings: show custom CSS in a code font, so braces, colons and
+   indentation are easy to line up. */
+.mukurtu-design-custom-css textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 /* The "Add to Default shortcuts" tooltip beside the page title pushes every
 admin page into horizontal scrolling at a 320px viewport (WCAG 1.4.10 Reflow,
 issue #2336). Gin positions it with

@@ -55,3 +55,6 @@ mukurtu_design.settings:
         tint:
           type: boolean
           label: 'Tint the header image'
+    custom_css:
+      type: string
+      label: 'Custom CSS'

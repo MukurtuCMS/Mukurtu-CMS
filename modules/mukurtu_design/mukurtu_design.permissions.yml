@@ -1,2 +1,6 @@
 administer mukurtu design settings:
   title: 'Administer Mukurtu design settings'
+edit mukurtu custom css:
+  title: 'Edit custom CSS'
+  description: 'Add CSS that loads on every page that uses the site theme.'
+  restrict access: true
