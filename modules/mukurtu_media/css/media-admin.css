@@ -97,3 +97,71 @@
 .mukurtu-bulk-dropzone [data-mukurtu-upload-messages] {
   text-align: start;
 }
+
+/* A 3D model's viewer on its add and edit forms, for capturing a thumbnail
+   (3d-model-thumbnail-capture.js). The viewer's own styles are in
+   mukurtu_v4, which these forms don't load. */
+.mukurtu-3d-capture {
+  max-inline-size: 40rem;
+  margin-block-start: 1rem;
+}
+
+.mukurtu-3d-capture .media-3d-model {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* model-viewer's own styles set a 300x150px box. */
+.mukurtu-3d-capture .media-3d-model__viewer {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--gin-border-color, #ccc);
+}
+
+/* Focus lands inside the viewer's shadow root; media-3d-model.js copies its
+   state to this class. */
+.mukurtu-3d-capture .media-3d-model__viewer--focus-visible {
+  outline: 3px solid var(--gin-color-focus, #2f6ad5);
+  outline-offset: 2px;
+}
+
+.mukurtu-3d-capture .media-3d-model__ar {
+  display: none;
+}
+
+.mukurtu-3d-capture .media-3d-model__controls:not([hidden]),
+.mukurtu-3d-capture .media-3d-model__controls-row,
+.mukurtu-3d-capture__actions:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mukurtu-3d-capture .media-3d-model__controls:not([hidden]),
+.mukurtu-3d-capture__actions:not([hidden]) {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.mukurtu-3d-capture .media-3d-model__controls .button,
+.mukurtu-3d-capture__actions .button {
+  margin: 0;
+}
+
+.mukurtu-3d-capture .media-3d-model--unsupported .media-3d-model__viewer,
+.mukurtu-3d-capture .media-3d-model--unsupported .media-3d-model__controls {
+  display: none;
+}
+
+.mukurtu-3d-capture__status {
+  margin: 0;
+}
+
+.mukurtu-3d-capture__preview {
+  max-inline-size: 12rem;
+  block-size: auto;
+  border: 1px solid var(--gin-border-color, #ccc);
+}
