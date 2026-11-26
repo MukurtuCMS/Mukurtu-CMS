@@ -74,3 +74,15 @@ mukurtu_taxonomy.restore_nesting:
         type: entity:taxonomy_vocabulary
   requirements:
     _entity_access: 'taxonomy_vocabulary.update'
+
+mukurtu_taxonomy.vocabulary_page:
+  path: '/taxonomy/{taxonomy_vocabulary}'
+  defaults:
+    _controller: '\Drupal\mukurtu_taxonomy\Controller\VocabularyPageController::build'
+    _title_callback: '\Drupal\mukurtu_taxonomy\Controller\VocabularyPageController::title'
+  options:
+    parameters:
+      taxonomy_vocabulary:
+        type: entity:taxonomy_vocabulary
+  requirements:
+    _permission: 'access content'
